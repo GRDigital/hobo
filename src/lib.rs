@@ -212,6 +212,7 @@ html![
 	a, HtmlAnchorElement,
 	img, HtmlImageElement,
 	textarea, HtmlTextAreaElement,
+	script, HtmlScriptElement,
 ];
 
 #[extend::ext]

@@ -37,4 +37,5 @@ intern_strings! {
 	a, "a";
 	img, "img";
 	textarea, "textarea";
+	script, "script";
 }
