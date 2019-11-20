@@ -19,22 +19,13 @@ thread_local! {
 	static CONTEXT: Context = Default::default();
 }
 
+#[derive(Default)]
 struct StyleStorage {
-	element: web_sys::Element,
 	map: RefCell<HashMap<css::Style, u64>>,
 }
 
-impl Default for StyleStorage {
-	fn default() -> Self {
-		let dom = web_sys::window().unwrap().document().unwrap();
-		let element = dom.create_element(web_str::style()).unwrap();
-		dom.head().unwrap().append_child(&element).unwrap();
-		Self { element, map: RefCell::new(HashMap::new()) }
-	}
-}
-
 impl StyleStorage {
-	fn fetch(&self, style: &css::Style) -> String {
+	fn fetch(&self, element: &web_sys::Element, style: &css::Style) -> String {
 		if let Some(id) = self.map.borrow().get(style) { return format!("s{}", id) }
 		let mut hasher = std::collections::hash_map::DefaultHasher::new();
 		style.hash(&mut hasher);
@@ -49,7 +40,13 @@ impl StyleStorage {
 				}
 			}
 		}
-		self.element.append_with_str_1(&style.to_string()).unwrap();
+		let dom = element.owner_document().unwrap();
+		let style_element = if let Some(x) = dom.get_elements_by_tag_name("style").get_with_index(0) { x } else {
+			let element = dom.create_element(web_str::style()).unwrap();
+			dom.head().unwrap().append_child(&element).unwrap();
+			element
+		};
+		style_element.append_with_str_1(&style.to_string()).unwrap();
 		class
 	}
 }
@@ -139,8 +136,9 @@ pub trait Element: Drop {
 	}
 	fn set_class(&self, style: &css::Style) -> &Self where Self: Sized + 'static {
 		CONTEXT.with(move |ctx| {
-			let element_class = ctx.style_storage.fetch(style);
-			self.element().set_attribute(web_str::class(), &format!("{} {}", Self::class(), element_class)).unwrap();
+			let element = self.element();
+			let element_class = ctx.style_storage.fetch(element, style);
+			element.set_attribute(web_str::class(), &format!("{} {}", Self::class(), element_class)).unwrap();
 			// TODO:
 			// ctx.classes.borrow_mut().insert(0, element_class);
 			self
@@ -166,7 +164,7 @@ impl<T: AsRef<web_sys::Element>> Element for BasicElement<T> {
 impl web_sys::Element {
 	fn set_class(self, style: &css::Style) {
 		CONTEXT.with(move |ctx| {
-			let element_class = ctx.style_storage.fetch(style);
+			let element_class = ctx.style_storage.fetch(&self, style);
 			self.set_attribute(web_str::class(), &element_class).unwrap();
 		})
 	}
