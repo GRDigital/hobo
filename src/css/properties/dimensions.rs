@@ -45,23 +45,23 @@ impl ToString for DimensionExtremity {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __dimension {
-	($kind:ident, 0)           => {$crate::paste::expr!{ $crate::css::Property::$kind($crate::css::Dimension::None) }};
-	($kind:ident, auto)        => {$crate::paste::expr!{ $crate::css::Property::$kind($crate::css::Dimension::Auto) }};
-	($kind:ident, initial)     => {$crate::paste::expr!{ $crate::css::Property::$kind($crate::css::Dimension::Initial) }};
-	($kind:ident, inherit)     => {$crate::paste::expr!{ $crate::css::Property::$kind($crate::css::Dimension::Inherit) }};
-	($kind:ident, $($val:tt)+) => {$crate::paste::expr!{ $crate::css::Property::$kind($crate::css::Dimension::Some($crate::unit!($($val)+))) }};
+	($kind:ident, 0)           => {$crate::css::Property::$kind($crate::css::Dimension::None)};
+	($kind:ident, auto)        => {$crate::css::Property::$kind($crate::css::Dimension::Auto)};
+	($kind:ident, initial)     => {$crate::css::Property::$kind($crate::css::Dimension::Initial)};
+	($kind:ident, inherit)     => {$crate::css::Property::$kind($crate::css::Dimension::Inherit)};
+	($kind:ident, $($val:tt)+) => {$crate::css::Property::$kind($crate::css::Dimension::Some($crate::unit!($($val)+)))};
 }
 
-#[macro_export] macro_rules! width { ($($tt:tt)+) => { $crate::__dimension!(Width, $($tt)+)} }
-#[macro_export] macro_rules! height { ($($tt:tt)+) => { $crate::__dimension!(Height, $($tt)+)} }
+#[macro_export] macro_rules! width { ($($tt:tt)+) => {$crate::__dimension!(Width, $($tt)+)} }
+#[macro_export] macro_rules! height { ($($tt:tt)+) => {$crate::__dimension!(Height, $($tt)+)} }
 
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __dimension_extremity {
-	($kind:ident, 0)           => {$crate::paste::expr!{ $crate::css::Property::$kind($crate::css::DimensionExtremity::None) }};
-	($kind:ident, initial)     => {$crate::paste::expr!{ $crate::css::Property::$kind($crate::css::DimensionExtremity::Initial) }};
-	($kind:ident, inherit)     => {$crate::paste::expr!{ $crate::css::Property::$kind($crate::css::DimensionExtremity::Inherit) }};
-	($kind:ident, $($val:tt)+) => {$crate::paste::expr!{ $crate::css::Property::$kind($crate::css::DimensionExtremity::Some($crate::unit!($($val)+))) }};
+	($kind:ident, 0)           => {$crate::css::Property::$kind($crate::css::DimensionExtremity::None)};
+	($kind:ident, initial)     => {$crate::css::Property::$kind($crate::css::DimensionExtremity::Initial)};
+	($kind:ident, inherit)     => {$crate::css::Property::$kind($crate::css::DimensionExtremity::Inherit)};
+	($kind:ident, $($val:tt)+) => {$crate::css::Property::$kind($crate::css::DimensionExtremity::Some($crate::unit!($($val)+)))};
 }
 
 #[macro_export] macro_rules! min_width { ($($tt:tt)+) => { $crate::__dimension_extremity!(MinWidth, $($tt)+)} }
