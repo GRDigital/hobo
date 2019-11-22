@@ -45,33 +45,34 @@ impl ToString for Style {
 	}
 }
 
+#[doc(hidden)]
+pub trait AppendProperty {
+	fn append_property(self, decls: &mut Vec<Property>);
+}
+
+impl AppendProperty for () {
+	fn append_property(self, _: &mut Vec<Property>) {}
+}
+
+impl AppendProperty for Vec<Property> {
+	fn append_property(mut self, decls: &mut Vec<Property>) {
+		decls.append(&mut self);
+	}
+}
+
+impl AppendProperty for Property {
+	fn append_property(self, decls: &mut Vec<Property>) {
+		decls.push(self);
+	}
+}
+
 #[macro_export]
 macro_rules! declarations {
-	// finished
-	(@@($($e:tt)+)) => {
-		vec!($($e)+)
-	};
-
-	// end
-	(@($($head:tt)+) ,) => {
-		$crate::declarations!(@@($($head)+ .into()))
-	};
-	(@($($head:tt)+) $cur:tt) => {
-		$crate::declarations!(@@($($head)+ $cur.into()))
-	};
-
-	// middle
-	(@($($head:tt)+) , $($tail:tt)+) => {
-		$crate::declarations!(@($($head)+ .into(),) $($tail)+)
-	};
-	(@($($head:tt)+) $cur:tt $($tail:tt)+) => {
-		$crate::declarations!(@($($head)+ $cur) $($tail)+)
-	};
-
-	// start
-	($t:tt $($tail:tt)+) => {
-		$crate::declarations!(@($t) $($tail)+)
-	};
+	($($e:expr),*$(,)*) => {{
+		let mut v = Vec::new();
+		$($crate::css::AppendProperty::append_property($e, &mut v);)*
+		v
+	}};
 }
 
 #[macro_export]

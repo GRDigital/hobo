@@ -22,8 +22,6 @@ pub use overflow::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Property {
-	None,
-	Combined(Vec<Property>), // TODO: this is maybe hack?
 	Raw(String),
 	Display(Display),
 	MarginLeft(Margin),
@@ -57,8 +55,6 @@ pub enum Property {
 impl ToString for Property {
 	fn to_string(&self) -> String {
 		match self {
-			Self::None                          => "".to_owned(),
-			Self::Combined(x)                   => x.iter().map(ToString::to_string).collect::<String>(),
 			Self::Raw(x)                        => x.clone(),
 
 			Self::MarginLeft(x)                 => format!("margin-left:{};", x.to_string()),
@@ -90,18 +86,6 @@ impl ToString for Property {
 			Self::ZIndex(x)                     => x.to_string(),
 			Self::Overflow(x)                   => x.to_string(),
 		}
-	}
-}
-
-impl Into<Property> for Vec<Property> {
-	fn into(self) -> Property {
-		Property::Combined(self)
-	}
-}
-
-impl Into<Property> for () {
-	fn into(self) -> Property {
-		Property::None
 	}
 }
 
