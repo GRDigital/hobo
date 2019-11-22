@@ -37,6 +37,41 @@ macro_rules! __margin {
 #[macro_export] macro_rules! margin_top { ($($tt:tt)+) => { $crate::__margin!(Top, $($tt)+)} }
 #[macro_export] macro_rules! margin_bottom { ($($tt:tt)+) => { $crate::__margin!(Bottom, $($tt)+)} }
 
+/*
+should define some kind of a Box struct that impls AppendProperty
+this construct will completely handle the element's position and size (i.e. the bits that influence position of other elements on the page)
+split line by line until comma and run through some kind of __box_line! macro
+box!(
+	width (250 px .. 500 px), // syntax is either <min .. max> or just <value>
+	height (100 px),
+	absolute,
+	top (25 px .. 10 px | 15 px), // top .. margin-top | padding-top
+	right (0 .. 5px |1 px solid black| 10 px), // right .. margin-right | border-right-width border-right-style border-right-color | padding-right
+)
+
+so i.e., the above structure would be equaivalent to:
+{
+	// these are appended automatically as it's what you'd almost certainly want
+	box-sizing: border-box;
+	flex-shrink: 0;
+
+	min-width: 250px;
+	max-width: 500px;
+	height: 100px;
+	position: absolute;
+	top: 25px;
+	margin-top: 10px;
+	padding-top: 15px;
+	right: 0;
+	margin-right: 5px;
+	border-right-width: 1px;
+	border-right-style: solid;
+	border-right-color: black;
+	padding-right: 10px;
+}
+*/
+
+// update @ 22 november - dumb as shit, definitely no the way to go
 // idk if this is not dumb, looks pretty dumb to me
 // will also need to account for 1 or 2 elements, should be ez to amend tts
 // #[macro_export]
