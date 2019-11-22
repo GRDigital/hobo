@@ -3,14 +3,22 @@
 #[macro_use] mod margin;
 #[macro_use] mod padding;
 #[macro_use] mod dimensions;
+#[macro_use] mod position;
+#[macro_use] mod box_sizing;
+#[macro_use] mod visibility;
+#[macro_use] mod overflow;
 
-use crate::prelude::*;
+// use crate::prelude::*;
 use std::string::ToString;
 pub use display::*;
 pub use flex_wrap::*;
 pub use margin::*;
 pub use padding::*;
 pub use dimensions::*;
+pub use position::*;
+pub use box_sizing::*;
+pub use visibility::*;
+pub use overflow::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Property {
@@ -34,6 +42,15 @@ pub enum Property {
 	MaxHeight(DimensionExtremity),
 	BackgroundColor((u8, u8, u8, u8)),
 	FlexWrap(FlexWrap),
+	Position(Position),
+	Top(Dimension),
+	Right(Dimension),
+	Left(Dimension),
+	Bottom(Dimension),
+	BoxSizing(BoxSizing),
+	Visibility(Visibility),
+	ZIndex(ZIndex),
+	Overflow(Overflow),
 	// etc
 }
 
@@ -43,7 +60,7 @@ impl ToString for Property {
 			Self::None                          => "".to_owned(),
 			Self::Combined(x)                   => x.iter().map(ToString::to_string).collect::<String>(),
 			Self::Raw(x)                        => x.clone(),
-			Self::Display(x)                    => x.to_string(),
+
 			Self::MarginLeft(x)                 => format!("margin-left:{};", x.to_string()),
 			Self::MarginRight(x)                => format!("margin-right:{};", x.to_string()),
 			Self::MarginTop(x)                  => format!("margin-top:{};", x.to_string()),
@@ -58,8 +75,20 @@ impl ToString for Property {
 			Self::MaxWidth(x)                   => format!("max-width:{};", x.to_string()),
 			Self::MinHeight(x)                  => format!("min-height:{};", x.to_string()),
 			Self::MaxHeight(x)                  => format!("max-height:{};", x.to_string()),
+			Self::Top(x)                        => format!("top:{};", x.to_string()),
+			Self::Right(x)                      => format!("right:{};", x.to_string()),
+			Self::Left(x)                       => format!("left:{};", x.to_string()),
+			Self::Bottom(x)                     => format!("bottom:{};", x.to_string()),
+
 			Self::BackgroundColor((r, g, b, a)) => format!("background-color:#{:02x}{:02x}{:02x}{:02x};", r, g, b, a),
+
 			Self::FlexWrap(x)                   => x.to_string(),
+			Self::Position(x)                   => x.to_string(),
+			Self::Display(x)                    => x.to_string(),
+			Self::BoxSizing(x)                  => x.to_string(),
+			Self::Visibility(x)                 => x.to_string(),
+			Self::ZIndex(x)                     => x.to_string(),
+			Self::Overflow(x)                   => x.to_string(),
 		}
 	}
 }
@@ -87,6 +116,11 @@ macro_rules! from_properties {
 from_properties! {
 	Display,
 	FlexWrap,
+	Position,
+	BoxSizing,
+	Visibility,
+	Overflow,
+	ZIndex,
 }
 
 #[macro_export]
