@@ -78,26 +78,21 @@ macro_rules! declarations {
 #[macro_export]
 macro_rules! rule {
 	// finished
-	(@@($($selector:tt)+) { $($rules:tt)+ }) => {
+	(($($selector:tt)+) { $($rules:tt)+ }) => {
 		$crate::css::Rule(
 			$crate::selector!($($selector)+),
 			$crate::declarations!($($rules)+),
 		)
 	};
 
-	// end
-	(@($($head:tt)+) $tail:tt) => {
-		$crate::rule!(@@($($head)+) $tail)
-	};
-
 	// middle
-	(@($($head:tt)+) $cur:tt $($tail:tt)+) => {
-		$crate::rule!(@($($head)+ $cur) $($tail)+)
+	(($($head:tt)+) $cur:tt $($tail:tt)+) => {
+		$crate::rule!(($($head)+ $cur) $($tail)+)
 	};
 
 	// start
 	($head:tt $($tail:tt)+) => {
-		$crate::rule!(@($head) $($tail)+)
+		$crate::rule!(($head) $($tail)+)
 	};
 }
 
