@@ -9,3 +9,4 @@ smart-default = "0.5"
 paste = "0.1"
 strum = "0.16"
 strum_macros = "0.16"
+css_macros = { path = "css_macros" }

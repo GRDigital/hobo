@@ -1,24 +1,4 @@
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum_macros::Display)]
-pub enum Position {
-	#[strum(to_string = "position:static;")] Static,
-	#[strum(to_string = "position:absolute;")] Absolute,
-	#[strum(to_string = "position:fixed;")] Fixed,
-	#[strum(to_string = "position:relative;")] Relative,
-	#[strum(to_string = "position:sticky;")] Sticky,
-	#[strum(to_string = "position:initial;")] Initial,
-	#[strum(to_string = "position:inherit;")] Inherit,
-}
-
-#[macro_export]
-macro_rules! position {
-	(static)   => { $crate::Property::Position($crate::Position::Static) };
-	(absolute) => { $crate::Property::Position($crate::Position::Absolute) };
-	(fixed)    => { $crate::Property::Position($crate::Position::Fixed) };
-	(relative) => { $crate::Property::Position($crate::Position::Relative) };
-	(sticky)   => { $crate::Property::Position($crate::Position::Sticky) };
-	(initial)  => { $crate::Property::Position($crate::Position::Initial) };
-	(inherit)  => { $crate::Property::Position($crate::Position::Inherit) };
-}
+css_macros::easy_enum!{position static absolute fixed relative sticky}
 
 #[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, Copy)]
 pub enum ZIndex {

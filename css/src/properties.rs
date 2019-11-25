@@ -1,26 +1,18 @@
-#[macro_use] mod display;
-// #[macro_use] mod flex_wrap;
 #[macro_use] mod flex;
 #[macro_use] mod margin;
 #[macro_use] mod padding;
 #[macro_use] mod dimensions;
 #[macro_use] mod position;
-#[macro_use] mod box_sizing;
-#[macro_use] mod visibility;
-#[macro_use] mod overflow;
+#[macro_use] mod text;
 
 // use crate::prelude::*;
 use std::string::ToString;
-pub use display::*;
-// pub use flex_wrap::*;
 pub use flex::*;
 pub use margin::*;
 pub use padding::*;
 pub use dimensions::*;
 pub use position::*;
-pub use box_sizing::*;
-pub use visibility::*;
-pub use overflow::*;
+pub use text::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Property {
@@ -60,6 +52,16 @@ pub enum Property {
 	Visibility(Visibility),
 	ZIndex(ZIndex),
 	Overflow(Overflow),
+	// Direction(Direction),
+	// UnicodeBidi(UnicodeBidi),
+	// WhiteSpace(WhiteSpace),
+	// WritingMode(WritingMode),
+	// HangingPunctuation(HangingPunctuation),
+	// Hyphens(Hyphens),
+	// TextAlign(TextAlign),
+	// TextAlignLast(TextAlignLast),
+	// TextJustify(TextJustify),
+	// FontStretch(FontStretch),
 	// etc
 }
 
@@ -135,3 +137,8 @@ macro_rules! background_color {
 	($r:tt $g:tt $b:tt $a:tt) => { $crate::Property::BackgroundColor(($r, $g, $b, $a)) };
 	($r:tt $g:tt $b:tt) => { $crate::Property::BackgroundColor(($r, $g, $b, 255)) };
 }
+
+css_macros::easy_enum!{box-sizing content-box border-box}
+css_macros::easy_enum!{visibility visible hidden collapse}
+css_macros::easy_enum!{overflow visible hidden scroll auto}
+css_macros::easy_enum!{display block none inline inline-block flex inline-flex}

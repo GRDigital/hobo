@@ -20,7 +20,6 @@ all
 # Border
 box-decoration-break
 box-shadow
-border
 border-
 	{side}
 	{side}-color
@@ -110,18 +109,20 @@ transition
 
 # Text/Inline
 color
-direction
-unicode-bidi
-white-space
+~~direction~~
+~~unicode-bidi~~
+~~white-space~~
 letter-spacing
 line-height
-writing-mode
+~~writing-mode~~
 caret-color
-hanging-punctuation
-hyphens
+~~hanging-punctuation~~
+~~hyphens~~
 quotes
 tab-size
-list-style
+list-style-type
+list-style-position
+list-style-image
 vertical-align
 
 page-break-
@@ -130,28 +131,35 @@ page-break-
 	inside
 
 text-
-	align
-	align-last
-	decoration
+	~~align~~
+	~~align-last~~
+	decoration-color
+	decoration-line
+	decoration-style
 	indent
-	justify
+	~~justify~~
 	overflow
 	shadow
 	transform
 
-font
 font-
+	style
+	variant
+	weight
+	size
+	family
 	kerning
 	size-adjust
-	stretch
+	~~stretch~~
 
 word-
 	break
 	spacing
 	wrap
 
-columns
 column-
+	width
+	count
 	fill
 	gap
 	rule
