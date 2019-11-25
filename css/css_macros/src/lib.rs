@@ -42,14 +42,16 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 	let enum_members = values.iter().map(|value| {
 		let value_camel = proc_macro2::Ident::new(&value.to_camel_case(), proc_macro2::Span::call_site());
-		quote!{#[strum(to_string = "#property:#value;")] #value_camel,}
+		let css_string = format!("{}:{};", property, value);
+		quote!{#[strum(to_string = #css_string)] #value_camel,}
 	});
 	let macro_values = values.iter().map(|value| {
 		let value_camel = proc_macro2::Ident::new(&value.to_camel_case(), proc_macro2::Span::call_site());
-		quote!{(#value) => { $crate::Property::#property_camel($crate::#property_camel::#value_camel) };}
+		let value_tt: proc_macro2::TokenStream = syn::parse_str(value).unwrap();
+		quote!{(#value_tt) => { $crate::Property::#property_camel($crate::#property_camel::#value_camel) };}
 	});
 
-	quote!(
+	let will_ret = quote!(
 		#[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, Copy, strum_macros::Display)]
 		pub enum #property_camel {
 			#[default]
@@ -60,5 +62,9 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		macro_rules! #property_snek {
 			#(#macro_values)*
 		}
-	).into()
+	);
+
+	// println!("{}", will_ret.to_string());
+
+	will_ret.into()
 }
