@@ -1,0 +1,11 @@
+[package]
+name = "hobo-css"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+ordered-float = { version = "1", default-features = false }
+smart-default = "0.5"
+paste = "0.1"
+strum = "0.16"
+strum_macros = "0.16"

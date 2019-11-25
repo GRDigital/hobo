@@ -11,13 +11,13 @@ pub enum Position {
 
 #[macro_export]
 macro_rules! position {
-	(static)   => { $crate::css::Property::Position($crate::css::Position::Static) };
-	(absolute) => { $crate::css::Property::Position($crate::css::Position::Absolute) };
-	(fixed)    => { $crate::css::Property::Position($crate::css::Position::Fixed) };
-	(relative) => { $crate::css::Property::Position($crate::css::Position::Relative) };
-	(sticky)   => { $crate::css::Property::Position($crate::css::Position::Sticky) };
-	(initial)  => { $crate::css::Property::Position($crate::css::Position::Initial) };
-	(inherit)  => { $crate::css::Property::Position($crate::css::Position::Inherit) };
+	(static)   => { $crate::Property::Position($crate::Position::Static) };
+	(absolute) => { $crate::Property::Position($crate::Position::Absolute) };
+	(fixed)    => { $crate::Property::Position($crate::Position::Fixed) };
+	(relative) => { $crate::Property::Position($crate::Position::Relative) };
+	(sticky)   => { $crate::Property::Position($crate::Position::Sticky) };
+	(initial)  => { $crate::Property::Position($crate::Position::Initial) };
+	(inherit)  => { $crate::Property::Position($crate::Position::Inherit) };
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, Copy)]
@@ -42,8 +42,8 @@ impl ToString for ZIndex {
 
 #[macro_export]
 macro_rules! z_index {
-	(auto)       => { $crate::css::Property::Position($crate::css::Position::Auto) };
-	($some:expr) => { $crate::css::Property::Position($crate::css::Position::Some($some)) };
-	(initial)    => { $crate::css::Property::Position($crate::css::Position::Initial) };
-	(inherit)    => { $crate::css::Property::Position($crate::css::Position::Inherit) };
+	(auto)       => { $crate::Property::ZIndex($crate::ZIndex::Auto) };
+	($some:expr) => { $crate::Property::ZIndex($crate::ZIndex::Some($some)) };
+	(initial)    => { $crate::Property::ZIndex($crate::ZIndex::Initial) };
+	(inherit)    => { $crate::Property::ZIndex($crate::ZIndex::Inherit) };
 }

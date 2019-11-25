@@ -2,7 +2,6 @@
 
 pub mod prelude;
 pub mod web_str;
-pub mod css;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast as _;
@@ -14,6 +13,7 @@ use std::hash::{Hash, Hasher};
 pub use hobo_derive::*;
 pub use web_sys;
 pub use paste;
+pub use css;
 
 thread_local! {
 	static CONTEXT: Context = Default::default();

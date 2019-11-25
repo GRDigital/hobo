@@ -8,8 +8,8 @@ pub enum BoxSizing {
 
 #[macro_export]
 macro_rules! box_sizing {
-	(content-box) => { $crate::css::Property::BoxSizing($crate::css::BoxSizing::ContentBox) };
-	(border-box)  => { $crate::css::Property::BoxSizing($crate::css::BoxSizing::BorderBox) };
-	(initial)     => { $crate::css::Property::BoxSizing($crate::css::BoxSizing::Initial) };
-	(inherit)     => { $crate::css::Property::BoxSizing($crate::css::BoxSizing::Inherit) };
+	(content-box) => { $crate::Property::BoxSizing($crate::BoxSizing::ContentBox) };
+	(border-box)  => { $crate::Property::BoxSizing($crate::BoxSizing::BorderBox) };
+	(initial)     => { $crate::Property::BoxSizing($crate::BoxSizing::Initial) };
+	(inherit)     => { $crate::Property::BoxSizing($crate::BoxSizing::Inherit) };
 }

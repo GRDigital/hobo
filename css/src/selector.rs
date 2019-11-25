@@ -173,41 +173,41 @@ impl ToString for Selector {
 #[macro_export]
 macro_rules! selector {
 	// finish
-	(@($acc:expr) $element:ident)                       => { $acc.element($crate::css::selector::Element::$element) };
+	(@($acc:expr) $element:ident)                       => { $acc.element($crate::selector::Element::$element) };
 	(@($acc:expr) .($class:expr))                       => { $acc.class($class.into()) };
 	(@($acc:expr) .&)                                   => { $acc.class_placeholder() };
 	(@($acc:expr) #($id:expr))                          => { $acc.id($id.into()) };
-	(@($acc:expr) :nth_child($n:expr))                  => { $acc.pseudo_class($crate::css::selector::PseudoClass::nth_child($n)) };
-	(@($acc:expr) :not($($selector:tt)+))               => { $acc.pseudo_class($crate::css::selector::PseudoClass::not($crate::selector!($($selector)+))) };
-	(@($acc:expr) :$pseudo_class:ident)                 => { $acc.pseudo_class($crate::css::selector::PseudoClass::$pseudo_class) };
-	(@($acc:expr) ::$pseudo_element:ident)              => { $crate::css::selector::Selector::from($acc.pseudo_element($crate::css::selector::PseudoElement::$pseudo_element)) };
+	(@($acc:expr) :nth_child($n:expr))                  => { $acc.pseudo_class($crate::selector::PseudoClass::nth_child($n)) };
+	(@($acc:expr) :not($($selector:tt)+))               => { $acc.pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+))) };
+	(@($acc:expr) :$pseudo_class:ident)                 => { $acc.pseudo_class($crate::selector::PseudoClass::$pseudo_class) };
+	(@($acc:expr) ::$pseudo_element:ident)              => { $crate::selector::Selector::from($acc.pseudo_element($crate::selector::PseudoElement::$pseudo_element)) };
 
 	// middle
 	(@($acc:expr) >> $($rest:tt)+)                      => { $crate::selector!(@($acc.descendant()) $($rest)+) };
 	(@($acc:expr) > $($rest:tt)+)                       => { $crate::selector!(@($acc.child()) $($rest)+) };
 	(@($acc:expr) , $($rest:tt)+)                       => { $crate::selector!(@($acc.and()) $($rest)+) };
-	(@($acc:expr) $element:ident $($rest:tt)+)          => { $crate::selector!(@($acc.element($crate::css::selector::Element::$element)) $($rest)+) };
+	(@($acc:expr) $element:ident $($rest:tt)+)          => { $crate::selector!(@($acc.element($crate::selector::Element::$element)) $($rest)+) };
 	(@($acc:expr) .($class:expr) $($rest:tt)+)          => { $crate::selector!(@($acc.class($class.into())) $($rest)+) };
 	(@($acc:expr) .& $($rest:tt)+)                      => { $crate::selector!(@($acc.class_placeholder()) $($rest)+) };
 	(@($acc:expr) #($id:expr) $($rest:tt)+)             => { $crate::selector!(@($acc.id($id.into())) $($rest)+) };
-	(@($acc:expr) :nth_child($n:expr) $($rest:tt)+)     => { $crate::selector!(@($acc.pseudo_class($crate::css::selector::PseudoClass::nth_child($n))) $($rest)+) };
-	(@($acc:expr) :not($($selector:tt)+) $($rest:tt)+)  => { $crate::selector!(@($acc.pseudo_class($crate::css::selector::PseudoClass::not($crate::selector!($($selector)+)))) $($rest)+) };
-	(@($acc:expr) :$pseudo_class:ident $($rest:tt)+)    => { $crate::selector!(@($acc.pseudo_class($crate::css::selector::PseudoClass::$pseudo_class)) $($rest)+) };
-	(@($acc:expr) ::$pseudo_element:ident $($rest:tt)+) => { $crate::selector!(@($acc.pseudo_element($crate::css::selector::PseudoElement::$pseudo_element)) $($rest)+) };
+	(@($acc:expr) :nth_child($n:expr) $($rest:tt)+)     => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::nth_child($n))) $($rest)+) };
+	(@($acc:expr) :not($($selector:tt)+) $($rest:tt)+)  => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+)))) $($rest)+) };
+	(@($acc:expr) :$pseudo_class:ident $($rest:tt)+)    => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::$pseudo_class)) $($rest)+) };
+	(@($acc:expr) ::$pseudo_element:ident $($rest:tt)+) => { $crate::selector!(@($acc.pseudo_element($crate::selector::PseudoElement::$pseudo_element)) $($rest)+) };
 
 	// start
-	($element:ident $($rest:tt)+)                       => { $crate::selector!(@($crate::css::selector::Selector::build().element($crate::css::selector::Element::$element)) $($rest)+) };
-	(.($class:expr) $($rest:tt)+)                       => { $crate::selector!(@($crate::css::selector::Selector::build().class($class.into())) $($rest)+) };
-	(.& $($rest:tt)+)                                   => { $crate::selector!(@($crate::css::selector::Selector::build().class_placeholder()) $($rest)+) };
-	(#($id:expr) $($rest:tt)+)                          => { $crate::selector!(@($crate::css::selector::Selector::build().id($id.into())) $($rest)+) };
+	($element:ident $($rest:tt)+)                       => { $crate::selector!(@($crate::selector::Selector::build().element($crate::selector::Element::$element)) $($rest)+) };
+	(.($class:expr) $($rest:tt)+)                       => { $crate::selector!(@($crate::selector::Selector::build().class($class.into())) $($rest)+) };
+	(.& $($rest:tt)+)                                   => { $crate::selector!(@($crate::selector::Selector::build().class_placeholder()) $($rest)+) };
+	(#($id:expr) $($rest:tt)+)                          => { $crate::selector!(@($crate::selector::Selector::build().id($id.into())) $($rest)+) };
 
 	// only
-	($elem:ident)                                       => { $crate::css::selector::Selector::build().element($crate::css::selector::Element::$elem) };
-	(.($class:expr))                                    => { $crate::css::selector::Selector::build().class($class.into()) };
-	(.&)                                                => { $crate::css::selector::Selector::build().class_placeholder() };
-	(#($id:expr))                                       => { $crate::css::selector::Selector::build().id($id.into()) };
-	(:nth_child($n:expr))                               => { $crate::css::selector::Selector::build().pseudo_class($crate::css::selector::PseudoClass::nth_child($n)) };
-	(:not($($selector:tt)+))                            => { $crate::css::selector::Selector::build().pseudo_class($crate::css::selector::PseudoClass::not($crate::selector!($($selector)+))) };
-	(:$pseudo_class:ident)                              => { $crate::css::selector::Selector::build().pseudo_class($crate::css::selector::PseudoClass::$pseudo_class) };
-	(::$pseudo_element:ident)                           => { $crate::css::selector::Selector::build().pseudo_element($crate::css::selector::PseudoElement::$pseudo_element) };
+	($elem:ident)                                       => { $crate::selector::Selector::build().element($crate::selector::Element::$elem) };
+	(.($class:expr))                                    => { $crate::selector::Selector::build().class($class.into()) };
+	(.&)                                                => { $crate::selector::Selector::build().class_placeholder() };
+	(#($id:expr))                                       => { $crate::selector::Selector::build().id($id.into()) };
+	(:nth_child($n:expr))                               => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::nth_child($n)) };
+	(:not($($selector:tt)+))                            => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+))) };
+	(:$pseudo_class:ident)                              => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::$pseudo_class) };
+	(::$pseudo_element:ident)                           => { $crate::selector::Selector::build().pseudo_element($crate::selector::PseudoElement::$pseudo_element) };
 }

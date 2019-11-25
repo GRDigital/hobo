@@ -7,7 +7,7 @@ pub enum Margin {
 	Auto,
 	Initial,
 	Inherit,
-	Some(css::Unit),
+	Some(Unit),
 }
 
 impl ToString for Margin {
@@ -25,11 +25,11 @@ impl ToString for Margin {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __margin {
-	($side:ident, 0)           => {$crate::paste::expr!{ $crate::css::Property::[<Margin $side>]($crate::css::Margin::None) }};
-	($side:ident, auto)        => {$crate::paste::expr!{ $crate::css::Property::[<Margin $side>]($crate::css::Margin::Auto) }};
-	($side:ident, initial)     => {$crate::paste::expr!{ $crate::css::Property::[<Margin $side>]($crate::css::Margin::Initial) }};
-	($side:ident, inherit)     => {$crate::paste::expr!{ $crate::css::Property::[<Margin $side>]($crate::css::Margin::Inherit) }};
-	($side:ident, $($val:tt)+) => {$crate::paste::expr!{ $crate::css::Property::[<Margin $side>]($crate::css::Margin::Some($crate::unit!($($val)+))) }};
+	($side:ident, 0)           => {$crate::paste::expr!{ $crate::Property::[<Margin $side>]($crate::Margin::None) }};
+	($side:ident, auto)        => {$crate::paste::expr!{ $crate::Property::[<Margin $side>]($crate::Margin::Auto) }};
+	($side:ident, initial)     => {$crate::paste::expr!{ $crate::Property::[<Margin $side>]($crate::Margin::Initial) }};
+	($side:ident, inherit)     => {$crate::paste::expr!{ $crate::Property::[<Margin $side>]($crate::Margin::Inherit) }};
+	($side:ident, $($val:tt)+) => {$crate::paste::expr!{ $crate::Property::[<Margin $side>]($crate::Margin::Some($crate::unit!($($val)+))) }};
 }
 
 #[macro_export] macro_rules! margin_left { ($($tt:tt)+) => { $crate::__margin!(Left, $($tt)+)} }

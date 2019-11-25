@@ -55,15 +55,18 @@ table-layout
 # Flex
 
 ## Parent
-flex-flow
-justify-content
-align-items
-align-content
+~~flex-direction~~
+~~flex-wrap~~
+~~justify-content~~
+~~align-items~~
+~~align-content~~
 
 ## Child
-order
-flex
-align-self
+~~order~~
+~~flex-grow~~
+~~flex-shrink~~
+~~flex-basis~~
+~~align-self~~
 
 # Grid
 grid

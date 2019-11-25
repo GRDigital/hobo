@@ -1,3 +1,4 @@
+pub mod prelude;
 #[macro_use] pub mod properties;
 #[macro_use] pub mod units;
 #[macro_use] pub mod selector;
@@ -5,27 +6,7 @@
 pub use properties::*;
 use std::string::ToString;
 pub use units::Unit;
-#[doc(inline)]
-pub use crate::{
-	style,
-	background_color,
-	display,
-	flex_wrap,
-	height,
-	margin_bottom,
-	margin_left,
-	margin_right,
-	margin_top,
-	max_height,
-	max_width,
-	min_height,
-	min_width,
-	padding_bottom,
-	padding_left,
-	padding_right,
-	padding_top,
-	width,
-};
+pub use paste;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Rule(pub selector::Selector, pub Vec<Property>);
@@ -70,7 +51,7 @@ impl AppendProperty for Property {
 macro_rules! declarations {
 	($($e:expr),*$(,)*) => {{
 		let mut v = Vec::new();
-		$($crate::css::AppendProperty::append_property($e, &mut v);)*
+		$($crate::AppendProperty::append_property($e, &mut v);)*
 		v
 	}};
 }
@@ -79,7 +60,7 @@ macro_rules! declarations {
 macro_rules! rule {
 	// finished
 	(($($selector:tt)+) { $($rules:tt)+ }) => {
-		$crate::css::Rule(
+		$crate::Rule(
 			$crate::selector!($($selector)+),
 			$crate::declarations!($($rules)+),
 		)
@@ -103,7 +84,7 @@ macro_rules! __accumulate_style {
 		acc = $acc:expr,
 		rules = ()
 	) => {{
-		$crate::css::Style($acc)
+		$crate::Style($acc)
 	}};
 
 	(

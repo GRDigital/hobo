@@ -1,5 +1,6 @@
 #[macro_use] mod display;
-#[macro_use] mod flex_wrap;
+// #[macro_use] mod flex_wrap;
+#[macro_use] mod flex;
 #[macro_use] mod margin;
 #[macro_use] mod padding;
 #[macro_use] mod dimensions;
@@ -11,7 +12,8 @@
 // use crate::prelude::*;
 use std::string::ToString;
 pub use display::*;
-pub use flex_wrap::*;
+// pub use flex_wrap::*;
+pub use flex::*;
 pub use margin::*;
 pub use padding::*;
 pub use dimensions::*;
@@ -40,6 +42,15 @@ pub enum Property {
 	MaxHeight(DimensionExtremity),
 	BackgroundColor((u8, u8, u8, u8)),
 	FlexWrap(FlexWrap),
+	FlexDirection(FlexDirection),
+	JustifyContent(JustifyContent),
+	AlignItems(AlignItems),
+	AlignContent(AlignContent),
+	AlignSelf(AlignSelf),
+	FlexBasis(FlexBasis),
+	FlexGrow(FlexGrow),
+	FlexShrink(FlexShrink),
+	Order(Order),
 	Position(Position),
 	Top(Dimension),
 	Right(Dimension),
@@ -57,6 +68,7 @@ impl ToString for Property {
 		match self {
 			Self::Raw(x)                        => x.clone(),
 
+			// different properties that essentially take the same argument
 			Self::MarginLeft(x)                 => format!("margin-left:{};", x.to_string()),
 			Self::MarginRight(x)                => format!("margin-right:{};", x.to_string()),
 			Self::MarginTop(x)                  => format!("margin-top:{};", x.to_string()),
@@ -78,7 +90,18 @@ impl ToString for Property {
 
 			Self::BackgroundColor((r, g, b, a)) => format!("background-color:#{:02x}{:02x}{:02x}{:02x};", r, g, b, a),
 
+			// different properties that have specific to them arguments
+			// basis/grow/shrink/order kind of take the same, but basis and shrink are 1 by default while others are 0 so /shrug
 			Self::FlexWrap(x)                   => x.to_string(),
+			Self::FlexDirection(x)              => x.to_string(),
+			Self::JustifyContent(x)             => x.to_string(),
+			Self::AlignItems(x)                 => x.to_string(),
+			Self::AlignContent(x)               => x.to_string(),
+			Self::AlignSelf(x)                  => x.to_string(),
+			Self::FlexBasis(x)                  => x.to_string(),
+			Self::FlexGrow(x)                   => x.to_string(),
+			Self::FlexShrink(x)                 => x.to_string(),
+			Self::Order(x)                      => x.to_string(),
 			Self::Position(x)                   => x.to_string(),
 			Self::Display(x)                    => x.to_string(),
 			Self::BoxSizing(x)                  => x.to_string(),
@@ -109,6 +132,6 @@ from_properties! {
 
 #[macro_export]
 macro_rules! background_color {
-	($r:tt $g:tt $b:tt $a:tt) => { $crate::css::Property::BackgroundColor(($r, $g, $b, $a)) };
-	($r:tt $g:tt $b:tt) => { $crate::css::Property::BackgroundColor(($r, $g, $b, 255)) };
+	($r:tt $g:tt $b:tt $a:tt) => { $crate::Property::BackgroundColor(($r, $g, $b, $a)) };
+	($r:tt $g:tt $b:tt) => { $crate::Property::BackgroundColor(($r, $g, $b, 255)) };
 }

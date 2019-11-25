@@ -12,6 +12,7 @@ strum = "0.16"
 strum_macros = "0.16"
 extend = "0.0.2"
 hobo_derive = { path = "hobo_derive" }
+css = { path = "css", package = "hobo-css" }
 
 [dependencies.web-sys]
 version = "0.3"

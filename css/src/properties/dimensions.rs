@@ -7,7 +7,7 @@ pub enum Dimension {
 	Auto,
 	Initial,
 	Inherit,
-	Some(css::Unit),
+	Some(Unit),
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, Copy)]
@@ -16,7 +16,7 @@ pub enum DimensionExtremity {
 	None,
 	Initial,
 	Inherit,
-	Some(css::Unit),
+	Some(Unit),
 }
 
 impl ToString for Dimension {
@@ -45,11 +45,11 @@ impl ToString for DimensionExtremity {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __dimension {
-	($kind:ident, 0)           => {$crate::css::Property::$kind($crate::css::Dimension::None)};
-	($kind:ident, auto)        => {$crate::css::Property::$kind($crate::css::Dimension::Auto)};
-	($kind:ident, initial)     => {$crate::css::Property::$kind($crate::css::Dimension::Initial)};
-	($kind:ident, inherit)     => {$crate::css::Property::$kind($crate::css::Dimension::Inherit)};
-	($kind:ident, $($val:tt)+) => {$crate::css::Property::$kind($crate::css::Dimension::Some($crate::unit!($($val)+)))};
+	($kind:ident, 0)           => {$crate::Property::$kind($crate::Dimension::None)};
+	($kind:ident, auto)        => {$crate::Property::$kind($crate::Dimension::Auto)};
+	($kind:ident, initial)     => {$crate::Property::$kind($crate::Dimension::Initial)};
+	($kind:ident, inherit)     => {$crate::Property::$kind($crate::Dimension::Inherit)};
+	($kind:ident, $($val:tt)+) => {$crate::Property::$kind($crate::Dimension::Some($crate::unit!($($val)+)))};
 }
 
 #[macro_export] macro_rules! width { ($($tt:tt)+) => {$crate::__dimension!(Width, $($tt)+)} }
@@ -58,10 +58,10 @@ macro_rules! __dimension {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __dimension_extremity {
-	($kind:ident, 0)           => {$crate::css::Property::$kind($crate::css::DimensionExtremity::None)};
-	($kind:ident, initial)     => {$crate::css::Property::$kind($crate::css::DimensionExtremity::Initial)};
-	($kind:ident, inherit)     => {$crate::css::Property::$kind($crate::css::DimensionExtremity::Inherit)};
-	($kind:ident, $($val:tt)+) => {$crate::css::Property::$kind($crate::css::DimensionExtremity::Some($crate::unit!($($val)+)))};
+	($kind:ident, 0)           => {$crate::Property::$kind($crate::DimensionExtremity::None)};
+	($kind:ident, initial)     => {$crate::Property::$kind($crate::DimensionExtremity::Initial)};
+	($kind:ident, inherit)     => {$crate::Property::$kind($crate::DimensionExtremity::Inherit)};
+	($kind:ident, $($val:tt)+) => {$crate::Property::$kind($crate::DimensionExtremity::Some($crate::unit!($($val)+)))};
 }
 
 #[macro_export] macro_rules! min_width { ($($tt:tt)+) => { $crate::__dimension_extremity!(MinWidth, $($tt)+)} }
