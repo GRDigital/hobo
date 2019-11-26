@@ -8,27 +8,33 @@
 ~~margin~~
 
 ~~overflow~~
+
 ~~width~~
-	~~max-width~~
-	~~min-width~~
+~~max-width~~
+~~min-width~~
+
 ~~height~~
-	~~max-height~~
-	~~min-height~~
+~~max-height~~
+~~min-height~~
 
 ~~box-sizing~~
 
 # Border
-~~box-decoration-break~~
+border-spacing
 box-shadow
-border-
-	{side}
-	{side}-color
-	{side}-style
-	{side}-width
-	radius
-	~~collapse~~
-	image
-	spacing
+
+border-image-source
+border-image-slice
+border-image-width
+border-image-outset
+border-image-repeat
+
+~~box-decoration-break~~
+~~border-{side}-color~~
+~~border-{side}-style~~
+~~border-{side}-width~~
+~~border-radius~~
+~~border-collapse~~
 
 ~~outline-width~~
 ~~outline-style~~
@@ -37,15 +43,17 @@ border-
 
 # Position
 ~~position~~
-	~~top~~
-	~~left~~
-	~~bottom~~
-	~~right~~
+~~top~~
+~~left~~
+~~bottom~~
+~~right~~
+
 ~~z-index~~
 
 # 3D
-~~perspective~~
 perspective-origin
+
+~~perspective~~
 ~~backface-visibility~~
 
 # Table
@@ -70,39 +78,46 @@ perspective-origin
 ~~align-self~~
 
 # Grid
-grid
-grid-
-	area
-	column-gap
-	gap
-	row-gap
+grid-template-rows
+grid-template-columns
+grid-template-areas
+grid-auto-rows
+grid-auto-columns
+grid-auto-flow
+grdi-area
+grdi-column-gap
+grdi-gap
+grdi-row-gap
 
 # Behaviour
+~~cursor~~ !!!!!!! no custom urls
 ~~user-select~~
 ~~scroll-behavior~~
 ~~pointer-events~~
 ~~resize~~
-~~cursor~~ no custom urls
 
 # Image/Video position
-~~object-fit~~
 object-position
 clip
 
+~~object-fit~~
+
 # Overlay
-~~opacity~~
 filter
+
+~~opacity~~
 ~~mix-blend-mode~~
 ~~isolation~~
 
 # Background
-~~background-color~~
 background-image
 background-position
 background-size
-~~background-repeat~~
 background-origin
 background-clip
+
+~~background-repeat~~
+~~background-color~~
 ~~background-attachment~~
 ~~background-blend-mode~~
 ~~content~~
@@ -113,10 +128,39 @@ transform-origin
 ~~transform-style~~
 
 # Animation
-animation
-transition
+animation-name
+animation-duration
+animation-timing-function
+animation-delay
+animation-iteration-count
+animation-direction
+animation-fill-mode
+animation-play-state
+
+transition-property
+transition-duration
+transition-timing-function
+transition-delay
 
 # Text/Inline
+caret-color
+quotes
+text-decoration-color
+text-decoration-line
+text-decoration-style
+text-shadow
+list-style-position
+list-style-image
+font-size-adjust
+
+column-width
+column-count
+column-fill
+column-gap
+column-rule
+column-span
+
+~~list-style-type~~
 ~~color~~
 ~~direction~~
 ~~unicode-bidi~~
@@ -124,55 +168,33 @@ transition
 ~~letter-spacing~~
 ~~line-height~~
 ~~writing-mode~~
-caret-color
 ~~hanging-punctuation~~
 ~~hyphens~~
-quotes
 ~~tab-size~~
-~~list-style-type~~
-list-style-position
-list-style-image
 ~~vertical-align~~
 
-~~page-break-~~
-	~~after~~
-	~~before~~
-	~~inside~~
+~~page-break-after~~
+~~page-break-before~~
+~~page-break-inside~~
 
-text-
-	~~align~~
-	~~align-last~~
-	decoration-color
-	decoration-line
-	decoration-style
-	~~indent~~
-	~~justify~~
-	~~overflow~~
-	shadow
-	~~transform~~
+~~text-align~~
+~~text-align-last~~
+~~text-transform~~
+~~text-indent~~
+~~text-justify~~
+~~text-overflow~~
 
-font-
-	~~style~~
-	~~variant~~
-	~~weight~~
-	~~size~~
-	~~family~~
-	~~kerning~~
-	size-adjust
-	~~stretch~~
+~~font-style~~
+~~font-variant~~
+~~font-weight~~
+~~font-size~~
+~~font-family~~
+~~font-kerning~~
+~~font-stretch~~
 
-~~word-~~
-	~~break~~
-	~~spacing~~
-	~~wrap~~
-
-column-
-	width
-	count
-	fill
-	gap
-	rule
-	span
+~~word-break~~
+~~word-spacing~~
+~~word-wrap~~
 
 -----------------------------
 
