@@ -1,5 +1,5 @@
 # Basic
-all
+~~all~~
 
 ~~display~~
 ~~visibility~~
@@ -18,7 +18,7 @@ all
 ~~box-sizing~~
 
 # Border
-box-decoration-break
+~~box-decoration-break~~
 box-shadow
 border-
 	{side}
@@ -26,12 +26,14 @@ border-
 	{side}-style
 	{side}-width
 	radius
-	collapse
+	~~collapse~~
 	image
 	spacing
 
-outline
-outline-offset
+~~outline-width~~
+~~outline-style~~
+~~outline-color~~
+~~outline-offset~~
 
 # Position
 ~~position~~
@@ -42,14 +44,14 @@ outline-offset
 ~~z-index~~
 
 # 3D
-perspective
+~~perspective~~
 perspective-origin
-backface-visibility
+~~backface-visibility~~
 
 # Table
-caption-side
-empty-cells
-table-layout
+~~caption-side~~
+~~empty-cells~~
+~~table-layout~~
 
 # Flex
 
@@ -76,59 +78,66 @@ grid-
 	row-gap
 
 # Behaviour
-user-select
-scroll-behavior
-pointer-events
-resize
-cursor
+~~user-select~~
+~~scroll-behavior~~
+~~pointer-events~~
+~~resize~~
+~~cursor~~ no custom urls
 
 # Image/Video position
-object-fit
+~~object-fit~~
 object-position
 clip
 
 # Overlay
-opacity
+~~opacity~~
 filter
-mix-blend-mode
-isolation
+~~mix-blend-mode~~
+~~isolation~~
 
 # Background
-background
-background-blend-mode
-content
+~~background-color~~
+background-image
+background-position
+background-size
+~~background-repeat~~
+background-origin
+background-clip
+~~background-attachment~~
+~~background-blend-mode~~
+~~content~~
 
 # Transform
 transform
 transform-origin
-transform-style
+~~transform-style~~
 
 # Animation
 animation
 transition
 
 # Text/Inline
-color
+~~color~~
 ~~direction~~
 ~~unicode-bidi~~
 ~~white-space~~
-letter-spacing
-line-height
+~~letter-spacing~~
+~~line-height~~
 ~~writing-mode~~
 caret-color
 ~~hanging-punctuation~~
 ~~hyphens~~
 quotes
-tab-size
-list-style-type
+~~tab-size~~
+~~list-style-type~~
 list-style-position
 list-style-image
-vertical-align
+~~vertical-align~~
 
-page-break-
-	after
-	before
-	inside
+~~page-break-~~
+	~~after~~
+	~~before~~
+	~~inside~~
 
 text-
 	~~align~~
@@ -136,26 +145,26 @@ text-
 	decoration-color
 	decoration-line
 	decoration-style
-	indent
+	~~indent~~
 	~~justify~~
-	overflow
+	~~overflow~~
 	shadow
-	transform
+	~~transform~~
 
 font-
-	style
-	variant
-	weight
-	size
-	family
-	kerning
+	~~style~~
+	~~variant~~
+	~~weight~~
+	~~size~~
+	~~family~~
+	~~kerning~~
 	size-adjust
 	~~stretch~~
 
-word-
-	break
-	spacing
-	wrap
+~~word-~~
+	~~break~~
+	~~spacing~~
+	~~wrap~~
 
 column-
 	width
