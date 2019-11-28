@@ -145,9 +145,9 @@ transition-delay
 # Text/Inline
 caret-color
 quotes
-text-decoration-color
-text-decoration-line
-text-decoration-style
+~~text-decoration-color~~
+~~text-decoration-line~~
+~~text-decoration-style~~
 text-shadow
 list-style-position
 list-style-image

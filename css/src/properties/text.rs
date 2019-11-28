@@ -27,6 +27,8 @@ css_macros::easy_enum!{vertical-align baseline sub super top text-top middle bot
 css_macros::easy_enum!{line-height normal # @}
 css_macros::easy_enum!{letter-spacing normal @}
 css_macros::easy_enum!{tab-size #}
+css_macros::easy_enum!{text-decoration-style solid double dotted dashed wavy}
+css_macros::easy_enum!{text-decoration-line none underline overline line-through}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum_macros::Display)]
 pub enum FontWeight {
@@ -65,27 +67,18 @@ macro_rules! font_weight {
 	(inherit) => {$crate::Property::FontWeight($crate::FontWeight::Inherit)};
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub enum Color {
-	Rgba(u8, u8, u8, u8),
-	Initial,
-	Inherit,
-}
-
-impl ToString for Color {
-	fn to_string(&self) -> String {
-		match self {
-			Self::Rgba(r, g, b, a) => format!("color:#{:02x}{:02x}{:02x}{:02x};", r, g, b, a),
-			Self::Initial            => "color:initial;".to_owned(),
-			Self::Inherit            => "color:inherit;".to_owned(),
-		}
-	}
+#[macro_export]
+macro_rules! color {
+	($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::TextColor($crate::Color::Rgba($r, $g, $b, $a))};
+	($r:tt $g:tt $b:tt)       => {$crate::Property::TextColor($crate::Color::Rgba($r, $g, $b, 255))};
+	(initial)                 => {$crate::Property::TextColor($crate::Color::Initial)};
+	(inherit)                 => {$crate::Property::TextColor($crate::Color::Inherit)};
 }
 
 #[macro_export]
-macro_rules! color {
-	($r:tt $g:tt $b:tt $a:tt) => { $crate::Property::Color::Rgba(($r, $g, $b, $a)) };
-	($r:tt $g:tt $b:tt)       => { $crate::Property::Color::Rgba(($r, $g, $b, 255)) };
-	(initial)                 => {$crate::Property::Color($crate::Color::Initial)};
-	(inherit)                 => {$crate::Property::Color($crate::Color::Inherit)};
+macro_rules! text_decoration_color {
+	($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::TextDecorationColor($crate::Color::Rgba($r, $g, $b, $a))};
+	($r:tt $g:tt $b:tt)       => {$crate::Property::TextDecorationColor($crate::Color::Rgba($r, $g, $b, 255))};
+	(initial)                 => {$crate::Property::TextDecorationColor($crate::Color::Initial)};
+	(inherit)                 => {$crate::Property::TextDecorationColor($crate::Color::Inherit)};
 }

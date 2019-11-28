@@ -92,6 +92,7 @@ pub enum SelectorComponent {
 	Descendant,
 	And,
 	ClassPlaceholder,
+	Any,
 }
 
 impl ToString for SelectorComponent {
@@ -106,6 +107,7 @@ impl ToString for SelectorComponent {
 			Self::Descendant       => " ".to_owned(),
 			Self::And              => ",".to_owned(),
 			Self::ClassPlaceholder => ".&".to_owned(),
+			Self::Any              => "*".to_owned(),
 		}
 	}
 }
@@ -133,6 +135,7 @@ impl Selector {
 
 impl CombiningSelector {
 	pub fn element(mut self, x: Element)              -> Selector              { self.0.push(SelectorComponent::Element(x)); Selector(self.0) }
+	pub fn any(mut self)                              -> Selector              { self.0.push(SelectorComponent::Any); Selector(self.0) }
 	pub fn class(mut self, x: String)                 -> Selector              { self.0.push(SelectorComponent::Class(x)); Selector(self.0) }
 	pub fn class_placeholder(mut self)                -> Selector              { self.0.push(SelectorComponent::ClassPlaceholder); Selector(self.0) }
 	pub fn id(mut self, x: String)                    -> Selector              { self.0.push(SelectorComponent::Id(x)); Selector(self.0) }
@@ -181,6 +184,7 @@ macro_rules! selector {
 	(@($acc:expr) :not($($selector:tt)+))               => { $acc.pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+))) };
 	(@($acc:expr) :$pseudo_class:ident)                 => { $acc.pseudo_class($crate::selector::PseudoClass::$pseudo_class) };
 	(@($acc:expr) ::$pseudo_element:ident)              => { $crate::selector::Selector::from($acc.pseudo_element($crate::selector::PseudoElement::$pseudo_element)) };
+	(@($acc:expr) *)                                    => { $acc.any() };
 
 	// middle
 	(@($acc:expr) >> $($rest:tt)+)                      => { $crate::selector!(@($acc.descendant()) $($rest)+) };
@@ -194,12 +198,14 @@ macro_rules! selector {
 	(@($acc:expr) :not($($selector:tt)+) $($rest:tt)+)  => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+)))) $($rest)+) };
 	(@($acc:expr) :$pseudo_class:ident $($rest:tt)+)    => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::$pseudo_class)) $($rest)+) };
 	(@($acc:expr) ::$pseudo_element:ident $($rest:tt)+) => { $crate::selector!(@($acc.pseudo_element($crate::selector::PseudoElement::$pseudo_element)) $($rest)+) };
+	(@($acc:expr) * $($rest:tt)+)                       => { $crate::selector!(@($acc.any()) $($rest)+) };
 
 	// start
 	($element:ident $($rest:tt)+)                       => { $crate::selector!(@($crate::selector::Selector::build().element($crate::selector::Element::$element)) $($rest)+) };
 	(.($class:expr) $($rest:tt)+)                       => { $crate::selector!(@($crate::selector::Selector::build().class($class.into())) $($rest)+) };
 	(.& $($rest:tt)+)                                   => { $crate::selector!(@($crate::selector::Selector::build().class_placeholder()) $($rest)+) };
 	(#($id:expr) $($rest:tt)+)                          => { $crate::selector!(@($crate::selector::Selector::build().id($id.into())) $($rest)+) };
+	(* $($rest:tt)+)                                    => { $crate::selector!(@($crate::selector::Selector::build().any()) $($rest)+) };
 
 	// only
 	($elem:ident)                                       => { $crate::selector::Selector::build().element($crate::selector::Element::$elem) };
@@ -210,4 +216,5 @@ macro_rules! selector {
 	(:not($($selector:tt)+))                            => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+))) };
 	(:$pseudo_class:ident)                              => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::$pseudo_class) };
 	(::$pseudo_element:ident)                           => { $crate::selector::Selector::build().pseudo_element($crate::selector::PseudoElement::$pseudo_element) };
+	(*)                                                 => { $crate::selector::Selector::build().any() };
 }

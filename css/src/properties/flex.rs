@@ -57,6 +57,7 @@ macro_rules! flex_grow {
 
 #[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, Copy)]
 pub enum FlexShrink {
+	Zero,
 	#[default]
 	Some(#[default = 1] i32),
 	Initial,
@@ -69,6 +70,7 @@ impl ToString for FlexShrink {
 			Self::Initial    => "flex-shrink:initial;".to_owned(),
 			Self::Inherit    => "flex-shrink:inherit;".to_owned(),
 			Self::Some(x)    => format!("flex-shrink:{};", x),
+			Self::Zero       => "flex-shrink:0;".to_owned(),
 		}
 	}
 }

@@ -18,6 +18,23 @@ pub use text::*;
 pub use border::*;
 pub use background::*;
 
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub enum Color {
+	Rgba(u8, u8, u8, u8),
+	Initial,
+	Inherit,
+}
+
+impl ToString for Color {
+	fn to_string(&self) -> String {
+		match self {
+			Self::Rgba(r, g, b, a)   => format!("#{:02x}{:02x}{:02x}{:02x}", r, g, b, a),
+			Self::Initial            => "initial".to_owned(),
+			Self::Inherit            => "inherit".to_owned(),
+		}
+	}
+}
+
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Property {
 	Raw(String),
@@ -36,7 +53,7 @@ pub enum Property {
 	MaxWidth(DimensionExtremity),
 	MinHeight(DimensionExtremity),
 	MaxHeight(DimensionExtremity),
-	BackgroundColor(BackgroundColor),
+	BackgroundColor(Color),
 	FlexWrap(FlexWrap),
 	FlexDirection(FlexDirection),
 	JustifyContent(JustifyContent),
@@ -55,8 +72,9 @@ pub enum Property {
 	BoxSizing(BoxSizing),
 	Visibility(Visibility),
 	ZIndex(ZIndex),
-	Overflow(Overflow),
-	Color(Color),
+	OverflowX(OverflowX),
+	OverflowY(OverflowY),
+	TextColor(Color),
 	Direction(Direction),
 	UnicodeBidi(UnicodeBidi),
 	WhiteSpace(WhiteSpace),
@@ -127,6 +145,9 @@ pub enum Property {
 	BorderTopRightRadius(BorderRadius),
 	BorderBottomLeftRadius(BorderRadius),
 	BorderBottomRightRadius(BorderRadius),
+	TextDecorationStyle(TextDecorationStyle),
+	TextDecorationLine(TextDecorationLine),
+	TextDecorationColor(Color),
 	// etc
 }
 
@@ -178,6 +199,10 @@ impl ToString for Property {
 			Self::BorderBottomLeftRadius(x)  => format!("border-bottom-left-radius:{};", x.to_string()),
 			Self::BorderBottomRightRadius(x) => format!("border-bottom-right-radius:{};", x.to_string()),
 
+			Self::BackgroundColor(x)         => format!("background-color:{};", x.to_string()),
+			Self::TextColor(x)               => format!("color:{};", x.to_string()),
+			Self::TextDecorationColor(x)     => format!("text-decoration-color:{};", x.to_string()),
+
 			// different properties that have specific to them arguments
 			// basis/grow/shrink/order kind of take the same, but basis and shrink are 1 by default while others are 0 so /shrug
 			Self::FlexWrap(x)             => x.to_string(),
@@ -195,9 +220,8 @@ impl ToString for Property {
 			Self::BoxSizing(x)            => x.to_string(),
 			Self::Visibility(x)           => x.to_string(),
 			Self::ZIndex(x)               => x.to_string(),
-			Self::Overflow(x)             => x.to_string(),
-			Self::BackgroundColor(x)      => x.to_string(),
-			Self::Color(x)                => x.to_string(),
+			Self::OverflowX(x)            => x.to_string(),
+			Self::OverflowY(x)            => x.to_string(),
 			Self::Direction(x)            => x.to_string(),
 			Self::UnicodeBidi(x)          => x.to_string(),
 			Self::WhiteSpace(x)           => x.to_string(),
@@ -252,6 +276,8 @@ impl ToString for Property {
 			Self::Opacity(x)              => x.to_string(),
 			Self::Perspective(x)          => x.to_string(),
 			Self::BackfaceVisibility(x)   => x.to_string(),
+			Self::TextDecorationStyle(x)  => x.to_string(),
+			Self::TextDecorationLine(x)   => x.to_string(),
 		}
 	}
 }
@@ -280,9 +306,8 @@ from_properties! {
 	BoxSizing,
 	Visibility,
 	ZIndex,
-	Overflow,
-	BackgroundColor,
-	Color,
+	OverflowX,
+	OverflowY,
 	Direction,
 	UnicodeBidi,
 	WhiteSpace,
@@ -337,11 +362,12 @@ from_properties! {
 	Opacity,
 	Perspective,
 	BackfaceVisibility,
+	TextDecorationStyle,
+	TextDecorationLine,
 }
 
 css_macros::easy_enum!{box-sizing content-box border-box}
 css_macros::easy_enum!{visibility visible hidden collapse}
-css_macros::easy_enum!{overflow visible hidden scroll auto}
 css_macros::easy_enum!{display block none inline inline-block flex inline-flex}
 css_macros::easy_enum!{user-select auto none text all}
 css_macros::easy_enum!{scroll-behavior auto smooth}
@@ -361,3 +387,7 @@ css_macros::easy_enum!{content normal none counter open-quote close-quote no-ope
 css_macros::easy_enum!{opacity #}
 css_macros::easy_enum!{perspective none @}
 css_macros::easy_enum!{backface-visibility visible hidden}
+
+// TODO: abstract overflow
+css_macros::easy_enum!{overflow-x visible hidden scroll auto}
+css_macros::easy_enum!{overflow-y visible hidden scroll auto}
