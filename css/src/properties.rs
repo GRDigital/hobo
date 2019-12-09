@@ -153,6 +153,7 @@ pub enum Property {
 	Fill(Color),
 	Stroke(Color),
 	VectorEffect(VectorEffect),
+	BackgroundImage(BackgroundImage),
 	// etc
 }
 
@@ -286,6 +287,7 @@ impl ToString for Property {
 			Self::TextDecorationStyle(x)  => x.to_string(),
 			Self::TextDecorationLine(x)   => x.to_string(),
 			Self::VectorEffect(x)         => x.to_string(),
+			Self::BackgroundImage(x)      => x.to_string(),
 		}
 	}
 }

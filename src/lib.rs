@@ -24,6 +24,7 @@ struct StyleStorage {
 	map: RefCell<HashMap<css::Style, u64>>,
 }
 
+// TODO: right now if the same style is reused in multiple windows - won't work, need to track style insertion per window
 impl StyleStorage {
 	fn fetch(&self, element: &web_sys::Element, style: &css::Style) -> String {
 		if let Some(id) = self.map.borrow().get(style) { return format!("s{}", id) }
@@ -41,9 +42,10 @@ impl StyleStorage {
 			}
 		}
 		let dom = element.owner_document().unwrap();
-		let style_element = if let Some(x) = dom.get_elements_by_tag_name("style").get_with_index(0) { x } else {
+		let head = dom.head().unwrap();
+		let style_element = if let Some(x) = head.get_elements_by_tag_name("style").get_with_index(0) { x } else {
 			let element = dom.create_element(web_str::style()).unwrap();
-			dom.head().unwrap().append_child(&element).unwrap();
+			head.append_child(&element).unwrap();
 			element
 		};
 		style_element.append_with_str_1(&style.to_string()).unwrap();
@@ -186,10 +188,9 @@ macro_rules! html {
 			use super::*;
 
 			$(
-				#[extend::ext(pub)]
-				impl web_sys::$t {
-					fn to_element(self) -> BasicElement<web_sys::$t> {
-						BasicElement { element: self }
+				impl From<web_sys::$t> for BasicElement<web_sys::$t> {
+					fn from(element: web_sys::$t) -> Self {
+						Self { element }
 					}
 				}
 
@@ -237,6 +238,15 @@ impl Element for SvgElement {
 impl Drop for SvgElement {
 	fn drop(&mut self) {
 		self.element.remove();
+	}
+}
+
+impl Clone for SvgElement {
+	fn clone(&self) -> Self {
+		Self {
+			element: self.element.clone_node_with_deep(true).unwrap().dyn_into().unwrap(),
+			children: self.children.clone(),
+		}
 	}
 }
 

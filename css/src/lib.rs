@@ -47,6 +47,12 @@ impl AppendProperty for Property {
 	}
 }
 
+impl<F: FnOnce(&mut Vec<Property>)> AppendProperty for F {
+	fn append_property(self, decls: &mut Vec<Property>) {
+		self(decls);
+	}
+}
+
 #[macro_export]
 macro_rules! declarations {
 	($($e:expr),*$(,)*) => {{

@@ -1,19 +1,17 @@
 use crate::prelude::*;
 
-#[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Dimension {
-	#[default]
-	None,
+	Zero,
 	Auto,
 	Initial,
 	Inherit,
 	Some(Unit),
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum DimensionExtremity {
-	#[default]
-	None,
+	Zero,
 	Initial,
 	Inherit,
 	Some(Unit),
@@ -22,7 +20,7 @@ pub enum DimensionExtremity {
 impl ToString for Dimension {
 	fn to_string(&self) -> String {
 		match self {
-			Self::None       => "0".to_owned(),
+			Self::Zero       => "0".to_owned(),
 			Self::Auto       => "auto".to_owned(),
 			Self::Initial    => "initial".to_owned(),
 			Self::Inherit    => "inherit".to_owned(),
@@ -34,7 +32,7 @@ impl ToString for Dimension {
 impl ToString for DimensionExtremity {
 	fn to_string(&self) -> String {
 		match self {
-			Self::None       => "0".to_owned(),
+			Self::Zero       => "0".to_owned(),
 			Self::Initial    => "initial".to_owned(),
 			Self::Inherit    => "inherit".to_owned(),
 			Self::Some(unit) => unit.to_string(),
@@ -45,7 +43,7 @@ impl ToString for DimensionExtremity {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __dimension {
-	($kind:ident, 0)           => {$crate::Property::$kind($crate::Dimension::None)};
+	($kind:ident, 0)           => {$crate::Property::$kind($crate::Dimension::Zero)};
 	($kind:ident, auto)        => {$crate::Property::$kind($crate::Dimension::Auto)};
 	($kind:ident, initial)     => {$crate::Property::$kind($crate::Dimension::Initial)};
 	($kind:ident, inherit)     => {$crate::Property::$kind($crate::Dimension::Inherit)};
@@ -58,7 +56,7 @@ macro_rules! __dimension {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __dimension_extremity {
-	($kind:ident, 0)           => {$crate::Property::$kind($crate::DimensionExtremity::None)};
+	($kind:ident, 0)           => {$crate::Property::$kind($crate::DimensionExtremity::Zero)};
 	($kind:ident, initial)     => {$crate::Property::$kind($crate::DimensionExtremity::Initial)};
 	($kind:ident, inherit)     => {$crate::Property::$kind($crate::DimensionExtremity::Inherit)};
 	($kind:ident, $($val:tt)+) => {$crate::Property::$kind($crate::DimensionExtremity::Some($crate::unit!($($val)+)))};

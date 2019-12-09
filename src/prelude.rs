@@ -3,4 +3,4 @@ pub use web_sys;
 pub use wasm_bindgen::prelude::*;
 pub use wasm_bindgen::JsCast as _;
 pub use std::convert::TryInto as _;
-pub use css;
+pub use css::{self, AppendProperty};

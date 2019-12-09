@@ -47,20 +47,35 @@ macro_rules! __flexbox_line {
 	($acc:expr, column) => {
 		$acc.push($crate::Property::FlexDirection($crate::FlexDirection::Column));
 	};
+
 	($acc:expr, width ($($value:tt)*)) => {
 		$acc.push($crate::width!($($value)*))
+	};
+	($acc:expr, width ($($min:tt)*) ..) => {
+		$acc.push($crate::min_width!($($min)*));
+	};
+	($acc:expr, width .. ($($max:tt)*)) => {
+		$acc.push($crate::max_width!($($max)*));
 	};
 	($acc:expr, width ($($min:tt)*) .. ($($max:tt)*)) => {
 		$acc.push($crate::min_width!($($min)*));
 		$acc.push($crate::max_width!($($max)*));
 	};
+
 	($acc:expr, height ($($value:tt)*)) => {
 		$acc.push($crate::height!($($value)*))
+	};
+	($acc:expr, height ($($min:tt)*) ..) => {
+		$acc.push($crate::min_height!($($min)*));
+	};
+	($acc:expr, height .. ($($max:tt)*)) => {
+		$acc.push($crate::max_height!($($max)*));
 	};
 	($acc:expr, height ($($min:tt)*) .. ($($max:tt)*)) => {
 		$acc.push($crate::min_height!($($min)*));
 		$acc.push($crate::max_height!($($max)*));
 	};
+
 	($acc:expr, top ($($margin:tt)*) | ($($padding:tt)*)) => {
 		$acc.push($crate::margin_top!($($margin)*));
 		$acc.push($crate::padding_top!($($padding)*));
@@ -155,7 +170,7 @@ fn flexbox_macro_test() {
 		crate::declarations!(
 			crate::flexbox!(
 				width (100 px) .. (200 px),
-				height (200 px),
+				height .. (200 px),
 				top (100 px) | (50 px),
 				horizontal (15 px),
 				column,
@@ -167,7 +182,7 @@ fn flexbox_macro_test() {
 			crate::Property::Display(crate::Display::Flex),
 			crate::Property::MinWidth(crate::DimensionExtremity::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(100.) }))),
 			crate::Property::MaxWidth(crate::DimensionExtremity::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(200.) }))),
-			crate::Property::Height(crate::Dimension::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(200.) }))),
+			crate::Property::MaxHeight(crate::Dimension::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(200.) }))),
 			crate::Property::MarginTop(crate::Margin::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(100.) }))),
 			crate::Property::PaddingTop(crate::Padding::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(50.) }))),
 			crate::Property::MarginLeft(crate::Margin::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(15.) }))),

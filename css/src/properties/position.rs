@@ -1,5 +1,10 @@
 css_macros::easy_enum!{position static absolute fixed relative sticky}
 
+#[macro_export] macro_rules! top { ($($tt:tt)+) => {$crate::__dimension!(Top, $($tt)+)} }
+#[macro_export] macro_rules! right { ($($tt:tt)+) => {$crate::__dimension!(Right, $($tt)+)} }
+#[macro_export] macro_rules! bottom { ($($tt:tt)+) => {$crate::__dimension!(Bottom, $($tt)+)} }
+#[macro_export] macro_rules! left { ($($tt:tt)+) => {$crate::__dimension!(Left, $($tt)+)} }
+
 #[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, Copy)]
 pub enum ZIndex {
 	#[default]
