@@ -6,6 +6,7 @@
 #[macro_use] mod text;
 #[macro_use] mod border;
 #[macro_use] mod background;
+#[macro_use] mod svg;
 
 // use crate::prelude::*;
 use std::string::ToString;
@@ -17,6 +18,7 @@ pub use position::*;
 pub use text::*;
 pub use border::*;
 pub use background::*;
+pub use svg::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Color {
@@ -148,6 +150,9 @@ pub enum Property {
 	TextDecorationStyle(TextDecorationStyle),
 	TextDecorationLine(TextDecorationLine),
 	TextDecorationColor(Color),
+	Fill(Color),
+	Stroke(Color),
+	VectorEffect(VectorEffect),
 	// etc
 }
 
@@ -202,6 +207,8 @@ impl ToString for Property {
 			Self::BackgroundColor(x)         => format!("background-color:{};", x.to_string()),
 			Self::TextColor(x)               => format!("color:{};", x.to_string()),
 			Self::TextDecorationColor(x)     => format!("text-decoration-color:{};", x.to_string()),
+			Self::Fill(x)                    => format!("fill:{};", x.to_string()),
+			Self::Stroke(x)                  => format!("stroke:{};", x.to_string()),
 
 			// different properties that have specific to them arguments
 			// basis/grow/shrink/order kind of take the same, but basis and shrink are 1 by default while others are 0 so /shrug
@@ -278,6 +285,7 @@ impl ToString for Property {
 			Self::BackfaceVisibility(x)   => x.to_string(),
 			Self::TextDecorationStyle(x)  => x.to_string(),
 			Self::TextDecorationLine(x)   => x.to_string(),
+			Self::VectorEffect(x)         => x.to_string(),
 		}
 	}
 }

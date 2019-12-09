@@ -29,6 +29,8 @@ css_macros::easy_enum!{letter-spacing normal @}
 css_macros::easy_enum!{tab-size #}
 css_macros::easy_enum!{text-decoration-style solid double dotted dashed wavy}
 css_macros::easy_enum!{text-decoration-line none underline overline line-through}
+css_macros::easy_color!{color}
+css_macros::easy_color!{text-decoration-color}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum_macros::Display)]
 pub enum FontWeight {
@@ -65,20 +67,4 @@ macro_rules! font_weight {
 	(900)     => {$crate::Property::FontWeight($crate::FontWeight::Weight900)};
 	(initial) => {$crate::Property::FontWeight($crate::FontWeight::Initial)};
 	(inherit) => {$crate::Property::FontWeight($crate::FontWeight::Inherit)};
-}
-
-#[macro_export]
-macro_rules! color {
-	($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::TextColor($crate::Color::Rgba($r, $g, $b, $a))};
-	($r:tt $g:tt $b:tt)       => {$crate::Property::TextColor($crate::Color::Rgba($r, $g, $b, 255))};
-	(initial)                 => {$crate::Property::TextColor($crate::Color::Initial)};
-	(inherit)                 => {$crate::Property::TextColor($crate::Color::Inherit)};
-}
-
-#[macro_export]
-macro_rules! text_decoration_color {
-	($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::TextDecorationColor($crate::Color::Rgba($r, $g, $b, $a))};
-	($r:tt $g:tt $b:tt)       => {$crate::Property::TextDecorationColor($crate::Color::Rgba($r, $g, $b, 255))};
-	(initial)                 => {$crate::Property::TextDecorationColor($crate::Color::Initial)};
-	(inherit)                 => {$crate::Property::TextDecorationColor($crate::Color::Inherit)};
 }

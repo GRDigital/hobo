@@ -143,3 +143,23 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 	res.into()
 }
+
+#[proc_macro]
+pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	let property = input.into_iter().map(|x| x.to_string()).collect::<String>();
+
+	let property_snek = proc_macro2::Ident::new(&property.to_snek_case(), proc_macro2::Span::call_site());
+	let property_camel = proc_macro2::Ident::new(&property.to_camel_case(), proc_macro2::Span::call_site());
+
+	let res = quote!(
+		#[macro_export]
+		macro_rules! #property_snek {
+			($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::#property_camel($crate::Color::Rgba($r, $g, $b, $a))};
+			($r:tt $g:tt $b:tt)       => {$crate::Property::#property_camel($crate::Color::Rgba($r, $g, $b, 255))};
+			(initial)                 => {$crate::Property::#property_camel($crate::Color::Initial)};
+			(inherit)                 => {$crate::Property::#property_camel($crate::Color::Inherit)};
+		}
+	);
+
+	res.into()
+}

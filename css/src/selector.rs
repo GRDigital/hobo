@@ -55,30 +55,11 @@ impl ToString for PseudoClass {
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, AsRefStr, strum_macros::Display)]
 #[allow(non_camel_case_types)]
 pub enum Element {
-	div,
-	span,
-	input,
-	a,
-	img,
-	textarea,
-	html,
-	body,
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6,
-	p,
-	header,
-	var,
-	nav,
-	li,
-	ul,
-	footer,
-	strong,
-	hr,
-	button,
+	div, span, input, a, img, textarea,
+	html, body, h1, h2, h3, h4,
+	h5, h6, p, header, var, nav,
+	li, ul, footer, strong, hr, button,
+	svg, path,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]

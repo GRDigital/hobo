@@ -26,8 +26,8 @@ impl ToString for OutlineColor {
 #[macro_export]
 macro_rules! outline_color {
 	(invert)                  => {$crate::Property::OutlineColor($crate::OutlineColor::Invert)};
-	($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::OutlineColor::Rgba(($r, $g, $b, $a))};
-	($r:tt $g:tt $b:tt)       => {$crate::Property::OutlineColor::Rgba(($r, $g, $b, 255))};
+	($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba(($r, $g, $b, $a)))};
+	($r:tt $g:tt $b:tt)       => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba(($r, $g, $b, 255)))};
 	(initial)                 => {$crate::Property::OutlineColor($crate::OutlineColor::Initial)};
 	(inherit)                 => {$crate::Property::OutlineColor($crate::OutlineColor::Inherit)};
 }
