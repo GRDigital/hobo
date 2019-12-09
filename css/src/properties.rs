@@ -76,7 +76,7 @@ pub enum Property {
 	ZIndex(ZIndex),
 	OverflowX(OverflowX),
 	OverflowY(OverflowY),
-	TextColor(Color),
+	Color(Color),
 	Direction(Direction),
 	UnicodeBidi(UnicodeBidi),
 	WhiteSpace(WhiteSpace),
@@ -205,7 +205,7 @@ impl ToString for Property {
 			Self::BorderBottomRightRadius(x) => format!("border-bottom-right-radius:{};", x.to_string()),
 
 			Self::BackgroundColor(x)         => format!("background-color:{};", x.to_string()),
-			Self::TextColor(x)               => format!("color:{};", x.to_string()),
+			Self::Color(x)                   => format!("color:{};", x.to_string()),
 			Self::TextDecorationColor(x)     => format!("text-decoration-color:{};", x.to_string()),
 			Self::Fill(x)                    => format!("fill:{};", x.to_string()),
 			Self::Stroke(x)                  => format!("stroke:{};", x.to_string()),
