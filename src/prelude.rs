@@ -1,4 +1,4 @@
-pub use crate::{Element as _, EventTarget as _, web_sys_element_exts::*, event_raw_exts::*};
+pub use crate::{Element as _, EventTarget as _, web_sys_element_exts::*, event_raw_exts::*, web_str};
 pub use web_sys;
 pub use wasm_bindgen::prelude::*;
 pub use wasm_bindgen::JsCast as _;

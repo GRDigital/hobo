@@ -14,6 +14,7 @@ intern_strings! {
 	max, "max";
 	value, "value";
 	style, "style";
+	placeholder, "placeholder";
 
 	// events
 	click, "click";
