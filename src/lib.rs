@@ -130,7 +130,7 @@ pub trait Element: Drop {
 	fn class() -> String where Self: Sized + 'static {
 		std::any::TypeId::of::<Self>().to_class_string("t")
 	}
-	fn append<C: Element>(&self, child: impl std::ops::Deref<Target = C>) -> &Self where Self: Sized {
+	fn append(&self, child: &dyn Element) -> &Self where Self: Sized {
 		self.element().append_child(child.element()).expect("Can't append child");
 		self
 	}
