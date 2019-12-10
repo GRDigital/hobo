@@ -67,6 +67,17 @@ macro_rules! declarations {
 		v
 	}};
 }
+#[macro_export]
+macro_rules! class {
+	($($rules:tt)+) => {
+		$crate::Style(vec![
+			$crate::Rule(
+				$crate::selector::Selector::build().class_placeholder(),
+				$crate::declarations!($($rules)+),
+			),
+		])
+	}
+}
 
 #[macro_export]
 macro_rules! rule {
