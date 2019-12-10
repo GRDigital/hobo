@@ -5,10 +5,8 @@ pub mod web_str;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast as _;
-use std::rc::Rc;
-use std::cell::{Ref, RefMut, RefCell};
+use std::cell::RefCell;
 use std::collections::HashMap;
-use std::marker::PhantomData;
 use std::hash::{Hash, Hasher};
 pub use hobo_derive::*;
 pub use web_sys;
@@ -97,7 +95,7 @@ macro_rules! generate_events {
 					#[allow(clippy::missing_safety_doc)]
 					unsafe fn [<unsafe_ $f>]<'a>(&'a self, f: impl FnMut($event_kind) + 'a) -> EventHandler where Self: Sized {
 						let fbox: Box<dyn FnMut($event_kind) + 'a> = Box::new(f);
-						let long_fbox: Box<dyn FnMut($event_kind) + 'static> = unsafe { std::mem::transmute(fbox) };
+						let long_fbox: Box<dyn FnMut($event_kind) + 'static> = std::mem::transmute(fbox);
 						let handler = Closure::wrap(long_fbox);
 						self.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).unwrap();
 						EventHandler(Box::new(handler))

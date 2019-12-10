@@ -1,9 +1,6 @@
 extern crate proc_macro;
-use proc_macro2::TokenStream;
 use proc_quote::quote;
-use syn::spanned::Spanned;
-use syn::{parse_macro_input, Data, DeriveInput, Fields, Ident, DataStruct};
-use darling::{FromField, FromDeriveInput};
+use syn::{DeriveInput};
 
 #[proc_macro_derive(Element)]
 pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

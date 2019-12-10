@@ -1,9 +1,5 @@
 extern crate proc_macro;
-use proc_macro2::TokenStream;
 use proc_quote::quote;
-use syn::spanned::Spanned;
-use syn::{parse_macro_input, Data, DeriveInput, Fields, Ident, DataStruct};
-use darling::{FromField, FromDeriveInput};
 use heck::*;
 
 enum Value {
