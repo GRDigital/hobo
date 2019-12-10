@@ -1,6 +1,6 @@
 css_macros::easy_enum!{flex-wrap nowrap wrap wrap-reverse}
 css_macros::easy_enum!{flex-direction row row-reverse column column-reverse}
-css_macros::easy_enum!{justify_content flex-start flex-end center space-between space-around}
+css_macros::easy_enum!{justify-content flex-start flex-end center space-between space-around}
 css_macros::easy_enum!{align-items stretch center flex-start flex-end baseline}
 css_macros::easy_enum!{align-content stretch center flex-start flex-end space-between space-around}
 css_macros::easy_enum!{align-self auto stretch center flex-start flex-end baseline}
