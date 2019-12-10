@@ -26,10 +26,11 @@ impl ToString for OutlineColor {
 #[macro_export]
 macro_rules! outline_color {
 	(invert)                  => {$crate::Property::OutlineColor($crate::OutlineColor::Invert)};
-	($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba(($r, $g, $b, $a)))};
-	($r:tt $g:tt $b:tt)       => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba(($r, $g, $b, 255)))};
 	(initial)                 => {$crate::Property::OutlineColor($crate::OutlineColor::Initial)};
 	(inherit)                 => {$crate::Property::OutlineColor($crate::OutlineColor::Inherit)};
+	($rgb:tt)                 => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba(($rgb, $rgb, $rgb, 255)))};
+	($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba(($r, $g, $b, $a)))};
+	($r:tt $g:tt $b:tt)       => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba(($r, $g, $b, 255)))};
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
@@ -177,6 +178,7 @@ macro_rules! __border_color {
 	($side:ident, inherit)                 => {$crate::paste::expr!{$crate::Property::[<Border $side Color>]($crate::BorderColor::Inherit)}};
 	($side:ident, $r:tt $g:tt $b:tt $a:tt) => {$crate::paste::expr!{$crate::Property::[<Border $side Color>]($crate::BorderColor::Rgba($r, $g, $b, $a))}};
 	($side:ident, $r:tt $g:tt $b:tt)       => {$crate::paste::expr!{$crate::Property::[<Border $side Color>]($crate::BorderColor::Rgba($r, $g, $b, 255))}};
+	($side:ident, $rgb:tt)                 => {$crate::paste::expr!{$crate::Property::[<Border $side Color>]($crate::BorderColor::Rgba($rgb, $rgb, $rgb, 255))}};
 }
 
 #[macro_export] macro_rules! border_left_color {($($tt:tt)+)   => {$crate::__border_color!(Left, $($tt)+)}}

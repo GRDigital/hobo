@@ -108,9 +108,6 @@ macro_rules! __flexbox_line {
 		$crate::__flexbox_line!($acc, horizontal $($rest)*);
 		$crate::__flexbox_line!($acc, vertical $($rest)*);
 	};
-	($acc:expr, $side:ident $margin:tt) => {
-		$crate::__flexbox_line!($acc, $side $margin | (0));
-	};
 	($acc:expr, [$($inner:tt)*]) => { $crate::__flexbox_line!($acc, $($inner)*) };
 }
 
@@ -172,7 +169,7 @@ fn flexbox_macro_test() {
 				width (100 px) .. (200 px),
 				height .. (200 px),
 				top (100 px) | (50 px),
-				horizontal (15 px),
+				horizontal (15 px) | (0),
 				column,
 			),
 		),
