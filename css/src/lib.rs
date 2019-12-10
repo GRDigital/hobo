@@ -26,6 +26,12 @@ impl ToString for Style {
 	}
 }
 
+impl Style {
+	pub fn append(&mut self, other: &mut Style) {
+		self.0.append(&mut other.0);
+	}
+}
+
 #[doc(hidden)]
 pub trait AppendProperty {
 	fn append_property(self, decls: &mut Vec<Property>);
