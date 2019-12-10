@@ -197,3 +197,11 @@ macro_rules! __border_radius {
 #[macro_export] macro_rules! border_top_right_radius {($($tt:tt)+)    => {$crate::__border_radius!(TopRight, $($tt)+)}}
 #[macro_export] macro_rules! border_bottom_left_radius {($($tt:tt)+)  => {$crate::__border_radius!(BottomLeft, $($tt)+)}}
 #[macro_export] macro_rules! border_bottom_right_radius {($($tt:tt)+) => {$crate::__border_radius!(BottomRight, $($tt)+)}}
+#[macro_export] macro_rules! border_radius {($($tt:tt)+) => {
+	vec![
+		$crate::border_top_left_radius!($($tt)+),
+		$crate::border_top_right_radius!($($tt)+),
+		$crate::border_bottom_left_radius!($($tt)+),
+		$crate::border_bottom_right_radius!($($tt)+),
+	]
+}}
