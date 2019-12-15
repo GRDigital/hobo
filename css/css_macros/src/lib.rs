@@ -13,8 +13,8 @@ enum Value {
 pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let mut args: Vec<String> = vec![];
 	let mut current_ident: String = String::new();
-	let mut input = input.into_iter();
-	while let Some(t) = input.next() {
+	let input = input.into_iter();
+	for t in input {
 		match t {
 			proc_macro::TokenTree::Punct(x) if x.as_char() == '-' => {
 				current_ident += "-";
@@ -22,7 +22,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 			x => {
 				if current_ident.is_empty() {
 					current_ident = x.to_string();
-				} else if current_ident.chars().last().unwrap() == '-' {
+				} else if current_ident.ends_with('-') {
 					current_ident += &x.to_string();
 				} else {
 					args.push(current_ident);
@@ -36,7 +36,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	args.push("inherit".to_owned());
 
 	let property: &str = args.get(0).unwrap();
-	let values = args.get(1..).unwrap().into_iter().map(|x| match &x as &str {
+	let values = args.get(1..).unwrap().iter().map(|x| match &x as &str {
 		"@" => Value::Unit,
 		"$" => Value::String,
 		"#" => Value::Number,
