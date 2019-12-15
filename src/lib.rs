@@ -130,9 +130,8 @@ pub trait Element: Drop {
 	fn class() -> String where Self: Sized + 'static {
 		std::any::TypeId::of::<Self>().to_class_string("t")
 	}
-	fn append(&self, child: &dyn Element) -> &Self where Self: Sized {
+	fn append(&self, child: &dyn Element) {
 		self.element().append_child(child.element()).expect("Can't append child");
-		self
 	}
 	fn set_class(&self, style: &css::Style) -> &Self where Self: Sized + 'static {
 		CONTEXT.with(move |ctx| {
