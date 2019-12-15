@@ -148,6 +148,14 @@ pub trait Element: Drop {
 
 pub struct BasicElement<T: AsRef<web_sys::Element>> {
 	pub element: T,
+	pub children: Vec<Box<dyn Element>>,
+}
+
+impl<T: AsRef<web_sys::Element>> BasicElement<T> {
+	pub fn attach_child(&mut self, child: impl Element + 'static) {
+		self.append(&child);
+		self.children.push(Box::new(child));
+	}
 }
 
 impl<T: AsRef<web_sys::Element>> Drop for BasicElement<T> {
@@ -188,13 +196,13 @@ macro_rules! html {
 			$(
 				impl From<web_sys::$t> for BasicElement<web_sys::$t> {
 					fn from(element: web_sys::$t) -> Self {
-						Self { element }
+						Self { element, children: vec![] }
 					}
 				}
 
 				impl Default for BasicElement<web_sys::$t> {
 					fn default() -> Self {
-						BasicElement { element: create::$name() }
+						BasicElement { element: create::$name(), children: vec![] }
 					}
 				}
 			)+
