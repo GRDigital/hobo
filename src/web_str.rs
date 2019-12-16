@@ -5,7 +5,7 @@ macro_rules! intern_strings {
 	)+}
 }
 
-intern_strings! {
+intern_strings!{
 	class, "class";
 	r#type, "type";
 	range, "range";
@@ -15,6 +15,8 @@ intern_strings! {
 	value, "value";
 	style, "style";
 	placeholder, "placeholder";
+	src, "src";
+	href, "href";
 
 	// events
 	click, "click";
@@ -39,4 +41,7 @@ intern_strings! {
 	img, "img";
 	textarea, "textarea";
 	script, "script";
+	object, "object";
+	iframe, "iframe";
+	embed, "embed";
 }

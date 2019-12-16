@@ -217,6 +217,9 @@ html![
 	img, HtmlImageElement,
 	textarea, HtmlTextAreaElement,
 	script, HtmlScriptElement,
+	iframe, HtmlIFrameElement,
+	object, HtmlObjectElement,
+	embed, HtmlEmbedElement,
 ];
 
 #[extend::ext]
