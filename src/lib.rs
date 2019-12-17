@@ -85,6 +85,7 @@ macro_rules! generate_events {
 			$(
 				#[extend::ext(pub, name = [<Raw $trait>])]
 				impl web_sys::EventTarget {
+					#[must_use]
 					fn $f(&self, f: impl FnMut($event_kind) + 'static) -> EventHandler where Self: Sized {
 						let fbox: Box<dyn FnMut($event_kind) + 'static> = Box::new(f);
 						let handler = Closure::wrap(fbox);
@@ -92,6 +93,7 @@ macro_rules! generate_events {
 						EventHandler(Box::new(handler))
 					}
 
+					#[must_use]
 					#[allow(clippy::missing_safety_doc)]
 					unsafe fn [<unsafe_ $f>]<'a>(&'a self, f: impl FnMut($event_kind) + 'a) -> EventHandler where Self: Sized {
 						let fbox: Box<dyn FnMut($event_kind) + 'a> = Box::new(f);
