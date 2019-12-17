@@ -199,11 +199,39 @@ macro_rules! __border_radius {
 #[macro_export] macro_rules! border_top_right_radius {($($tt:tt)+)    => {$crate::__border_radius!(TopRight, $($tt)+)}}
 #[macro_export] macro_rules! border_bottom_left_radius {($($tt:tt)+)  => {$crate::__border_radius!(BottomLeft, $($tt)+)}}
 #[macro_export] macro_rules! border_bottom_right_radius {($($tt:tt)+) => {$crate::__border_radius!(BottomRight, $($tt)+)}}
+
 #[macro_export] macro_rules! border_radius {($($tt:tt)+) => {
 	vec![
 		$crate::border_top_left_radius!($($tt)+),
 		$crate::border_top_right_radius!($($tt)+),
 		$crate::border_bottom_left_radius!($($tt)+),
 		$crate::border_bottom_right_radius!($($tt)+),
+	]
+}}
+
+#[macro_export] macro_rules! border_width {($($tt:tt)+) => {
+	vec![
+		$crate::border_left_width!($($tt)+),
+		$crate::border_right_width!($($tt)+),
+		$crate::border_top_width!($($tt)+),
+		$crate::border_bottom_width!($($tt)+),
+	]
+}}
+
+#[macro_export] macro_rules! border_style {($($tt:tt)+) => {
+	vec![
+		$crate::border_left_style!($($tt)+),
+		$crate::border_right_style!($($tt)+),
+		$crate::border_top_style!($($tt)+),
+		$crate::border_bottom_style!($($tt)+),
+	]
+}}
+
+#[macro_export] macro_rules! border_color {($($tt:tt)+) => {
+	vec![
+		$crate::border_left_color!($($tt)+),
+		$crate::border_right_color!($($tt)+),
+		$crate::border_top_color!($($tt)+),
+		$crate::border_bottom_color!($($tt)+),
 	]
 }}
