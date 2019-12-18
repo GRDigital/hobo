@@ -222,6 +222,8 @@ html![
 	iframe, HtmlIFrameElement,
 	object, HtmlObjectElement,
 	embed, HtmlEmbedElement,
+	select, HtmlSelectElement,
+	option, HtmlOptionElement,
 ];
 
 #[extend::ext]

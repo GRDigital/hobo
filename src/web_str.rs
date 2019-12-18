@@ -44,4 +44,6 @@ intern_strings!{
 	object, "object";
 	iframe, "iframe";
 	embed, "embed";
+	select, "select";
+	option, "option";
 }
