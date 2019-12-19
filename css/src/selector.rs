@@ -59,7 +59,7 @@ pub enum Element {
 	html, body, h1, h2, h3, h4,
 	h5, h6, p, header, var, nav,
 	li, ul, footer, strong, hr, button,
-	svg, path,
+	svg, path, select, option,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
