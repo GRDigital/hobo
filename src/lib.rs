@@ -150,6 +150,13 @@ pub trait Element: Drop {
 pub struct BasicElement<T: AsRef<web_sys::Element>> {
 	pub element: T,
 	pub children: Vec<Box<dyn Element>>,
+	pub event_handlers: EventHandlers,
+}
+
+impl<T: AsRef<web_sys::Element>> EventTarget for BasicElement<T> {
+	fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>> {
+		self.event_handlers.borrow_mut()
+	}
 }
 
 impl<T: AsRef<web_sys::Element>> BasicElement<T> {
@@ -197,13 +204,13 @@ macro_rules! html {
 			$(
 				impl From<web_sys::$t> for BasicElement<web_sys::$t> {
 					fn from(element: web_sys::$t) -> Self {
-						Self { element, children: vec![] }
+						Self { element, children: vec![], event_handlers: EventHandlers::default() }
 					}
 				}
 
 				impl Default for BasicElement<web_sys::$t> {
 					fn default() -> Self {
-						BasicElement { element: create::$name(), children: vec![] }
+						BasicElement { element: create::$name(), children: vec![], event_handlers: EventHandlers::default() }
 					}
 				}
 			)+
