@@ -1,7 +1,10 @@
-#![feature(proc_macro_hygiene, specialization)]
+#![feature(proc_macro_hygiene)]
 
 pub mod prelude;
 pub mod web_str;
+mod element;
+mod basic_element;
+mod svg_element;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast as _;
@@ -12,6 +15,9 @@ pub use hobo_derive::*;
 pub use web_sys;
 pub use paste;
 pub use css;
+pub use element::Element;
+pub use basic_element::BasicElement;
+pub use svg_element::SvgElement;
 
 thread_local! {
 	static CONTEXT: Context = Default::default();
@@ -127,54 +133,6 @@ generate_events!{
 	web_sys::Event,         change,      OnChange,      on_change;
 }
 
-pub trait Element: Drop {
-	fn element(&self) -> &web_sys::Element;
-	fn class() -> String where Self: Sized + 'static {
-		std::any::TypeId::of::<Self>().to_class_string("t")
-	}
-	fn append(&self, child: &dyn Element) {
-		self.element().append_child(child.element()).expect("Can't append child");
-	}
-	fn set_class(&self, style: &css::Style) -> &Self where Self: Sized + 'static {
-		CONTEXT.with(move |ctx| {
-			let element = self.element();
-			let element_class = ctx.style_storage.fetch(element, style);
-			element.set_attribute(web_str::class(), &format!("{} {}", Self::class(), element_class)).unwrap();
-			// TODO:
-			// ctx.classes.borrow_mut().insert(0, element_class);
-			self
-		})
-	}
-}
-
-pub struct BasicElement<T: AsRef<web_sys::Element>> {
-	pub element: T,
-	pub children: Vec<Box<dyn Element>>,
-	pub event_handlers: EventHandlers,
-}
-
-impl<T: AsRef<web_sys::Element>> EventTarget for BasicElement<T> {
-	fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>> {
-		self.event_handlers.borrow_mut()
-	}
-}
-
-impl<T: AsRef<web_sys::Element>> BasicElement<T> {
-	pub fn attach_child(&mut self, child: impl Element + 'static) {
-		self.append(&child);
-		self.children.push(Box::new(child));
-	}
-}
-
-impl<T: AsRef<web_sys::Element>> Drop for BasicElement<T> {
-	fn drop(&mut self) {
-		self.element.as_ref().remove();
-	}
-}
-
-impl<T: AsRef<web_sys::Element>> Element for BasicElement<T> {
-	fn element(&self) -> &web_sys::Element { &self.element.as_ref() }
-}
 
 #[extend::ext(name = RawSetClass)]
 impl web_sys::Element {
@@ -232,66 +190,3 @@ html![
 	select, HtmlSelectElement,
 	option, HtmlOptionElement,
 ];
-
-#[extend::ext]
-impl<T: Hash> T {
-	fn to_class_string(&self, prefix: &str) -> String {
-		let mut hasher = std::collections::hash_map::DefaultHasher::new();
-		self.hash(&mut hasher);
-		let id = hasher.finish();
-		format!("{}{}", prefix, id)
-	}
-}
-
-pub struct SvgElement {
-	element: web_sys::Element,
-	children: Vec<SvgElement>,
-}
-
-impl Element for SvgElement {
-	fn element(&self) -> &web_sys::Element {
-		&self.element
-	}
-}
-
-impl Drop for SvgElement {
-	fn drop(&mut self) {
-		self.element.remove();
-	}
-}
-
-impl Clone for SvgElement {
-	fn clone(&self) -> Self {
-		Self {
-			element: self.element.clone_node_with_deep(true).unwrap().dyn_into().unwrap(),
-			children: self.children.clone(),
-		}
-	}
-}
-
-impl<'a> From<roxmltree::Document<'a>> for SvgElement {
-	fn from(doc: roxmltree::Document) -> Self {
-		doc.root_element().into()
-	}
-}
-
-impl<'a, 'b> From<roxmltree::Node<'a, 'b>> for SvgElement {
-	fn from(node: roxmltree::Node) -> Self {
-		let dom = web_sys::window().unwrap().document().unwrap();
-		let element = dom.create_element_ns(Some("http://www.w3.org/2000/svg"), node.tag_name().name()).unwrap();
-		for attribute in node.attributes() {
-			element.set_attribute(attribute.name(), attribute.value()).unwrap();
-		}
-		let children = node.children().filter_map(|child| -> Option<SvgElement> {
-			match child.node_type() {
-				roxmltree::NodeType::Element => Some(child.into()),
-				_ => None,
-			}
-		}).collect::<Vec<_>>();
-		let me = Self { children, element };
-		for child in me.children.iter() {
-			me.append(child);
-		}
-		me
-	}
-}
