@@ -17,6 +17,9 @@ intern_strings!{
 	placeholder, "placeholder";
 	src, "src";
 	href, "href";
+	disabled, "disabled";
+	selected, "selected";
+	hidden, "hidden";
 
 	// events
 	click, "click";
