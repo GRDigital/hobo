@@ -179,7 +179,7 @@ fn flexbox_macro_test() {
 			crate::Property::Display(crate::Display::Flex),
 			crate::Property::MinWidth(crate::DimensionExtremity::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(100.) }))),
 			crate::Property::MaxWidth(crate::DimensionExtremity::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(200.) }))),
-			crate::Property::MaxHeight(crate::Dimension::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(200.) }))),
+			crate::Property::MaxHeight(crate::DimensionExtremity::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(200.) }))),
 			crate::Property::MarginTop(crate::Margin::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(100.) }))),
 			crate::Property::PaddingTop(crate::Padding::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(50.) }))),
 			crate::Property::MarginLeft(crate::Margin::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(15.) }))),

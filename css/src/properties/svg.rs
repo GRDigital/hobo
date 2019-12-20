@@ -4,5 +4,5 @@ css_macros::easy_color!{stroke}
 
 #[test]
 fn svg_test() {
-	assert_eq!(vector_effect!(non-scaling-stroke), Property::VectorEffect::NonScalingStroke);
+	assert_eq!(vector_effect!(non-scaling-stroke), crate::Property::VectorEffect(crate::VectorEffect::NonScalingStroke));
 }
