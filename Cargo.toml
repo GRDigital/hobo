@@ -6,11 +6,10 @@ edition = "2018"
 [dependencies]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize", "nightly", "strict-macro", "enable-interning"] }
 ordered-float = { version = "1", default-features = false }
-smart-default = "0.5"
+smart-default = "0.6"
 paste = "0.1"
-strum = "0.16"
-strum_macros = "0.16"
-extend = "0.0.2"
+strum = { version = "0.17", features = ["derive"] }
+extend = "0.1"
 hobo_derive = { path = "hobo_derive" }
 css = { path = "css", package = "hobo-css" }
 roxmltree = "0.7"

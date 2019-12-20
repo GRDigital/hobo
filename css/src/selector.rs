@@ -1,6 +1,4 @@
-use strum_macros::AsRefStr;
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum_macros::Display)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]
 #[allow(non_camel_case_types)]
 pub enum PseudoElement {
 	#[strum(to_string = "::after")] after,
@@ -52,7 +50,7 @@ impl ToString for PseudoClass {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, AsRefStr, strum_macros::Display)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::AsRefStr, strum::Display)]
 #[allow(non_camel_case_types)]
 pub enum Element {
 	div, span, input, a, img, textarea,

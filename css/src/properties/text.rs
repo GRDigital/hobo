@@ -32,7 +32,7 @@ css_macros::easy_enum!{text-decoration-line none underline overline line-through
 css_macros::easy_color!{color}
 css_macros::easy_color!{text-decoration-color}
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum_macros::Display)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]
 pub enum FontWeight {
 	#[strum(to_string = "font-weight:normal;")] Normal,
 	#[strum(to_string = "font-weight:bold;")] Bold,
