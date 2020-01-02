@@ -12,7 +12,7 @@ strum = { version = "0.17", features = ["derive"] }
 extend = "0.1"
 hobo_derive = { path = "hobo_derive" }
 css = { path = "css", package = "hobo-css" }
-roxmltree = "0.7"
+roxmltree = "0.8"
 
 [dependencies.web-sys]
 version = "0.3"
