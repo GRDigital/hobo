@@ -5,6 +5,7 @@ pub mod web_str;
 mod element;
 mod basic_element;
 mod svg_element;
+mod enclose;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast as _;
