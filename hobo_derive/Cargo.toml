@@ -8,7 +8,6 @@ proc-macro = true
 
 [dependencies]
 lazy_static = "1"
-matches = "0.1"
 syn = "1"
 proc-macro2 = "1"
 proc-quote = "0.3"
