@@ -1,35 +1,32 @@
 pub mod prelude;
-#[macro_use] pub mod properties;
-#[macro_use] pub mod units;
-#[macro_use] pub mod selector;
+#[macro_use]
+pub mod properties;
+#[macro_use]
+pub mod units;
+#[macro_use]
+pub mod selector;
 
+pub use paste;
 pub use properties::*;
 use std::string::ToString;
 pub use units::Unit;
-pub use paste;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Rule(pub selector::Selector, pub Vec<Property>);
 
 impl ToString for Rule {
-	fn to_string(&self) -> String {
-		format!("{}{{{}}}", self.0.to_string(), self.1.iter().map(ToString::to_string).collect::<String>())
-	}
+	fn to_string(&self) -> String { format!("{}{{{}}}", self.0.to_string(), self.1.iter().map(ToString::to_string).collect::<String>()) }
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Style(pub Vec<Rule>);
 
 impl ToString for Style {
-	fn to_string(&self) -> String {
-		self.0.iter().map(ToString::to_string).collect::<String>()
-	}
+	fn to_string(&self) -> String { self.0.iter().map(ToString::to_string).collect::<String>() }
 }
 
 impl Style {
-	pub fn append(&mut self, other: &mut Style) {
-		self.0.append(&mut other.0);
-	}
+	pub fn append(&mut self, other: &mut Style) { self.0.append(&mut other.0); }
 }
 
 #[doc(hidden)]
@@ -42,21 +39,15 @@ impl AppendProperty for () {
 }
 
 impl AppendProperty for Vec<Property> {
-	fn append_property(mut self, decls: &mut Vec<Property>) {
-		decls.append(&mut self);
-	}
+	fn append_property(mut self, decls: &mut Vec<Property>) { decls.append(&mut self); }
 }
 
 impl AppendProperty for Property {
-	fn append_property(self, decls: &mut Vec<Property>) {
-		decls.push(self);
-	}
+	fn append_property(self, decls: &mut Vec<Property>) { decls.push(self); }
 }
 
 impl<F: FnOnce(&mut Vec<Property>)> AppendProperty for F {
-	fn append_property(self, decls: &mut Vec<Property>) {
-		self(decls);
-	}
+	fn append_property(self, decls: &mut Vec<Property>) { self(decls); }
 }
 
 #[macro_export]
@@ -76,7 +67,7 @@ macro_rules! class {
 				$crate::declarations!($($rules)+),
 			),
 		])
-	}
+	};
 }
 
 #[macro_export]
@@ -176,7 +167,7 @@ macro_rules! style {
 			new_rule = (),
 			rest = ($($tt)+),
 		}
-	}
+	};
 }
 
 #[test]
@@ -197,8 +188,10 @@ fn macros() {
 				display!(block),
 				margin_left!(10 px),
 			}
-		}.to_string(),
-		"div#id:first-child>span div::after{margin-left:10px;display:block;}div.fsdg:hover>span div::after{display:block;margin-left:10px;}",
+		}
+		.to_string(),
+		"div#id:first-child>span div::after{margin-left:10px;display:block;}div.fsdg:hover>span \
+		 div::after{display:block;margin-left:10px;}",
 	);
 	assert_eq!(
 		style! {
@@ -206,7 +199,8 @@ fn macros() {
 				margin_left!(10 px),
 				display!(block),
 			}
-		}.to_string(),
+		}
+		.to_string(),
 		"div#id:first-child>span div::after{margin-left:10px;display:block;}",
 	);
 	assert_eq!(
@@ -220,8 +214,10 @@ fn macros() {
 				display!(block),
 				margin_left!(10 px),
 			}
-		}.to_string(),
-		"div.&#id:first-child>span div::after{margin-left:10px;display:block;}.&.fsdg:hover>span div::after{display:block;margin-left:10px;}",
+		}
+		.to_string(),
+		"div.&#id:first-child>span div::after{margin-left:10px;display:block;}.&.fsdg:hover>span \
+		 div::after{display:block;margin-left:10px;}",
 	);
 
 	assert_eq!(
@@ -240,8 +236,10 @@ fn macros() {
 				display!(flex),
 				margin_right!(10 px),
 			}
-		}.to_string(),
-		"div.&#id:first-child>span div::after{margin-left:10px;display:block;}.&.fsdg:hover>span div::after{display:block;margin-left:10px;}.&.asdf:hover>span div::after{display:flex;margin-right:10px;}",
+		}
+		.to_string(),
+		"div.&#id:first-child>span div::after{margin-left:10px;display:block;}.&.fsdg:hover>span \
+		 div::after{display:block;margin-left:10px;}.&.asdf:hover>span div::after{display:flex;margin-right:10px;}",
 	);
 
 	assert_eq!(selector!(div).to_string(), "div");
@@ -259,7 +257,8 @@ fn macros() {
 				display!(block),
 				margin_left!(10 px),
 			}
-		}.to_string(),
+		}
+		.to_string(),
 		"div.fsdg:hover>span div::after{display:block;margin-left:10px;}",
 	);
 }

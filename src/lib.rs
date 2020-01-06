@@ -1,24 +1,25 @@
 #![feature(proc_macro_hygiene)]
 
-pub mod prelude;
-pub mod web_str;
-mod element;
 mod basic_element;
-mod svg_element;
+mod element;
 mod enclose;
+pub mod prelude;
+mod svg_element;
+pub mod web_str;
 
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast as _;
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::hash::{Hash, Hasher};
-pub use hobo_derive::*;
-pub use web_sys;
-pub use paste;
+pub use basic_element::BasicElement;
 pub use css;
 pub use element::Element;
-pub use basic_element::BasicElement;
+pub use hobo_derive::*;
+pub use paste;
+use std::{
+	cell::RefCell,
+	collections::HashMap,
+	hash::{Hash, Hasher},
+};
 pub use svg_element::SvgElement;
+use wasm_bindgen::{prelude::*, JsCast as _};
+pub use web_sys;
 
 thread_local! {
 	static CONTEXT: Context = Default::default();
@@ -32,7 +33,9 @@ struct StyleStorage {
 // TODO: right now if the same style is reused in multiple windows - won't work, need to track style insertion per window
 impl StyleStorage {
 	fn fetch(&self, element: &web_sys::Element, style: &css::Style) -> String {
-		if let Some(id) = self.map.borrow().get(style) { return format!("s{}", id) }
+		if let Some(id) = self.map.borrow().get(style) {
+			return format!("s{}", id);
+		}
 		let mut hasher = std::collections::hash_map::DefaultHasher::new();
 		style.hash(&mut hasher);
 		let id = hasher.finish();
@@ -48,7 +51,9 @@ impl StyleStorage {
 		}
 		let dom = element.owner_document().unwrap();
 		let head = dom.head().unwrap();
-		let style_element = if let Some(x) = head.get_elements_by_tag_name("style").get_with_index(0) { x } else {
+		let style_element = if let Some(x) = head.get_elements_by_tag_name("style").get_with_index(0) {
+			x
+		} else {
 			let element = dom.create_element(web_str::style()).unwrap();
 			head.append_child(&element).unwrap();
 			element
@@ -118,7 +123,7 @@ macro_rules! generate_events {
 pub struct EventHandler(Box<dyn std::any::Any>);
 pub type EventHandlers = RefCell<Vec<EventHandler>>;
 
-generate_events!{
+generate_events! {
 	web_sys::MouseEvent,    click,       OnClick,       on_click;
 	web_sys::MouseEvent,    contextmenu, OnContextMenu, on_context_menu;
 	web_sys::MouseEvent,    dblclick,    OnDblClick,    on_dbl_click;
@@ -133,7 +138,6 @@ generate_events!{
 	web_sys::KeyboardEvent, keyup,       OnKeyUp,       on_key_up;
 	web_sys::Event,         change,      OnChange,      on_change;
 }
-
 
 #[extend::ext(name = RawSetClass)]
 impl web_sys::Element {
@@ -177,6 +181,7 @@ macro_rules! html {
 	};
 }
 
+#[rustfmt::skip]
 html![
 	div, HtmlDivElement,
 	span, HtmlSpanElement,

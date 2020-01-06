@@ -1,3 +1,4 @@
+#[rustfmt::skip]
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]
 #[allow(non_camel_case_types)]
 pub enum PseudoElement {
@@ -28,6 +29,7 @@ pub enum PseudoClass {
 	// etc
 }
 
+#[rustfmt::skip]
 impl ToString for PseudoClass {
 	fn to_string(&self) -> String {
 		match self {
@@ -50,6 +52,7 @@ impl ToString for PseudoClass {
 	}
 }
 
+#[rustfmt::skip]
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::AsRefStr, strum::Display)]
 #[allow(non_camel_case_types)]
 pub enum Element {
@@ -74,6 +77,7 @@ pub enum SelectorComponent {
 	Any,
 }
 
+#[rustfmt::skip]
 impl ToString for SelectorComponent {
 	fn to_string(&self) -> String {
 		match self {
@@ -100,6 +104,7 @@ pub struct PseudoElementSelector(Vec<SelectorComponent>);
 #[derive(Debug, Default, PartialEq, Eq, Hash, Clone)]
 pub struct CombiningSelector(Vec<SelectorComponent>);
 
+#[rustfmt::skip]
 impl Selector {
 	pub fn build()                                    -> CombiningSelector     { CombiningSelector::default() }
 	pub fn class(mut self, x: String)                 -> Self                  { self.0.push(SelectorComponent::Class(x)); self }
@@ -112,6 +117,7 @@ impl Selector {
 	pub fn and(mut self)                              -> CombiningSelector     { self.0.push(SelectorComponent::And); CombiningSelector(self.0) }
 }
 
+#[rustfmt::skip]
 impl CombiningSelector {
 	pub fn element(mut self, x: Element)              -> Selector              { self.0.push(SelectorComponent::Element(x)); Selector(self.0) }
 	pub fn any(mut self)                              -> Selector              { self.0.push(SelectorComponent::Any); Selector(self.0) }
@@ -122,6 +128,7 @@ impl CombiningSelector {
 	pub fn pseudo_element(mut self, x: PseudoElement) -> Selector              { self.0.push(SelectorComponent::PseudoElement(x)); Selector(self.0) }
 }
 
+#[rustfmt::skip]
 impl PseudoElementSelector {
 	pub fn child(mut self)                            -> CombiningSelector     { self.0.push(SelectorComponent::Child); CombiningSelector(self.0) }
 	pub fn descendant(mut self)                       -> CombiningSelector     { self.0.push(SelectorComponent::Descendant); CombiningSelector(self.0) }
@@ -129,21 +136,15 @@ impl PseudoElementSelector {
 }
 
 impl From<PseudoElementSelector> for Selector {
-	fn from(x: PseudoElementSelector) -> Self {
-		Self(x.0)
-	}
+	fn from(x: PseudoElementSelector) -> Self { Self(x.0) }
 }
 
 impl ToString for PseudoElementSelector {
-	fn to_string(&self) -> String {
-		self.0.iter().map(ToString::to_string).collect::<String>()
-	}
+	fn to_string(&self) -> String { self.0.iter().map(ToString::to_string).collect::<String>() }
 }
 
 impl ToString for Selector {
-	fn to_string(&self) -> String {
-		self.0.iter().map(ToString::to_string).collect::<String>()
-	}
+	fn to_string(&self) -> String { self.0.iter().map(ToString::to_string).collect::<String>() }
 }
 
 /// ```edition2018,compile_fail
@@ -152,6 +153,7 @@ impl ToString for Selector {
 /// ```edition2018,compile_fail
 /// selector!(div div);
 /// ```
+#[rustfmt::skip]
 #[macro_export]
 macro_rules! selector {
 	// finish

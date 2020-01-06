@@ -1,8 +1,8 @@
-css_macros::easy_enum!{border-collapse separate collapse}
-css_macros::easy_enum!{box-decoration-break slice clone unset}
-css_macros::easy_enum!{outline-width medium thin thick @}
-css_macros::easy_enum!{outline-style none hidden dotted dashed solid double groove ridge inset outset}
-css_macros::easy_enum!{outline-offset @}
+css_macros::easy_enum! {border-collapse separate collapse}
+css_macros::easy_enum! {box-decoration-break slice clone unset}
+css_macros::easy_enum! {outline-width medium thin thick @}
+css_macros::easy_enum! {outline-style none hidden dotted dashed solid double groove ridge inset outset}
+css_macros::easy_enum! {outline-offset @}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum OutlineColor {
@@ -12,6 +12,7 @@ pub enum OutlineColor {
 	Inherit,
 }
 
+#[rustfmt::skip]
 impl ToString for OutlineColor {
 	fn to_string(&self) -> String {
 		match self {
@@ -23,6 +24,7 @@ impl ToString for OutlineColor {
 	}
 }
 
+#[rustfmt::skip]
 #[macro_export]
 macro_rules! outline_color {
 	(invert)                  => {$crate::Property::OutlineColor($crate::OutlineColor::Invert)};
@@ -41,6 +43,7 @@ pub enum BorderColor {
 	Inherit,
 }
 
+#[rustfmt::skip]
 impl ToString for BorderColor {
 	fn to_string(&self) -> String {
 		match self {
@@ -68,6 +71,7 @@ pub enum BorderStyle {
 	Inherit,
 }
 
+#[rustfmt::skip]
 impl ToString for BorderStyle {
 	fn to_string(&self) -> String {
 		match self {
@@ -98,6 +102,7 @@ pub enum BorderWidth {
 	Inherit,
 }
 
+#[rustfmt::skip]
 impl ToString for BorderWidth {
 	fn to_string(&self) -> String {
 		match self {
@@ -120,6 +125,7 @@ pub enum BorderRadius {
 	Inherit,
 }
 
+#[rustfmt::skip]
 impl ToString for BorderRadius {
 	fn to_string(&self) -> String {
 		match self {
@@ -131,6 +137,7 @@ impl ToString for BorderRadius {
 	}
 }
 
+#[rustfmt::skip]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __border_width {
@@ -148,6 +155,7 @@ macro_rules! __border_width {
 #[macro_export] macro_rules! border_top_width {($($tt:tt)+)    => {$crate::__border_width!(Top, $($tt)+)}}
 #[macro_export] macro_rules! border_bottom_width {($($tt:tt)+) => {$crate::__border_width!(Bottom, $($tt)+)}}
 
+#[rustfmt::skip]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __border_style {
@@ -170,6 +178,7 @@ macro_rules! __border_style {
 #[macro_export] macro_rules! border_top_style {($($tt:tt)+)    => {$crate::__border_style!(Top, $($tt)+)}}
 #[macro_export] macro_rules! border_bottom_style {($($tt:tt)+) => {$crate::__border_style!(Bottom, $($tt)+)}}
 
+#[rustfmt::skip]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __border_color {
@@ -186,6 +195,7 @@ macro_rules! __border_color {
 #[macro_export] macro_rules! border_top_color {($($tt:tt)+)    => {$crate::__border_color!(Top, $($tt)+)}}
 #[macro_export] macro_rules! border_bottom_color {($($tt:tt)+) => {$crate::__border_color!(Bottom, $($tt)+)}}
 
+#[rustfmt::skip]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __border_radius {

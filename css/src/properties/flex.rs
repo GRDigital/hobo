@@ -1,9 +1,9 @@
-css_macros::easy_enum!{flex-wrap nowrap wrap wrap-reverse}
-css_macros::easy_enum!{flex-direction row row-reverse column column-reverse}
-css_macros::easy_enum!{justify-content flex-start flex-end center space-between space-around}
-css_macros::easy_enum!{align-items stretch center flex-start flex-end baseline}
-css_macros::easy_enum!{align-content stretch center flex-start flex-end space-between space-around}
-css_macros::easy_enum!{align-self auto stretch center flex-start flex-end baseline}
+css_macros::easy_enum! {flex-wrap nowrap wrap wrap-reverse}
+css_macros::easy_enum! {flex-direction row row-reverse column column-reverse}
+css_macros::easy_enum! {justify-content flex-start flex-end center space-between space-around}
+css_macros::easy_enum! {align-items stretch center flex-start flex-end baseline}
+css_macros::easy_enum! {align-content stretch center flex-start flex-end space-between space-around}
+css_macros::easy_enum! {align-self auto stretch center flex-start flex-end baseline}
 
 #[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, Copy)]
 pub enum FlexBasis {
@@ -13,6 +13,7 @@ pub enum FlexBasis {
 	Inherit,
 }
 
+#[rustfmt::skip]
 impl ToString for FlexBasis {
 	fn to_string(&self) -> String {
 		match self {
@@ -23,6 +24,7 @@ impl ToString for FlexBasis {
 	}
 }
 
+#[rustfmt::skip]
 #[macro_export]
 macro_rules! flex_basis {
 	($some:expr) => { $crate::Property::FlexBasis($crate::FlexBasis::Some($some)) };
@@ -38,6 +40,7 @@ pub enum FlexGrow {
 	Inherit,
 }
 
+#[rustfmt::skip]
 impl ToString for FlexGrow {
 	fn to_string(&self) -> String {
 		match self {
@@ -48,6 +51,7 @@ impl ToString for FlexGrow {
 	}
 }
 
+#[rustfmt::skip]
 #[macro_export]
 macro_rules! flex_grow {
 	($some:expr) => { $crate::Property::FlexGrow($crate::FlexGrow::Some($some)) };
@@ -64,6 +68,7 @@ pub enum FlexShrink {
 	Inherit,
 }
 
+#[rustfmt::skip]
 impl ToString for FlexShrink {
 	fn to_string(&self) -> String {
 		match self {
@@ -75,6 +80,7 @@ impl ToString for FlexShrink {
 	}
 }
 
+#[rustfmt::skip]
 #[macro_export]
 macro_rules! flex_shrink {
 	($some:expr) => { $crate::Property::FlexShrink($crate::FlexShrink::Some($some)) };
@@ -90,6 +96,7 @@ pub enum Order {
 	Inherit,
 }
 
+#[rustfmt::skip]
 impl ToString for Order {
 	fn to_string(&self) -> String {
 		match self {
@@ -100,6 +107,7 @@ impl ToString for Order {
 	}
 }
 
+#[rustfmt::skip]
 #[macro_export]
 macro_rules! order {
 	($some:expr) => { $crate::Property::Order($crate::Order::Some($some)) };

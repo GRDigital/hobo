@@ -9,16 +9,16 @@
 #[macro_use] mod svg;
 
 // use crate::prelude::*;
-use std::string::ToString;
+pub use background::*;
+pub use border::*;
+pub use dimensions::*;
 pub use flex::*;
 pub use margin::*;
 pub use padding::*;
-pub use dimensions::*;
 pub use position::*;
-pub use text::*;
-pub use border::*;
-pub use background::*;
+use std::string::ToString;
 pub use svg::*;
+pub use text::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Color {
@@ -27,6 +27,7 @@ pub enum Color {
 	Inherit,
 }
 
+#[rustfmt::skip]
 impl ToString for Color {
 	fn to_string(&self) -> String {
 		match self {
@@ -157,6 +158,7 @@ pub enum Property {
 	// etc
 }
 
+#[rustfmt::skip]
 impl ToString for Property {
 	fn to_string(&self) -> String {
 		match self {
@@ -376,28 +378,28 @@ from_properties! {
 	TextDecorationLine,
 }
 
-css_macros::easy_enum!{box-sizing content-box border-box}
-css_macros::easy_enum!{visibility visible hidden collapse}
-css_macros::easy_enum!{display block none inline inline-block flex inline-flex}
-css_macros::easy_enum!{user-select auto none text all}
-css_macros::easy_enum!{scroll-behavior auto smooth}
-css_macros::easy_enum!{pointer-events auto none}
-css_macros::easy_enum!{resize none both horizontal vertical}
-css_macros::easy_enum!{object-fit fill contain cover scale-down none}
-css_macros::easy_enum!{transform-style flat preserve-3d}
-css_macros::easy_enum!{background-blend-mode normal multiply screen overlay darken lighten color-dodge saturation color luminosity}
-css_macros::easy_enum!{mix-blend-mode normal multiply screen overlay darken lighten color-dodge color-burn difference exclusion hue saturation color luminosity}
-css_macros::easy_enum!{isolation auto isolate}
-css_macros::easy_enum!{caption-side top bottom}
-css_macros::easy_enum!{empty-cells show hide}
-css_macros::easy_enum!{table-layout auto fixed}
-css_macros::easy_enum!{all unset}
-css_macros::easy_enum!{cursor auto alias all-scroll cell context-menu col-resize copy crosshair default e-resize ew-resize grab grabbing help move n-resize ne-resize nesw-resize ns-resize nw-resize nwse-resize no-drop none not-allowed pointer progress row-resize s-resize se-resize sw-resize text vertical-text w-resize wait zoom-in zoom-out}
-css_macros::easy_enum!{content normal none counter open-quote close-quote no-open-quote no-close-quote $}
-css_macros::easy_enum!{opacity #}
-css_macros::easy_enum!{perspective none @}
-css_macros::easy_enum!{backface-visibility visible hidden}
+css_macros::easy_enum! {box-sizing content-box border-box}
+css_macros::easy_enum! {visibility visible hidden collapse}
+css_macros::easy_enum! {display block none inline inline-block flex inline-flex}
+css_macros::easy_enum! {user-select auto none text all}
+css_macros::easy_enum! {scroll-behavior auto smooth}
+css_macros::easy_enum! {pointer-events auto none}
+css_macros::easy_enum! {resize none both horizontal vertical}
+css_macros::easy_enum! {object-fit fill contain cover scale-down none}
+css_macros::easy_enum! {transform-style flat preserve-3d}
+css_macros::easy_enum! {background-blend-mode normal multiply screen overlay darken lighten color-dodge saturation color luminosity}
+css_macros::easy_enum! {mix-blend-mode normal multiply screen overlay darken lighten color-dodge color-burn difference exclusion hue saturation color luminosity}
+css_macros::easy_enum! {isolation auto isolate}
+css_macros::easy_enum! {caption-side top bottom}
+css_macros::easy_enum! {empty-cells show hide}
+css_macros::easy_enum! {table-layout auto fixed}
+css_macros::easy_enum! {all unset}
+css_macros::easy_enum! {cursor auto alias all-scroll cell context-menu col-resize copy crosshair default e-resize ew-resize grab grabbing help move n-resize ne-resize nesw-resize ns-resize nw-resize nwse-resize no-drop none not-allowed pointer progress row-resize s-resize se-resize sw-resize text vertical-text w-resize wait zoom-in zoom-out}
+css_macros::easy_enum! {content normal none counter open-quote close-quote no-open-quote no-close-quote $}
+css_macros::easy_enum! {opacity #}
+css_macros::easy_enum! {perspective none @}
+css_macros::easy_enum! {backface-visibility visible hidden}
 
 // TODO: abstract overflow
-css_macros::easy_enum!{overflow-x visible hidden scroll auto}
-css_macros::easy_enum!{overflow-y visible hidden scroll auto}
+css_macros::easy_enum! {overflow-x visible hidden scroll auto}
+css_macros::easy_enum! {overflow-y visible hidden scroll auto}

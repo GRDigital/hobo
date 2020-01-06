@@ -1,4 +1,4 @@
-use super::{Element, EventHandlers, EventHandler, EventTarget};
+use super::{Element, EventHandler, EventHandlers, EventTarget};
 
 pub struct BasicElement<T: AsRef<web_sys::Element>> {
 	pub element: T,
@@ -7,15 +7,11 @@ pub struct BasicElement<T: AsRef<web_sys::Element>> {
 }
 
 impl<T: AsRef<web_sys::Element>> AsRef<web_sys::Element> for BasicElement<T> {
-	fn as_ref(&self) -> &web_sys::Element {
-		self.element.as_ref()
-	}
+	fn as_ref(&self) -> &web_sys::Element { self.element.as_ref() }
 }
 
 impl<T: AsRef<web_sys::Element>> EventTarget for BasicElement<T> {
-	fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>> {
-		self.event_handlers.borrow_mut()
-	}
+	fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>> { self.event_handlers.borrow_mut() }
 }
 
 impl<T: AsRef<web_sys::Element>> BasicElement<T> {
@@ -26,9 +22,7 @@ impl<T: AsRef<web_sys::Element>> BasicElement<T> {
 }
 
 impl<T: AsRef<web_sys::Element>> Drop for BasicElement<T> {
-	fn drop(&mut self) {
-		self.element.as_ref().remove();
-	}
+	fn drop(&mut self) { self.element.as_ref().remove(); }
 }
 
 impl<T: AsRef<web_sys::Element>> Element for BasicElement<T> {

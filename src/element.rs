@@ -3,13 +3,17 @@ use std::hash::{Hash, Hasher};
 
 pub trait Element: Drop {
 	fn element(&self) -> &web_sys::Element;
-	fn class() -> String where Self: Sized + 'static {
+	fn class() -> String
+	where
+		Self: Sized + 'static,
+	{
 		std::any::TypeId::of::<Self>().to_class_string("t")
 	}
-	fn append(&self, child: &dyn Element) {
-		self.element().append_child(child.element()).expect("Can't append child");
-	}
-	fn set_class(&self, style: &css::Style) -> &Self where Self: Sized + 'static {
+	fn append(&self, child: &dyn Element) { self.element().append_child(child.element()).expect("Can't append child"); }
+	fn set_class(&self, style: &css::Style) -> &Self
+	where
+		Self: Sized + 'static,
+	{
 		super::CONTEXT.with(move |ctx| {
 			let element = self.element();
 			let element_class = ctx.style_storage.fetch(element, style);
@@ -22,9 +26,7 @@ pub trait Element: Drop {
 }
 
 impl AsRef<web_sys::Element> for dyn Element {
-	fn as_ref(&self) -> &web_sys::Element {
-		self.element()
-	}
+	fn as_ref(&self) -> &web_sys::Element { self.element() }
 }
 
 #[extend::ext]

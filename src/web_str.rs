@@ -2,10 +2,10 @@ macro_rules! intern_strings {
 	($($name:ident, $s:expr);+$(;)*) => {$(
 		#[inline(always)]
 		pub fn $name() -> &'static str { wasm_bindgen::intern($s) }
-	)+}
+	)+};
 }
 
-intern_strings!{
+intern_strings! {
 	class, "class";
 	r#type, "type";
 	range, "range";

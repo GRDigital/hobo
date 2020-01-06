@@ -1,4 +1,4 @@
-css_macros::easy_enum!{position static absolute fixed relative sticky}
+css_macros::easy_enum! {position static absolute fixed relative sticky}
 
 #[macro_export] macro_rules! top { ($($tt:tt)+) => {$crate::__dimension!(Top, $($tt)+)} }
 #[macro_export] macro_rules! right { ($($tt:tt)+) => {$crate::__dimension!(Right, $($tt)+)} }
@@ -14,6 +14,7 @@ pub enum ZIndex {
 	Some(i32),
 }
 
+#[rustfmt::skip]
 impl ToString for ZIndex {
 	fn to_string(&self) -> String {
 		match self {
@@ -25,6 +26,7 @@ impl ToString for ZIndex {
 	}
 }
 
+#[rustfmt::skip]
 #[macro_export]
 macro_rules! z_index {
 	(auto)       => { $crate::Property::ZIndex($crate::ZIndex::Auto) };

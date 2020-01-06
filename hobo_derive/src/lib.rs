@@ -1,6 +1,6 @@
 extern crate proc_macro;
 use proc_quote::quote;
-use syn::{DeriveInput};
+use syn::DeriveInput;
 
 #[proc_macro_derive(Element)]
 pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

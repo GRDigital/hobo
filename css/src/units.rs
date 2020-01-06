@@ -13,6 +13,7 @@ pub enum Unit {
 	// TODO: calc?
 }
 
+#[rustfmt::skip]
 impl ToString for Unit {
 	fn to_string(&self) -> String {
 		match self {
@@ -39,7 +40,7 @@ macro_rules! generate_units {
 	};
 }
 
-generate_units!{
+generate_units! {
 	px, Px;
 	em, Em;
 	rem, Rem;
@@ -50,6 +51,7 @@ generate_units!{
 	pct, Percent;
 }
 
+#[rustfmt::skip]
 #[macro_export]
 macro_rules! unit {
 	(expr = ($($e:tt)+))   => { $crate::Unit::Px(unsafe { $crate::units::F32::unchecked_new(($($e)+) as _) }) };

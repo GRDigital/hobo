@@ -10,6 +10,7 @@ pub enum Margin {
 	Some(Unit),
 }
 
+#[rustfmt::skip]
 impl ToString for Margin {
 	fn to_string(&self) -> String {
 		match self {
@@ -22,6 +23,7 @@ impl ToString for Margin {
 	}
 }
 
+#[rustfmt::skip]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __margin {
@@ -164,15 +166,13 @@ macro_rules! flexbox {
 #[test]
 fn flexbox_macro_test() {
 	assert_eq!(
-		crate::declarations!(
-			crate::flexbox!(
-				width (100 px) .. (200 px),
-				height .. (200 px),
-				top (100 px) | (50 px),
-				horizontal (15 px) | (0),
-				column,
-			),
-		),
+		crate::declarations!(crate::flexbox!(
+			width (100 px) .. (200 px),
+			height .. (200 px),
+			top (100 px) | (50 px),
+			horizontal (15 px) | (0),
+			column,
+		),),
 		crate::declarations!(
 			crate::Property::BoxSizing(crate::BoxSizing::BorderBox),
 			crate::Property::FlexShrink(crate::FlexShrink::Zero),

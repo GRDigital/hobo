@@ -9,6 +9,7 @@ pub enum Padding {
 	Some(Unit),
 }
 
+#[rustfmt::skip]
 impl ToString for Padding {
 	fn to_string(&self) -> String {
 		match self {
@@ -20,6 +21,7 @@ impl ToString for Padding {
 	}
 }
 
+#[rustfmt::skip]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __padding {

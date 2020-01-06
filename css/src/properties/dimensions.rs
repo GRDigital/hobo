@@ -17,6 +17,7 @@ pub enum DimensionExtremity {
 	Some(Unit),
 }
 
+#[rustfmt::skip]
 impl ToString for Dimension {
 	fn to_string(&self) -> String {
 		match self {
@@ -29,6 +30,7 @@ impl ToString for Dimension {
 	}
 }
 
+#[rustfmt::skip]
 impl ToString for DimensionExtremity {
 	fn to_string(&self) -> String {
 		match self {
@@ -40,6 +42,7 @@ impl ToString for DimensionExtremity {
 	}
 }
 
+#[rustfmt::skip]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __dimension {
@@ -53,6 +56,7 @@ macro_rules! __dimension {
 #[macro_export] macro_rules! width { ($($tt:tt)+) => {$crate::__dimension!(Width, $($tt)+)} }
 #[macro_export] macro_rules! height { ($($tt:tt)+) => {$crate::__dimension!(Height, $($tt)+)} }
 
+#[rustfmt::skip]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __dimension_extremity {
