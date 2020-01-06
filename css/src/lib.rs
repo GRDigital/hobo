@@ -170,95 +170,95 @@ macro_rules! style {
 	};
 }
 
-#[test]
-fn macros() {
-	assert_eq!(format!("#{:x}{:x}{:x}{:x}", 0xf1, 0xf2, 0xf3, 0xff), "#f1f2f3ff");
-	assert_eq!(format!("#{:x}{:x}{:x}{:x}", 0xf1, 0xf2, 0xf3, 0x44), "#f1f2f344");
-	assert_eq!(format!("#{:x}{:x}{:x}{:x}", 255, 128, 255, 255), "#ff80ffff");
-	assert_eq!(format!("#{:x}{:x}{:x}{:x}", 255, 128, 255, 128), "#ff80ff80");
+// #[test]
+// fn macros() {
+//     assert_eq!(format!("#{:x}{:x}{:x}{:x}", 0xf1, 0xf2, 0xf3, 0xff), "#f1f2f3ff");
+//     assert_eq!(format!("#{:x}{:x}{:x}{:x}", 0xf1, 0xf2, 0xf3, 0x44), "#f1f2f344");
+//     assert_eq!(format!("#{:x}{:x}{:x}{:x}", 255, 128, 255, 255), "#ff80ffff");
+//     assert_eq!(format!("#{:x}{:x}{:x}{:x}", 255, 128, 255, 128), "#ff80ff80");
 
-	assert_eq!(
-		style! {
-			div#("id"):first_child > span >> div::after {
-				margin_left!(10 px),
-				display!(block),
-			}
+//     assert_eq!(
+//         style! {
+//             div#("id"):first_child > span >> div::after {
+//                 margin_left!(10 px),
+//                 display!(block),
+//             }
 
-			div.("fsdg"):hover > span >> div::after {
-				display!(block),
-				margin_left!(10 px),
-			}
-		}
-		.to_string(),
-		"div#id:first-child>span div::after{margin-left:10px;display:block;}div.fsdg:hover>span \
-		 div::after{display:block;margin-left:10px;}",
-	);
-	assert_eq!(
-		style! {
-			div#("id"):first_child > span >> div::after {
-				margin_left!(10 px),
-				display!(block),
-			}
-		}
-		.to_string(),
-		"div#id:first-child>span div::after{margin-left:10px;display:block;}",
-	);
-	assert_eq!(
-		style! {
-			div.&#("id"):first_child > span >> div::after {
-				margin_left!(10 px),
-				display!(block),
-			}
+//             div.("fsdg"):hover > span >> div::after {
+//                 display!(block),
+//                 margin_left!(10 px),
+//             }
+//         }
+//         .to_string(),
+//         "div#id:first-child>span div::after{margin-left:10px;display:block;}div.fsdg:hover>span \
+//         div::after{display:block;margin-left:10px;}",
+//     );
+//     assert_eq!(
+//         style! {
+//             div#("id"):first_child > span >> div::after {
+//                 margin_left!(10 px),
+//                 display!(block),
+//             }
+//         }
+//         .to_string(),
+//         "div#id:first-child>span div::after{margin-left:10px;display:block;}",
+//     );
+//     assert_eq!(
+//         style! {
+//             div.&#("id"):first_child > span >> div::after {
+//                 margin_left!(10 px),
+//                 display!(block),
+//             }
 
-			.&.("fsdg"):hover > span >> div::after {
-				display!(block),
-				margin_left!(10 px),
-			}
-		}
-		.to_string(),
-		"div.&#id:first-child>span div::after{margin-left:10px;display:block;}.&.fsdg:hover>span \
-		 div::after{display:block;margin-left:10px;}",
-	);
+//             .&.("fsdg"):hover > span >> div::after {
+//                 display!(block),
+//                 margin_left!(10 px),
+//             }
+//         }
+//         .to_string(),
+//         "div.&#id:first-child>span div::after{margin-left:10px;display:block;}.&.fsdg:hover>span \
+//         div::after{display:block;margin-left:10px;}",
+//     );
 
-	assert_eq!(
-		style! {
-			div.&#("id"):first_child > span >> div::after {
-				margin_left!(10 px),
-				display!(block),
-			}
+//     assert_eq!(
+//         style! {
+//             div.&#("id"):first_child > span >> div::after {
+//                 margin_left!(10 px),
+//                 display!(block),
+//             }
 
-			.&.("fsdg"):hover > span >> div::after {
-				display!(block),
-				margin_left!(10 px),
-			}
+//             .&.("fsdg"):hover > span >> div::after {
+//                 display!(block),
+//                 margin_left!(10 px),
+//             }
 
-			.&.("asdf"):hover > span >> div::after {
-				display!(flex),
-				margin_right!(10 px),
-			}
-		}
-		.to_string(),
-		"div.&#id:first-child>span div::after{margin-left:10px;display:block;}.&.fsdg:hover>span \
-		 div::after{display:block;margin-left:10px;}.&.asdf:hover>span div::after{display:flex;margin-right:10px;}",
-	);
+//             .&.("asdf"):hover > span >> div::after {
+//                 display!(flex),
+//                 margin_right!(10 px),
+//             }
+//         }
+//         .to_string(),
+//         "div.&#id:first-child>span div::after{margin-left:10px;display:block;}.&.fsdg:hover>span \
+//         div::after{display:block;margin-left:10px;}.&.asdf:hover>span div::after{display:flex;margin-right:10px;}",
+//     );
 
-	assert_eq!(selector!(div).to_string(), "div");
-	assert_eq!(selector!(div:nth_child(5)).to_string(), "div:nth-child(5)");
-	assert_eq!(selector!(.("fsdg")).to_string(), ".fsdg");
-	assert_eq!(selector!(#("fsdg")).to_string(), "#fsdg");
-	assert_eq!(selector!(:active).to_string(), ":active");
-	assert_eq!(selector!(::after).to_string(), "::after");
-	assert_eq!(selector!(div.("fsdg"):hover > span >> div::after).to_string(), "div.fsdg:hover>span div::after");
-	assert_eq!(selector!(div#("id"):first_child > span >> div::after).to_string(), "div#id:first-child>span div::after");
+//     assert_eq!(selector!(div).to_string(), "div");
+//     assert_eq!(selector!(div:nth_child(5)).to_string(), "div:nth-child(5)");
+//     assert_eq!(selector!(.("fsdg")).to_string(), ".fsdg");
+//     assert_eq!(selector!(#("fsdg")).to_string(), "#fsdg");
+//     assert_eq!(selector!(:active).to_string(), ":active");
+//     assert_eq!(selector!(::after).to_string(), "::after");
+//     assert_eq!(selector!(div.("fsdg"):hover > span >> div::after).to_string(), "div.fsdg:hover>span div::after");
+//     assert_eq!(selector!(div#("id"):first_child > span >> div::after).to_string(), "div#id:first-child>span div::after");
 
-	assert_eq!(
-		rule! {
-			div.("fsdg"):hover > span >> div::after {
-				display!(block),
-				margin_left!(10 px),
-			}
-		}
-		.to_string(),
-		"div.fsdg:hover>span div::after{display:block;margin-left:10px;}",
-	);
-}
+//     assert_eq!(
+//         rule! {
+//             div.("fsdg"):hover > span >> div::after {
+//                 display!(block),
+//                 margin_left!(10 px),
+//             }
+//         }
+//         .to_string(),
+//         "div.fsdg:hover>span div::after{display:block;margin-left:10px;}",
+//     );
+// }

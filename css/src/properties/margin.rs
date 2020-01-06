@@ -163,33 +163,33 @@ macro_rules! flexbox {
 	};
 }
 
-#[test]
-fn flexbox_macro_test() {
-	assert_eq!(
-		crate::declarations!(crate::flexbox!(
-			width (100 px) .. (200 px),
-			height .. (200 px),
-			top (100 px) | (50 px),
-			horizontal (15 px) | (0),
-			column,
-		),),
-		crate::declarations!(
-			crate::Property::BoxSizing(crate::BoxSizing::BorderBox),
-			crate::Property::FlexShrink(crate::FlexShrink::Zero),
-			crate::Property::Display(crate::Display::Flex),
-			crate::Property::MinWidth(crate::DimensionExtremity::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(100.) }))),
-			crate::Property::MaxWidth(crate::DimensionExtremity::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(200.) }))),
-			crate::Property::MaxHeight(crate::DimensionExtremity::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(200.) }))),
-			crate::Property::MarginTop(crate::Margin::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(100.) }))),
-			crate::Property::PaddingTop(crate::Padding::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(50.) }))),
-			crate::Property::MarginLeft(crate::Margin::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(15.) }))),
-			crate::Property::PaddingLeft(crate::Padding::None),
-			crate::Property::MarginRight(crate::Margin::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(15.) }))),
-			crate::Property::PaddingRight(crate::Padding::None),
-			crate::Property::FlexDirection(crate::FlexDirection::Column),
-		),
-	);
-}
+// #[test]
+// fn flexbox_macro_test() {
+//     assert_eq!(
+//         crate::declarations!(crate::flexbox!(
+//             width (100 px) .. (200 px),
+//             height .. (200 px),
+//             top (100 px) | (50 px),
+//             horizontal (15 px) | (0),
+//             column,
+//         )),
+//         crate::declarations!(
+//             crate::Property::BoxSizing(crate::BoxSizing::BorderBox),
+//             crate::Property::FlexShrink(crate::FlexShrink::Zero),
+//             crate::Property::Display(crate::Display::Flex),
+//             crate::Property::MinWidth(crate::DimensionExtremity::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(100.) }))),
+//             crate::Property::MaxWidth(crate::DimensionExtremity::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(200.) }))),
+//             crate::Property::MaxHeight(crate::DimensionExtremity::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(200.) }))),
+//             crate::Property::MarginTop(crate::Margin::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(100.) }))),
+//             crate::Property::PaddingTop(crate::Padding::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(50.) }))),
+//             crate::Property::MarginLeft(crate::Margin::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(15.) }))),
+//             crate::Property::PaddingLeft(crate::Padding::None),
+//             crate::Property::MarginRight(crate::Margin::Some(crate::units::Unit::Px(unsafe { crate::units::F32::unchecked_new(15.) }))),
+//             crate::Property::PaddingRight(crate::Padding::None),
+//             crate::Property::FlexDirection(crate::FlexDirection::Column),
+//         ),
+//     );
+// }
 
 /*
 should define some kind of a Box struct that impls AppendProperty
