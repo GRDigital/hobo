@@ -20,6 +20,16 @@ intern_strings! {
 	disabled, "disabled";
 	selected, "selected";
 	hidden, "hidden";
+	beforebegin, "beforebegin";
+	afterbegin, "afterbegin";
+	beforeend, "beforeend";
+	afterend, "afterend";
+	checkbox, "checkbox";
+	radio, "radio";
+	accept, "accept";
+	alt, "alt";
+	checked, "checked";
+	step, "step";
 
 	// events
 	click, "click";
