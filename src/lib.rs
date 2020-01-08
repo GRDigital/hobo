@@ -147,6 +147,14 @@ impl web_sys::Element {
 			self.set_attribute(web_str::class(), &element_class).unwrap();
 		})
 	}
+
+	fn add_class(self, style: &css::Style) {
+		CONTEXT.with(move |ctx| {
+			let element_class = ctx.style_storage.fetch(&self, style);
+			let existing_class = self.get_attribute(web_str::class()).unwrap_or_else(String::new);
+			self.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).unwrap();
+		})
+	}
 }
 
 macro_rules! html {
