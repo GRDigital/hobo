@@ -31,6 +31,23 @@ intern_strings! {
 	checked, "checked";
 	step, "step";
 	number, "number";
+	multiple, "multiple";
+	readonly, "readonly";
+	required, "required";
+	reversed, "reversed";
+	rows, "rows";
+	tabindex, "tabindex";
+	target, "target";
+	width, "width";
+	height, "height";
+	wrap, "wrap";
+	autofocus, "autofocus";
+	autoplay, "autoplay";
+	r#async, "async";
+	autocomplete, "autocomplete";
+	download, "download";
+	draggable, "draggable";
+	dropzone, "dropzone";
 
 	// events
 	click, "click";
