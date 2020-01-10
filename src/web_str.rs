@@ -30,6 +30,7 @@ intern_strings! {
 	alt, "alt";
 	checked, "checked";
 	step, "step";
+	number, "number";
 
 	// events
 	click, "click";
