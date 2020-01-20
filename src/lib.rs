@@ -6,6 +6,7 @@ mod enclose;
 pub mod prelude;
 mod svg_element;
 pub mod web_str;
+pub mod components;
 
 pub use basic_element::BasicElement;
 pub use css;
@@ -20,6 +21,7 @@ use std::{
 pub use svg_element::SvgElement;
 use wasm_bindgen::{prelude::*, JsCast as _};
 pub use web_sys;
+pub use components as cmp;
 
 thread_local! {
 	static CONTEXT: Context = Default::default();
