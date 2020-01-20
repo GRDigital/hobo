@@ -43,8 +43,18 @@ macro_rules! __margin {
 // border?
 #[macro_export]
 macro_rules! __flexbox_line {
+	($acc:expr, row $align:ident $(-$align_trail:ident)* $justify:ident $(-$justify_trail:ident)*) => {
+		$acc.push($crate::Property::FlexDirection($crate::FlexDirection::Row));
+		$acc.push($crate::align_items!($align $(-$align_trail)*));
+		$acc.push($crate::justify_content!($justify $(-$justify_trail)*));
+	};
 	($acc:expr, row) => {
 		$acc.push($crate::Property::FlexDirection($crate::FlexDirection::Row));
+	};
+	($acc:expr, column $align:ident $(-$align_trail:ident)* $justify:ident $(-$justify_trail:ident)*) => {
+		$acc.push($crate::Property::FlexDirection($crate::FlexDirection::Column));
+		$acc.push($crate::align_items!($align $(-$align_trail)*));
+		$acc.push($crate::justify_content!($justify $(-$justify_trail)*));
 	};
 	($acc:expr, column) => {
 		$acc.push($crate::Property::FlexDirection($crate::FlexDirection::Column));
