@@ -186,6 +186,12 @@ macro_rules! html {
 						BasicElement { element: create::$name(), children: vec![], event_handlers: EventHandlers::default() }
 					}
 				}
+
+				impl<'a> basic_element::BasicElementBuilder<'a, web_sys::$t> {
+					pub fn build_default(self) -> BasicElement<web_sys::$t> {
+						self.build(create::$name())
+					}
+				}
 			)+
 		}
 	};
