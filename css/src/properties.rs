@@ -9,6 +9,7 @@
 #[macro_use] mod svg;
 #[macro_use] mod animation;
 #[macro_use] mod transform;
+#[macro_use] mod filter;
 
 // use crate::prelude::*;
 pub use background::*;
@@ -23,6 +24,7 @@ pub use svg::*;
 pub use text::*;
 pub use animation::*;
 pub use transform::*;
+pub use filter::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Color {
@@ -168,6 +170,7 @@ pub enum Property {
 	// AnimationDuration(AnimationDuration),
 	// AnimationDelay(AnimationDelay),
 	Transform(Transform),
+	Filter(Filter),
 	// etc
 }
 
@@ -310,6 +313,7 @@ impl ToString for Property {
 			Self::AnimationPlayState(x)      => x.to_string(),
 			Self::AnimationTimingFunction(x) => x.to_string(),
 			Self::Transform(x)               => x.to_string(),
+			Self::Filter(x)                  => x.to_string(),
 		}
 	}
 }
