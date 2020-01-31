@@ -3,6 +3,11 @@ css_macros::easy_enum! {box-decoration-break slice clone unset}
 css_macros::easy_enum! {outline-width medium thin thick @}
 css_macros::easy_enum! {outline-style none hidden dotted dashed solid double groove ridge inset outset}
 css_macros::easy_enum! {outline-offset @}
+css_macros::easy_enum! {border-image-source none $}
+css_macros::easy_enum! {border-image-slice fill $} // TODO:
+css_macros::easy_enum! {border-image-width auto $} // TODO:
+css_macros::easy_enum! {border-image-outset $} // TODO:
+css_macros::easy_enum! {border-image-repeat stretch repeat round space}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum OutlineColor {

@@ -7,6 +7,7 @@ enum Value {
 	Unit,
 	String,
 	Number,
+	Float,
 }
 
 #[proc_macro]
@@ -44,6 +45,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 			"@" => Value::Unit,
 			"$" => Value::String,
 			"#" => Value::Number,
+			"[float]" => Value::Float,
 			x => Value::EnumVariant(x.to_owned()),
 		})
 		.collect::<Vec<_>>();
@@ -68,6 +70,9 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		Value::Number => {
 			quote! {Number(i32),}
 		},
+		Value::Float => {
+			quote! {Number(crate::units::F32),}
+		},
 	});
 
 	let to_string_lines = values.iter().map(|value| match value {
@@ -88,7 +93,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 			let css_format_string = format!("{}:{{}};", property);
 			quote! {Self::String(x) => format!(#css_format_string, x),}
 		},
-		Value::Number => {
+		Value::Number | Value::Float => {
 			let css_format_string = format!("{}:{{}};", property);
 			quote! {Self::Number(x) => format!(#css_format_string, x),}
 		},
@@ -111,6 +116,9 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		},
 		Value::Number => {
 			quote! {($str:expr) => { $crate::Property::#property_camel($crate::#property_camel::Number($str)) };}
+		},
+		Value::Float => {
+			quote! {($str:expr) => { $crate::Property::#property_camel($crate::#property_camel::Number(unsafe { $crate::units::F32::unchecked_new($str as _) })) };}
 		},
 	});
 

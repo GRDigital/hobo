@@ -8,7 +8,9 @@ css_macros::easy_enum! {text-align left right center justify}
 css_macros::easy_enum! {text-align-last left right center justify start end}
 css_macros::easy_enum! {text-justify auto inter-word inter-character none}
 css_macros::easy_enum! {font-stretch normal ultra-condensed extra-condensed condensed semi-condensed semi-expanded expanded extra-expanded ultra-expanded}
-css_macros::easy_enum! {list-style-type disc armenian circle cjk-ideographic decimal decimal-leading-zero georgian hebrew hiragana hiragana-iroha katakana katakana-iroha lower-alpha lower-greek lower-latin lower-roman none square upper-alpha upper-greek upper-latin upper-roman}
+css_macros::easy_enum! {list-style-type disc armenian circle cjk decimal decimal-leading-zero georgian hebrew hiragana hiragana-iroha katakana katakana-iroha lower-alpha lower-greek lower-latin lower-roman none square upper-alpha upper-greek upper-latin upper-roman}
+css_macros::easy_enum! {list-style-position inside outside}
+css_macros::easy_enum! {list-style-image none $}
 css_macros::easy_enum! {page-break-after auto always avoid left right}
 css_macros::easy_enum! {page-break-before auto always avoid left right}
 css_macros::easy_enum! {page-break-inside auto avoid}
@@ -24,7 +26,7 @@ css_macros::easy_enum! {word-spacing normal @}
 css_macros::easy_enum! {text-indent @}
 css_macros::easy_enum! {text-overflow clip ellipsis $}
 css_macros::easy_enum! {vertical-align baseline sub super top text-top middle bottom text-bottom @}
-css_macros::easy_enum! {line-height normal # @}
+css_macros::easy_enum! {line-height normal [float] @}
 css_macros::easy_enum! {letter-spacing normal @}
 css_macros::easy_enum! {tab-size #}
 css_macros::easy_enum! {text-decoration-style solid double dotted dashed wavy}
