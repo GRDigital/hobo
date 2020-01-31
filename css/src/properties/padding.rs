@@ -35,3 +35,11 @@ macro_rules! __padding {
 #[macro_export] macro_rules! padding_right { ($($tt:tt)+) => { $crate::__padding!(Right, $($tt)+)} }
 #[macro_export] macro_rules! padding_top { ($($tt:tt)+) => { $crate::__padding!(Top, $($tt)+)} }
 #[macro_export] macro_rules! padding_bottom { ($($tt:tt)+) => { $crate::__padding!(Bottom, $($tt)+)} }
+#[macro_export] macro_rules! padding { ($($tt:tt)+) => {
+	vec![
+		$crate::__padding!(Left, $($tt)+),
+		$crate::__padding!(Right, $($tt)+),
+		$crate::__padding!(Top, $($tt)+),
+		$crate::__padding!(Bottom, $($tt)+),
+	]
+} }
