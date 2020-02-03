@@ -58,11 +58,11 @@ macro_rules! declarations {
 }
 #[macro_export]
 macro_rules! class {
-	($($rules:tt)+) => {
+	($($rules:tt)*) => {
 		$crate::Style(vec![
 			$crate::Rule(
 				$crate::selector::Selector::build().class_placeholder(),
-				$crate::declarations!($($rules)+),
+				$crate::declarations!($($rules)*),
 			),
 		])
 	};
@@ -71,21 +71,21 @@ macro_rules! class {
 #[macro_export]
 macro_rules! rule {
 	// finished
-	(($($selector:tt)+) { $($rules:tt)+ }) => {
+	(($($selector:tt)+) { $($rules:tt)* }) => {
 		$crate::Rule(
 			$crate::selector!($($selector)+),
-			$crate::declarations!($($rules)+),
+			$crate::declarations!($($rules)*),
 		)
 	};
 
 	// middle
-	(($($head:tt)+) $cur:tt $($tail:tt)+) => {
-		$crate::rule!(($($head)+ $cur) $($tail)+)
+	(($($head:tt)+) $cur:tt $($tail:tt)*) => {
+		$crate::rule!(($($head)+ $cur) $($tail)*)
 	};
 
 	// start
-	($head:tt $($tail:tt)+) => {
-		$crate::rule!(($head) $($tail)+)
+	($head:tt $($tail:tt)*) => {
+		$crate::rule!(($head) $($tail)*)
 	};
 }
 

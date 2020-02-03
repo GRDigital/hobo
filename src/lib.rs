@@ -197,6 +197,39 @@ macro_rules! html {
 	};
 }
 
+macro_rules! svg {
+	($($name:ident, $t:ident),+$(,)*) => {
+		#[allow(non_snake_case)]
+		pub mod create_svg {
+			fn dom() -> web_sys::Document {
+				web_sys::window().unwrap().document().unwrap()
+			}
+
+			$(
+				pub fn $name() -> web_sys::$t { web_sys::$t::from(wasm_bindgen::JsValue::from(dom().create_element_ns(Some("http://www.w3.org/2000/svg"), crate::web_str::$name()).unwrap())) }
+			)+
+		}
+
+		pub mod web_sys_svg_exts {
+			use super::*;
+
+			$(
+				impl From<web_sys::$t> for BasicElement<web_sys::$t> {
+					fn from(element: web_sys::$t) -> Self {
+						Self { element, children: vec![], event_handlers: EventHandlers::default() }
+					}
+				}
+
+				impl Default for BasicElement<web_sys::$t> {
+					fn default() -> Self {
+						BasicElement { element: create_svg::$name(), children: vec![], event_handlers: EventHandlers::default() }
+					}
+				}
+			)+
+		}
+	};
+}
+
 #[rustfmt::skip]
 html![
 	div, HtmlDivElement,
@@ -211,4 +244,12 @@ html![
 	embed, HtmlEmbedElement,
 	select, HtmlSelectElement,
 	option, HtmlOptionElement,
+	nav, HtmlElement,
+];
+
+#[rustfmt::skip]
+svg![
+	svg, SvgsvgElement,
+	filter, SvgFilterElement,
+	feColorMatrix, SvgfeColorMatrixElement,
 ];

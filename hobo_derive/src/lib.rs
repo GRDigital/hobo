@@ -21,6 +21,30 @@ pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 	})
 }
 
+// TODO: maybe only leave this and remove Element at all? and also maybe simplify somehow with set_inner_* accessors?
+#[proc_macro_derive(Component)]
+pub fn derive_new_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	let input = syn::parse_macro_input!(input as DeriveInput);
+	let name = input.ident;
+	let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+
+	proc_macro::TokenStream::from(quote! {
+		impl #impl_generics Drop for #name #ty_generics #where_clause {
+			fn drop(&mut self) {
+				// TODO: Drop bound not necessary?
+			}
+		}
+
+		impl #impl_generics ::hobo::Element for #name #ty_generics #where_clause {
+			fn element(&self) -> &web_sys::Element { &self.element.element }
+		}
+
+		impl #impl_generics ::hobo::EventTarget for #name #ty_generics #where_clause {
+			fn event_handlers(&self) -> ::std::cell::RefMut<Vec<::hobo::EventHandler>> { self.element.event_handlers.borrow_mut() }
+		}
+	})
+}
+
 #[proc_macro_derive(EventTarget)]
 pub fn derive_event_target(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = syn::parse_macro_input!(input as DeriveInput);

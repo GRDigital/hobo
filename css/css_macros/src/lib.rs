@@ -159,9 +159,10 @@ pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		macro_rules! #property_snek {
 			(initial)                 => {$crate::Property::#property_camel($crate::Color::Initial)};
 			(inherit)                 => {$crate::Property::#property_camel($crate::Color::Inherit)};
+			(...$tuple:expr)          => {$crate::Property::#property_camel($crate::Color::Rgba($tuple.0, $tuple.1, $tuple.2, $tuple.3))};
 			($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::#property_camel($crate::Color::Rgba($r, $g, $b, $a))};
 			($r:tt $g:tt $b:tt)       => {$crate::Property::#property_camel($crate::Color::Rgba($r, $g, $b, 255))};
-			($rgb:tt)                 => {$crate::Property::#property_camel($crate::Color::Rgba($rgb, $rgb, $rgb, 255))};
+			($rgb:expr)               => {$crate::Property::#property_camel($crate::Color::Rgba($rgb, $rgb, $rgb, 255))};
 		}
 	);
 

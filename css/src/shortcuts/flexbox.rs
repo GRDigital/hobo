@@ -4,49 +4,53 @@ use crate::prelude::*;
 // border?
 #[macro_export]
 macro_rules! __flexbox_line {
-	($acc:expr, row $align:ident $(-$align_trail:ident)* $justify:ident $(-$justify_trail:ident)*) => {
-		$acc.push($crate::Property::FlexDirection($crate::FlexDirection::Row));
+	($acc:expr, size $($rest:tt)*) => {
+		$crate::__flexbox_line!($acc, width $($rest)*);
+		$crate::__flexbox_line!($acc, height $($rest)*);
+	};
+	($acc:expr, horizontal $($rest:tt)*) => {
+		$crate::__flexbox_line!($acc, left $($rest)*);
+		$crate::__flexbox_line!($acc, right $($rest)*);
+	};
+	($acc:expr, vertical $($rest:tt)*) => {
+		$crate::__flexbox_line!($acc, top $($rest)*);
+		$crate::__flexbox_line!($acc, bottom $($rest)*);
+	};
+	($acc:expr, around $($rest:tt)*) => {
+		$crate::__flexbox_line!($acc, horizontal $($rest)*);
+		$crate::__flexbox_line!($acc, vertical $($rest)*);
+	};
+
+	($acc:expr, wrap) => {$acc.push($crate::flex_wrap!(wrap));};
+	($acc:expr, nowrap) => {$acc.push($crate::flex_wrap!(nowrap));};
+	($acc:expr, wrap-reverse) => {$acc.push($crate::flex_wrap!(wrap-reverse));};
+
+	($acc:expr, $direction:ident $align:ident $(-$align_trail:ident)* $justify:ident $(-$justify_trail:ident)*) => {
+		$acc.push($crate::flex_direction!($direction));
 		$acc.push($crate::align_items!($align $(-$align_trail)*));
 		$acc.push($crate::justify_content!($justify $(-$justify_trail)*));
 	};
-	($acc:expr, row) => {
-		$acc.push($crate::Property::FlexDirection($crate::FlexDirection::Row));
-	};
-	($acc:expr, column $align:ident $(-$align_trail:ident)* $justify:ident $(-$justify_trail:ident)*) => {
-		$acc.push($crate::Property::FlexDirection($crate::FlexDirection::Column));
-		$acc.push($crate::align_items!($align $(-$align_trail)*));
-		$acc.push($crate::justify_content!($justify $(-$justify_trail)*));
-	};
-	($acc:expr, column) => {
-		$acc.push($crate::Property::FlexDirection($crate::FlexDirection::Column));
+	($acc:expr, $direction:ident) => {
+		$acc.push($crate::flex_direction!($direction));
 	};
 
-	($acc:expr, width ($($value:tt)*)) => {
-		$acc.push($crate::width!($($value)*))
+	($acc:expr, $dimension:ident ($($value:tt)*)) => {
+		$acc.push($crate::$dimension!($($value)*))
 	};
-	($acc:expr, width ($($min:tt)*) ..) => {
-		$acc.push($crate::min_width!($($min)*));
+	($acc:expr, $dimension:ident ($($min:tt)*) ..) => {
+		let acc = &mut $acc;
+		paste::item!{$acc.push($crate::[<min_ $dimension>]!($($min)*));};
 	};
-	($acc:expr, width .. ($($max:tt)*)) => {
-		$acc.push($crate::max_width!($($max)*));
+	($acc:expr, $dimension:ident .. ($($max:tt)*)) => {
+		let acc = &mut $acc;
+		paste::item!{$acc.push($crate::[<max_ $dimension>]!($($max)*));};
 	};
-	($acc:expr, width ($($min:tt)*) .. ($($max:tt)*)) => {
-		$acc.push($crate::min_width!($($min)*));
-		$acc.push($crate::max_width!($($max)*));
-	};
-
-	($acc:expr, height ($($value:tt)*)) => {
-		$acc.push($crate::height!($($value)*))
-	};
-	($acc:expr, height ($($min:tt)*) ..) => {
-		$acc.push($crate::min_height!($($min)*));
-	};
-	($acc:expr, height .. ($($max:tt)*)) => {
-		$acc.push($crate::max_height!($($max)*));
-	};
-	($acc:expr, height ($($min:tt)*) .. ($($max:tt)*)) => {
-		$acc.push($crate::min_height!($($min)*));
-		$acc.push($crate::max_height!($($max)*));
+	($acc:expr, $dimension:ident ($($min:tt)*) .. ($($max:tt)*)) => {
+		let acc = &mut $acc;
+		paste::item!{
+			$acc.push($crate::[<min_ $dimension>]!($($min)*));
+			$acc.push($crate::[<max_ $dimension>]!($($max)*));
+		};
 	};
 
 	($acc:expr, top ($($margin:tt)*) | ($($padding:tt)*)) => {
@@ -64,22 +68,6 @@ macro_rules! __flexbox_line {
 	($acc:expr, left ($($margin:tt)*) | ($($padding:tt)*)) => {
 		$acc.push($crate::margin_left!($($margin)*));
 		$acc.push($crate::padding_left!($($padding)*));
-	};
-	($acc:expr, size $($rest:tt)*) => {
-		$crate::__flexbox_line!($acc, width $($rest)*);
-		$crate::__flexbox_line!($acc, height $($rest)*);
-	};
-	($acc:expr, horizontal $($rest:tt)*) => {
-		$crate::__flexbox_line!($acc, left $($rest)*);
-		$crate::__flexbox_line!($acc, right $($rest)*);
-	};
-	($acc:expr, vertical $($rest:tt)*) => {
-		$crate::__flexbox_line!($acc, top $($rest)*);
-		$crate::__flexbox_line!($acc, bottom $($rest)*);
-	};
-	($acc:expr, around $($rest:tt)*) => {
-		$crate::__flexbox_line!($acc, horizontal $($rest)*);
-		$crate::__flexbox_line!($acc, vertical $($rest)*);
 	};
 	($acc:expr, [$($inner:tt)*]) => { $crate::__flexbox_line!($acc, $($inner)*) };
 }

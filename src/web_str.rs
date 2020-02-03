@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 macro_rules! intern_strings {
 	($($name:ident, $s:expr);+$(;)*) => {$(
 		#[inline(always)]
@@ -48,6 +50,7 @@ intern_strings! {
 	download, "download";
 	draggable, "draggable";
 	dropzone, "dropzone";
+	id, "id";
 
 	// events
 	click, "click";
@@ -77,4 +80,8 @@ intern_strings! {
 	embed, "embed";
 	select, "select";
 	option, "option";
+	nav, "nav";
+	filter, "filter";
+	svg, "svg";
+	feColorMatrix, "feColorMatrix";
 }

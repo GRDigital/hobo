@@ -437,7 +437,13 @@ css_macros::easy_enum! {content normal none counter open-quote close-quote no-op
 css_macros::easy_enum! {opacity #}
 css_macros::easy_enum! {perspective none @}
 css_macros::easy_enum! {backface-visibility visible hidden}
-
-// TODO: abstract overflow
 css_macros::easy_enum! {overflow-x visible hidden scroll auto}
 css_macros::easy_enum! {overflow-y visible hidden scroll auto}
+
+#[macro_export]
+macro_rules! overflow {
+	($($tt:tt)+) => {vec![
+		$crate::overflow_x!($($tt)+),
+		$crate::overflow_y!($($tt)+),
+	]}
+}
