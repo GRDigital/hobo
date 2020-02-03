@@ -171,8 +171,6 @@ macro_rules! selector {
 	(@($acc:expr) [$ty:ty])                             => { $acc.class(<$ty>::class().into()) };
 	(@($acc:expr) .&)                                   => { $acc.class_placeholder() };
 	(@($acc:expr) #($id:expr))                          => { $acc.id($id.into()) };
-	(@($acc:expr) :last_child)                          => { $acc.pseudo_class($crate::selector::PseudoClass::last_child) };
-	(@($acc:expr) :focus)                               => { $acc.pseudo_class($crate::selector::PseudoClass::focus) };
 	(@($acc:expr) :nth_child($n:expr))                  => { $acc.pseudo_class($crate::selector::PseudoClass::nth_child($n)) };
 	(@($acc:expr) :nth_of_type($n:expr))                => { $acc.pseudo_class($crate::selector::PseudoClass::nth_of_type($n)) };
 	(@($acc:expr) :not($($selector:tt)+))               => { $acc.pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+))) };
@@ -190,8 +188,6 @@ macro_rules! selector {
 	(@($acc:expr) [$ty:ty] $($rest:tt)+)                => { $crate::selector!(@($acc.class(<$ty>::class().into())) $($rest)+) };
 	(@($acc:expr) .& $($rest:tt)+)                      => { $crate::selector!(@($acc.class_placeholder()) $($rest)+) };
 	(@($acc:expr) #($id:expr) $($rest:tt)+)             => { $crate::selector!(@($acc.id($id.into())) $($rest)+) };
-	(@($acc:expr) :last_child $($rest:tt)+)             => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::last_child)) $($rest)+) };
-	(@($acc:expr) :focus $($rest:tt)+)                  => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::focus)) $($rest)+) };
 	(@($acc:expr) :nth_child($n:expr) $($rest:tt)+)     => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::nth_child($n))) $($rest)+) };
 	(@($acc:expr) :nth_of_type($n:expr) $($rest:tt)+)   => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::nth_of_type($n))) $($rest)+) };
 	(@($acc:expr) :not($($selector:tt)+) $($rest:tt)+)  => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+)))) $($rest)+) };
@@ -214,8 +210,6 @@ macro_rules! selector {
 	([$ty:ty])                                          => { $crate::selector::Selector::build().class(<$ty>::class().into()) };
 	(.&)                                                => { $crate::selector::Selector::build().class_placeholder() };
 	(#($id:expr))                                       => { $crate::selector::Selector::build().id($id.into()) };
-	(:last_child)                                       => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::last_child) };
-	(:focus)                                            => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::focus) };
 	(:nth_child($n:expr))                               => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::nth_child($n)) };
 	(:nth_of_type($n:expr))                             => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::nth_of_type($n)) };
 	(:not($($selector:tt)+))                            => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+))) };
