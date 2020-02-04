@@ -35,10 +35,10 @@ macro_rules! outline_color {
 	(invert)                  => {$crate::Property::OutlineColor($crate::OutlineColor::Invert)};
 	(initial)                 => {$crate::Property::OutlineColor($crate::OutlineColor::Initial)};
 	(inherit)                 => {$crate::Property::OutlineColor($crate::OutlineColor::Inherit)};
-	(...$tuple:expr)          => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba(($tuple.0, $tuple.1, $tuple.2, $tuple.3)))};
-	($rgb:expr)               => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba(($rgb, $rgb, $rgb, 255)))};
-	($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba(($r, $g, $b, $a)))};
-	($r:tt $g:tt $b:tt)       => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba(($r, $g, $b, 255)))};
+	(...$tuple:expr)          => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba($tuple.0, $tuple.1, $tuple.2, $tuple.3))};
+	($rgb:expr)               => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba($rgb, $rgb, $rgb, 255))};
+	($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba($r, $g, $b, $a))};
+	($r:tt $g:tt $b:tt)       => {$crate::Property::OutlineColor($crate::OutlineColor::Rgba($r, $g, $b, 255))};
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
