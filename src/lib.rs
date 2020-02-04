@@ -177,6 +177,12 @@ macro_rules! html_create {
 					BasicElement { element: create::$name(), children: vec![], event_handlers: EventHandlers::default() }
 				}
 			}
+
+			impl<'a> cmp::Builder<'a> {
+				pub fn $name(self) -> BasicElement<web_sys::$t> {
+					self.build(create::$name())
+				}
+			}
 		)+
 	};
 }
@@ -196,12 +202,6 @@ macro_rules! html_defaults {
 				impl Default for BasicElement<web_sys::$t> {
 					fn default() -> Self {
 						BasicElement { element: create::$name(), children: vec![], event_handlers: EventHandlers::default() }
-					}
-				}
-
-				impl<'a> cmp::Builder<'a> {
-					pub fn $name(self) -> BasicElement<web_sys::$t> {
-						self.build(create::$name())
 					}
 				}
 			)+
@@ -250,6 +250,12 @@ html_create![
 	nav, HtmlElement,
 	footer, HtmlElement,
 	address, HtmlElement,
+	h1, HtmlHeadingElement,
+	h2, HtmlHeadingElement,
+	h3, HtmlHeadingElement,
+	h4, HtmlHeadingElement,
+	h5, HtmlHeadingElement,
+	h6, HtmlHeadingElement,
 ];
 
 #[rustfmt::skip]
