@@ -249,6 +249,7 @@ html_create![
 	option, HtmlOptionElement,
 	nav, HtmlElement,
 	footer, HtmlElement,
+	address, HtmlElement,
 ];
 
 #[rustfmt::skip]

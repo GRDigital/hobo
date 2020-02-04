@@ -85,4 +85,5 @@ intern_strings! {
 	svg, "svg";
 	feColorMatrix, "feColorMatrix";
 	footer, "footer";
+	address, "address";
 }
