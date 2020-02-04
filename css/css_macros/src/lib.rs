@@ -2,6 +2,7 @@ extern crate proc_macro;
 use heck::*;
 use proc_quote::quote;
 
+#[derive(Clone)]
 enum Value {
 	EnumVariant(String),
 	Unit,
@@ -33,21 +34,26 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		}
 	}
 	args.push(current_ident);
-	args.push("initial".to_owned());
-	args.push("inherit".to_owned());
 
 	let property: &str = args.get(0).unwrap();
-	let values = args
-		.get(1..)
-		.unwrap()
-		.iter()
-		.map(|x| match &x as &str {
-			"@" => Value::Unit,
-			"$" => Value::String,
-			"#" => Value::Number,
-			"[float]" => Value::Float,
-			x => Value::EnumVariant(x.to_owned()),
-		})
+	let values = vec![
+		Value::EnumVariant("initial".to_owned()),
+		Value::EnumVariant("inherit".to_owned()),
+	]
+		.into_iter()
+		.chain(args
+			.get(1..)
+			.unwrap()
+			.iter()
+			.map(|x| match &x as &str {
+				"@" => Value::Unit,
+				"$" => Value::String,
+				"#" => Value::Number,
+				"[float]" => Value::Float,
+				x => Value::EnumVariant(x.to_owned()),
+			})
+			.clone()
+		)
 		.collect::<Vec<_>>();
 
 	let property_snek = proc_macro2::Ident::new(&property.to_snek_case(), proc_macro2::Span::call_site());
