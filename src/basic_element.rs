@@ -43,7 +43,7 @@ impl<T: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement>> BasicElement<T> {
 pub struct BasicElementBuilder<'a, T: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement>> {
 	pub text: Option<&'a str>,
 	pub attributes: Option<Vec<[&'a str; 2]>>,
-	pub style: Option<crate::css::Style>,
+	pub style: Option<&'a crate::css::Style>,
 	pd: std::marker::PhantomData<T>,
 }
 
@@ -53,7 +53,7 @@ impl<'a, T: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement> + 'static> Bas
 		self
 	}
 
-	pub fn style(mut self, x: crate::css::Style) -> Self {
+	pub fn style(mut self, x: &'a crate::css::Style) -> Self {
 		self.style = Some(x);
 		self
 	}
@@ -74,7 +74,7 @@ impl<'a, T: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement> + 'static> Bas
 			}
 		};
 		let cmp = BasicElement { element, children: vec![], event_handlers: EventHandlers::default() };
-		if let Some(x) = self.style { cmp.set_class(&x); };
+		if let Some(x) = self.style { cmp.set_class(x); };
 		cmp
 	}
 }
