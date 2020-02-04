@@ -31,6 +31,7 @@ css_macros::easy_enum! {letter-spacing normal @}
 css_macros::easy_enum! {tab-size #}
 css_macros::easy_enum! {text-decoration-style solid double dotted dashed wavy}
 css_macros::easy_enum! {text-decoration-line none underline overline line-through}
+css_macros::easy_enum! {text-rendering auto optimizeSpeed optimizeLegibility geometricPrecision}
 css_macros::easy_color! {color}
 css_macros::easy_color! {text-decoration-color}
 
