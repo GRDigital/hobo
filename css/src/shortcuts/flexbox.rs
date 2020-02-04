@@ -53,21 +53,12 @@ macro_rules! __flexbox_line {
 		};
 	};
 
-	($acc:expr, top ($($margin:tt)*) | ($($padding:tt)*)) => {
-		$acc.push($crate::margin_top!($($margin)*));
-		$acc.push($crate::padding_top!($($padding)*));
-	};
-	($acc:expr, right ($($margin:tt)*) | ($($padding:tt)*)) => {
-		$acc.push($crate::margin_right!($($margin)*));
-		$acc.push($crate::padding_right!($($padding)*));
-	};
-	($acc:expr, bottom ($($margin:tt)*) | ($($padding:tt)*)) => {
-		$acc.push($crate::margin_bottom!($($margin)*));
-		$acc.push($crate::padding_bottom!($($padding)*));
-	};
-	($acc:expr, left ($($margin:tt)*) | ($($padding:tt)*)) => {
-		$acc.push($crate::margin_left!($($margin)*));
-		$acc.push($crate::padding_left!($($padding)*));
+	($acc:expr, $side:ident ($($margin:tt)*) | ($($padding:tt)*)) => {
+		let acc = &mut $acc;
+		paste::item!{
+			acc.push($crate::[<margin_ $side>]!($($margin)*));
+			acc.push($crate::[<padding_ $side>]!($($padding)*));
+		};
 	};
 	($acc:expr, [$($inner:tt)*]) => { $crate::__flexbox_line!($acc, $($inner)*) };
 }

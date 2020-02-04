@@ -25,10 +25,10 @@ impl ToString for Padding {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __padding {
-	($side:ident, 0)           => {$crate::paste::expr!{ $crate::Property::[<Padding $side>]($crate::Padding::None) }};
-	($side:ident, initial)     => {$crate::paste::expr!{ $crate::Property::[<Padding $side>]($crate::Padding::Initial) }};
-	($side:ident, inherit)     => {$crate::paste::expr!{ $crate::Property::[<Padding $side>]($crate::Padding::Inherit) }};
-	($side:ident, $($val:tt)+) => {$crate::paste::expr!{ $crate::Property::[<Padding $side>]($crate::Padding::Some($crate::unit!($($val)+))) }};
+	($side:ident, 0)           => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::Padding::None) }};
+	($side:ident, initial)     => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::Padding::Initial) }};
+	($side:ident, inherit)     => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::Padding::Inherit) }};
+	($side:ident, $($val:tt)+) => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::Padding::Some($crate::unit!($($val)+))) }};
 }
 
 #[macro_export] macro_rules! padding_left { ($($tt:tt)+) => { $crate::__padding!(Left, $($tt)+)} }
