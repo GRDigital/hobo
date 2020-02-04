@@ -80,9 +80,9 @@ macro_rules! __flexbox_inner {
 		rest = (),
 	) => {{
 		let mut acc = vec![
-			$crate::Property::BoxSizing($crate::BoxSizing::BorderBox),
-			$crate::Property::FlexShrink($crate::FlexShrink::Zero),
-			$crate::Property::Display($crate::Display::Flex),
+			$crate::box_sizing!(border-box),
+			$crate::flex_shrink!(0),
+			$crate::display!(flex),
 		];
 		$($crate::__flexbox_line!(acc, $line);)*
 		acc

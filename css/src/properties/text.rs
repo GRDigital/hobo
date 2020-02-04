@@ -11,9 +11,9 @@ css_macros::easy_enum! {font-stretch normal ultra-condensed extra-condensed cond
 css_macros::easy_enum! {list-style-type disc armenian circle cjk decimal decimal-leading-zero georgian hebrew hiragana hiragana-iroha katakana katakana-iroha lower-alpha lower-greek lower-latin lower-roman none square upper-alpha upper-greek upper-latin upper-roman}
 css_macros::easy_enum! {list-style-position inside outside}
 css_macros::easy_enum! {list-style-image none $}
-css_macros::easy_enum! {page-break-after auto always avoid left right}
-css_macros::easy_enum! {page-break-before auto always avoid left right}
-css_macros::easy_enum! {page-break-inside auto avoid}
+css_macros::easy_enum! {break-after auto avoid-page page left right avoid-column column}
+css_macros::easy_enum! {break-before auto avoid-page page left right avoid-column column}
+css_macros::easy_enum! {break-inside auto avoid avoid-page avoid-column}
 css_macros::easy_enum! {font-variant normal small-caps}
 css_macros::easy_enum! {word-break normal break-all keep-all break-word}
 css_macros::easy_enum! {word-wrap normal break-word}
@@ -53,6 +53,8 @@ pub enum FontWeight {
 	#[strum(to_string = "font-weight:900;")] Weight900,
 	#[strum(to_string = "font-weight:initial;")] Initial,
 	#[strum(to_string = "font-weight:inherit;")] Inherit,
+	#[strum(to_string = "font-weight:unset;")] Unset,
+	#[strum(to_string = "font-weight:revert;")] Revert,
 }
 
 #[rustfmt::skip]
@@ -73,4 +75,6 @@ macro_rules! font_weight {
 	(900)     => {$crate::Property::FontWeight($crate::FontWeight::Weight900)};
 	(initial) => {$crate::Property::FontWeight($crate::FontWeight::Initial)};
 	(inherit) => {$crate::Property::FontWeight($crate::FontWeight::Inherit)};
+	(unset)   => {$crate::Property::FontWeight($crate::FontWeight::Unset)};
+	(revert)  => {$crate::Property::FontWeight($crate::FontWeight::Revert)};
 }
