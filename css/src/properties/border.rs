@@ -61,40 +61,21 @@ impl ToString for BorderColor {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub enum BorderStyle {
-	None,
-	Hidden,
-	Dotted,
-	Dashed,
-	Solid,
-	Double,
-	Groove,
-	Ridge,
-	Inset,
-	Outset,
-	Initial,
-	Inherit,
-}
-
 #[rustfmt::skip]
-impl ToString for BorderStyle {
-	fn to_string(&self) -> String {
-		match self {
-			Self::None    => "none".to_owned(),
-			Self::Hidden  => "hidden".to_owned(),
-			Self::Dotted  => "dotted".to_owned(),
-			Self::Dashed  => "dashed".to_owned(),
-			Self::Solid   => "solid".to_owned(),
-			Self::Double  => "double".to_owned(),
-			Self::Groove  => "groove".to_owned(),
-			Self::Ridge   => "ridge".to_owned(),
-			Self::Inset   => "inset".to_owned(),
-			Self::Outset  => "outset".to_owned(),
-			Self::Initial => "initial".to_owned(),
-			Self::Inherit => "inherit".to_owned(),
-		}
-	}
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]
+pub enum BorderStyle {
+	#[strum(to_string = "none")] None,
+	#[strum(to_string = "hidden")] Hidden,
+	#[strum(to_string = "dotted")] Dotted,
+	#[strum(to_string = "dashed")] Dashed,
+	#[strum(to_string = "solid")] Solid,
+	#[strum(to_string = "double")] Double,
+	#[strum(to_string = "groove")] Groove,
+	#[strum(to_string = "ridge")] Ridge,
+	#[strum(to_string = "inset")] Inset,
+	#[strum(to_string = "outset")] Outset,
+	#[strum(to_string = "initial")] Initial,
+	#[strum(to_string = "inherit")] Inherit,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]

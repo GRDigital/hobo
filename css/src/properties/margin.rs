@@ -38,11 +38,3 @@ macro_rules! __margin {
 #[macro_export] macro_rules! margin_right { ($($tt:tt)+) => { $crate::__margin!(Right, $($tt)+)} }
 #[macro_export] macro_rules! margin_top { ($($tt:tt)+) => { $crate::__margin!(Top, $($tt)+)} }
 #[macro_export] macro_rules! margin_bottom { ($($tt:tt)+) => { $crate::__margin!(Bottom, $($tt)+)} }
-#[macro_export] macro_rules! margin { ($($tt:tt)+) => {
-	vec![
-		$crate::__margin!(Left, $($tt)+),
-		$crate::__margin!(Right, $($tt)+),
-		$crate::__margin!(Top, $($tt)+),
-		$crate::__margin!(Bottom, $($tt)+),
-	]
-} }
