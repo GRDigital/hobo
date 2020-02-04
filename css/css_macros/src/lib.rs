@@ -39,6 +39,8 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let values = vec![
 		Value::EnumVariant("initial".to_owned()),
 		Value::EnumVariant("inherit".to_owned()),
+		Value::EnumVariant("unset".to_owned()),
+		Value::EnumVariant("revert".to_owned()),
 	]
 		.into_iter()
 		.chain(args

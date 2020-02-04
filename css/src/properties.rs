@@ -180,6 +180,7 @@ pub enum Property {
 	Transform(Transform),
 	Filter(Filter),
 	ClipPath(ClipPath),
+	BackgroundPosition(BackgroundPosition),
 	// etc
 }
 
@@ -332,6 +333,7 @@ impl ToString for Property {
 			Self::BorderImageOutset(x)       => x.to_string(),
 			Self::BorderImageRepeat(x)       => x.to_string(),
 			Self::ClipPath(x)                => x.to_string(),
+			Self::BackgroundPosition(x)      => x.to_string(),
 		}
 	}
 }
@@ -435,7 +437,7 @@ css_macros::easy_enum! {isolation auto isolate}
 css_macros::easy_enum! {caption-side top bottom}
 css_macros::easy_enum! {empty-cells show hide}
 css_macros::easy_enum! {table-layout auto fixed}
-css_macros::easy_enum! {all unset}
+css_macros::easy_enum! {all}
 css_macros::easy_enum! {cursor auto alias all-scroll cell context-menu col-resize copy crosshair default e-resize ew-resize grab grabbing help move n-resize ne-resize nesw-resize ns-resize nw-resize nwse-resize no-drop none not-allowed pointer progress row-resize s-resize se-resize sw-resize text vertical-text w-resize wait zoom-in zoom-out}
 css_macros::easy_enum! {content normal none counter open-quote close-quote no-open-quote no-close-quote $}
 css_macros::easy_enum! {opacity #}
