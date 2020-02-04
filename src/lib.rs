@@ -159,7 +159,7 @@ impl web_sys::Element {
 	}
 }
 
-macro_rules! html {
+macro_rules! html_create {
 	($($name:ident, $t:ident),+$(,)*) => {
 		pub mod create {
 			fn dom() -> web_sys::Document {
@@ -171,6 +171,18 @@ macro_rules! html {
 			)+
 		}
 
+		$(
+			impl basic_element::BasicElement<web_sys::$t> {
+				pub fn $name() -> Self {
+					BasicElement { element: create::$name(), children: vec![], event_handlers: EventHandlers::default() }
+				}
+			}
+		)+
+	};
+}
+
+macro_rules! html_defaults {
+	($($name:ident, $t:ident),+$(,)*) => {
 		pub mod web_sys_element_exts {
 			use super::*;
 
@@ -197,7 +209,7 @@ macro_rules! html {
 	};
 }
 
-macro_rules! svg {
+macro_rules! svg_create {
 	($($name:ident, $t:ident),+$(,)*) => {
 		#[allow(non_snake_case)]
 		pub mod create_svg {
@@ -210,28 +222,19 @@ macro_rules! svg {
 			)+
 		}
 
-		pub mod web_sys_svg_exts {
-			use super::*;
-
-			$(
-				impl From<web_sys::$t> for BasicElement<web_sys::$t> {
-					fn from(element: web_sys::$t) -> Self {
-						Self { element, children: vec![], event_handlers: EventHandlers::default() }
-					}
+		$(
+			#[allow(non_snake_case)]
+			impl basic_element::BasicElement<web_sys::$t> {
+				pub fn $name() -> Self {
+					BasicElement { element: create_svg::$name(), children: vec![], event_handlers: EventHandlers::default() }
 				}
-
-				impl Default for BasicElement<web_sys::$t> {
-					fn default() -> Self {
-						BasicElement { element: create_svg::$name(), children: vec![], event_handlers: EventHandlers::default() }
-					}
-				}
-			)+
-		}
+			}
+		)+
 	};
 }
 
 #[rustfmt::skip]
-html![
+html_create![
 	div, HtmlDivElement,
 	span, HtmlSpanElement,
 	input, HtmlInputElement,
@@ -245,10 +248,27 @@ html![
 	select, HtmlSelectElement,
 	option, HtmlOptionElement,
 	nav, HtmlElement,
+	footer, HtmlElement,
 ];
 
 #[rustfmt::skip]
-svg![
+html_defaults![
+	div, HtmlDivElement,
+	span, HtmlSpanElement,
+	input, HtmlInputElement,
+	a, HtmlAnchorElement,
+	img, HtmlImageElement,
+	textarea, HtmlTextAreaElement,
+	script, HtmlScriptElement,
+	iframe, HtmlIFrameElement,
+	object, HtmlObjectElement,
+	embed, HtmlEmbedElement,
+	select, HtmlSelectElement,
+	option, HtmlOptionElement,
+];
+
+#[rustfmt::skip]
+svg_create![
 	svg, SvgsvgElement,
 	filter, SvgFilterElement,
 	feColorMatrix, SvgfeColorMatrixElement,
