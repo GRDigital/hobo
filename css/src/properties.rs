@@ -179,6 +179,7 @@ pub enum Property {
 	// AnimationDelay(AnimationDelay),
 	Transform(Transform),
 	Filter(Filter),
+	ClipPath(ClipPath),
 	// etc
 }
 
@@ -330,6 +331,7 @@ impl ToString for Property {
 			Self::BorderImageWidth(x)        => x.to_string(),
 			Self::BorderImageOutset(x)       => x.to_string(),
 			Self::BorderImageRepeat(x)       => x.to_string(),
+			Self::ClipPath(x)                => x.to_string(),
 		}
 	}
 }
@@ -441,11 +443,4 @@ css_macros::easy_enum! {perspective none @}
 css_macros::easy_enum! {backface-visibility visible hidden}
 css_macros::easy_enum! {overflow-x visible hidden scroll auto}
 css_macros::easy_enum! {overflow-y visible hidden scroll auto}
-
-#[macro_export]
-macro_rules! overflow {
-	($($tt:tt)+) => {vec![
-		$crate::overflow_x!($($tt)+),
-		$crate::overflow_y!($($tt)+),
-	]}
-}
+css_macros::easy_enum! {clip-path none margin-box border-box padding-box content-box fill-box stroke-box view-box $}

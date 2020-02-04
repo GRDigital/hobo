@@ -41,3 +41,11 @@ mod flexbox;
 		$crate::__padding!(Bottom, $($tt)+),
 	]
 } }
+
+#[macro_export]
+macro_rules! overflow {
+	($($tt:tt)+) => {vec![
+		$crate::overflow_x!($($tt)+),
+		$crate::overflow_y!($($tt)+),
+	]}
+}

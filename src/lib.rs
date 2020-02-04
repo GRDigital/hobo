@@ -199,8 +199,8 @@ macro_rules! html_defaults {
 					}
 				}
 
-				impl<'a> basic_element::BasicElementBuilder<'a, web_sys::$t> {
-					pub fn build_default(self) -> BasicElement<web_sys::$t> {
+				impl<'a> cmp::Builder<'a> {
+					pub fn $name(self) -> BasicElement<web_sys::$t> {
 						self.build(create::$name())
 					}
 				}
