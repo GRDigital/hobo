@@ -16,7 +16,7 @@ pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 		}
 
 		impl #impl_generics ::hobo::Element for #name #ty_generics #where_clause {
-			fn element(&self) -> &web_sys::Element { &self.element }
+			fn element(&self) -> &::hobo::web_sys::Element { &self.element }
 		}
 	})
 }
@@ -36,11 +36,17 @@ pub fn derive_new_element(input: proc_macro::TokenStream) -> proc_macro::TokenSt
 		}
 
 		impl #impl_generics ::hobo::Element for #name #ty_generics #where_clause {
-			fn element(&self) -> &web_sys::Element { &self.element.element }
+			fn element(&self) -> &::hobo::web_sys::Element { &self.element.element }
 		}
 
 		impl #impl_generics ::hobo::EventTarget for #name #ty_generics #where_clause {
 			fn event_handlers(&self) -> ::std::cell::RefMut<Vec<::hobo::EventHandler>> { self.element.event_handlers.borrow_mut() }
+		}
+
+		impl #impl_generics #name #ty_generics #where_clause {
+			pub fn attach_child(&mut self, child: impl ::hobo::Element + 'static) {
+				self.element.attach_child(child)
+			}
 		}
 	})
 }
