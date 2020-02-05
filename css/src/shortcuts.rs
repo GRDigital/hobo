@@ -49,3 +49,11 @@ macro_rules! overflow {
 		$crate::overflow_y!($($tt)+),
 	]}
 }
+
+#[macro_export]
+macro_rules! size {
+	($($tt:tt)+) => {vec![
+		$crate::width!($($tt)+),
+		$crate::height!($($tt)+),
+	]}
+}
