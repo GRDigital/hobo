@@ -25,7 +25,7 @@ pub fn build<'a>() -> Builder<'a> {
 pub struct Builder<'a> {
 	pub text: std::option::Option<&'a str>,
 	pub attributes: std::option::Option<Vec<[&'a str; 2]>>,
-	pub class: std::option::Option<&'a crate::css::Style>,
+	pub class: std::option::Option<std::borrow::Cow<'a, crate::css::Style>>,
 	pub children: Vec<Box<dyn crate::Element>>,
 }
 
@@ -35,8 +35,8 @@ impl<'a> Builder<'a> {
 		self
 	}
 
-	pub fn class(mut self, x: &'a crate::css::Style) -> Self {
-		self.class = Some(x);
+	pub fn class(mut self, x: impl Into<std::borrow::Cow<'a, crate::css::Style>>) -> Self {
+		self.class = Some(x.into());
 		self
 	}
 

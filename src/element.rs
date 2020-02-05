@@ -1,5 +1,6 @@
 use crate::web_str;
 use std::hash::{Hash, Hasher};
+use std::borrow::Cow;
 
 pub trait Element: Drop {
 	fn element(&self) -> &web_sys::Element;
@@ -13,7 +14,7 @@ pub trait Element: Drop {
 
 	fn append(&self, child: &dyn Element) { self.element().append_child(child.element()).expect("Can't append child"); }
 
-	fn set_class(&self, style: &css::Style) -> &Self
+	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) -> &Self
 	where
 		Self: Sized + 'static,
 	{
@@ -27,7 +28,7 @@ pub trait Element: Drop {
 		})
 	}
 
-	fn add_class(&self, style: &css::Style) -> &Self
+	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) -> &Self
 	where
 		Self: Sized + 'static,
 	{

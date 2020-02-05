@@ -27,6 +27,18 @@ impl Style {
 	pub fn append(&mut self, other: &mut Style) { self.0.append(&mut other.0); }
 }
 
+impl<'a> From<&'a Style> for std::borrow::Cow<'a, Style> {
+	fn from(x: &Style) -> std::borrow::Cow<'_, Style> {
+		std::borrow::Cow::Borrowed(x)
+	}
+}
+
+impl<'a> From<Style> for std::borrow::Cow<'a, Style> {
+	fn from(x: Style) -> std::borrow::Cow<'a, Style> {
+		std::borrow::Cow::Owned(x)
+	}
+}
+
 #[doc(hidden)]
 pub trait AppendProperty {
 	fn append_property(self, decls: &mut Vec<Property>);

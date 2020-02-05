@@ -17,6 +17,7 @@ use std::{
 	cell::RefCell,
 	collections::HashMap,
 	hash::{Hash, Hasher},
+	borrow::Cow,
 };
 pub use svg_element::SvgElement;
 use wasm_bindgen::{prelude::*, JsCast as _};
@@ -34,16 +35,17 @@ struct StyleStorage {
 
 // TODO: right now if the same style is reused in multiple windows - won't work, need to track style insertion per window
 impl StyleStorage {
-	fn fetch(&self, element: &web_sys::Element, style: &css::Style) -> String {
-		if let Some(id) = self.map.borrow().get(style) {
+	fn fetch<'a>(&self, element: &web_sys::Element, style: impl Into<Cow<'a, css::Style>>) -> String {
+		let style = style.into();
+		if let Some(id) = self.map.borrow().get(&style) {
 			return format!("s{}", id);
 		}
 		let mut hasher = std::collections::hash_map::DefaultHasher::new();
 		style.hash(&mut hasher);
 		let id = hasher.finish();
-		self.map.borrow_mut().insert(style.clone(), id);
+		self.map.borrow_mut().insert(style.clone().into_owned(), id);
 		let class = format!("s{}", id);
-		let mut style = style.clone();
+		let mut style = style.into_owned();
 		for rule in style.0.iter_mut() {
 			for selector_component in (rule.0).0.iter_mut() {
 				if *selector_component == css::selector::SelectorComponent::ClassPlaceholder {
@@ -143,14 +145,14 @@ generate_events! {
 
 #[extend::ext(name = RawSetClass)]
 impl web_sys::Element {
-	fn set_class(self, style: &css::Style) {
+	fn set_class<'a>(self, style: impl Into<Cow<'a, css::Style>>) {
 		CONTEXT.with(move |ctx| {
 			let element_class = ctx.style_storage.fetch(&self, style);
 			self.set_attribute(web_str::class(), &element_class).unwrap();
 		})
 	}
 
-	fn add_class(self, style: &css::Style) {
+	fn add_class<'a>(self, style: impl Into<Cow<'a, css::Style>>) {
 		CONTEXT.with(move |ctx| {
 			let element_class = ctx.style_storage.fetch(&self, style);
 			let existing_class = self.get_attribute(web_str::class()).unwrap_or_else(String::new);
