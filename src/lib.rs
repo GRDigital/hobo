@@ -258,6 +258,7 @@ html_create![
 	h4, HtmlHeadingElement,
 	h5, HtmlHeadingElement,
 	h6, HtmlHeadingElement,
+	p, HtmlParagraphElement,
 ];
 
 #[rustfmt::skip]
