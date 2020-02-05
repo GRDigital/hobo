@@ -4,7 +4,7 @@ css_macros::easy_enum! {justify-content center start end flex-start flex-end lef
 css_macros::easy_enum! {justify-items auto normal stretch center start end flex-start flex-end self-start self-end left right}
 css_macros::easy_enum! {justify-self auto normal stretch center start end flex-start flex-end self-start self-end left right}
 css_macros::easy_enum! {align-items normal stretch center start end flex-start flex-end}
-css_macros::easy_enum! {align-content stretch center flex-start flex-end space-between space-around}
+css_macros::easy_enum! {align-content center start end flex-start flex-end normal space-between space-around space-evenly stretch}
 css_macros::easy_enum! {align-self auto normal center start end self-start self-end flex-start flex-end}
 css_macros::easy_enum! {flex-grow [float]}
 css_macros::easy_enum! {flex-shrink [float]}
