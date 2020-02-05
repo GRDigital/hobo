@@ -21,14 +21,15 @@ macro_rules! __flexbox_line {
 		$crate::__flexbox_line!($acc, vertical $($rest)*);
 	};
 
-	($acc:expr, wrap) => {$acc.push($crate::flex_wrap!(wrap));};
-	($acc:expr, nowrap) => {$acc.push($crate::flex_wrap!(nowrap));};
-	($acc:expr, wrap-reverse) => {$acc.push($crate::flex_wrap!(wrap-reverse));};
+	($acc:expr, $wrap:ident $($align_content:ident)-+) => {
+		$acc.push($crate::flex_wrap!($wrap));
+		$acc.push($crate::align_content!($($align_content)-+));
+	};
 
-	($acc:expr, $direction:ident $align:ident $(-$align_trail:ident)* $justify:ident $(-$justify_trail:ident)*) => {
+	($acc:expr, $direction:ident $($align:ident)-+ $($justify:ident)-+) => {
 		$acc.push($crate::flex_direction!($direction));
-		$acc.push($crate::align_items!($align $(-$align_trail)*));
-		$acc.push($crate::justify_content!($justify $(-$justify_trail)*));
+		$acc.push($crate::align_items!($($align)-+));
+		$acc.push($crate::justify_content!($($justify)-+));
 	};
 	($acc:expr, $direction:ident) => {
 		$acc.push($crate::flex_direction!($direction));
@@ -87,6 +88,17 @@ macro_rules! __flexbox_inner {
 			lines = ($($lines)* [$($current_line)*]),
 			current_line = (),
 			rest = ($($rest)*),
+		}
+	};
+	(
+		lines = ($($lines:tt)*),
+		current_line = ($($current_line:tt)*),
+		rest = (),
+	) => {
+		$crate::__flexbox_inner!{
+			lines = ($($lines)* [$($current_line)*]),
+			current_line = (),
+			rest = (),
 		}
 	};
 	(
