@@ -10,6 +10,7 @@
 #[macro_use] mod animation;
 #[macro_use] mod transform;
 #[macro_use] mod filter;
+#[macro_use] mod grid;
 
 // use crate::prelude::*;
 pub use background::*;
@@ -25,6 +26,7 @@ pub use text::*;
 pub use animation::*;
 pub use transform::*;
 pub use filter::*;
+pub use grid::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Color {
@@ -182,6 +184,11 @@ pub enum Property {
 	ClipPath(ClipPath),
 	BackgroundPosition(BackgroundPosition),
 	BackgroundOrigin(BackgroundOrigin),
+	GridTemplateColumns(GridTemplate),
+	GridTemplateRows(GridTemplate),
+	GridAutoFlow(GridAutoFlow),
+	RowGap(RowGap),
+	ColumnGap(ColumnGap),
 	// etc
 }
 
@@ -239,6 +246,9 @@ impl ToString for Property {
 			Self::TextDecorationColor(x)     => format!("text-decoration-color:{};", x.to_string()),
 			Self::Fill(x)                    => format!("fill:{};", x.to_string()),
 			Self::Stroke(x)                  => format!("stroke:{};", x.to_string()),
+
+			Self::GridTemplateColumns(x)     => format!("grid-template-columns:{};", x.to_string()),
+			Self::GridTemplateRows(x)        => format!("grid-template-rows:{};", x.to_string()),
 
 			// different properties that have specific to them arguments
 			// basis/grow/shrink/order kind of take the same, but basis and shrink are 1 by default while others are 0 so /shrug
@@ -336,6 +346,9 @@ impl ToString for Property {
 			Self::ClipPath(x)                => x.to_string(),
 			Self::BackgroundPosition(x)      => x.to_string(),
 			Self::BackgroundOrigin(x)        => x.to_string(),
+			Self::GridAutoFlow(x)            => x.to_string(),
+			Self::RowGap(x)                  => x.to_string(),
+			Self::ColumnGap(x)               => x.to_string(),
 		}
 	}
 }
@@ -426,7 +439,7 @@ from_properties! {
 
 css_macros::easy_enum! {box-sizing content-box border-box}
 css_macros::easy_enum! {visibility visible hidden collapse}
-css_macros::easy_enum! {display block none inline inline-block flex inline-flex}
+css_macros::easy_enum! {display block none inline inline-block flex inline-flex grid}
 css_macros::easy_enum! {user-select auto none text all}
 css_macros::easy_enum! {scroll-behavior auto smooth}
 css_macros::easy_enum! {pointer-events auto none}

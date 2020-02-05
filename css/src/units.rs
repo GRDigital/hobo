@@ -9,6 +9,7 @@ pub enum Unit {
 	Vh(F32),
 	Vmin(F32),
 	Vmax(F32),
+	Fr(F32),
 	Percent(F32),
 	// TODO: calc?
 }
@@ -24,31 +25,10 @@ impl ToString for Unit {
 			Self::Vh(x)      => format!("{}vh", x),
 			Self::Vmin(x)    => format!("{}vmin", x),
 			Self::Vmax(x)    => format!("{}vmax", x),
+			Self::Fr(x)      => format!("{}fr", x),
 			Self::Percent(x) => format!("{}%", x),
 		}
 	}
-}
-
-macro_rules! generate_units {
-	($($small:ident, $big:ident);+$(;)*) => {
-		$(
-			#[macro_export]
-			macro_rules! $small {
-				($e:expr) => { $crate::Unit::$big(unsafe { $crate::units::F32::unchecked_new($e as _) }) };
-			}
-		)+
-	};
-}
-
-generate_units! {
-	px, Px;
-	em, Em;
-	rem, Rem;
-	vw, Vw;
-	vh, Vh;
-	vmin, Vmin;
-	vmax, Vmax;
-	pct, Percent;
 }
 
 #[rustfmt::skip]
@@ -62,6 +42,7 @@ macro_rules! unit {
 	(expr = ($($e:tt)+) vh)                  => { $crate::Unit::Vh(unsafe {      $crate::units::F32::unchecked_new(($($e)+) as _) }) };
 	(expr = ($($e:tt)+) vmin)                => { $crate::Unit::Vmin(unsafe {    $crate::units::F32::unchecked_new(($($e)+) as _) }) };
 	(expr = ($($e:tt)+) vmax)                => { $crate::Unit::Vmax(unsafe {    $crate::units::F32::unchecked_new(($($e)+) as _) }) };
+	(expr = ($($e:tt)+) fr)                  => { $crate::Unit::Fr(unsafe {      $crate::units::F32::unchecked_new(($($e)+) as _) }) };
 	(expr = ($($e:tt)+) %)                   => { $crate::Unit::Percent(unsafe { $crate::units::F32::unchecked_new(($($e)+) as _) }) };
 	(expr = ($($e:tt)*) $tt:tt $($rest:tt)*) => { $crate::unit!(expr = ($($e)* $tt) $($rest)*) };
 	($head:tt $($rest:tt)*)                  => { $crate::unit!(expr = ($head) $($rest)*) };
