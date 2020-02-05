@@ -181,6 +181,7 @@ pub enum Property {
 	Filter(Filter),
 	ClipPath(ClipPath),
 	BackgroundPosition(BackgroundPosition),
+	BackgroundOrigin(BackgroundOrigin),
 	// etc
 }
 
@@ -334,6 +335,7 @@ impl ToString for Property {
 			Self::BorderImageRepeat(x)       => x.to_string(),
 			Self::ClipPath(x)                => x.to_string(),
 			Self::BackgroundPosition(x)      => x.to_string(),
+			Self::BackgroundOrigin(x)        => x.to_string(),
 		}
 	}
 }
