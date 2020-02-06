@@ -366,6 +366,10 @@ macro_rules! from_properties {
 		impl From<$name> for Property {
 			fn from(x: $name) -> Self { Self::$name(x) }
 		}
+
+		impl crate::AppendProperty for $name {
+			fn append_property(self, decls: &mut Vec<Property>) { decls.push(Property::$name(self)); }
+		}
 	)+};
 }
 
@@ -443,6 +447,7 @@ from_properties! {
 	BackfaceVisibility,
 	TextDecorationStyle,
 	TextDecorationLine,
+	Transform,
 }
 
 css_macros::easy_enum! {box-sizing content-box border-box}
