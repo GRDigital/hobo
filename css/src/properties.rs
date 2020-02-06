@@ -189,6 +189,10 @@ pub enum Property {
 	GridAutoFlow(GridAutoFlow),
 	RowGap(RowGap),
 	ColumnGap(ColumnGap),
+	GridColumnStart(GridColumnStart),
+	GridColumnEnd(GridColumnEnd),
+	GridRowStart(GridRowStart),
+	GridRowEnd(GridRowEnd),
 	// etc
 }
 
@@ -349,6 +353,10 @@ impl ToString for Property {
 			Self::GridAutoFlow(x)            => x.to_string(),
 			Self::RowGap(x)                  => x.to_string(),
 			Self::ColumnGap(x)               => x.to_string(),
+			Self::GridColumnStart(x)         => x.to_string(),
+			Self::GridColumnEnd(x)           => x.to_string(),
+			Self::GridRowStart(x)            => x.to_string(),
+			Self::GridRowEnd(x)              => x.to_string(),
 		}
 	}
 }

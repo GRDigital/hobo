@@ -2,6 +2,19 @@ use crate::prelude::*;
 
 css_macros::easy_enum! {row-gap normal @}
 css_macros::easy_enum! {column-gap normal @}
+css_macros::easy_enum! {grid-column-start auto #}
+css_macros::easy_enum! {grid-column-end auto #}
+css_macros::easy_enum! {grid-row-start auto #}
+css_macros::easy_enum! {grid-row-end auto #}
+
+/*
+css::grid!(
+	column,
+	// [*-gap] | [grid-template-*] >> [grid-auto-*]
+	columns (32 px) | (1 fr) (50 px) repeat(5, (1 fr)) >> 1 fr,
+	rows >> 1 fr,
+)
+*/
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum GridAutoFlow {

@@ -35,6 +35,16 @@ css_macros::easy_enum! {text-rendering auto optimizeSpeed optimizeLegibility geo
 css_macros::easy_color! {color}
 css_macros::easy_color! {text-decoration-color}
 
+// css::font!(
+//     font "Roboto" 500 italic normal,
+//     size 18 px,
+//     spacing 3 px,
+//     line-height 1.20,
+//     color 0xFF,
+//     transform upppercase,
+//     decoration double underline,
+// )
+
 #[rustfmt::skip]
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]
 pub enum FontWeight {
