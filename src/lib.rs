@@ -141,6 +141,7 @@ generate_events! {
 	web_sys::KeyboardEvent, keydown,     OnKeyDown,     on_key_down;
 	web_sys::KeyboardEvent, keyup,       OnKeyUp,       on_key_up;
 	web_sys::Event,         change,      OnChange,      on_change;
+	web_sys::Event,         scroll,      OnScroll,      on_scroll;
 }
 
 #[extend::ext(name = RawSetClass)]

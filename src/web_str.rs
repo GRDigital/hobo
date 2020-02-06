@@ -66,6 +66,7 @@ intern_strings! {
 	change, "change";
 	keydown, "keydown";
 	keyup, "keyup";
+	scroll, "scroll";
 
 	// elements
 	div, "div";
