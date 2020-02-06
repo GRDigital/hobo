@@ -65,7 +65,7 @@ impl<F: FnOnce(&mut Vec<Property>)> AppendProperty for F {
 }
 
 #[macro_export]
-macro_rules! declarations {
+macro_rules! properties {
 	($($e:expr),*$(,)*) => {{
 		let mut v = Vec::new();
 		$($crate::AppendProperty::append_property($e, &mut v);)*
@@ -78,7 +78,7 @@ macro_rules! class {
 		$crate::Style(vec![
 			$crate::Rule(
 				$crate::selector::Selector::build().class_placeholder(),
-				$crate::declarations!($($rules)*),
+				$crate::properties!($($rules)*),
 			),
 		])
 	};
@@ -90,7 +90,7 @@ macro_rules! rule {
 	(($($selector:tt)+) { $($rules:tt)* }) => {
 		$crate::Rule(
 			$crate::selector!($($selector)+),
-			$crate::declarations!($($rules)*),
+			$crate::properties!($($rules)*),
 		)
 	};
 
