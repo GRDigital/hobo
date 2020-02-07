@@ -3,6 +3,10 @@ use std::hash::{Hash, Hasher};
 use std::borrow::Cow;
 
 pub trait Element: Drop {
+	// should probably be subsumed by BasicElement, which would also probably give me more control over ssr
+	//
+	// could be made to return a cow, which would allow Rc<RefCell<T: Element>> to impl Element as well,
+	// which would in turn allow Rc<RefCell<T: Element>> to be used in attach_child etc
 	fn element(&self) -> &web_sys::Element;
 
 	fn class() -> String
@@ -48,7 +52,7 @@ impl AsRef<web_sys::Element> for dyn Element {
 	fn as_ref(&self) -> &web_sys::Element { self.element() }
 }
 
-#[extend::ext]
+#[extend::ext(pub, name = HashToClassString)]
 impl<T: Hash> T {
 	fn to_class_string(&self, prefix: &str) -> String {
 		let mut hasher = std::collections::hash_map::DefaultHasher::new();
