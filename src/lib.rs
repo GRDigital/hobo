@@ -190,28 +190,6 @@ macro_rules! html_create {
 	};
 }
 
-macro_rules! html_defaults {
-	($($name:ident, $t:ident),+$(,)*) => {
-		pub mod web_sys_element_exts {
-			use super::*;
-
-			$(
-				impl From<web_sys::$t> for BasicElement<web_sys::$t> {
-					fn from(element: web_sys::$t) -> Self {
-						Self { element, children: vec![], event_handlers: EventHandlers::default() }
-					}
-				}
-
-				impl Default for BasicElement<web_sys::$t> {
-					fn default() -> Self {
-						BasicElement { element: create::$name(), children: vec![], event_handlers: EventHandlers::default() }
-					}
-				}
-			)+
-		}
-	};
-}
-
 macro_rules! svg_create {
 	($($name:ident, $t:ident),+$(,)*) => {
 		#[allow(non_snake_case)]
@@ -260,22 +238,6 @@ html_create![
 	h5, HtmlHeadingElement,
 	h6, HtmlHeadingElement,
 	p, HtmlParagraphElement,
-];
-
-#[rustfmt::skip]
-html_defaults![
-	div, HtmlDivElement,
-	span, HtmlSpanElement,
-	input, HtmlInputElement,
-	a, HtmlAnchorElement,
-	img, HtmlImageElement,
-	textarea, HtmlTextAreaElement,
-	script, HtmlScriptElement,
-	iframe, HtmlIFrameElement,
-	object, HtmlObjectElement,
-	embed, HtmlEmbedElement,
-	select, HtmlSelectElement,
-	option, HtmlOptionElement,
 ];
 
 #[rustfmt::skip]
