@@ -130,6 +130,30 @@ impl ToString for GridTemplateValue {
 	}
 }
 
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub enum GridAuto {
+	Inherit,
+	Initial,
+	Unset,
+	Revert,
+	Auto,
+	Some(Vec<Unit>),
+}
+
+#[rustfmt::skip]
+impl ToString for GridAuto {
+	fn to_string(&self) -> String {
+		match self {
+			Self::Inherit => "inherit".to_owned(),
+			Self::Initial => "initial".to_owned(),
+			Self::Unset   => "unset".to_owned(),
+			Self::Revert  => "revert".to_owned(),
+			Self::Auto    => "auto".to_owned(),
+			Self::Some(x) => x.iter().map(std::string::ToString::to_string).collect::<Vec<_>>().join(" "),
+		}
+	}
+}
+
 #[macro_export]
 macro_rules! __repeat_number {
 	(auto-fit) => {$crate::GridRepeatNumber::AutoFit};

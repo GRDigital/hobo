@@ -1,34 +1,13 @@
-use crate::prelude::*;
-
-#[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, Copy)]
-pub enum Padding {
-	#[default]
-	None,
-	Initial,
-	Inherit,
-	Some(Unit),
-}
-
-#[rustfmt::skip]
-impl ToString for Padding {
-	fn to_string(&self) -> String {
-		match self {
-			Self::None       => "0".to_owned(),
-			Self::Initial    => "initial".to_owned(),
-			Self::Inherit    => "inherit".to_owned(),
-			Self::Some(unit) => unit.to_string(),
-		}
-	}
-}
-
 #[rustfmt::skip]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __padding {
-	($side:ident, 0)           => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::Padding::None) }};
-	($side:ident, initial)     => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::Padding::Initial) }};
-	($side:ident, inherit)     => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::Padding::Inherit) }};
-	($side:ident, $($val:tt)+) => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::Padding::Some($crate::unit!($($val)+))) }};
+	($side:ident, 0)           => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::UnitValue::Zero) }};
+	($side:ident, initial)     => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::UnitValue::Initial) }};
+	($side:ident, inherit)     => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::UnitValue::Inherit) }};
+	($side:ident, unset)       => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::UnitValue::Unset) }};
+	($side:ident, revert)      => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::UnitValue::Revert) }};
+	($side:ident, $($val:tt)+) => {$crate::paste::item!{ $crate::Property::[<Padding $side>]($crate::UnitValue::Unit($crate::unit!($($val)+))) }};
 }
 
 #[macro_export] macro_rules! padding_left { ($($tt:tt)+) => { $crate::__padding!(Left, $($tt)+)} }

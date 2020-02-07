@@ -13,10 +13,10 @@ pub enum Filter {
 impl ToString for Filter {
 	fn to_string(&self) -> String {
 		match self {
-			Self::None       => "filter: none;".to_owned(),
-			Self::Initial    => "filter: initial;".to_owned(),
-			Self::Inherit    => "filter: inherit;".to_owned(),
-			Self::Some(fns)  => format!("filter: {};", fns.iter().map(ToString::to_string).collect::<Vec<_>>().join(" ")),
+			Self::None       => "filter:none;".to_owned(),
+			Self::Initial    => "filter:initial;".to_owned(),
+			Self::Inherit    => "filter:inherit;".to_owned(),
+			Self::Some(fns)  => format!("filter:{};", fns.iter().map(ToString::to_string).collect::<Vec<_>>().join(" ")),
 		}
 	}
 }

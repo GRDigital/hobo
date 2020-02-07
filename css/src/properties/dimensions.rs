@@ -6,6 +6,8 @@ pub enum Dimension {
 	Auto,
 	Initial,
 	Inherit,
+	Unset,
+	Revert,
 	Some(Unit),
 }
 
@@ -14,7 +16,12 @@ pub enum DimensionExtremity {
 	Zero,
 	Initial,
 	Inherit,
+	Unset,
+	Revert,
 	Some(Unit),
+	None,
+	MaxContent,
+	MinContent,
 }
 
 #[rustfmt::skip]
@@ -25,6 +32,8 @@ impl ToString for Dimension {
 			Self::Auto       => "auto".to_owned(),
 			Self::Initial    => "initial".to_owned(),
 			Self::Inherit    => "inherit".to_owned(),
+			Self::Unset      => "unset;".to_owned(),
+			Self::Revert     => "revert;".to_owned(),
 			Self::Some(unit) => unit.to_string(),
 		}
 	}
@@ -37,7 +46,12 @@ impl ToString for DimensionExtremity {
 			Self::Zero       => "0".to_owned(),
 			Self::Initial    => "initial".to_owned(),
 			Self::Inherit    => "inherit".to_owned(),
+			Self::Unset      => "unset;".to_owned(),
+			Self::Revert     => "revert;".to_owned(),
 			Self::Some(unit) => unit.to_string(),
+			Self::None       => "none".to_owned(),
+			Self::MaxContent => "max-content".to_owned(),
+			Self::MinContent => "min-content".to_owned(),
 		}
 	}
 }
@@ -50,6 +64,8 @@ macro_rules! __dimension {
 	($kind:ident, auto)        => {$crate::Property::$kind($crate::Dimension::Auto)};
 	($kind:ident, initial)     => {$crate::Property::$kind($crate::Dimension::Initial)};
 	($kind:ident, inherit)     => {$crate::Property::$kind($crate::Dimension::Inherit)};
+	($kind:ident, unset)       => {$crate::Property::$kind($crate::Dimension::Unset)};
+	($kind:ident, revert)      => {$crate::Property::$kind($crate::Dimension::Revert)};
 	($kind:ident, $($val:tt)+) => {$crate::Property::$kind($crate::Dimension::Some($crate::unit!($($val)+)))};
 }
 
@@ -63,6 +79,11 @@ macro_rules! __dimension_extremity {
 	($kind:ident, 0)           => {$crate::Property::$kind($crate::DimensionExtremity::Zero)};
 	($kind:ident, initial)     => {$crate::Property::$kind($crate::DimensionExtremity::Initial)};
 	($kind:ident, inherit)     => {$crate::Property::$kind($crate::DimensionExtremity::Inherit)};
+	($kind:ident, unset)       => {$crate::Property::$kind($crate::DimensionExtremity::Unset)};
+	($kind:ident, revert)      => {$crate::Property::$kind($crate::DimensionExtremity::Revert)};
+	($kind:ident, none)        => {$crate::Property::$kind($crate::DimensionExtremity::None)};
+	($kind:ident, max-content) => {$crate::Property::$kind($crate::DimensionExtremity::MaxContent)};
+	($kind:ident, min-content) => {$crate::Property::$kind($crate::DimensionExtremity::MinContent)};
 	($kind:ident, $($val:tt)+) => {$crate::Property::$kind($crate::DimensionExtremity::Some($crate::unit!($($val)+)))};
 }
 

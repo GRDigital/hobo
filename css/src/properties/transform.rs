@@ -13,10 +13,10 @@ pub enum Transform {
 impl ToString for Transform {
 	fn to_string(&self) -> String {
 		match self {
-			Self::None       => "transform: none;".to_owned(),
-			Self::Initial    => "transform: initial;".to_owned(),
-			Self::Inherit    => "transform: inherit;".to_owned(),
-			Self::Some(fns)  => format!("transform: {};", fns.iter().map(ToString::to_string).collect::<Vec<_>>().join(" ")),
+			Self::None       => "transform:none;".to_owned(),
+			Self::Initial    => "transform:initial;".to_owned(),
+			Self::Inherit    => "transform:inherit;".to_owned(),
+			Self::Some(fns)  => format!("transform:{};", fns.iter().map(ToString::to_string).collect::<Vec<_>>().join(" ")),
 		}
 	}
 }

@@ -12,7 +12,7 @@
 #[macro_use] mod filter;
 #[macro_use] mod grid;
 
-// use crate::prelude::*;
+use crate::prelude::*;
 pub use background::*;
 pub use border::*;
 pub use dimensions::*;
@@ -28,20 +28,116 @@ pub use transform::*;
 pub use filter::*;
 pub use grid::*;
 
+pub use Property::{
+	MarginLeft,
+	MarginRight,
+	MarginTop,
+	MarginBottom,
+	PaddingLeft,
+	PaddingRight,
+	PaddingTop,
+	PaddingBottom,
+	Width,
+	Height,
+	MinWidth,
+	MaxWidth,
+	MinHeight,
+	MaxHeight,
+	Top,
+	Right,
+	Left,
+	Bottom,
+	BorderLeftColor,
+	BorderRightColor,
+	BorderTopColor,
+	BorderBottomColor,
+	BorderLeftStyle,
+	BorderRightStyle,
+	BorderTopStyle,
+	BorderBottomStyle,
+	BorderLeftWidth,
+	BorderRightWidth,
+	BorderTopWidth,
+	BorderBottomWidth,
+	BorderTopLeftRadius,
+	BorderTopRightRadius,
+	BorderBottomLeftRadius,
+	BorderBottomRightRadius,
+	BackgroundColor,
+	Color,
+	TextDecorationColor,
+	Fill,
+	Stroke,
+	OutlineColor,
+	GridTemplateColumns,
+	GridTemplateRows,
+	GridAutoColumns,
+	GridAutoRows,
+	TextIndent,
+	OutlineOffset,
+};
+
+
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub enum Color {
+pub enum ColorValue {
 	Rgba(u8, u8, u8, u8),
 	Initial,
 	Inherit,
+	Unset,
+	Revert,
+}
+
+impl From<(u8, u8, u8, u8)> for ColorValue {
+	fn from((r, g, b, a): (u8, u8, u8, u8)) -> Self {
+		Self::Rgba(r, g, b, a)
+	}
+}
+
+impl From<(u8, u8, u8)> for ColorValue {
+	fn from((r, g, b): (u8, u8, u8)) -> Self {
+		Self::Rgba(r, g, b, 1)
+	}
+}
+
+impl From<u8> for ColorValue {
+	fn from(rgb: u8) -> Self {
+		Self::Rgba(rgb, rgb, rgb, 1)
+	}
 }
 
 #[rustfmt::skip]
-impl ToString for Color {
+impl ToString for ColorValue {
 	fn to_string(&self) -> String {
 		match self {
-			Self::Rgba(r, g, b, a)   => format!("#{:02x}{:02x}{:02x}{:02x}", r, g, b, a),
-			Self::Initial            => "initial".to_owned(),
-			Self::Inherit            => "inherit".to_owned(),
+			Self::Rgba(r, g, b, a) => format!("#{:02x}{:02x}{:02x}{:02x}", r, g, b, a),
+			Self::Initial          => "initial".to_owned(),
+			Self::Inherit          => "inherit".to_owned(),
+			Self::Unset            => "unset".to_owned(),
+			Self::Revert           => "revert".to_owned(),
+		}
+	}
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub enum UnitValue {
+	Zero,
+	Unit(Unit),
+	Initial,
+	Inherit,
+	Unset,
+	Revert,
+}
+
+#[rustfmt::skip]
+impl ToString for UnitValue {
+	fn to_string(&self) -> String {
+		match self {
+			Self::Zero    => "0".to_owned(),
+			Self::Unit(x) => x.to_string(),
+			Self::Initial => "initial".to_owned(),
+			Self::Inherit => "inherit".to_owned(),
+			Self::Unset   => "unset".to_owned(),
+			Self::Revert  => "revert".to_owned(),
 		}
 	}
 }
@@ -49,128 +145,49 @@ impl ToString for Color {
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Property {
 	Raw(String),
-	Display(Display),
-	MarginLeft(Margin),
-	MarginRight(Margin),
-	MarginTop(Margin),
-	MarginBottom(Margin),
-	PaddingLeft(Padding),
-	PaddingRight(Padding),
-	PaddingTop(Padding),
-	PaddingBottom(Padding),
-	Width(Dimension),
-	Height(Dimension),
-	MinWidth(DimensionExtremity),
-	MaxWidth(DimensionExtremity),
-	MinHeight(DimensionExtremity),
-	MaxHeight(DimensionExtremity),
-	BackgroundColor(Color),
-	FlexWrap(FlexWrap),
-	FlexDirection(FlexDirection),
-	JustifyContent(JustifyContent),
-	AlignItems(AlignItems),
-	AlignContent(AlignContent),
-	AlignSelf(AlignSelf),
-	FlexBasis(FlexBasis),
-	FlexGrow(FlexGrow),
-	FlexShrink(FlexShrink),
-	Order(Order),
-	Position(Position),
-	Top(Dimension),
-	Right(Dimension),
-	Left(Dimension),
-	Bottom(Dimension),
-	BoxSizing(BoxSizing),
-	Visibility(Visibility),
-	ZIndex(ZIndex),
-	OverflowX(OverflowX),
-	OverflowY(OverflowY),
-	Color(Color),
-	Direction(Direction),
-	UnicodeBidi(UnicodeBidi),
-	WhiteSpace(WhiteSpace),
-	WritingMode(WritingMode),
-	HangingPunctuation(HangingPunctuation),
-	Hyphens(Hyphens),
-	TextAlign(TextAlign),
-	TextAlignLast(TextAlignLast),
-	TextJustify(TextJustify),
-	FontStretch(FontStretch),
-	UserSelect(UserSelect),
-	ScrollBehavior(ScrollBehavior),
-	PointerEvents(PointerEvents),
-	Resize(Resize),
-	ObjectFit(ObjectFit),
-	ListStyleType(ListStyleType),
-	BreakAfter(BreakAfter),
-	BreakBefore(BreakBefore),
-	BreakInside(BreakInside),
-	FontVariant(FontVariant),
-	WordBreak(WordBreak),
-	WordWrap(WordWrap),
-	FontStyle(FontStyle),
-	TransformStyle(TransformStyle),
-	BackgroundBlendMode(BackgroundBlendMode),
-	MixBlendMode(MixBlendMode),
-	Isolation(Isolation),
-	CaptionSide(CaptionSide),
-	EmptyCells(EmptyCells),
-	TableLayout(TableLayout),
-	BorderCollapse(BorderCollapse),
 	All(All),
-	FontWeight(FontWeight),
-	FontSize(FontSize),
-	BackgroundRepeat(BackgroundRepeat),
-	BackgroundAttachment(BackgroundAttachment),
-	Cursor(Cursor),
-	TextTransform(TextTransform),
-	FontKerning(FontKerning),
-	FontFamily(FontFamily),
-	WordSpacing(WordSpacing),
-	TextIndent(TextIndent),
-	TextOverflow(TextOverflow),
-	VerticalAlign(VerticalAlign),
-	LineHeight(LineHeight),
-	LetterSpacing(LetterSpacing),
-	TabSize(TabSize),
-	BoxDecorationBreak(BoxDecorationBreak),
-	OutlineWidth(OutlineWidth),
-	OutlineColor(OutlineColor),
-	OutlineStyle(OutlineStyle),
-	Content(Content),
+
+	Display(Display), BoxSizing(BoxSizing), Visibility(Visibility),
+	OverflowX(OverflowX), OverflowY(OverflowY),
 	Opacity(Opacity),
-	Perspective(Perspective),
-	BackfaceVisibility(BackfaceVisibility),
-	BorderLeftColor(BorderColor),
-	BorderRightColor(BorderColor),
-	BorderTopColor(BorderColor),
-	BorderBottomColor(BorderColor),
-	BorderLeftStyle(BorderStyle),
-	BorderRightStyle(BorderStyle),
-	BorderTopStyle(BorderStyle),
-	BorderBottomStyle(BorderStyle),
-	BorderLeftWidth(BorderWidth),
-	BorderRightWidth(BorderWidth),
-	BorderTopWidth(BorderWidth),
-	BorderBottomWidth(BorderWidth),
-	BorderTopLeftRadius(BorderRadius),
-	BorderTopRightRadius(BorderRadius),
-	BorderBottomLeftRadius(BorderRadius),
-	BorderBottomRightRadius(BorderRadius),
-	BorderImageSource(BorderImageSource),
-	BorderImageSlice(BorderImageSlice),
-	BorderImageWidth(BorderImageWidth),
-	BorderImageOutset(BorderImageOutset),
+
+	// dimensions
+	MarginLeft(Margin), MarginRight(Margin), MarginTop(Margin), MarginBottom(Margin),
+	PaddingLeft(UnitValue), PaddingRight(UnitValue), PaddingTop(UnitValue), PaddingBottom(UnitValue),
+	Width(Dimension), Height(Dimension),
+	MinWidth(DimensionExtremity), MaxWidth(DimensionExtremity), MinHeight(DimensionExtremity), MaxHeight(DimensionExtremity),
+
+	// flex
+	FlexWrap(FlexWrap), FlexDirection(FlexDirection), JustifyContent(JustifyContent),
+	AlignItems(AlignItems), AlignContent(AlignContent), AlignSelf(AlignSelf),
+	FlexBasis(FlexBasis), FlexGrow(FlexGrow), FlexShrink(FlexShrink), Order(Order),
+
+	// position
+	Position(Position), Top(Dimension), Right(Dimension), Left(Dimension), Bottom(Dimension), ZIndex(ZIndex),
+
+	// grid
+	GridTemplateColumns(GridTemplate), GridTemplateRows(GridTemplate), RowGap(RowGap), ColumnGap(ColumnGap),
+	GridColumnStart(GridColumnStart), GridColumnEnd(GridColumnEnd), GridRowStart(GridRowStart), GridRowEnd(GridRowEnd),
+	GridAutoFlow(GridAutoFlow), GridAutoRows(GridAuto), GridAutoColumns(GridAuto),
+
+	// background
+	BackgroundColor(ColorValue), BackgroundBlendMode(BackgroundBlendMode),
+	BackgroundRepeat(BackgroundRepeat), BackgroundAttachment(BackgroundAttachment),
+	BackgroundImage(BackgroundImage), BackgroundSize(BackgroundSize),
+	BackgroundPosition(BackgroundPosition), BackgroundOrigin(BackgroundOrigin),
+
+	// border
+	BorderLeftColor(ColorValue), BorderRightColor(ColorValue), BorderTopColor(ColorValue), BorderBottomColor(ColorValue),
+	BorderLeftStyle(BorderStyle), BorderRightStyle(BorderStyle), BorderTopStyle(BorderStyle), BorderBottomStyle(BorderStyle),
+	BorderLeftWidth(BorderWidth), BorderRightWidth(BorderWidth), BorderTopWidth(BorderWidth), BorderBottomWidth(BorderWidth),
+	BorderTopLeftRadius(UnitValue), BorderTopRightRadius(UnitValue), BorderBottomLeftRadius(UnitValue), BorderBottomRightRadius(UnitValue),
+	BorderImageSource(BorderImageSource), BorderImageSlice(BorderImageSlice), BorderImageWidth(BorderImageWidth), BorderImageOutset(BorderImageOutset),
 	BorderImageRepeat(BorderImageRepeat),
-	TextDecorationStyle(TextDecorationStyle),
-	TextDecorationLine(TextDecorationLine),
-	TextDecorationColor(Color),
-	TextRendering(TextRendering),
-	Fill(Color),
-	Stroke(Color),
-	VectorEffect(VectorEffect),
-	BackgroundImage(BackgroundImage),
-	BackgroundSize(BackgroundSize),
+	BorderCollapse(BorderCollapse),
+	OutlineWidth(OutlineWidth), OutlineColor(ColorValue), OutlineStyle(OutlineStyle),
+	OutlineOffset(UnitValue),
+
+	// animation
 	AnimationDirection(AnimationDirection),
 	AnimationFillMode(AnimationFillMode),
 	AnimationIterationCount(AnimationIterationCount),
@@ -179,21 +196,54 @@ pub enum Property {
 	AnimationTimingFunction(AnimationTimingFunction),
 	// AnimationDuration(AnimationDuration),
 	// AnimationDelay(AnimationDelay),
-	Transform(Transform),
-	Filter(Filter),
+
+	// svg
+	Fill(ColorValue), Stroke(ColorValue),
+	VectorEffect(VectorEffect),
 	ClipPath(ClipPath),
-	BackgroundPosition(BackgroundPosition),
-	BackgroundOrigin(BackgroundOrigin),
-	GridTemplateColumns(GridTemplate),
-	GridTemplateRows(GridTemplate),
-	GridAutoFlow(GridAutoFlow),
-	RowGap(RowGap),
-	ColumnGap(ColumnGap),
-	GridColumnStart(GridColumnStart),
-	GridColumnEnd(GridColumnEnd),
-	GridRowStart(GridRowStart),
-	GridRowEnd(GridRowEnd),
+
+	// pointer/cursor-related
+	UserSelect(UserSelect), Resize(Resize),
+	Cursor(Cursor), ScrollBehavior(ScrollBehavior), PointerEvents(PointerEvents),
+
+	// text
+	Color(ColorValue),
+	Direction(Direction),
+	UnicodeBidi(UnicodeBidi),
+	WhiteSpace(WhiteSpace),
+	WritingMode(WritingMode),
+	HangingPunctuation(HangingPunctuation),
+	Hyphens(Hyphens),
+	TextAlign(TextAlign), TextAlignLast(TextAlignLast), TextJustify(TextJustify),
+	BreakAfter(BreakAfter), BreakBefore(BreakBefore), BreakInside(BreakInside),
+	WordBreak(WordBreak), WordWrap(WordWrap),
+	FontFamily(FontFamily), FontStyle(FontStyle), FontVariant(FontVariant), FontSize(FontSize),
+	FontWeight(FontWeight), FontStretch(FontStretch), FontKerning(FontKerning),
+	TextTransform(TextTransform),
+	WordSpacing(WordSpacing),
+	TextIndent(UnitValue),
+	TextOverflow(TextOverflow),
+	OverflowWrap(OverflowWrap),
+	VerticalAlign(VerticalAlign),
+	LineHeight(LineHeight),
+	LetterSpacing(LetterSpacing),
+	TabSize(TabSize),
+	TextDecorationStyle(TextDecorationStyle), TextDecorationLine(TextDecorationLine), TextDecorationColor(ColorValue), TextRendering(TextRendering),
+
 	// etc
+	BoxDecorationBreak(BoxDecorationBreak),
+	ListStyleType(ListStyleType),
+	MixBlendMode(MixBlendMode),
+	Isolation(Isolation),
+	CaptionSide(CaptionSide),
+	EmptyCells(EmptyCells),
+	TableLayout(TableLayout),
+	Content(Content),
+	ObjectFit(ObjectFit),
+	Transform(Transform), TransformStyle(TransformStyle),
+	Filter(Filter),
+	BackfaceVisibility(BackfaceVisibility),
+	Perspective(Perspective),
 }
 
 #[rustfmt::skip]
@@ -202,7 +252,7 @@ impl ToString for Property {
 		match self {
 			Self::Raw(x) => x.clone(),
 
-			// different properties that essentially take the same argument
+			// different properties that take the same argument
 			Self::MarginLeft(x)              => format!("margin-left:{};", x.to_string()),
 			Self::MarginRight(x)             => format!("margin-right:{};", x.to_string()),
 			Self::MarginTop(x)               => format!("margin-top:{};", x.to_string()),
@@ -250,9 +300,15 @@ impl ToString for Property {
 			Self::TextDecorationColor(x)     => format!("text-decoration-color:{};", x.to_string()),
 			Self::Fill(x)                    => format!("fill:{};", x.to_string()),
 			Self::Stroke(x)                  => format!("stroke:{};", x.to_string()),
+			Self::OutlineColor(x)            => format!("outline-color:{};", x.to_string()),
 
 			Self::GridTemplateColumns(x)     => format!("grid-template-columns:{};", x.to_string()),
 			Self::GridTemplateRows(x)        => format!("grid-template-rows:{};", x.to_string()),
+			Self::GridAutoColumns(x)         => format!("grid-auto-columns:{};", x.to_string()),
+			Self::GridAutoRows(x)            => format!("grid-auto-rows:{};", x.to_string()),
+
+			Self::TextIndent(x)              => format!("text-indent:{};", x.to_string()),
+			Self::OutlineOffset(x)           => format!("outline-offset:{};", x.to_string()),
 
 			// different properties that have specific to them arguments
 			// basis/grow/shrink/order kind of take the same, but basis and shrink are 1 by default while others are 0 so /shrug
@@ -314,7 +370,6 @@ impl ToString for Property {
 			Self::FontKerning(x)             => x.to_string(),
 			Self::FontFamily(x)              => x.to_string(),
 			Self::WordSpacing(x)             => x.to_string(),
-			Self::TextIndent(x)              => x.to_string(),
 			Self::TextOverflow(x)            => x.to_string(),
 			Self::VerticalAlign(x)           => x.to_string(),
 			Self::LineHeight(x)              => x.to_string(),
@@ -322,7 +377,6 @@ impl ToString for Property {
 			Self::TabSize(x)                 => x.to_string(),
 			Self::BoxDecorationBreak(x)      => x.to_string(),
 			Self::OutlineWidth(x)            => x.to_string(),
-			Self::OutlineColor(x)            => x.to_string(),
 			Self::OutlineStyle(x)            => x.to_string(),
 			Self::Content(x)                 => x.to_string(),
 			Self::Opacity(x)                 => x.to_string(),
@@ -357,6 +411,7 @@ impl ToString for Property {
 			Self::GridColumnEnd(x)           => x.to_string(),
 			Self::GridRowStart(x)            => x.to_string(),
 			Self::GridRowEnd(x)              => x.to_string(),
+			Self::OverflowWrap(x)            => x.to_string(),
 		}
 	}
 }
@@ -432,7 +487,6 @@ from_properties! {
 	FontKerning,
 	FontFamily,
 	WordSpacing,
-	TextIndent,
 	TextOverflow,
 	VerticalAlign,
 	LineHeight,
@@ -440,14 +494,40 @@ from_properties! {
 	TabSize,
 	BoxDecorationBreak,
 	OutlineWidth,
-	OutlineColor,
+	OutlineStyle,
 	Content,
 	Opacity,
 	Perspective,
 	BackfaceVisibility,
 	TextDecorationStyle,
 	TextDecorationLine,
+	TextRendering,
+	VectorEffect,
+	BackgroundImage,
+	BackgroundSize,
+	AnimationDirection,
+	AnimationFillMode,
+	AnimationIterationCount,
+	AnimationName,
+	AnimationPlayState,
+	AnimationTimingFunction,
 	Transform,
+	Filter,
+	BorderImageSource,
+	BorderImageSlice,
+	BorderImageWidth,
+	BorderImageOutset,
+	BorderImageRepeat,
+	ClipPath,
+	BackgroundPosition,
+	BackgroundOrigin,
+	GridAutoFlow,
+	RowGap,
+	ColumnGap,
+	GridColumnStart,
+	GridColumnEnd,
+	GridRowStart,
+	GridRowEnd,
 }
 
 css_macros::easy_enum! {box-sizing content-box border-box}
@@ -468,9 +548,9 @@ css_macros::easy_enum! {table-layout auto fixed}
 css_macros::easy_enum! {all}
 css_macros::easy_enum! {cursor auto alias all-scroll cell context-menu col-resize copy crosshair default e-resize ew-resize grab grabbing help move n-resize ne-resize nesw-resize ns-resize nw-resize nwse-resize no-drop none not-allowed pointer progress row-resize s-resize se-resize sw-resize text vertical-text w-resize wait zoom-in zoom-out}
 css_macros::easy_enum! {content normal none counter open-quote close-quote no-open-quote no-close-quote $}
-css_macros::easy_enum! {opacity #}
+css_macros::easy_enum! {opacity [float]}
 css_macros::easy_enum! {perspective none @}
 css_macros::easy_enum! {backface-visibility visible hidden}
 css_macros::easy_enum! {overflow-x visible hidden scroll auto}
 css_macros::easy_enum! {overflow-y visible hidden scroll auto}
-css_macros::easy_enum! {clip-path none margin-box border-box padding-box content-box fill-box stroke-box view-box $}
+css_macros::easy_enum! {clip-path none margin-box border-box padding-box content-box fill-box stroke-box view-box [raw]}

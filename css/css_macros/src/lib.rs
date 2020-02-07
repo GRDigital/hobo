@@ -9,6 +9,7 @@ enum Value {
 	String,
 	Number,
 	Float,
+	Raw,
 }
 
 #[proc_macro]
@@ -52,6 +53,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 				"$" => Value::String,
 				"#" => Value::Number,
 				"[float]" => Value::Float,
+				"[raw]" => Value::Raw,
 				x => Value::EnumVariant(x.to_owned()),
 			})
 			.clone()
@@ -74,6 +76,9 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		},
 		Value::String => {
 			quote! {String(String),}
+		},
+		Value::Raw => {
+			quote! {Raw(String),}
 		},
 		Value::Number => {
 			quote! {Number(i32),}
@@ -98,8 +103,12 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 			}
 		},
 		Value::String => {
-			let css_format_string = format!("{}:{{}};", property);
+			let css_format_string = format!(r#"{}:"{{}}";"#, property);
 			quote! {Self::String(x) => format!(#css_format_string, x),}
+		},
+		Value::Raw => {
+			let css_format_string = format!("{}:{{}};", property);
+			quote! {Self::Raw(x) => format!(#css_format_string, x),}
 		},
 		Value::Number | Value::Float => {
 			let css_format_string = format!("{}:{{}};", property);
@@ -122,11 +131,14 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		Value::String => {
 			quote! {($str:expr) => { $crate::Property::#property_camel($crate::#property_camel::String($str.into())) };}
 		},
+		Value::Raw => {
+			quote! {($str:expr) => { $crate::Property::#property_camel($crate::#property_camel::Raw($str.into())) };}
+		},
 		Value::Number => {
-			quote! {($str:expr) => { $crate::Property::#property_camel($crate::#property_camel::Number($str)) };}
+			quote! {($num:expr) => { $crate::Property::#property_camel($crate::#property_camel::Number($num)) };}
 		},
 		Value::Float => {
-			quote! {($str:expr) => { $crate::Property::#property_camel($crate::#property_camel::Number(unsafe { $crate::units::F32::unchecked_new($str as _) })) };}
+			quote! {($num:expr) => { $crate::Property::#property_camel($crate::#property_camel::Number(unsafe { $crate::units::F32::unchecked_new($num as _) })) };}
 		},
 	});
 
@@ -165,12 +177,14 @@ pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let res = quote!(
 		#[macro_export]
 		macro_rules! #property_snek {
-			(initial)                 => {$crate::Property::#property_camel($crate::Color::Initial)};
-			(inherit)                 => {$crate::Property::#property_camel($crate::Color::Inherit)};
-			(...$tuple:expr)          => {$crate::Property::#property_camel($crate::Color::Rgba($tuple.0, $tuple.1, $tuple.2, $tuple.3))};
-			($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::#property_camel($crate::Color::Rgba($r, $g, $b, $a))};
-			($r:tt $g:tt $b:tt)       => {$crate::Property::#property_camel($crate::Color::Rgba($r, $g, $b, 255))};
-			($rgb:expr)               => {$crate::Property::#property_camel($crate::Color::Rgba($rgb, $rgb, $rgb, 255))};
+			(initial)                 => {$crate::Property::#property_camel($crate::ColorValue::Initial)};
+			(inherit)                 => {$crate::Property::#property_camel($crate::ColorValue::Inherit)};
+			(unset)                   => {$crate::Property::#property_camel($crate::ColorValue::Unset)};
+			(revert)                  => {$crate::Property::#property_camel($crate::ColorValue::Revert)};
+			(...$tuple:expr)          => {$crate::Property::#property_camel($crate::ColorValue::Rgba($tuple.0, $tuple.1, $tuple.2, $tuple.3))};
+			($r:tt $g:tt $b:tt $a:tt) => {$crate::Property::#property_camel($crate::ColorValue::Rgba($r, $g, $b, $a))};
+			($r:tt $g:tt $b:tt)       => {$crate::Property::#property_camel($crate::ColorValue::Rgba($r, $g, $b, 255))};
+			($rgb:expr)               => {$crate::Property::#property_camel($crate::ColorValue::Rgba($rgb, $rgb, $rgb, 255))};
 		}
 	);
 

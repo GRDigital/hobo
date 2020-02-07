@@ -15,7 +15,7 @@ css_macros::easy_enum! {break-after auto avoid-page page left right avoid-column
 css_macros::easy_enum! {break-before auto avoid-page page left right avoid-column column}
 css_macros::easy_enum! {break-inside auto avoid avoid-page avoid-column}
 css_macros::easy_enum! {font-variant normal small-caps}
-css_macros::easy_enum! {word-break normal break-all keep-all break-word}
+css_macros::easy_enum! {word-break normal break-all keep-all}
 css_macros::easy_enum! {word-wrap normal break-word}
 css_macros::easy_enum! {font-style normal italic oblique}
 css_macros::easy_enum! {font-size medium xx-small x-small small large x-large xx-large smaller larger @}
@@ -23,7 +23,6 @@ css_macros::easy_enum! {text-transform none capitalize uppercase lowercase}
 css_macros::easy_enum! {font-kerning auto normal none}
 css_macros::easy_enum! {font-family $}
 css_macros::easy_enum! {word-spacing normal @}
-css_macros::easy_enum! {text-indent @}
 css_macros::easy_enum! {text-overflow clip ellipsis $}
 css_macros::easy_enum! {vertical-align baseline sub super top text-top middle bottom text-bottom @}
 css_macros::easy_enum! {line-height normal [float] @}
@@ -32,6 +31,7 @@ css_macros::easy_enum! {tab-size #}
 css_macros::easy_enum! {text-decoration-style solid double dotted dashed wavy}
 css_macros::easy_enum! {text-decoration-line none underline overline line-through}
 css_macros::easy_enum! {text-rendering auto optimizeSpeed optimizeLegibility geometricPrecision}
+css_macros::easy_enum! {overflow-wrap normal break-word anywhere}
 css_macros::easy_color! {color}
 css_macros::easy_color! {text-decoration-color}
 
