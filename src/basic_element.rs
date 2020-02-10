@@ -21,19 +21,19 @@ impl<T: AsRef<web_sys::Element> + 'static> BasicElement<T> {
 	}
 }
 
+impl<T: AsRef<web_sys::Node> + AsRef<web_sys::Element> + wasm_bindgen::JsCast + 'static> BasicElement<T> {
+	pub fn clone_html(&self) -> Self {
+		use wasm_bindgen::JsCast;
+
+		let node: &web_sys::Node = self.element.as_ref();
+		Self { element: node.clone_node_with_deep(true).unwrap().dyn_into().unwrap(), children: vec![], event_handlers: crate::EventHandlers::default() }
+	}
+}
+
 impl<T: AsRef<web_sys::Element> + 'static> Drop for BasicElement<T> {
 	fn drop(&mut self) { self.element.as_ref().remove(); }
 }
 
 impl<T: AsRef<web_sys::Element> + 'static> Element for BasicElement<T> {
 	fn element(&self) -> &web_sys::Element { &self.element.as_ref() }
-}
-
-impl<T: AsRef<web_sys::Node> + AsRef<web_sys::Element> + wasm_bindgen::JsCast + 'static> Clone for BasicElement<T> {
-	fn clone(&self) -> Self {
-		use wasm_bindgen::JsCast;
-
-		let node: &web_sys::Node = self.element.as_ref();
-		Self { element: node.clone_node_with_deep(true).unwrap().dyn_into().unwrap(), children: vec![], event_handlers: crate::EventHandlers::default() }
-	}
 }
