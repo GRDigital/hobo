@@ -145,7 +145,7 @@ generate_events! {
 	web_sys::Event,         scroll,      OnScroll,      on_scroll;
 }
 
-#[extend::ext(name = RawSetClass)]
+#[extend::ext(pub, name = RawSetClass)]
 impl web_sys::Element {
 	fn set_class<'a>(self, style: impl Into<Cow<'a, css::Style>>) {
 		CONTEXT.with(move |ctx| {
@@ -160,6 +160,17 @@ impl web_sys::Element {
 			let existing_class = self.get_attribute(web_str::class()).unwrap_or_else(String::new);
 			self.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).unwrap();
 		})
+	}
+
+	fn set_style(&self, style: Vec<css::Property>) {
+		web_sys::console::log_1(self);
+		log::info!("SETTING STYLE {}", style.iter().map(std::string::ToString::to_string).collect::<String>());
+		let r = self.set_attribute(web_str::style(), &style.iter().map(std::string::ToString::to_string).collect::<String>());
+		log::info!("SET OK? {:?}", r);
+	}
+
+	fn remove_style(&self) {
+		let _ = self.remove_attribute(web_str::style());
 	}
 }
 

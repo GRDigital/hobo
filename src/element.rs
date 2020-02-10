@@ -1,4 +1,4 @@
-use crate::web_str;
+use crate::{web_str, RawSetClass};
 use std::hash::{Hash, Hasher};
 use std::borrow::Cow;
 
@@ -33,11 +33,11 @@ pub trait Element: Drop {
 	}
 
 	fn set_style(&self, style: Vec<css::Property>) {
-		let _ = self.element().set_attribute(web_str::style(), &style.iter().map(std::string::ToString::to_string).collect::<String>());
+		self.element().set_style(style);
 	}
 
 	fn remove_style(&self) {
-		let _ = self.element().remove_attribute(web_str::style());
+		self.element().remove_style();
 	}
 
 	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) -> &Self
