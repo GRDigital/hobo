@@ -32,6 +32,14 @@ pub trait Element: Drop {
 		})
 	}
 
+	fn set_style(&self, style: Vec<css::Property>) {
+		let _ = self.element().set_attribute(web_str::style(), &style.iter().map(std::string::ToString::to_string).collect::<String>());
+	}
+
+	fn remove_style(&self) {
+		let _ = self.element().remove_attribute(web_str::style());
+	}
+
 	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) -> &Self
 	where
 		Self: Sized + 'static,
