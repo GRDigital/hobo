@@ -1,4 +1,4 @@
-#![feature(proc_macro_hygiene)]
+#![feature(proc_macro_hygiene, unsized_locals)]
 #![recursion_limit="1024"]
 
 mod basic_element;
