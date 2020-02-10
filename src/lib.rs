@@ -163,10 +163,7 @@ impl web_sys::Element {
 	}
 
 	fn set_style(&self, style: Vec<css::Property>) {
-		web_sys::console::log_1(self);
-		log::info!("SETTING STYLE {}", style.iter().map(std::string::ToString::to_string).collect::<String>());
-		let r = self.set_attribute(web_str::style(), &style.iter().map(std::string::ToString::to_string).collect::<String>());
-		log::info!("SET OK? {:?}", r);
+		let _ = self.set_attribute(web_str::style(), &style.iter().map(std::string::ToString::to_string).collect::<String>());
 	}
 
 	fn remove_style(&self) {
