@@ -84,8 +84,66 @@ macro_rules! class {
 	};
 }
 
+// TODO: replace @font-face selector with regular rust struct
+/*
+pub enum FontDisplay {
+	Auto,
+	Block,
+	Swap,
+	Fallback,
+	Optional,
+}
+
+pub enum FontStretch {
+	UltraCondensed,
+	ExtraCondensed,
+	Condensed,
+	SemiCondensed,
+	Normal,
+	SemiExpanded,
+	Expanded,
+	ExtraExpanded,
+	UltraExpanded,
+	Percentage(f32),
+}
+
+pub enum FontStyle {
+	Normal,
+	Italic,
+	Oblique,
+	ObliqueAngle(f32),
+	ObliqueAngleRange(f32, f32),
+}
+
+pub enum FontWeight {
+	Normal,
+	Bold,
+	Number(u16),
+}
+
+pub struct FontFace {
+	font_family: String,
+	src: Vec<(String, String)>,
+	font_display: FontDisplay,
+	font_stretch: Vec<FontStretch>,
+	font_style: FontStyle,
+	font_weight: Vec<FontWeight>,
+	// font_variant:
+	// font-feature-settings
+	// font-variation-settings:
+	unicode_range: Vec<(u32, u32)>,
+}
+*/
+
 #[macro_export]
 macro_rules! rule {
+	// ((@font-face) { $($rules:tt),*$(,)* }) => {
+	//     $crate::Rule::FontFace {
+	//         $($tt:tt),*,
+	//         ...$crate::FontFace::default()
+	//     }
+	// };
+
 	// finished
 	(($($selector:tt)+) { $($rules:tt)* }) => {
 		$crate::Rule(
