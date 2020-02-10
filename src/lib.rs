@@ -1,4 +1,5 @@
 #![feature(proc_macro_hygiene)]
+#![recursion_limit="1024"]
 
 mod basic_element;
 mod element;
@@ -19,7 +20,7 @@ use std::{
 	hash::{Hash, Hasher},
 	borrow::Cow,
 };
-pub use svg_element::SvgElement;
+// pub use svg_element::SvgElement;
 use wasm_bindgen::{prelude::*, JsCast as _};
 pub use web_sys;
 pub use components as cmp;
@@ -162,25 +163,30 @@ impl web_sys::Element {
 	}
 }
 
+fn dom() -> web_sys::Document {
+	web_sys::window().unwrap().document().unwrap()
+}
+
 macro_rules! html_create {
 	($($name:ident, $t:ident),+$(,)*) => {
+		#[allow(non_snake_case)]
 		pub mod create {
-			fn dom() -> web_sys::Document {
-				web_sys::window().unwrap().document().unwrap()
-			}
+			use super::dom;
 
 			$(
-				pub fn $name() -> web_sys::$t { web_sys::$t::from(wasm_bindgen::JsValue::from(dom().create_element(crate::web_str::$name()).unwrap())) }
+				pub fn $name() -> web_sys::$t { web_sys::$t::from(wasm_bindgen::JsValue::from(dom().create_element(crate::web_str::$name()).expect("can't create element"))) }
 			)+
 		}
 
 		$(
+			#[allow(non_snake_case)]
 			impl basic_element::BasicElement<web_sys::$t> {
 				pub fn $name() -> Self {
 					BasicElement { element: create::$name(), children: vec![], event_handlers: EventHandlers::default() }
 				}
 			}
 
+			#[allow(non_snake_case)]
 			impl<'a> cmp::Builder<'a> {
 				pub fn $name(self) -> BasicElement<web_sys::$t> {
 					self.build(create::$name())
@@ -194,12 +200,10 @@ macro_rules! svg_create {
 	($($name:ident, $t:ident),+$(,)*) => {
 		#[allow(non_snake_case)]
 		pub mod create_svg {
-			fn dom() -> web_sys::Document {
-				web_sys::window().unwrap().document().unwrap()
-			}
+			use super::dom;
 
 			$(
-				pub fn $name() -> web_sys::$t { web_sys::$t::from(wasm_bindgen::JsValue::from(dom().create_element_ns(Some("http://www.w3.org/2000/svg"), crate::web_str::$name()).unwrap())) }
+				pub fn $name() -> web_sys::$t { web_sys::$t::from(wasm_bindgen::JsValue::from(dom().create_element_ns(Some(wasm_bindgen::intern("http://www.w3.org/2000/svg")), crate::web_str::$name()).expect("can't create svg element"))) }
 			)+
 		}
 
@@ -208,6 +212,13 @@ macro_rules! svg_create {
 			impl basic_element::BasicElement<web_sys::$t> {
 				pub fn $name() -> Self {
 					BasicElement { element: create_svg::$name(), children: vec![], event_handlers: EventHandlers::default() }
+				}
+			}
+
+			#[allow(non_snake_case)]
+			impl<'a> cmp::Builder<'a> {
+				pub fn $name(self) -> BasicElement<web_sys::$t> {
+					self.build_svg(create_svg::$name())
 				}
 			}
 		)+

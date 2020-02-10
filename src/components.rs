@@ -15,6 +15,7 @@ declare_basic_shortcuts! {
 	Anchor => HtmlAnchorElement,
 	IFrame => HtmlIFrameElement,
 	Element => HtmlElement,
+	Svg => SvgElement,
 }
 
 pub fn build<'a>() -> Builder<'a> {
@@ -62,6 +63,21 @@ impl<'a> Builder<'a> {
 		};
 		for child in &self.children {
 			html_element.append_child(child.element()).expect("Can't append child");
+		}
+		let cmp = crate::BasicElement { element, children: self.children, event_handlers: crate::EventHandlers::default() };
+		if let Some(x) = self.class { cmp.set_class(x); };
+		cmp
+	}
+
+	pub fn build_svg<T: AsRef<web_sys::Element> + AsRef<web_sys::SvgElement> + 'static>(self, element: T) -> crate::BasicElement<T> {
+		let svg_element: &web_sys::SvgElement = element.as_ref();
+		if let Some(x) = self.attributes {
+			for [k, v] in x {
+				svg_element.set_attribute(k, v).unwrap();
+			}
+		};
+		for child in &self.children {
+			svg_element.append_child(child.element()).expect("Can't append child");
 		}
 		let cmp = crate::BasicElement { element, children: self.children, event_handlers: crate::EventHandlers::default() };
 		if let Some(x) = self.class { cmp.set_class(x); };

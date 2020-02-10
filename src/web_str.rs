@@ -1,97 +1,92 @@
 #![allow(non_snake_case)]
 
-macro_rules! intern_strings {
-	($($name:ident, $s:expr);+$(;)*) => {$(
+macro_rules! intern_strings_line {
+	($name:ident, $s:expr) => {
 		#[inline(always)]
 		pub fn $name() -> &'static str { wasm_bindgen::intern($s) }
-	)+};
+	};
+	($name:ident) => {
+		#[inline(always)]
+		pub fn $name() -> &'static str { wasm_bindgen::intern(stringify!($name)) }
+	};
+}
+
+macro_rules! intern_strings {
+	(
+		current = ()
+		rest = ($(;)*)
+	) => {};
+	(
+		current = ($($current:tt)*)
+		rest = (; $($rest:tt)*)
+	) => {
+		intern_strings_line! {$($current)*}
+		intern_strings! {
+			current = ()
+			rest = ($($rest)*)
+		}
+	};
+	(
+		current = ($($current:tt)*)
+		rest = ($tt:tt $($rest:tt)*)
+	) => {
+		intern_strings! {
+			current = ($($current)* $tt)
+			rest = ($($rest)*)
+		}
+	};
+	($($tt:tt)+) => {
+		intern_strings! {
+			current = ()
+			rest = ($($tt)+)
+		}
+	};
 }
 
 intern_strings! {
-	class, "class";
+	class;
 	r#type, "type";
-	range, "range";
-	button, "button";
-	min, "min";
-	max, "max";
-	value, "value";
-	style, "style";
-	placeholder, "placeholder";
-	src, "src";
-	href, "href";
-	disabled, "disabled";
-	selected, "selected";
-	hidden, "hidden";
-	beforebegin, "beforebegin";
-	afterbegin, "afterbegin";
-	beforeend, "beforeend";
-	afterend, "afterend";
-	checkbox, "checkbox";
-	radio, "radio";
-	accept, "accept";
-	alt, "alt";
-	checked, "checked";
-	step, "step";
-	number, "number";
-	multiple, "multiple";
-	readonly, "readonly";
-	required, "required";
-	reversed, "reversed";
-	rows, "rows";
-	tabindex, "tabindex";
-	target, "target";
-	width, "width";
-	height, "height";
-	wrap, "wrap";
-	autofocus, "autofocus";
-	autoplay, "autoplay";
+	range;
+	button;
+	min; max; value; step;
+	style;
+	placeholder;
+	src;
+	href;
+	disabled; selected;
+	hidden;
+	beforebegin; afterbegin; beforeend; afterend;
+	checkbox; radio;
+	accept;
+	alt;
+	checked;
+	number;
+	multiple;
+	readonly;
+	required;
+	reversed;
+	rows;
+	tabindex;
+	target;
+	width; height;
+	wrap;
+	autofocus; autoplay;
 	r#async, "async";
-	autocomplete, "autocomplete";
-	download, "download";
-	draggable, "draggable";
-	dropzone, "dropzone";
-	id, "id";
+	autocomplete;
+	download;
+	draggable;
+	dropzone;
+	id;
 
 	// events
-	click, "click";
-	contextmenu, "contextmenu";
-	dblclick, "dblclick";
-	mousedown, "mousedown";
-	mouseenter, "mouseenter";
-	mouseleave, "mouseleave";
-	mousemove, "mousemove";
-	mouseover, "mouseover";
-	mouseout, "mouseout";
-	mouseup, "mouseup";
-	change, "change";
-	keydown, "keydown";
-	keyup, "keyup";
-	scroll, "scroll";
+	click; contextmenu; dblclick; mousedown; mouseenter;
+	mouseleave; mousemove; mouseover; mouseout; mouseup;
+	change; keydown; keyup; scroll;
 
 	// elements
-	div, "div";
-	span, "span";
-	input, "input";
-	a, "a";
-	img, "img";
-	textarea, "textarea";
-	script, "script";
-	object, "object";
-	iframe, "iframe";
-	embed, "embed";
-	select, "select";
-	option, "option";
-	nav, "nav";
-	filter, "filter";
-	svg, "svg";
-	feColorMatrix, "feColorMatrix";
-	footer, "footer";
-	address, "address";
-	h1, "h1";
-	h2, "h2";
-	h3, "h3";
-	h4, "h4";
-	h5, "h5";
-	h6, "h6";
-	p, "p";
+	div; span; input; a; img; p;
+	textarea; script; object; iframe; embed;
+	select; option; nav; filter; svg;
+	feColorMatrix; footer; address;
+	h1; h2; h3; h4; h5; h6;
 }
