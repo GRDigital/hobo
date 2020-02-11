@@ -193,14 +193,16 @@ macro_rules! html_create {
 					BasicElement { element: create::$name(), children: vec![], event_handlers: EventHandlers::default() }
 				}
 			}
+		)+
 
-			#[allow(non_snake_case)]
-			impl<'a> cmp::Builder<'a> {
+		#[allow(non_snake_case)]
+		impl<'a> cmp::Builder<'a> {
+			$(
 				pub fn $name(self) -> BasicElement<web_sys::$t> {
 					self.build(create::$name())
 				}
-			}
-		)+
+			)+
+		}
 	};
 }
 
@@ -222,14 +224,16 @@ macro_rules! svg_create {
 					BasicElement { element: create_svg::$name(), children: vec![], event_handlers: EventHandlers::default() }
 				}
 			}
+		)+
 
-			#[allow(non_snake_case)]
-			impl<'a> cmp::Builder<'a> {
+		#[allow(non_snake_case)]
+		impl<'a> cmp::Builder<'a> {
+			$(
 				pub fn $name(self) -> BasicElement<web_sys::$t> {
 					self.build_svg(create_svg::$name())
 				}
-			}
-		)+
+			)+
+		}
 	};
 }
 
