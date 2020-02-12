@@ -26,8 +26,6 @@ pub trait Element: Drop {
 			let element = self.element();
 			let element_class = ctx.style_storage.fetch(element, style);
 			element.set_attribute(web_str::class(), &format!("{} {}", Self::class(), element_class)).unwrap();
-			// TODO:
-			// ctx.classes.borrow_mut().insert(0, element_class);
 			self
 		})
 	}
@@ -42,15 +40,13 @@ pub trait Element: Drop {
 
 	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) -> &Self
 	where
-		Self: Sized + 'static,
+		Self: Sized,
 	{
 		super::CONTEXT.with(move |ctx| {
 			let element = self.element();
 			let element_class = ctx.style_storage.fetch(element, style);
 			let existing_class = element.get_attribute(web_str::class()).unwrap_or_else(String::new);
 			element.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).unwrap();
-			// TODO:
-			// ctx.classes.borrow_mut().insert(0, element_class);
 			self
 		})
 	}
