@@ -22,8 +22,6 @@ use std::{
 	hash::{Hash, Hasher},
 	borrow::Cow,
 };
-// pub use svg_element::SvgElement;
-// use wasm_bindgen::{prelude::*, JsCast as _};
 pub use web_sys;
 pub use components as cmp;
 pub use create::*;
