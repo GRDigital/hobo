@@ -1,45 +1,16 @@
 #![allow(non_snake_case)]
 
-macro_rules! intern_strings_line {
-	($name:ident, $s:expr) => {
+macro_rules! intern_strings {
+	() => {};
+	($name:ident, $s:expr; $($rest:tt)*) => {
 		#[inline(always)]
 		pub fn $name() -> &'static str { wasm_bindgen::intern($s) }
+		intern_strings! {$($rest)*}
 	};
-	($name:ident) => {
+	($name:ident; $($rest:tt)*) => {
 		#[inline(always)]
 		pub fn $name() -> &'static str { wasm_bindgen::intern(stringify!($name)) }
-	};
-}
-
-macro_rules! intern_strings {
-	(
-		current = ()
-		rest = ($(;)*)
-	) => {};
-	(
-		current = ($($current:tt)*)
-		rest = (; $($rest:tt)*)
-	) => {
-		intern_strings_line! {$($current)*}
-		intern_strings! {
-			current = ()
-			rest = ($($rest)*)
-		}
-	};
-	(
-		current = ($($current:tt)*)
-		rest = ($tt:tt $($rest:tt)*)
-	) => {
-		intern_strings! {
-			current = ($($current)* $tt)
-			rest = ($($rest)*)
-		}
-	};
-	($($tt:tt)+) => {
-		intern_strings! {
-			current = ()
-			rest = ($($tt)+)
-		}
+		intern_strings! {$($rest)*}
 	};
 }
 
