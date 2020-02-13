@@ -52,6 +52,53 @@ impl ToString for BorderWidth {
 	}
 }
 
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Default)]
+pub struct BoxShadowEffect {
+	pub inset: bool,
+	pub offset_x: Unit,
+	pub offset_y: Unit,
+	pub blur_radius: Unit,
+	pub spread_radius: Unit,
+	pub color: (u8, u8, u8, u8),
+}
+
+impl ToString for BoxShadowEffect {
+	fn to_string(&self) -> String {
+		format!(
+			"{}{} {} {} {} #{:02x}{:02x}{:02x}{:02x}",
+			if self.inset { "inset " } else { "" },
+			self.offset_x.to_string(),
+			self.offset_y.to_string(),
+			self.blur_radius.to_string(),
+			self.spread_radius.to_string(),
+			self.color.0, self.color.1, self.color.2, self.color.3,
+		)
+	}
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub enum BoxShadow {
+	None,
+	Initial,
+	Inherit,
+	Unset,
+	Revert,
+	Some(Vec<BoxShadowEffect>),
+}
+
+impl ToString for BoxShadow {
+	fn to_string(&self) -> String {
+		match self {
+			Self::None    => "box-shadow:none;".to_owned(),
+			Self::Initial => "box-shadow:initial;".to_owned(),
+			Self::Inherit => "box-shadow:inherit;".to_owned(),
+			Self::Unset   => "box-shadow:unset;".to_owned(),
+			Self::Revert  => "box-shadow:revert;".to_owned(),
+			Self::Some(x) => format!("box-shadow:{};", x.iter().map(std::string::ToString::to_string).collect::<Vec<_>>().join(",")),
+		}
+	}
+}
+
 #[rustfmt::skip]
 #[macro_export]
 #[doc(hidden)]

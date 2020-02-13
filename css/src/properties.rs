@@ -232,6 +232,7 @@ pub enum Property {
 	BorderCollapse(BorderCollapse),
 	OutlineWidth(OutlineWidth), OutlineColor(ColorValue), OutlineStyle(OutlineStyle),
 	OutlineOffset(UnitValue),
+	BoxShadow(BoxShadow),
 
 	// animation
 	AnimationDirection(AnimationDirection),
@@ -458,6 +459,7 @@ impl ToString for Property {
 			Self::GridRowStart(x)            => x.to_string(),
 			Self::GridRowEnd(x)              => x.to_string(),
 			Self::OverflowWrap(x)            => x.to_string(),
+			Self::BoxShadow(x)               => x.to_string(),
 		}
 	}
 }
@@ -574,6 +576,7 @@ from_properties! {
 	GridColumnEnd,
 	GridRowStart,
 	GridRowEnd,
+	BoxShadow,
 }
 
 css_macros::easy_enum! {box-sizing content-box border-box}
