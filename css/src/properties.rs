@@ -11,6 +11,7 @@
 #[macro_use] mod transform;
 #[macro_use] mod filter;
 #[macro_use] mod grid;
+#[macro_use] mod clip_path;
 
 use crate::prelude::*;
 pub use background::*;
@@ -27,6 +28,7 @@ pub use animation::*;
 pub use transform::*;
 pub use filter::*;
 pub use grid::*;
+pub use clip_path::*;
 
 pub use Property::{
 	MarginLeft,
@@ -184,6 +186,20 @@ impl ToString for Image {
 			Self::Url(x) => format!(r#"url("{}")"#, x),
 			Self::LinearGradient(x) => format!("linear-gradient({})", x.to_string()),
 			Self::RepeatingLinearGradient(x) => format!("repeating-linear-gradient({})", x.to_string()),
+		}
+	}
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub enum BasicShape {
+	Polygon(Vec<(Unit, Unit)>),
+	// etc
+}
+
+impl ToString for BasicShape {
+	fn to_string(&self) -> String {
+		match self {
+			Self::Polygon(x) => format!("polygon({})", x.iter().map(|(x, y)| format!("{} {}", x.to_string(), y.to_string())).collect::<Vec<_>>().join(",")),
 		}
 	}
 }
@@ -602,4 +618,3 @@ css_macros::easy_enum! {perspective none @}
 css_macros::easy_enum! {backface-visibility visible hidden}
 css_macros::easy_enum! {overflow-x visible hidden scroll auto}
 css_macros::easy_enum! {overflow-y visible hidden scroll auto}
-css_macros::easy_enum! {clip-path none margin-box border-box padding-box content-box fill-box stroke-box view-box [raw]}
