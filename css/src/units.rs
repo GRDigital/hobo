@@ -1,7 +1,8 @@
 pub type F32 = ordered_float::NotNan<f32>;
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, smart_default::SmartDefault)]
 pub enum Unit {
+	#[default]
 	Zero,
 	Px(F32),
 	Em(F32),
