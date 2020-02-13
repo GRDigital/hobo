@@ -2,10 +2,6 @@ use crate::prelude::*;
 
 css_macros::easy_enum! {row-gap normal @}
 css_macros::easy_enum! {column-gap normal @}
-css_macros::easy_enum! {grid-column-start auto #}
-css_macros::easy_enum! {grid-column-end auto #}
-css_macros::easy_enum! {grid-row-start auto #}
-css_macros::easy_enum! {grid-row-end auto #}
 
 /*
 css::grid!(
@@ -15,6 +11,31 @@ css::grid!(
 	rows >> 1 fr,
 )
 */
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub enum GridSpan {
+	Auto,
+	Initial,
+	Inherit,
+	Unset,
+	Revert,
+	Span(i32),
+	Absolute(i32),
+}
+
+impl ToString for GridSpan {
+	fn to_string(&self) -> String {
+		match self {
+			Self::Auto => "auto".to_owned(),
+			Self::Initial => "initial".to_owned(),
+			Self::Inherit => "inherit".to_owned(),
+			Self::Unset => "unset".to_owned(),
+			Self::Revert => "revert".to_owned(),
+			Self::Span(x) => format!("span {}", x),
+			Self::Absolute(x) => x.to_string(),
+		}
+	}
+}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum GridAutoFlow {

@@ -42,6 +42,7 @@ pub use Property::{
 	BorderTopLeftRadius, BorderTopRightRadius, BorderBottomLeftRadius, BorderBottomRightRadius,
 
 	GridTemplateColumns, GridTemplateRows, GridAutoColumns, GridAutoRows,
+	GridColumnStart, GridColumnEnd, GridRowStart, GridRowEnd,
 
 	BackgroundColor,
 	Color,
@@ -203,7 +204,7 @@ pub enum Property {
 
 	// grid
 	GridTemplateColumns(GridTemplate), GridTemplateRows(GridTemplate), RowGap(RowGap), ColumnGap(ColumnGap),
-	GridColumnStart(GridColumnStart), GridColumnEnd(GridColumnEnd), GridRowStart(GridRowStart), GridRowEnd(GridRowEnd),
+	GridColumnStart(GridSpan), GridColumnEnd(GridSpan), GridRowStart(GridSpan), GridRowEnd(GridSpan),
 	GridAutoFlow(GridAutoFlow), GridAutoRows(GridAuto), GridAutoColumns(GridAuto),
 
 	// background
@@ -347,6 +348,11 @@ impl ToString for Property {
 			Self::TextIndent(x)              => format!("text-indent:{};", x.to_string()),
 			Self::OutlineOffset(x)           => format!("outline-offset:{};", x.to_string()),
 
+			Self::GridColumnStart(x)         => format!("grid-column-start:{};", x.to_string()),
+			Self::GridColumnEnd(x)           => format!("grid-column-end:{};", x.to_string()),
+			Self::GridRowStart(x)            => format!("grid-row-start:{};", x.to_string()),
+			Self::GridRowEnd(x)              => format!("grid-row-end:{};", x.to_string()),
+
 			// different properties that have specific to them arguments
 			// basis/grow/shrink/order kind of take the same, but basis and shrink are 1 by default while others are 0 so /shrug
 			Self::FlexWrap(x)                => x.to_string(),
@@ -444,10 +450,6 @@ impl ToString for Property {
 			Self::GridAutoFlow(x)            => x.to_string(),
 			Self::RowGap(x)                  => x.to_string(),
 			Self::ColumnGap(x)               => x.to_string(),
-			Self::GridColumnStart(x)         => x.to_string(),
-			Self::GridColumnEnd(x)           => x.to_string(),
-			Self::GridRowStart(x)            => x.to_string(),
-			Self::GridRowEnd(x)              => x.to_string(),
 			Self::OverflowWrap(x)            => x.to_string(),
 			Self::BoxShadow(x)               => x.to_string(),
 		}
@@ -562,10 +564,6 @@ from_properties! {
 	GridAutoFlow,
 	RowGap,
 	ColumnGap,
-	GridColumnStart,
-	GridColumnEnd,
-	GridRowStart,
-	GridRowEnd,
 	BoxShadow,
 }
 
