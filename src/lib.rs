@@ -28,6 +28,8 @@ pub use create::*;
 pub use svg_create::*;
 pub use events::*;
 
+pub type Color = (u8, u8, u8, u8);
+
 fn dom() -> web_sys::Document {
 	web_sys::window().unwrap().document().unwrap()
 }
