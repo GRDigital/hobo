@@ -32,6 +32,7 @@ css_macros::easy_enum! {text-decoration-style solid double dotted dashed wavy}
 css_macros::easy_enum! {text-decoration-line none underline overline line-through}
 css_macros::easy_enum! {text-rendering auto optimizeSpeed optimizeLegibility geometricPrecision}
 css_macros::easy_enum! {overflow-wrap normal break-word anywhere}
+css_macros::easy_enum! {font-weight normal bold bolder lighter #}
 css_macros::easy_color! {color}
 css_macros::easy_color! {text-decoration-color}
 
@@ -44,47 +45,3 @@ css_macros::easy_color! {text-decoration-color}
 //     transform upppercase,
 //     decoration double underline,
 // )
-
-#[rustfmt::skip]
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]
-pub enum FontWeight {
-	#[strum(to_string = "font-weight:normal;")] Normal,
-	#[strum(to_string = "font-weight:bold;")] Bold,
-	#[strum(to_string = "font-weight:bolder;")] Bolder,
-	#[strum(to_string = "font-weight:lighter;")] Lighter,
-	#[strum(to_string = "font-weight:100;")] Weight100,
-	#[strum(to_string = "font-weight:200;")] Weight200,
-	#[strum(to_string = "font-weight:300;")] Weight300,
-	#[strum(to_string = "font-weight:400;")] Weight400,
-	#[strum(to_string = "font-weight:500;")] Weight500,
-	#[strum(to_string = "font-weight:600;")] Weight600,
-	#[strum(to_string = "font-weight:700;")] Weight700,
-	#[strum(to_string = "font-weight:800;")] Weight800,
-	#[strum(to_string = "font-weight:900;")] Weight900,
-	#[strum(to_string = "font-weight:initial;")] Initial,
-	#[strum(to_string = "font-weight:inherit;")] Inherit,
-	#[strum(to_string = "font-weight:unset;")] Unset,
-	#[strum(to_string = "font-weight:revert;")] Revert,
-}
-
-#[rustfmt::skip]
-#[macro_export]
-macro_rules! font_weight {
-	(normal)  => {$crate::Property::FontWeight($crate::FontWeight::Normal)};
-	(bold)    => {$crate::Property::FontWeight($crate::FontWeight::Bold)};
-	(bolder)  => {$crate::Property::FontWeight($crate::FontWeight::Bolder)};
-	(lighter) => {$crate::Property::FontWeight($crate::FontWeight::Lighter)};
-	(100)     => {$crate::Property::FontWeight($crate::FontWeight::Weight100)};
-	(200)     => {$crate::Property::FontWeight($crate::FontWeight::Weight200)};
-	(300)     => {$crate::Property::FontWeight($crate::FontWeight::Weight300)};
-	(400)     => {$crate::Property::FontWeight($crate::FontWeight::Weight400)};
-	(500)     => {$crate::Property::FontWeight($crate::FontWeight::Weight500)};
-	(600)     => {$crate::Property::FontWeight($crate::FontWeight::Weight600)};
-	(700)     => {$crate::Property::FontWeight($crate::FontWeight::Weight700)};
-	(800)     => {$crate::Property::FontWeight($crate::FontWeight::Weight800)};
-	(900)     => {$crate::Property::FontWeight($crate::FontWeight::Weight900)};
-	(initial) => {$crate::Property::FontWeight($crate::FontWeight::Initial)};
-	(inherit) => {$crate::Property::FontWeight($crate::FontWeight::Inherit)};
-	(unset)   => {$crate::Property::FontWeight($crate::FontWeight::Unset)};
-	(revert)  => {$crate::Property::FontWeight($crate::FontWeight::Revert)};
-}
