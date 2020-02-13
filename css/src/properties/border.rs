@@ -1,13 +1,37 @@
+use crate::prelude::*;
+
 css_macros::easy_enum! {border-collapse separate collapse}
 css_macros::easy_enum! {box-decoration-break slice clone}
 css_macros::easy_enum! {outline-width medium thin thick @}
 css_macros::easy_enum! {outline-style none hidden dotted dashed solid double groove ridge inset outset}
-css_macros::easy_enum! {border-image-source none [raw]}
 css_macros::easy_enum! {border-image-slice fill [raw]} // TODO:
 css_macros::easy_enum! {border-image-width auto [raw]} // TODO:
 css_macros::easy_enum! {border-image-outset [raw]} // TODO:
 css_macros::easy_enum! {border-image-repeat stretch repeat round space}
 css_macros::easy_color! {outline-color}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub enum BorderImageSource {
+	None,
+	Initial,
+	Inherit,
+	Unset,
+	Revert,
+	Some(Vec<crate::Image>),
+}
+
+impl ToString for BorderImageSource {
+	fn to_string(&self) -> String {
+		match self {
+			Self::None    => "border-image-source:none;".to_owned(),
+			Self::Initial => "border-image-source:initial;".to_owned(),
+			Self::Inherit => "border-image-source:inherit;".to_owned(),
+			Self::Unset   => "border-image-source:unset;".to_owned(),
+			Self::Revert  => "border-image-source:revert;".to_owned(),
+			Self::Some(x) => format!("border-image-source:{};", x.iter().map(std::string::ToString::to_string).collect::<Vec<_>>().join(",")),
+		}
+	}
+}
 
 #[rustfmt::skip]
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]
