@@ -142,6 +142,52 @@ impl ToString for UnitValue {
 	}
 }
 
+/*
+pub enum RadialGradientShape {
+	Circle,
+	Ellipse,
+	// ???
+}
+
+pub struct RadialGradient {
+	shape: RadialGradientShape,
+	center_point: Vec<[BackgroundPositionElement; 4]>,
+	stop_list: Vec<((u8, u8, u8, u8), Unit)>,
+}
+*/
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub struct LinearGradient {
+	pub angle: F32,
+	pub stop_list: Vec<((u8, u8, u8, u8), Unit)>,
+}
+
+impl ToString for LinearGradient {
+	fn to_string(&self) -> String {
+		format!("{}deg,{}", self.angle, self.stop_list.iter().map(|(color, stop)| format!("#{:02x}{:02x}{:02x}{:02x} {}", color.0, color.1, color.2, color.3, stop.to_string())).collect::<Vec<_>>().join(","))
+	}
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub enum Image {
+	Url(String),
+	LinearGradient(LinearGradient),
+	RepeatingLinearGradient(LinearGradient),
+	// RadialGradient(RadialGradient),
+	// RepeatingRadialGradient(RadialGradient),
+	// conic ??
+}
+
+impl ToString for Image {
+	fn to_string(&self) -> String {
+		match self {
+			Self::Url(x) => format!(r#"url("{}")"#, x),
+			Self::LinearGradient(x) => format!("linear-gradient({})", x.to_string()),
+			Self::RepeatingLinearGradient(x) => format!("repeating-linear-gradient({})", x.to_string()),
+		}
+	}
+}
+
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Property {
 	Raw(String),
