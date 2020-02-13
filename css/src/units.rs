@@ -2,6 +2,7 @@ pub type F32 = ordered_float::NotNan<f32>;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Unit {
+	Zero,
 	Px(F32),
 	Em(F32),
 	Rem(F32),
@@ -18,6 +19,7 @@ pub enum Unit {
 impl ToString for Unit {
 	fn to_string(&self) -> String {
 		match self {
+			Self::Zero       => "0".to_string(),
 			Self::Px(x)      => format!("{}px", x),
 			Self::Em(x)      => format!("{}em", x),
 			Self::Rem(x)     => format!("{}rem", x),
@@ -34,6 +36,7 @@ impl ToString for Unit {
 #[rustfmt::skip]
 #[macro_export]
 macro_rules! unit {
+	(0)                                      => { $crate::Unit::Zero };
 	(expr = ($($e:tt)+))                     => { $crate::Unit::Px(unsafe {      $crate::units::F32::unchecked_new(($($e)+) as _) }) };
 	(expr = ($($e:tt)+) px)                  => { $crate::Unit::Px(unsafe {      $crate::units::F32::unchecked_new(($($e)+) as _) }) };
 	(expr = ($($e:tt)+) em)                  => { $crate::Unit::Em(unsafe {      $crate::units::F32::unchecked_new(($($e)+) as _) }) };
