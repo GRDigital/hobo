@@ -40,12 +40,12 @@ pub trait Element: Drop {
 
 	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) -> &Self
 	where
-		Self: Sized,
+		Self: Sized+ 'static,
 	{
 		super::CONTEXT.with(move |ctx| {
 			let element = self.element();
 			let element_class = ctx.style_storage.fetch(element, style);
-			let existing_class = element.get_attribute(web_str::class()).unwrap_or_else(String::new);
+			let existing_class = element.get_attribute(web_str::class()).unwrap_or_else(Self::class);
 			element.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).unwrap();
 			self
 		})

@@ -17,7 +17,7 @@ macro_rules! svg_create {
 		impl<'a> cmp::Builder<'a> {
 			$(
 				pub fn $name(self) -> BasicElement<web_sys::$t> {
-					self.build_svg($name())
+					self.build_raw_svg($name())
 				}
 			)+
 		}

@@ -23,7 +23,7 @@ pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 
 // TODO: maybe only leave this and remove Element at all? and also maybe simplify somehow with set_inner_* accessors?
 #[proc_macro_derive(Component)]
-pub fn derive_new_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn derive_component(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = syn::parse_macro_input!(input as DeriveInput);
 	let name = input.ident;
 	let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();

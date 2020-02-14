@@ -17,7 +17,7 @@ macro_rules! html_create {
 		impl<'a> cmp::Builder<'a> {
 			$(
 				pub fn $name(self) -> BasicElement<web_sys::$t> {
-					self.build($name())
+					self.build_raw($name())
 				}
 			)+
 		}
