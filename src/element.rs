@@ -30,8 +30,11 @@ pub trait Element: Drop {
 		})
 	}
 
-	fn set_style(&self, style: Vec<css::Property>) {
-		self.element().set_style(style);
+	fn set_style<'a>(&self, style: impl Into<Cow<'a, [css::Property]>>)
+	where
+		Self: Sized,
+	{
+		self.element().set_style(style.into());
 	}
 
 	fn remove_style(&self) {

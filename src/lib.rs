@@ -102,8 +102,8 @@ impl web_sys::Element {
 		})
 	}
 
-	fn set_style(&self, style: Vec<css::Property>) {
-		let _ = self.set_attribute(web_str::style(), &style.iter().map(std::string::ToString::to_string).collect::<String>());
+	fn set_style<'a>(&self, style: impl Into<Cow<'a, [css::Property]>>) {
+		let _ = self.set_attribute(web_str::style(), &style.into().iter().map(std::string::ToString::to_string).collect::<String>());
 	}
 
 	fn remove_style(&self) {

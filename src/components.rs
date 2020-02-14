@@ -25,6 +25,7 @@ pub fn build<'a>() -> Builder<'a> {
 
 pub mod builder {
 	use crate::prelude::*;
+	use std::borrow::{BorrowMut, Cow};
 
 	pub enum BuilderChild<'a> {
 		Owned(Box<dyn crate::Element>),
@@ -35,8 +36,8 @@ pub mod builder {
 	pub struct Builder<'a> {
 		pub text: Option<&'a str>,
 		pub attributes: Option<Vec<[&'a str; 2]>>,
-		pub class: Option<std::borrow::Cow<'a, crate::css::Style>>,
-		pub style: Option<Vec<crate::css::Property>>,
+		pub class: Option<Cow<'a, crate::css::Style>>,
+		pub style: Option<Cow<'a, [crate::css::Property]>>,
 		pub children: Vec<BuilderChild<'a>>,
 	}
 
@@ -46,12 +47,12 @@ pub mod builder {
 			self
 		}
 
-		pub fn class(mut self, x: impl Into<std::borrow::Cow<'a, crate::css::Style>>) -> Self {
+		pub fn class(mut self, x: impl Into<Cow<'a, crate::css::Style>>) -> Self {
 			self.class = Some(x.into());
 			self
 		}
 
-		pub fn style(mut self, x: impl Into<Vec<crate::css::Property>>) -> Self {
+		pub fn style(mut self, x: impl Into<Cow<'a, [crate::css::Property]>>) -> Self {
 			self.style = Some(x.into());
 			self
 		}
@@ -73,7 +74,7 @@ pub mod builder {
 			self
 		}
 
-		pub fn build<T: AsRef<web_sys::Element> + 'static, E: std::borrow::BorrowMut<crate::BasicElement<T>>>(self, mut component: E) -> E {
+		pub fn build<T: AsRef<web_sys::Element> + 'static, E: BorrowMut<crate::BasicElement<T>>>(self, mut component: E) -> E {
 			{
 				let component = component.borrow_mut();
 				let element: &web_sys::Element = component.element.as_ref();
