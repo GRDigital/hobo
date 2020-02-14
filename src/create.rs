@@ -48,4 +48,6 @@ html_create![
 	h5, HtmlHeadingElement,
 	h6, HtmlHeadingElement,
 	p, HtmlParagraphElement,
+	ul, HtmlUListElement,
+	li, HtmlLiElement,
 ];
