@@ -77,9 +77,9 @@ pub mod builder {
 			{
 				let component = component.borrow_mut();
 				let element: &web_sys::Element = component.element.as_ref();
-				if let Some(html_element) = element.dyn_ref::<web_sys::HtmlElement>() {
-					if let Some(x) = self.text { html_element.set_inner_text(x) };
-				}
+				if let Some(x) = self.text {
+					element.unchecked_ref::<web_sys::HtmlElement>().set_inner_text(x)
+				};
 				if let Some(x) = self.attributes {
 					for [k, v] in x {
 						element.set_attribute(k, v).unwrap();
@@ -103,9 +103,9 @@ pub mod builder {
 		pub fn build_raw<T: AsRef<web_sys::Element> + 'static>(self, element: T) -> crate::BasicElement<T> {
 			{
 				let element: &web_sys::Element = element.as_ref();
-				if let Some(html_element) = element.dyn_ref::<web_sys::HtmlElement>() {
-					if let Some(x) = self.text { html_element.set_inner_text(x) };
-				}
+				if let Some(x) = self.text {
+					element.unchecked_ref::<web_sys::HtmlElement>().set_inner_text(x)
+				};
 				if let Some(x) = self.attributes {
 					for [k, v] in x {
 						element.set_attribute(k, v).unwrap();
