@@ -73,91 +73,50 @@ pub mod builder {
 			self
 		}
 
-		pub fn build<T: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement> + 'static, E: std::borrow::BorrowMut<crate::BasicElement<T>>>(self, mut element: E) -> E {
+		pub fn build<T: AsRef<web_sys::Element> + 'static, E: std::borrow::BorrowMut<crate::BasicElement<T>>>(self, mut component: E) -> E {
 			{
-				let element = element.borrow_mut();
-				let html_element: &web_sys::HtmlElement = element.element.as_ref();
-				if let Some(x) = self.text { html_element.set_inner_text(x) };
+				let component = component.borrow_mut();
+				let element: &web_sys::Element = component.element.as_ref();
+				if let Some(html_element) = element.dyn_ref::<web_sys::HtmlElement>() {
+					if let Some(x) = self.text { html_element.set_inner_text(x) };
+				}
 				if let Some(x) = self.attributes {
 					for [k, v] in x {
-						html_element.set_attribute(k, v).unwrap();
+						element.set_attribute(k, v).unwrap();
 					}
 				};
 				for child in self.children.into_iter() {
 					match child {
 						BuilderChild::Owned(x) => {
-							element.append(&*x);
-							element.children.push(x);
+							component.append(&*x);
+							component.children.push(x);
 						},
-						BuilderChild::Ref(x) => element.append(x),
+						BuilderChild::Ref(x) => component.append(x),
 					}
 				}
-				if let Some(x) = self.class { element.add_class(x); };
-				if let Some(x) = self.style { element.set_style(x); };
+				if let Some(x) = self.class { component.add_class(x); };
+				if let Some(x) = self.style { component.set_style(x); };
 			}
-			element
+			component
 		}
 
-		pub fn build_svg<T: AsRef<web_sys::Element> + AsRef<web_sys::SvgElement> + 'static, E: std::borrow::BorrowMut<crate::BasicElement<T>>>(self, mut element: E) -> E {
+		pub fn build_raw<T: AsRef<web_sys::Element> + 'static>(self, element: T) -> crate::BasicElement<T> {
 			{
-				let element = element.borrow_mut();
-				let svg_element: &web_sys::SvgElement = element.element.as_ref();
+				let element: &web_sys::Element = element.as_ref();
+				if let Some(html_element) = element.dyn_ref::<web_sys::HtmlElement>() {
+					if let Some(x) = self.text { html_element.set_inner_text(x) };
+				}
 				if let Some(x) = self.attributes {
 					for [k, v] in x {
-						svg_element.set_attribute(k, v).unwrap();
+						element.set_attribute(k, v).unwrap();
 					}
 				};
-				for child in self.children.into_iter() {
-					match child {
-						BuilderChild::Owned(x) => {
-							element.append(&*x);
-							element.children.push(x);
-						},
-						BuilderChild::Ref(x) => element.append(x),
-					}
+				for child in &self.children {
+					element.append_child(match child {
+						BuilderChild::Owned(x) => x.element(),
+						BuilderChild::Ref(x) => x.element(),
+					}).expect("Can't append child");
 				}
-				if let Some(x) = self.class { element.add_class(x); };
-				if let Some(x) = self.style { element.set_style(x); };
-			}
-			element
-		}
-
-		pub fn build_raw<T: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement> + 'static>(self, element: T) -> crate::BasicElement<T> {
-			let html_element: &web_sys::HtmlElement = element.as_ref();
-			if let Some(x) = self.text { html_element.set_inner_text(x) };
-			if let Some(x) = self.attributes {
-				for [k, v] in x {
-					html_element.set_attribute(k, v).unwrap();
-				}
-			};
-			for child in &self.children {
-				html_element.append_child(match child {
-					BuilderChild::Owned(x) => x.element(),
-					BuilderChild::Ref(x) => x.element(),
-				}).expect("Can't append child");
-			}
-			let cmp = crate::BasicElement {
-				element,
-				children: self.children.into_iter().filter_map(|c| if let BuilderChild::Owned(x) = c { Some(x) } else { None }).collect::<Vec<_>>(),
-				event_handlers: crate::EventHandlers::default(),
-			};
-			if let Some(x) = self.class { cmp.set_class(x); };
-			if let Some(x) = self.style { cmp.set_style(x); };
-			cmp
-		}
-
-		pub fn build_raw_svg<T: AsRef<web_sys::Element> + AsRef<web_sys::SvgElement> + 'static>(self, element: T) -> crate::BasicElement<T> {
-			let svg_element: &web_sys::SvgElement = element.as_ref();
-			if let Some(x) = self.attributes {
-				for [k, v] in x {
-					svg_element.set_attribute(k, v).unwrap();
-				}
-			};
-			for child in &self.children {
-				svg_element.append_child(match child {
-					BuilderChild::Owned(x) => x.element(),
-					BuilderChild::Ref(x) => x.element(),
-				}).expect("Can't append child");
 			}
 			let cmp = crate::BasicElement {
 				element,
