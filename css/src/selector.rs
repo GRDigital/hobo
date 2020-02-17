@@ -47,7 +47,7 @@ impl ToString for PseudoClass {
 			Self::invalid        => ":invalid".to_owned(),
 			Self::nth_child(n)   => format!(":nth-child({})", n),
 			Self::nth_of_type(n) => format!(":nth-of-type({})", n),
-			Self::not(selector)  => format!(":not({}", selector.to_string()),
+			Self::not(selector)  => format!(":not({})", selector.to_string()),
 			Self::only_child     => ":only-child".to_owned(),
 			Self::read_only      => ":read-only".to_owned(),
 			Self::valid          => ":valid".to_owned(),
@@ -80,6 +80,7 @@ pub enum SelectorComponent {
 	ClassPlaceholder,
 	Any,
 	FontFace,
+	Attribute(String),
 }
 
 #[rustfmt::skip]
@@ -98,6 +99,7 @@ impl ToString for SelectorComponent {
 			Self::ClassPlaceholder => ".&".to_owned(),
 			Self::Any              => "*".to_owned(),
 			Self::FontFace         => "@font-face".to_owned(),
+			Self::Attribute(x)     => format!("[{}]", x),
 		}
 	}
 }
@@ -124,6 +126,7 @@ impl Selector {
 	pub fn adjacent(mut self)                         -> CombiningSelector     { self.0.push(SelectorComponent::Adjacent); CombiningSelector(self.0) }
 	pub fn and(mut self)                              -> CombiningSelector     { self.0.push(SelectorComponent::And); CombiningSelector(self.0) }
 	pub fn font_face()                                -> Self                  { Selector(vec![SelectorComponent::FontFace]) }
+	pub fn attribute(mut self, x: String)             -> Self                  { self.0.push(SelectorComponent::Attribute(x)); self }
 }
 
 #[rustfmt::skip]
@@ -135,6 +138,7 @@ impl CombiningSelector {
 	pub fn id(mut self, x: String)                    -> Selector              { self.0.push(SelectorComponent::Id(x)); Selector(self.0) }
 	pub fn pseudo_class(mut self, x: PseudoClass)     -> Selector              { self.0.push(SelectorComponent::PseudoClass(x)); Selector(self.0) }
 	pub fn pseudo_element(mut self, x: PseudoElement) -> Selector              { self.0.push(SelectorComponent::PseudoElement(x)); Selector(self.0) }
+	pub fn attribute(mut self, x: String)             -> Selector              { self.0.push(SelectorComponent::Attribute(x)); Selector(self.0) }
 }
 
 #[rustfmt::skip]
@@ -169,7 +173,8 @@ macro_rules! selector {
 	// finish
 	(@($acc:expr) $element:ident)                       => { $acc.element($crate::selector::Element::$element) };
 	(@($acc:expr) .($class:expr))                       => { $acc.class($class.into()) };
-	(@($acc:expr) [$ty:ty])                             => { $acc.class(<$ty>::class().into()) };
+	(@($acc:expr) .[$ty:ty])                            => { $acc.class(<$ty>::class().into()) };
+	(@($acc:expr) [$($attr:tt)+])                       => { $acc.attribute(stringify!($($attr)+).into()) };
 	(@($acc:expr) .&)                                   => { $acc.class_placeholder() };
 	(@($acc:expr) #($id:expr))                          => { $acc.id($id.into()) };
 	(@($acc:expr) :nth_child($n:expr))                  => { $acc.pseudo_class($crate::selector::PseudoClass::nth_child($n)) };
@@ -186,7 +191,8 @@ macro_rules! selector {
 	(@($acc:expr) , $($rest:tt)+)                       => { $crate::selector!(@($acc.and()) $($rest)+) };
 	(@($acc:expr) $element:ident $($rest:tt)+)          => { $crate::selector!(@($acc.element($crate::selector::Element::$element)) $($rest)+) };
 	(@($acc:expr) .($class:expr) $($rest:tt)+)          => { $crate::selector!(@($acc.class($class.into())) $($rest)+) };
-	(@($acc:expr) [$ty:ty] $($rest:tt)+)                => { $crate::selector!(@($acc.class(<$ty>::class().into())) $($rest)+) };
+	(@($acc:expr) .[$ty:ty] $($rest:tt)+)               => { $crate::selector!(@($acc.class(<$ty>::class().into())) $($rest)+) };
+	(@($acc:expr) [$($attr:tt)+] $($rest:tt)+)          => { $crate::selector!(@($acc.attribute(stringify!($($attr)+).into())) $($rest)+) };
 	(@($acc:expr) .& $($rest:tt)+)                      => { $crate::selector!(@($acc.class_placeholder()) $($rest)+) };
 	(@($acc:expr) #($id:expr) $($rest:tt)+)             => { $crate::selector!(@($acc.id($id.into())) $($rest)+) };
 	(@($acc:expr) :nth_child($n:expr) $($rest:tt)+)     => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::nth_child($n))) $($rest)+) };
@@ -199,7 +205,8 @@ macro_rules! selector {
 	// start
 	($element:ident $($rest:tt)+)                       => { $crate::selector!(@($crate::selector::Selector::build().element($crate::selector::Element::$element)) $($rest)+) };
 	(.($class:expr) $($rest:tt)+)                       => { $crate::selector!(@($crate::selector::Selector::build().class($class.into())) $($rest)+) };
-	([$ty:ty] $($rest:tt)+)                             => { $crate::selector!(@($crate::selector::Selector::build().class(<$ty>::class().into())) $($rest)+) };
+	(.[$ty:ty] $($rest:tt)+)                            => { $crate::selector!(@($crate::selector::Selector::build().class(<$ty>::class().into())) $($rest)+) };
+	([$($attr:tt)+] $($rest:tt)+)                       => { $crate::selector!(@($crate::selector::Selector::build().attribute(stringify!($($attr)+).into())) $($rest)+) };
 	(.& $($rest:tt)+)                                   => { $crate::selector!(@($crate::selector::Selector::build().class_placeholder()) $($rest)+) };
 	(#($id:expr) $($rest:tt)+)                          => { $crate::selector!(@($crate::selector::Selector::build().id($id.into())) $($rest)+) };
 	(* $($rest:tt)+)                                    => { $crate::selector!(@($crate::selector::Selector::build().any()) $($rest)+) };
@@ -208,7 +215,8 @@ macro_rules! selector {
 	(@font-face)                                        => { $crate::selector::Selector::font_face() };
 	($elem:ident)                                       => { $crate::selector::Selector::build().element($crate::selector::Element::$elem) };
 	(.($class:expr))                                    => { $crate::selector::Selector::build().class($class.into()) };
-	([$ty:ty])                                          => { $crate::selector::Selector::build().class(<$ty>::class().into()) };
+	(.[$ty:ty])                                         => { $crate::selector::Selector::build().class(<$ty>::class().into()) };
+	([$($attr:tt)+])                                    => { $crate::selector::Selector::build().attribute(stringify!($($attr)+).into()) };
 	(.&)                                                => { $crate::selector::Selector::build().class_placeholder() };
 	(#($id:expr))                                       => { $crate::selector::Selector::build().id($id.into()) };
 	(:nth_child($n:expr))                               => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::nth_child($n)) };
