@@ -23,6 +23,9 @@ macro_rules! make_stmt {
 	($expr:expr => $ident:ident) => {
 		let $ident = $expr.clone();
 	};
+	(mut $e:ident) => {
+		let mut $e = $e.clone();
+	};
 	($e:ident) => {
 		let $e = $e.clone();
 	};
