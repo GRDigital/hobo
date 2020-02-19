@@ -87,14 +87,14 @@ impl StyleStorage {
 
 #[extend::ext(pub, name = RawSetClass)]
 impl web_sys::Element {
-	fn set_class<'a>(self, style: impl Into<Cow<'a, css::Style>>) {
+	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) {
 		CONTEXT.with(move |ctx| {
 			let element_class = ctx.style_storage.fetch(&self, style);
 			self.set_attribute(web_str::class(), &element_class).unwrap();
 		})
 	}
 
-	fn add_class<'a>(self, style: impl Into<Cow<'a, css::Style>>) {
+	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) {
 		CONTEXT.with(move |ctx| {
 			let element_class = ctx.style_storage.fetch(&self, style);
 			let existing_class = self.get_attribute(web_str::class()).unwrap_or_else(String::new);
