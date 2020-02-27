@@ -3,12 +3,10 @@
 macro_rules! intern_strings {
 	() => {};
 	($name:ident, $s:expr; $($rest:tt)*) => {
-		#[inline(always)]
 		pub fn $name() -> &'static str { wasm_bindgen::intern($s) }
 		intern_strings! {$($rest)*}
 	};
 	($name:ident; $($rest:tt)*) => {
-		#[inline(always)]
 		pub fn $name() -> &'static str { wasm_bindgen::intern(stringify!($name)) }
 		intern_strings! {$($rest)*}
 	};

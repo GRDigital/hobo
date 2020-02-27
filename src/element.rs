@@ -2,12 +2,12 @@ use crate::{web_str, RawSetClass};
 use std::hash::{Hash, Hasher};
 use std::borrow::Cow;
 
-pub trait Element: Drop {
+pub trait Element {
 	// should probably be subsumed by BasicElement, which would also probably give me more control over ssr
 	//
 	// could be made to return a cow, which would allow Rc<RefCell<T: Element>> to impl Element as well,
 	// which would in turn allow Rc<RefCell<T: Element>> to be used in attach_child etc
-	fn element(&self) -> &web_sys::Element;
+	fn element(&self) -> Cow<'_, web_sys::Element>;
 
 	fn class() -> String
 	where
@@ -16,7 +16,7 @@ pub trait Element: Drop {
 		std::any::TypeId::of::<Self>().to_class_string("t")
 	}
 
-	fn append(&self, child: &dyn Element) { self.element().append_child(child.element()).expect("Can't append child"); }
+	fn append(&self, child: &dyn Element) { self.element().append_child(&child.element()).expect("Can't append child"); }
 
 	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) -> &Self
 	where
@@ -24,7 +24,7 @@ pub trait Element: Drop {
 	{
 		super::CONTEXT.with(move |ctx| {
 			let element = self.element();
-			let element_class = ctx.style_storage.fetch(element, style);
+			let element_class = ctx.style_storage.fetch(&element, style);
 			element.set_attribute(web_str::class(), &format!("{} {}", Self::class(), element_class)).unwrap();
 			self
 		})
@@ -47,7 +47,7 @@ pub trait Element: Drop {
 	{
 		super::CONTEXT.with(move |ctx| {
 			let element = self.element();
-			let element_class = ctx.style_storage.fetch(element, style);
+			let element_class = ctx.style_storage.fetch(&element, style);
 			let existing_class = element.get_attribute(web_str::class()).unwrap_or_else(Self::class);
 			element.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).unwrap();
 			self
@@ -55,9 +55,15 @@ pub trait Element: Drop {
 	}
 }
 
-impl AsRef<web_sys::Element> for dyn Element {
-	fn as_ref(&self) -> &web_sys::Element { self.element() }
+impl Element for std::cell::RefCell<dyn Element> {
+	fn element(&self) -> std::borrow::Cow<'_, web_sys::Element> {
+		std::borrow::Cow::Owned(self.borrow().element().into_owned())
+	}
 }
+
+// impl AsRef<web_sys::Element> for dyn Element {
+//     fn as_ref(&self) -> &web_sys::Element { self.element() }
+// }
 
 #[extend::ext(pub, name = HashToClassString)]
 impl<T: Hash> T {

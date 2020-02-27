@@ -116,7 +116,7 @@ pub mod builder {
 					element.append_child(match child {
 						BuilderChild::Owned(x) => x.element(),
 						BuilderChild::Ref(x) => x.element(),
-					}).expect("Can't append child");
+					}.as_ref()).expect("Can't append child");
 				}
 			}
 			let cmp = crate::BasicElement {

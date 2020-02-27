@@ -1,4 +1,5 @@
 use super::{Element, EventHandler, EventHandlers, EventTarget};
+use std::borrow::Cow;
 
 pub struct BasicElement<T: AsRef<web_sys::Element>> {
 	pub element: T,
@@ -35,5 +36,5 @@ impl<T: AsRef<web_sys::Element>> Drop for BasicElement<T> {
 }
 
 impl<T: AsRef<web_sys::Element>> Element for BasicElement<T> {
-	fn element(&self) -> &web_sys::Element { &self.element.as_ref() }
+	fn element(&self) -> Cow<'_, web_sys::Element> { Cow::Borrowed(self.element.as_ref()) }
 }

@@ -16,7 +16,7 @@ pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 		}
 
 		impl #impl_generics ::hobo::Element for #name #ty_generics #where_clause {
-			fn element(&self) -> &::hobo::web_sys::Element { &self.element }
+			fn element(&self) -> ::std::borrow::Cow<'_, ::hobo::web_sys::Element> { ::std::borrow::Cow::Borrowed(&self.element) }
 		}
 	})
 }
@@ -29,14 +29,8 @@ pub fn derive_component(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 	let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
 	proc_macro::TokenStream::from(quote! {
-		impl #impl_generics Drop for #name #ty_generics #where_clause {
-			fn drop(&mut self) {
-				// TODO: Drop bound not necessary?
-			}
-		}
-
 		impl #impl_generics ::hobo::Element for #name #ty_generics #where_clause {
-			fn element(&self) -> &::hobo::web_sys::Element { &self.element.element }
+			fn element(&self) -> ::std::borrow::Cow<'_, ::hobo::web_sys::Element> { ::std::borrow::Cow::Borrowed(&self.element.element) }
 		}
 
 		impl #impl_generics ::hobo::EventTarget for #name #ty_generics #where_clause {
