@@ -10,6 +10,7 @@ pub mod components;
 pub mod create;
 pub mod svg_create;
 pub mod events;
+pub mod state_slice;
 
 pub use basic_element::BasicElement;
 pub use css;
@@ -31,7 +32,7 @@ pub use events::*;
 pub type Color = (u8, u8, u8, u8);
 
 fn dom() -> web_sys::Document {
-	web_sys::window().unwrap().document().unwrap()
+	web_sys::window().expect("no window").document().expect("no document")
 }
 
 #[derive(Default)]
@@ -71,8 +72,8 @@ impl StyleStorage {
 				}
 			}
 		}
-		let dom = element.owner_document().unwrap();
-		let head = dom.head().unwrap();
+		let dom = element.owner_document().expect("element not attached to a dom");
+		let head = dom.head().expect("dom has no head");
 		let style_element = if let Some(x) = head.get_elements_by_tag_name("style").get_with_index(0) {
 			x
 		} else {

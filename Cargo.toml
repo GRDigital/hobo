@@ -13,6 +13,8 @@ extend = "0.1"
 hobo_derive = { path = "hobo_derive" }
 css = { path = "css", package = "hobo-css" }
 roxmltree = "0.9"
+slotmap = { version = "0.4", features = ["unstable"] }
+shrinkwraprs = "0.3"
 
 [dependencies.web-sys]
 version = "0.3"
