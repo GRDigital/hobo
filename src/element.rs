@@ -1,12 +1,11 @@
 use crate::{web_str, RawSetClass};
 use std::hash::{Hash, Hasher};
 use std::borrow::Cow;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub trait Element {
 	// should probably be subsumed by BasicElement, which would also probably give me more control over ssr
-	//
-	// could be made to return a cow, which would allow Rc<RefCell<T: Element>> to impl Element as well,
-	// which would in turn allow Rc<RefCell<T: Element>> to be used in attach_child etc
 	fn element(&self) -> Cow<'_, web_sys::Element>;
 
 	fn class() -> String
@@ -55,11 +54,17 @@ pub trait Element {
 	}
 }
 
-impl Element for std::cell::RefCell<dyn Element> {
-	fn element(&self) -> std::borrow::Cow<'_, web_sys::Element> {
-		std::borrow::Cow::Owned(self.borrow().element().into_owned())
+impl Element for RefCell<dyn Element> {
+	fn element(&self) -> Cow<'_, web_sys::Element> {
+		Cow::Owned(self.borrow().element().into_owned())
 	}
 }
+
+// impl<T: Element> Element for Rc<RefCell<T>> {
+//     fn element(&self) -> Cow<'_, web_sys::Element> {
+//         Cow::Owned(self.borrow().element().into_owned())
+//     }
+// }
 
 // impl AsRef<web_sys::Element> for dyn Element {
 //     fn as_ref(&self) -> &web_sys::Element { self.element() }
