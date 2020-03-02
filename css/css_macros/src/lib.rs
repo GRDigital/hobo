@@ -124,8 +124,8 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		},
 		Value::Unit => {
 			quote! {
-				($($val:tt)+) => { $crate::Property::#property_camel($crate::#property_camel::Some($crate::unit!($($val)+))) };
 				(0) => { $crate::Property::#property_camel($crate::#property_camel::Zero) };
+				($($val:tt)+) => { $crate::Property::#property_camel($crate::#property_camel::Some($crate::unit!($($val)+))) };
 			}
 		},
 		Value::String => {
