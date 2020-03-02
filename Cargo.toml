@@ -6,7 +6,6 @@ edition = "2018"
 [dependencies]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize", "nightly", "strict-macro", "enable-interning"] }
 ordered-float = { version = "1", default-features = false }
-smart-default = "0.6"
 paste = "0.1"
 strum = { version = "0.18", features = ["derive"] }
 extend = "0.1"
