@@ -3,6 +3,8 @@
 use std::{cell::{RefMut, RefCell}, rc::Rc, ops::{Deref, DerefMut}};
 use slotmap::SlotMap;
 
+static MAX_NESTED_UPDATES: usize = 100;
+
 slotmap::new_key_type! {
 	pub struct SubscriptionKey;
 }
@@ -13,6 +15,8 @@ type SubscriptionFn = Rc<RefCell<dyn FnMut()>>;
 pub struct StateSlice<T> {
 	data: RefCell<T>,
 	subscribers: RefCell<SlotMap<SubscriptionKey, SubscriptionFn>>,
+	update_ongoing: RefCell<bool>,
+	dirty: RefCell<bool>,
 }
 
 // This is only permissible because JS/WASM is single-threaded
@@ -29,22 +33,38 @@ struct StateSliceGuard<'a, T> {
 impl<'a, T> Deref for StateSliceGuard<'a, T> {
 	type Target = T;
 
-	fn deref(&self) -> &Self::Target { self.data_ref.as_ref().unwrap() }
+	fn deref(&self) -> &Self::Target { self.data_ref.as_ref().expect("deref for guard failed") }
 }
 
 impl<'a, T> DerefMut for StateSliceGuard<'a, T> {
-	fn deref_mut(&mut self) -> &mut Self::Target { self.data_ref.as_mut().unwrap() }
+	fn deref_mut(&mut self) -> &mut Self::Target { self.data_ref.as_mut().expect("deref mut for guard failed") }
 }
 
+// If there's already an ongoing update, this just releases state lock and does nothing
+// then the ongoing update will re-run all the subs (as the state has changed once again)
 impl<'a, T> Drop for StateSliceGuard<'a, T> {
 	fn drop(&mut self) {
 		drop(self.data_ref.take());
-		let snapshot = self.state.subscribers.borrow().values().cloned().collect::<Vec<_>>();
-		for subscriber in snapshot {
-			let mut subscriber = subscriber.borrow_mut();
-			let f = subscriber.deref_mut();
-			f();
+		*self.state.dirty.borrow_mut() = true;
+		if *self.state.update_ongoing.borrow() { return; }
+		*self.state.update_ongoing.borrow_mut() = true;
+
+		for _ in 0..MAX_NESTED_UPDATES {
+			*self.state.dirty.borrow_mut() = false;
+			let snapshot = self.state.subscribers.borrow().values().cloned().collect::<Vec<_>>();
+			for subscriber in snapshot {
+				let mut subscriber = subscriber.borrow_mut();
+				let f = subscriber.deref_mut();
+				f();
+			}
+
+			if !*self.state.dirty.borrow() {
+				*self.state.update_ongoing.borrow_mut() = false;
+				return;
+			}
 		}
+
+		panic!("too many nested updates");
 	}
 }
 
@@ -63,6 +83,8 @@ impl<T> StateSlice<T> {
 		Self {
 			data: RefCell::new(initial),
 			subscribers: Default::default(),
+			update_ongoing: Default::default(),
+			dirty: Default::default(),
 		}
 	}
 
