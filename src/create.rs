@@ -50,4 +50,7 @@ html_create![
 	p, HtmlParagraphElement,
 	ul, HtmlUListElement,
 	li, HtmlLiElement,
+	main, HtmlElement,
+	button, HtmlButtonElement,
+	label, HtmlLabelElement,
 ];

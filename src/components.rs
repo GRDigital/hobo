@@ -17,6 +17,9 @@ declare_basic_shortcuts! {
 	IFrame => HtmlIFrameElement,
 	Element => HtmlElement,
 	Svg => SvgElement,
+	Main => HtmlElement,
+	Button => HtmlButtonElement,
+	Label => HtmlLabelElement,
 }
 
 pub fn build<'a>() -> Builder<'a> {
