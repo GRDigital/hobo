@@ -19,6 +19,13 @@ pub struct StateSlice<T> {
 	dirty: RefCell<bool>,
 }
 
+// TODO: better debug impl
+impl<T: std::fmt::Debug> std::fmt::Debug for StateSlice<T> {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		self.data.borrow().fmt(f)
+	}
+}
+
 // This is only permissible because JS/WASM is single-threaded
 // would have to be rethunked if/wheen threading arrives via std::thread
 unsafe impl<T> Send for StateSlice<T> {}
