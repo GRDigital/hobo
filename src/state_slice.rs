@@ -114,9 +114,21 @@ impl<'a, T> Unsub<'a> for StateSlice<T> {
 	fn unsubscribe(&'a self, key: SubscriptionKey) { self.subscribers.borrow_mut().remove(key); }
 }
 
-#[derive(shrinkwraprs::Shrinkwrap, Clone)]
+#[derive(shrinkwraprs::Shrinkwrap)]
 pub struct State<T>(Rc<StateSlice<T>>);
+
+impl<T> Clone for State<T> {
+	fn clone(&self) -> Self {
+		Self(Rc::clone(&self.0))
+	}
+}
 
 impl<T> State<T> {
 	pub fn new(initial: T) -> Self { State(Rc::new(StateSlice::new(initial))) }
+}
+
+impl<T> From<Rc<StateSlice<T>>> for State<T> {
+	fn from(x: Rc<StateSlice<T>>) -> Self {
+		Self(x)
+	}
 }
