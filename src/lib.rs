@@ -86,6 +86,7 @@ impl StyleStorage {
 	}
 }
 
+#[doc(hidden)]
 #[extend::ext(pub, name = RawSetClass)]
 impl web_sys::Element {
 	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) {

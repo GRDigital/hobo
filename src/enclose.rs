@@ -1,3 +1,4 @@
+#[doc(hidden)]
 #[macro_export]
 macro_rules! make_rc_upgrade_stmt {
 	(% $expr:expr => $ident:ident) => {
@@ -9,6 +10,7 @@ macro_rules! make_rc_upgrade_stmt {
 	($($input:tt)*) => {};
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! make_stmt {
 	(% $expr:expr => $ident:ident) => {
@@ -31,6 +33,7 @@ macro_rules! make_stmt {
 	};
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! __e_inner {
 	// all inputs and the closure were consumed - return result basically
