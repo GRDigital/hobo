@@ -48,6 +48,7 @@ intern_strings! {
 	id;
 	password;
 	text;
+	_blank;
 
 	// events
 	click; contextmenu; dblclick; mousedown; mouseenter;

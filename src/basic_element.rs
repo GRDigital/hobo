@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use super::{Element, EventHandler, EventHandlers, EventTarget};
 use std::borrow::Cow;
 
@@ -7,8 +8,8 @@ pub struct BasicElement<T: AsRef<web_sys::Element>> {
 	pub event_handlers: EventHandlers,
 }
 
-impl<T: AsRef<web_sys::Element>> AsRef<web_sys::Element> for BasicElement<T> {
-	fn as_ref(&self) -> &web_sys::Element { self.element.as_ref() }
+impl<T: AsRef<web_sys::Element>> AsRef<T> for BasicElement<T> {
+	fn as_ref(&self) -> &T { &self.element }
 }
 
 impl<T: AsRef<web_sys::Element>> EventTarget for BasicElement<T> {
@@ -32,8 +33,6 @@ impl<T: AsRef<web_sys::Element>> BasicElement<T> {
 
 impl<T: AsRef<web_sys::Node> + AsRef<web_sys::Element> + wasm_bindgen::JsCast> BasicElement<T> {
 	pub fn clone_html(&self) -> Self {
-		use wasm_bindgen::JsCast;
-
 		let node: &web_sys::Node = self.element.as_ref();
 		Self { element: node.clone_node_with_deep(true).unwrap().dyn_into().unwrap(), children: vec![], event_handlers: crate::EventHandlers::default() }
 	}

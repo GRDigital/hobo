@@ -39,7 +39,7 @@ pub mod builder {
 	#[derive(Default)]
 	pub struct Builder<'a> {
 		pub text: Option<&'a str>,
-		pub attributes: Option<Vec<[&'a str; 2]>>,
+		pub attributes: Option<Vec<[Cow<'a, str>; 2]>>,
 		pub class: Option<Cow<'a, crate::css::Style>>,
 		pub style: Option<Cow<'a, [crate::css::Property]>>,
 		pub children: Vec<BuilderChild<'a>>,
@@ -61,9 +61,9 @@ pub mod builder {
 			self
 		}
 
-		pub fn attr(mut self, key: &'a str, value: &'a str) -> Self {
+		pub fn attr(mut self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) -> Self {
 			let mut v = self.attributes.unwrap_or_else(Vec::new);
-			v.push([key, value]);
+			v.push([key.into(), value.into()]);
 			self.attributes = Some(v);
 			self
 		}
@@ -87,7 +87,7 @@ pub mod builder {
 				};
 				if let Some(x) = self.attributes {
 					for [k, v] in x {
-						element.set_attribute(k, v).unwrap();
+						element.set_attribute(&k, &v).unwrap();
 					}
 				};
 				for child in self.children.into_iter() {
@@ -113,7 +113,7 @@ pub mod builder {
 				};
 				if let Some(x) = self.attributes {
 					for [k, v] in x {
-						element.set_attribute(k, v).unwrap();
+						element.set_attribute(&k, &v).unwrap();
 					}
 				};
 				for child in &self.children {
