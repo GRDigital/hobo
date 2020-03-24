@@ -26,6 +26,15 @@ macro_rules! generate_events {
 			)+
 		}
 
+		impl<T: AsRef<web_sys::Element>> crate::basic_element::BasicElement<T> {
+			$(
+				pub fn [<with_$f>](self, f: impl FnMut($event_kind) + 'static) -> Self {
+					self.$f(f);
+					self
+				}
+			)+
+		}
+
 		pub mod event_raw_exts {
 			use super::*;
 
