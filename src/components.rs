@@ -38,7 +38,7 @@ pub mod builder {
 
 	#[derive(Default)]
 	pub struct Builder<'a> {
-		pub text: Option<&'a str>,
+		pub text: Option<Cow<'a, str>>,
 		pub attributes: Option<Vec<[Cow<'a, str>; 2]>>,
 		pub class: Option<Cow<'a, crate::css::Style>>,
 		pub style: Option<Cow<'a, [crate::css::Property]>>,
@@ -46,8 +46,8 @@ pub mod builder {
 	}
 
 	impl<'a> Builder<'a> {
-		pub fn text(mut self, x: &'a str) -> Self {
-			self.text = Some(x);
+		pub fn text(mut self, x: impl Into<Cow<'a, str>>) -> Self {
+			self.text = Some(x.into());
 			self
 		}
 
@@ -83,7 +83,7 @@ pub mod builder {
 				let component = component.borrow_mut();
 				let element: &web_sys::Element = component.element.as_ref();
 				if let Some(x) = self.text {
-					element.unchecked_ref::<web_sys::HtmlElement>().set_inner_text(x)
+					element.unchecked_ref::<web_sys::HtmlElement>().set_inner_text(&x)
 				};
 				if let Some(x) = self.attributes {
 					for [k, v] in x {
@@ -109,7 +109,7 @@ pub mod builder {
 			{
 				let element: &web_sys::Element = element.as_ref();
 				if let Some(x) = self.text {
-					element.unchecked_ref::<web_sys::HtmlElement>().set_inner_text(x)
+					element.unchecked_ref::<web_sys::HtmlElement>().set_inner_text(&x)
 				};
 				if let Some(x) = self.attributes {
 					for [k, v] in x {
