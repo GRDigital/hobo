@@ -16,6 +16,14 @@ impl<T: AsRef<web_sys::Element>> EventTarget for BasicElement<T> {
 }
 
 impl<T: AsRef<web_sys::Element>> BasicElement<T> {
+	pub fn new(element: T) -> Self {
+		Self {
+			element,
+			children: vec![],
+			event_handlers: EventHandlers::default(),
+		}
+	}
+
 	pub fn attach_child(&mut self, child: impl Element + 'static) {
 		self.append(&child);
 		self.children.push(Box::new(child));
