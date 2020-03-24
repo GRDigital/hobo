@@ -17,6 +17,7 @@ declare_basic_shortcuts! {
 	IFrame => HtmlIFrameElement,
 	Element => HtmlElement,
 	Svg => SvgElement,
+	SvgRoot => SvgsvgElement,
 	Main => HtmlElement,
 	Button => HtmlButtonElement,
 	Label => HtmlLabelElement,
