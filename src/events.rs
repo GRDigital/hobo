@@ -23,6 +23,11 @@ macro_rules! generate_events {
 					let handler = self.element().[<unsafe_ $f>](f);
 					self.event_handlers().push(handler);
 				}
+
+				fn [<with_$f>](self, f: impl FnMut($event_kind) + 'static) -> Self where Self: Sized {
+					self.event_handlers().push(self.element().$f(f));
+					self
+				}
 			)+
 		}
 

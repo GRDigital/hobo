@@ -60,6 +60,12 @@ impl Element for RefCell<dyn Element> {
 	}
 }
 
+impl Element for Box<dyn Element> {
+	fn element(&self) -> Cow<'_, web_sys::Element> {
+		self.as_ref().element()
+	}
+}
+
 // impl<T: Element> Element for Rc<RefCell<T>> {
 //     fn element(&self) -> Cow<'_, web_sys::Element> {
 //         Cow::Owned(self.borrow().element().into_owned())
