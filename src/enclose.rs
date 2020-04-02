@@ -1,6 +1,12 @@
 #[doc(hidden)]
 #[macro_export]
 macro_rules! make_rc_upgrade_stmt {
+	(%slot $expr:expr => $ident:ident) => {
+		let $ident = if let Some(x) = ::std::rc::Weak::upgrade(&$ident) { $crate::Slot(x) } else { return; };
+	};
+	(%slot $e:ident) => {
+		let $e = if let Some(x) = ::std::rc::Weak::upgrade(&$e) { $crate::Slot(x) } else { return; };
+	};
 	(% $expr:expr => $ident:ident) => {
 		let $ident = if let Some(x) = ::std::rc::Weak::upgrade(&$ident) { x } else { return; };
 	};
@@ -13,6 +19,12 @@ macro_rules! make_rc_upgrade_stmt {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! make_stmt {
+	(%slot $expr:expr => $ident:ident) => {
+		let $ident = ::std::rc::Rc::downgrade(&$expr.0);
+	};
+	(%slot $e:ident) => {
+		let $e = ::std::rc::Rc::downgrade(&$e.0);
+	};
 	(% $expr:expr => $ident:ident) => {
 		let $ident = ::std::rc::Rc::downgrade(&$expr);
 	};
