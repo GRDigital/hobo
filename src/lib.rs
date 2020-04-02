@@ -18,6 +18,7 @@ pub use element::Element;
 pub use hobo_derive::*;
 pub use paste;
 use std::{
+	rc::Rc,
 	cell::RefCell,
 	collections::HashMap,
 	hash::{Hash, Hasher},
@@ -110,5 +111,96 @@ impl web_sys::Element {
 
 	fn remove_style(&self) {
 		let _ = self.remove_attribute(web_str::style());
+	}
+}
+
+pub trait Container: Element {
+	fn children(&self) -> &Vec<Box<dyn Element>>;
+	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>>;
+
+	fn attach_child(&mut self, child: impl Element + 'static) where Self: Sized {
+		self.attach_child_box(Box::new(child))
+	}
+
+	fn attach_child_box(&mut self, child: Box<dyn Element + 'static>) {
+		self.append(&child);
+		self.children_mut().push(child);
+	}
+}
+
+pub trait Basic: Element + Container + EventTarget { }
+impl<T: Element + Container + EventTarget> Basic for T {}
+
+pub trait Replaceable<T>: Basic {
+	fn replace_element(&self, element: T) where Self: Sized;
+}
+
+impl Element for Box<dyn Basic> {
+	fn element(&self) -> std::borrow::Cow<'_, web_sys::Element> {
+		self.as_ref().element()
+	}
+}
+
+impl Container for Box<dyn Basic> {
+	fn children(&self) -> &Vec<Box<dyn Element>> { self.as_ref().children() }
+	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>> { self.as_mut().children_mut() }
+}
+
+#[derive(Clone)]
+pub struct Slot(Rc<RefCell<Box<dyn Basic>>>);
+
+impl Slot {
+	pub fn new(element: impl Basic + 'static) -> Self {
+		Self(Rc::new(RefCell::new(Box::new(element))))
+	}
+}
+
+impl Container for Slot {
+	fn children(&self) -> &Vec<Box<dyn Element>> { unsafe { self.0.try_borrow_unguarded() }.expect("rc is mutably borrowed").children() }
+	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>> { Rc::get_mut(&mut self.0).expect("rc is mutably borrowed").get_mut().children_mut() }
+}
+
+impl<T: Element> Element for Rc<RefCell<T>> {
+	fn element(&self) -> std::borrow::Cow<'_, web_sys::Element> {
+		std::borrow::Cow::Owned(self.borrow().element().into_owned())
+	}
+}
+
+impl<T: Container> Container for Rc<RefCell<T>> {
+	fn children(&self) -> &Vec<Box<dyn Element>> { unsafe { self.try_borrow_unguarded() }.expect("rc is mutably borrowed").children() }
+	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>> { Rc::get_mut(self).expect("rc is mutably borrowed").get_mut().children_mut() }
+}
+
+impl<T: EventTarget> EventTarget for Rc<RefCell<T>> {
+	fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>> {
+		unsafe { self.try_borrow_unguarded() }.expect("rc is mutably borrowed").event_handlers()
+	}
+}
+
+impl<T: Basic> Replaceable<T> for Rc<RefCell<T>> {
+	fn replace_element(&self, element: T) {
+		let mut me = self.borrow_mut();
+		me.element().insert_adjacent_element(web_str::afterend(), &element.element()).unwrap();
+		*me = element;
+	}
+}
+
+impl Element for Slot {
+	fn element(&self) -> std::borrow::Cow<'_, web_sys::Element> {
+		std::borrow::Cow::Owned(self.0.borrow().element().into_owned())
+	}
+}
+
+impl EventTarget for Slot {
+	fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>> {
+		unsafe { self.0.try_borrow_unguarded() }.expect("rc is mutably borrowed").event_handlers()
+	}
+}
+
+impl<T: Basic + 'static> Replaceable<T> for Slot {
+	fn replace_element(&self, element: T) {
+		let mut me = self.0.borrow_mut();
+		me.element().insert_adjacent_element(web_str::afterend(), &element.element()).unwrap();
+		*me = Box::new(element);
 	}
 }

@@ -5,6 +5,9 @@ pub use crate::{
 	element::HashToClassString as _,
 	RawSetClass as _,
 	state_slice::Unsub as _,
+	Container as _,
+	Replaceable as _,
+	Slot,
 };
 #[doc(hidden)]
 pub use std::convert::TryInto as _;

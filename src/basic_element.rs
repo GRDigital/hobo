@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use super::{Element, EventHandler, EventHandlers, EventTarget};
+use super::{Element, EventHandler, EventHandlers, EventTarget, Container};
 use std::borrow::Cow;
 
 pub struct BasicElement<T: AsRef<web_sys::Element>> {
@@ -24,11 +24,6 @@ impl<T: AsRef<web_sys::Element>> BasicElement<T> {
 			event_handlers: EventHandlers::default(),
 		}
 	}
-
-	pub fn attach_child(&mut self, child: impl Element + 'static) {
-		self.append(&child);
-		self.children.push(Box::new(child));
-	}
 }
 
 impl<T: AsRef<web_sys::Node> + AsRef<web_sys::Element> + wasm_bindgen::JsCast> BasicElement<T> {
@@ -44,4 +39,9 @@ impl<T: AsRef<web_sys::Element>> Drop for BasicElement<T> {
 
 impl<T: AsRef<web_sys::Element>> Element for BasicElement<T> {
 	fn element(&self) -> Cow<'_, web_sys::Element> { Cow::Borrowed(self.element.as_ref()) }
+}
+
+impl<T: AsRef<web_sys::Element>> Container for BasicElement<T> {
+	fn children(&self) -> &Vec<Box<dyn Element>> { &self.children }
+	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>> { &mut self.children }
 }

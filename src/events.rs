@@ -1,12 +1,14 @@
 use crate::prelude::*;
 use std::cell::RefCell;
+use crate::Element;
+use crate::basic_element::BasicElement;
 
 pub struct EventHandler(Box<dyn std::any::Any>);
 pub type EventHandlers = RefCell<Vec<EventHandler>>;
 
 macro_rules! generate_events {
 	($($event_kind:path, $name:ident, $trait:ident, $f:ident);+$(;)*) => {paste::item!{
-		pub trait EventTarget: crate::Element {
+		pub trait EventTarget: Element {
 			fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>>;
 			$(
 				fn $f(&self, f: impl FnMut($event_kind) + 'static) where Self: Sized {
@@ -25,13 +27,13 @@ macro_rules! generate_events {
 				}
 
 				fn [<with_$f>](self, f: impl FnMut($event_kind) + 'static) -> Self where Self: Sized {
-					self.event_handlers().push(self.element().$f(f));
+					self.$f(f);
 					self
 				}
 			)+
 		}
 
-		impl<T: AsRef<web_sys::Element>> crate::basic_element::BasicElement<T> {
+		impl<T: AsRef<web_sys::Element>> BasicElement<T> {
 			$(
 				pub fn [<with_$f>](self, f: impl FnMut($event_kind) + 'static) -> Self {
 					self.$f(f);
