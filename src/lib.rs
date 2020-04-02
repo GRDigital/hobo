@@ -147,7 +147,7 @@ impl Container for Box<dyn Basic> {
 }
 
 #[derive(Clone)]
-pub struct Slot(Rc<RefCell<Box<dyn Basic>>>);
+pub struct Slot(pub Rc<RefCell<Box<dyn Basic>>>);
 
 impl Slot {
 	pub fn new(element: impl Basic + 'static) -> Self {

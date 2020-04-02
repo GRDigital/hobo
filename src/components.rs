@@ -46,35 +46,16 @@ pub mod builder {
 	}
 
 	impl<'a> Builder<'a> {
-		pub fn text(mut self, x: impl Into<Cow<'a, str>>) -> Self {
-			self.text = Some(x.into());
-			self
-		}
-
-		pub fn class(mut self, x: impl Into<Cow<'a, crate::css::Style>>) -> Self {
-			self.class = Some(x.into());
-			self
-		}
-
-		pub fn style(mut self, x: impl Into<Cow<'a, [crate::css::Property]>>) -> Self {
-			self.style = Some(x.into());
-			self
-		}
+		pub fn text(mut self, x: impl Into<Cow<'a, str>>) -> Self { self.text = Some(x.into()); self }
+		pub fn class(mut self, x: impl Into<Cow<'a, crate::css::Style>>) -> Self { self.class = Some(x.into()); self }
+		pub fn style(mut self, x: impl Into<Cow<'a, [crate::css::Property]>>) -> Self { self.style = Some(x.into()); self }
+		pub fn child(mut self, child: impl crate::Element + 'static) -> Self { self.children.push(BuilderChild::Owned(Box::new(child))); self }
+		pub fn child_ref(mut self, child: &'a (impl crate::Element + 'static)) -> Self { self.children.push(BuilderChild::Ref(child)); self }
 
 		pub fn attr(mut self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) -> Self {
 			let mut v = self.attributes.unwrap_or_else(Vec::new);
 			v.push([key.into(), value.into()]);
 			self.attributes = Some(v);
-			self
-		}
-
-		pub fn child(mut self, child: impl crate::Element + 'static) -> Self {
-			self.children.push(BuilderChild::Owned(Box::new(child)));
-			self
-		}
-
-		pub fn child_ref(mut self, child: &'a (impl crate::Element + 'static)) -> Self {
-			self.children.push(BuilderChild::Ref(child));
 			self
 		}
 
@@ -87,7 +68,7 @@ pub mod builder {
 				};
 				if let Some(x) = self.attributes {
 					for [k, v] in x {
-						element.set_attribute(&k, &v).unwrap();
+						element.set_attribute(&k, &v).expect("can't set attributes");
 					}
 				};
 				for child in self.children.into_iter() {
@@ -113,7 +94,7 @@ pub mod builder {
 				};
 				if let Some(x) = self.attributes {
 					for [k, v] in x {
-						element.set_attribute(&k, &v).unwrap();
+						element.set_attribute(&k, &v).expect("can't set attributes");
 					}
 				};
 				for child in &self.children {

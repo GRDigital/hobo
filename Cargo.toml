@@ -4,16 +4,16 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-wasm-bindgen = { version = "0.2", features = ["serde-serialize", "nightly", "strict-macro", "enable-interning"] }
-ordered-float = { version = "1", default-features = false }
-paste = "0.1"
-strum = { version = "0.18", features = ["derive"] }
+css = { path = "css", package = "hobo-css" }
 extend = "0.1"
 hobo_derive = { path = "hobo_derive" }
-css = { path = "css", package = "hobo-css" }
+ordered-float = { version = "1", default-features = false }
+paste = "0.1"
 roxmltree = "0.10"
-slotmap = { version = "0.4", features = ["unstable"] }
 shrinkwraprs = "0.3"
+slotmap = { version = "0.4", features = ["unstable"] }
+strum = { version = "0.18", features = ["derive"] }
+wasm-bindgen = { version = "0.2", features = ["serde-serialize", "nightly", "strict-macro", "enable-interning"] }
 
 [dependencies.web-sys]
 version = "0.3"
