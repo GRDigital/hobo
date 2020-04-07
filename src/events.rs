@@ -86,4 +86,6 @@ generate_events! {
 	web_sys::KeyboardEvent, keyup,       OnKeyUp,       on_key_up;
 	web_sys::Event,         change,      OnChange,      on_change;
 	web_sys::Event,         scroll,      OnScroll,      on_scroll;
+	web_sys::FocusEvent,    blur,        OnBlur,        on_blur;
+	web_sys::FocusEvent,    focus,       OnFocus,       on_focus;
 }

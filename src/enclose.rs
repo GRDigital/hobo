@@ -46,8 +46,14 @@ macro_rules! make_stmt {
 	(* $e:ident) => {
 		let $e = $e.as_ref().clone();
 	};
+	(* $expr:expr => $ident:ident) => {
+		let $ident = $expr.as_ref().clone();
+	};
 	(** $e:ident) => {
 		let $e = $e.as_ref().as_ref().clone();
+	};
+	(** $expr:expr => $ident:ident) => {
+		let $ident = $expr.as_ref().as_ref().clone();
 	};
 	($expr:expr => mut $ident:ident) => {
 		let mut $ident = $expr.clone();
