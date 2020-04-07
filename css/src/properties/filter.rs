@@ -26,7 +26,7 @@ pub enum FilterFunction {
 	Blur(i32),
 	Brightness(F32),
 	Contrast(F32),
-	DropShadow(i32, i32, Option<u32>, Option<(u8, u8, u8, u8)>), // h-shadow v-shadow blur colour
+	DropShadow(Unit, Unit, Option<u32>, Option<(u8, u8, u8, u8)>), // h-shadow v-shadow blur colour
 	Grayscale(F32),
 	HueRotate(F32),
 	Invert(F32),
@@ -42,7 +42,7 @@ impl ToString for FilterFunction {
 			Self::Blur(x)                                     => format!("blur({}px)", x),
 			Self::Brightness(x)                               => format!("brightness({})", x),
 			Self::Contrast(x)                                 => format!("contrast({})", x),
-			Self::DropShadow(h_shadow, v_shadow, blur, color) => format!("drop-shadow({} {} {} {})", h_shadow, v_shadow, blur.unwrap_or(0), color.map(|(r, g, b, a)| format!("#{:02x}{:02x}{:02x}{:02x}", r, g, b, a)).unwrap_or_else(String::new)),
+			Self::DropShadow(h_shadow, v_shadow, blur, color) => format!("drop-shadow({} {} {} {})", h_shadow.to_string(), v_shadow.to_string(), blur.unwrap_or(0), color.map(|(r, g, b, a)| format!("#{:02x}{:02x}{:02x}{:02x}", r, g, b, a)).unwrap_or_else(String::new)),
 			Self::Grayscale(x)                                => format!("grayscale({})", x),
 			Self::HueRotate(x)                                => format!("hue-rotate({}deg)", x),
 			Self::Invert(x)                                   => format!("invert({})", x),
