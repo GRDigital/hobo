@@ -53,7 +53,7 @@ intern_strings! {
 	// events
 	click; contextmenu; dblclick; mousedown; mouseenter;
 	mouseleave; mousemove; mouseover; mouseout; mouseup;
-	change; keydown; keyup; scroll;
+	change; keydown; keyup; scroll; resize;
 
 	// elements
 	div; span; input; a; img; p;

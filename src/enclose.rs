@@ -7,6 +7,12 @@ macro_rules! make_rc_upgrade_stmt {
 	(%slot $e:ident) => {
 		let $e = if let Some(x) = ::std::rc::Weak::upgrade(&$e) { $crate::Slot(x) } else { return; };
 	};
+	(%state $expr:expr => $ident:ident) => {
+		let $ident = if let Some(x) = ::std::rc::Weak::upgrade(&$ident) { $crate::state_slice::State(x) } else { return; };
+	};
+	(%state $e:ident) => {
+		let $e = if let Some(x) = ::std::rc::Weak::upgrade(&$e) { $crate::state_slice::State(x) } else { return; };
+	};
 	(% $expr:expr => $ident:ident) => {
 		let $ident = if let Some(x) = ::std::rc::Weak::upgrade(&$ident) { x } else { return; };
 	};
@@ -25,6 +31,12 @@ macro_rules! make_stmt {
 	(%slot $e:ident) => {
 		let $e = ::std::rc::Rc::downgrade(&$e.0);
 	};
+	(%state $expr:expr => $ident:ident) => {
+		let $ident = ::std::rc::Rc::downgrade(&$expr.0);
+	};
+	(%state $e:ident) => {
+		let $e = ::std::rc::Rc::downgrade(&$e.0);
+	};
 	(% $expr:expr => $ident:ident) => {
 		let $ident = ::std::rc::Rc::downgrade(&$expr);
 	};
@@ -33,6 +45,9 @@ macro_rules! make_stmt {
 	};
 	(* $e:ident) => {
 		let $e = $e.as_ref().clone();
+	};
+	(** $e:ident) => {
+		let $e = $e.as_ref().as_ref().clone();
 	};
 	($expr:expr => mut $ident:ident) => {
 		let mut $ident = $expr.clone();

@@ -108,6 +108,10 @@ impl<T> StateSlice<T> {
 	pub fn subscribe(&self, f: impl FnMut() + 'static) -> Subscription {
 		Subscription(self, self.subscribers.borrow_mut().insert(Rc::new(RefCell::new(f))))
 	}
+
+	pub fn subscribe_key(&self, f: impl FnMut() + 'static) -> SubscriptionKey {
+		self.subscribers.borrow_mut().insert(Rc::new(RefCell::new(f)))
+	}
 }
 
 impl<'a, T> Unsub<'a> for StateSlice<T> {
@@ -115,7 +119,7 @@ impl<'a, T> Unsub<'a> for StateSlice<T> {
 }
 
 #[derive(shrinkwraprs::Shrinkwrap)]
-pub struct State<T>(Rc<StateSlice<T>>);
+pub struct State<T>(pub Rc<StateSlice<T>>);
 
 impl<T> Clone for State<T> {
 	fn clone(&self) -> Self {
@@ -125,10 +129,4 @@ impl<T> Clone for State<T> {
 
 impl<T> State<T> {
 	pub fn new(initial: T) -> Self { State(Rc::new(StateSlice::new(initial))) }
-}
-
-impl<T> From<Rc<StateSlice<T>>> for State<T> {
-	fn from(x: Rc<StateSlice<T>>) -> Self {
-		Self(x)
-	}
 }

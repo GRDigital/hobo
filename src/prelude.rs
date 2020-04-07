@@ -20,6 +20,7 @@ pub use crate::{
 	state_slice::{StateSlice,
 		State,
 		Subscription,
+		SubscriptionKey,
 	},
 };
 pub use css::{self, AppendProperty};
