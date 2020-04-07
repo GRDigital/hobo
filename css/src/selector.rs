@@ -61,7 +61,7 @@ impl ToString for PseudoClass {
 pub enum Element {
 	div, span, input, a, img, textarea,
 	html, body, h1, h2, h3, h4, blockquote,
-	h5, h6, p, header, var, nav,
+	h5, h6, p, header, var, nav, label,
 	li, ul, ol, footer, strong, hr, button,
 	svg, path, select, option, address,
 }
