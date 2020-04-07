@@ -1,6 +1,29 @@
 use crate::prelude::*;
 
-#[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, SmartDefault, Clone)]
+pub enum TransformOrigin {
+	#[default]
+	None,
+	Initial,
+	Inherit,
+	// Unset,
+	// Revert,
+	Some(Unit, Unit),
+}
+
+#[rustfmt::skip]
+impl ToString for TransformOrigin {
+	fn to_string(&self) -> String {
+		match self {
+			Self::None              => "transform-origin:none;".to_owned(),
+			Self::Initial           => "transform-origin:initial;".to_owned(),
+			Self::Inherit           => "transform-origin:inherit;".to_owned(),
+			Self::Some(top, bottom) => format!("transform-origin:{} {};", top.to_string(), bottom.to_string()),
+		}
+	}
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, SmartDefault, Clone)]
 pub enum Transform {
 	#[default]
 	None,

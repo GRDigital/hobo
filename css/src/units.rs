@@ -1,6 +1,7 @@
+use crate::prelude::*;
 pub type F32 = ordered_float::NotNan<f32>;
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, smart_default::SmartDefault)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, SmartDefault)]
 pub enum Unit {
 	#[default]
 	Zero,

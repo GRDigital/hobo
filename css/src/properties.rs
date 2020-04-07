@@ -278,7 +278,7 @@ pub enum Property {
 	TableLayout(TableLayout),
 	Content(Content),
 	ObjectFit(ObjectFit),
-	Transform(Transform), TransformStyle(TransformStyle),
+	Transform(Transform), TransformStyle(TransformStyle), TransformOrigin(TransformOrigin),
 	Filter(Filter),
 	BackfaceVisibility(BackfaceVisibility),
 	Perspective(Perspective),
@@ -452,6 +452,7 @@ impl ToString for Property {
 			Self::ColumnGap(x)               => x.to_string(),
 			Self::OverflowWrap(x)            => x.to_string(),
 			Self::BoxShadow(x)               => x.to_string(),
+			Self::TransformOrigin(x)         => x.to_string(),
 		}
 	}
 }
@@ -565,6 +566,7 @@ from_properties! {
 	RowGap,
 	ColumnGap,
 	BoxShadow,
+	TransformOrigin,
 }
 
 css_macros::easy_enum! {box-sizing content-box border-box}
