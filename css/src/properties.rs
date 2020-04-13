@@ -211,7 +211,7 @@ pub enum Property {
 	BackgroundColor(ColorValue), BackgroundBlendMode(BackgroundBlendMode),
 	BackgroundRepeat(BackgroundRepeat), BackgroundAttachment(BackgroundAttachment),
 	BackgroundImage(BackgroundImage), BackgroundSize(BackgroundSize),
-	BackgroundPosition(BackgroundPosition), BackgroundOrigin(BackgroundOrigin),
+	BackgroundPositionX(BackgroundPositionX), BackgroundPositionY(BackgroundPositionY), BackgroundOrigin(BackgroundOrigin),
 
 	// border
 	BorderLeftColor(ColorValue), BorderRightColor(ColorValue), BorderTopColor(ColorValue), BorderBottomColor(ColorValue),
@@ -445,7 +445,8 @@ impl ToString for Property {
 			Self::BorderImageOutset(x)       => x.to_string(),
 			Self::BorderImageRepeat(x)       => x.to_string(),
 			Self::ClipPath(x)                => x.to_string(),
-			Self::BackgroundPosition(x)      => x.to_string(),
+			Self::BackgroundPositionX(x)     => x.to_string(),
+			Self::BackgroundPositionY(x)     => x.to_string(),
 			Self::BackgroundOrigin(x)        => x.to_string(),
 			Self::GridAutoFlow(x)            => x.to_string(),
 			Self::RowGap(x)                  => x.to_string(),
@@ -560,7 +561,8 @@ from_properties! {
 	BorderImageOutset,
 	BorderImageRepeat,
 	ClipPath,
-	BackgroundPosition,
+	BackgroundPositionX,
+	BackgroundPositionY,
 	BackgroundOrigin,
 	GridAutoFlow,
 	RowGap,
