@@ -51,6 +51,18 @@ pub mod builder {
 		pub fn style(mut self, x: impl Into<Cow<'a, [crate::css::Property]>>) -> Self { self.style = Some(x.into()); self }
 		pub fn child(mut self, child: impl crate::Element + 'static) -> Self { self.children.push(BuilderChild::Owned(Box::new(child))); self }
 		pub fn child_ref(mut self, child: &'a (impl crate::Element + 'static)) -> Self { self.children.push(BuilderChild::Ref(child)); self }
+		pub fn children<E: crate::Element + 'static, I: IntoIterator<Item = E>>(mut self, children: I) -> Self {
+			for child in children.into_iter() {
+				self.children.push(BuilderChild::Owned(Box::new(child)));
+			}
+			self
+		}
+		pub fn children_ref<E: crate::Element + 'static, I: IntoIterator<Item = &'a E>>(mut self, children: I) -> Self {
+			for child in children.into_iter() {
+				self.children.push(BuilderChild::Ref(child));
+			}
+			self
+		}
 
 		pub fn attr(mut self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) -> Self {
 			let mut v = self.attributes.unwrap_or_else(Vec::new);
