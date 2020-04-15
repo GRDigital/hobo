@@ -52,6 +52,8 @@ pub use Property::{
 	OutlineColor,
 	TextIndent,
 	OutlineOffset,
+
+	BackgroundPositionX, BackgroundPositionY,
 };
 
 
@@ -211,7 +213,7 @@ pub enum Property {
 	BackgroundColor(ColorValue), BackgroundBlendMode(BackgroundBlendMode),
 	BackgroundRepeat(BackgroundRepeat), BackgroundAttachment(BackgroundAttachment),
 	BackgroundImage(BackgroundImage), BackgroundSize(BackgroundSize),
-	BackgroundPositionX(BackgroundPositionX), BackgroundPositionY(BackgroundPositionY), BackgroundOrigin(BackgroundOrigin),
+	BackgroundPositionX(UnitValue), BackgroundPositionY(UnitValue), BackgroundOrigin(BackgroundOrigin),
 
 	// border
 	BorderLeftColor(ColorValue), BorderRightColor(ColorValue), BorderTopColor(ColorValue), BorderBottomColor(ColorValue),
@@ -263,8 +265,7 @@ pub enum Property {
 	TextOverflow(TextOverflow),
 	OverflowWrap(OverflowWrap),
 	VerticalAlign(VerticalAlign),
-	LineHeight(LineHeight),
-	LetterSpacing(LetterSpacing),
+	LineHeight(LineHeight), LetterSpacing(LetterSpacing),
 	TabSize(TabSize),
 	TextDecorationStyle(TextDecorationStyle), TextDecorationLine(TextDecorationLine), TextDecorationColor(ColorValue), TextRendering(TextRendering),
 
@@ -352,6 +353,9 @@ impl ToString for Property {
 			Self::GridColumnEnd(x)           => format!("grid-column-end:{};", x.to_string()),
 			Self::GridRowStart(x)            => format!("grid-row-start:{};", x.to_string()),
 			Self::GridRowEnd(x)              => format!("grid-row-end:{};", x.to_string()),
+
+			Self::BackgroundPositionX(x)     => format!("background-position-x:{};", x.to_string()),
+			Self::BackgroundPositionY(x)     => format!("background-position-y:{};", x.to_string()),
 
 			// different properties that have specific to them arguments
 			// basis/grow/shrink/order kind of take the same, but basis and shrink are 1 by default while others are 0 so /shrug
@@ -445,8 +449,6 @@ impl ToString for Property {
 			Self::BorderImageOutset(x)       => x.to_string(),
 			Self::BorderImageRepeat(x)       => x.to_string(),
 			Self::ClipPath(x)                => x.to_string(),
-			Self::BackgroundPositionX(x)     => x.to_string(),
-			Self::BackgroundPositionY(x)     => x.to_string(),
 			Self::BackgroundOrigin(x)        => x.to_string(),
 			Self::GridAutoFlow(x)            => x.to_string(),
 			Self::RowGap(x)                  => x.to_string(),
@@ -561,8 +563,6 @@ from_properties! {
 	BorderImageOutset,
 	BorderImageRepeat,
 	ClipPath,
-	BackgroundPositionX,
-	BackgroundPositionY,
 	BackgroundOrigin,
 	GridAutoFlow,
 	RowGap,
