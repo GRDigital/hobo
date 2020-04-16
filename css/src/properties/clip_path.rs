@@ -40,13 +40,13 @@ pub enum ClipPath {
 impl ToString for ClipPath {
 	fn to_string(&self) -> String {
 		match self {
-			Self::None => "clip-path:none;".to_owned(),
-			Self::Initial => "clip-path:initial;".to_owned(),
-			Self::Inherit => "clip-path:inherit;".to_owned(),
-			Self::Unset => "clip-path:unset;".to_owned(),
-			Self::Revert => "clip-path:revert;".to_owned(),
-			Self::Url(x) => format!(r#"clip-path:url("{}");"#, x),
-			Self::Shape(x) => format!("clip-path:{};", x.iter().map(std::string::ToString::to_string).collect::<Vec<_>>().join(" ")),
+			Self::None => "-webkit-clip-path:none;clip-path:none;".to_owned(),
+			Self::Initial => "-webkit-clip-path:initial;clip-path:initial;".to_owned(),
+			Self::Inherit => "-webkit-clip-path:inherit;clip-path:inherit;".to_owned(),
+			Self::Unset => "-webkit-clip-path:unset;clip-path:unset;".to_owned(),
+			Self::Revert => "-webkit-clip-path:revert;clip-path:revert;".to_owned(),
+			Self::Url(x) => format!(r#"-webkit-clip-path:url("{0}");clip-path:url("{0}");"#, x),
+			Self::Shape(x) => format!("-webkit-clip-path:{0};clip-path:{0};", x.iter().map(std::string::ToString::to_string).collect::<Vec<_>>().join(" ")),
 		}
 	}
 }
