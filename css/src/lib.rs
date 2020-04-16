@@ -8,6 +8,7 @@ pub use paste;
 pub use properties::*;
 use std::string::ToString;
 pub use units::Unit;
+use std::borrow::Cow;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Rule(pub selector::Selector, pub Vec<Property>);
@@ -27,15 +28,27 @@ impl Style {
 	pub fn append(&mut self, other: &mut Style) { self.0.append(&mut other.0); }
 }
 
-impl<'a> From<&'a Style> for std::borrow::Cow<'a, Style> {
-	fn from(x: &Style) -> std::borrow::Cow<'_, Style> {
-		std::borrow::Cow::Borrowed(x)
+impl<'a> From<&'a Style> for Cow<'a, Style> {
+	fn from(x: &'a Style) -> Cow<'a, Style> {
+		Cow::Borrowed(x)
 	}
 }
 
-impl<'a> From<Style> for std::borrow::Cow<'a, Style> {
-	fn from(x: Style) -> std::borrow::Cow<'a, Style> {
-		std::borrow::Cow::Owned(x)
+impl<'a> From<Style> for Cow<'a, Style> {
+	fn from(x: Style) -> Cow<'a, Style> {
+		Cow::Owned(x)
+	}
+}
+
+impl<'a> From<&'a Style> for Cow<'a, AtRules> {
+	fn from(x: &Style) -> Cow<'a, AtRules> {
+		Cow::Owned(AtRules(vec![AtRule { style: x.clone(), media: None }]))
+	}
+}
+
+impl<'a> From<Style> for Cow<'a, AtRules> {
+	fn from(x: Style) -> Cow<'a, AtRules> {
+		Cow::Owned(AtRules(vec![AtRule { style: x, media: None }]))
 	}
 }
 
@@ -83,6 +96,72 @@ macro_rules! class {
 		])
 	};
 }
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub struct AtRule {
+	pub media: Option<Media>,
+	pub style: Style,
+}
+
+impl ToString for AtRule {
+	fn to_string(&self) -> String {
+		if let Some(media) = self.media.as_ref() {
+			format!("{}{{{}}}", media.to_string(), self.style.to_string())
+		} else {
+			self.style.to_string()
+		}
+	}
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub struct AtRules(pub Vec<AtRule>);
+
+impl ToString for AtRules {
+	fn to_string(&self) -> String {
+		self.0.iter().map(ToString::to_string).collect::<String>()
+	}
+}
+
+impl<'a> From<AtRules> for Cow<'a, AtRules> {
+	fn from(x: AtRules) -> Cow<'a, AtRules> {
+		Cow::Owned(x)
+	}
+}
+
+impl<'a> From<&'a AtRules> for Cow<'a, AtRules> {
+	fn from(x: &'a AtRules) -> Cow<'a, AtRules> {
+		Cow::Borrowed(x)
+	}
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub enum Media {
+	MinWidth(Unit),
+	MaxWidth(Unit),
+	MinAspectRatio(u32, u32),
+	MaxAspectRatio(u32, u32),
+}
+
+impl ToString for Media {
+	fn to_string(&self) -> String {
+		match self {
+			Self::MinWidth(unit) => format!("@media(min-width:{})", unit.to_string()),
+			Self::MaxWidth(unit) => format!("@media(max-width:{})", unit.to_string()),
+			Self::MinAspectRatio(width, height) => format!("@media(min-aspect-ratio:{}/{})", width, height),
+			Self::MaxAspectRatio(width, height) => format!("@media(max-aspect-ratio:{}/{})", width, height),
+		}
+	}
+}
+
+// TODO: kind of hacky
+// #[derive(Debug, PartialEq, Eq, Hash, Clone)]
+// pub struct MediaMaxWidth(pub Unit);
+
+// impl ToString for MediaMaxWidth {
+//     fn to_string(&self) -> String {
+//         format!("@media (max-width:{})", self.0.to_string())
+//     }
+// }
 
 // TODO: replace @font-face selector with regular rust struct
 /*

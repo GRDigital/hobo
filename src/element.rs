@@ -17,7 +17,7 @@ pub trait Element {
 
 	fn append(&self, child: &dyn Element) { self.element().append_child(&child.element()).expect("Can't append child"); }
 
-	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) -> &Self
+	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>) -> &Self
 	where
 		Self: Sized + 'static,
 	{
@@ -40,7 +40,7 @@ pub trait Element {
 		self.element().remove_style();
 	}
 
-	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) -> &Self
+	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>) -> &Self
 	where
 		Self: Sized+ 'static,
 	{

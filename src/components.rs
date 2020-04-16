@@ -40,14 +40,14 @@ pub mod builder {
 	pub struct Builder<'a> {
 		pub text: Option<Cow<'a, str>>,
 		pub attributes: Option<Vec<[Cow<'a, str>; 2]>>,
-		pub class: Option<Cow<'a, crate::css::Style>>,
+		pub class: Option<Cow<'a, crate::css::AtRules>>,
 		pub style: Option<Cow<'a, [crate::css::Property]>>,
 		pub children: Vec<BuilderChild<'a>>,
 	}
 
 	impl<'a> Builder<'a> {
 		pub fn text(mut self, x: impl Into<Cow<'a, str>>) -> Self { self.text = Some(x.into()); self }
-		pub fn class(mut self, x: impl Into<Cow<'a, crate::css::Style>>) -> Self { self.class = Some(x.into()); self }
+		pub fn class(mut self, x: impl Into<Cow<'a, crate::css::AtRules>>) -> Self { self.class = Some(x.into()); self }
 		pub fn style(mut self, x: impl Into<Cow<'a, [crate::css::Property]>>) -> Self { self.style = Some(x.into()); self }
 		pub fn child(mut self, child: impl crate::Element + 'static) -> Self { self.children.push(BuilderChild::Owned(Box::new(child))); self }
 		pub fn child_ref(mut self, child: &'a (impl crate::Element + 'static)) -> Self { self.children.push(BuilderChild::Ref(child)); self }
