@@ -9,7 +9,7 @@ extend = "0.1"
 hobo_derive = { path = "hobo_derive" }
 ordered-float = { version = "1", default-features = false }
 paste = "0.1"
-roxmltree = "0.10"
+roxmltree = "0.11"
 shrinkwraprs = "0.3"
 slotmap = { version = "0.4", features = ["unstable"] }
 strum = { version = "0.18", features = ["derive"] }
