@@ -2,7 +2,6 @@ use crate::{web_str, RawSetClass};
 use std::hash::{Hash, Hasher};
 use std::borrow::Cow;
 use std::cell::RefCell;
-use std::rc::Rc;
 
 pub trait Element {
 	// should probably be subsumed by BasicElement, which would also probably give me more control over ssr
