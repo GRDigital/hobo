@@ -1,10 +1,45 @@
-extern crate proc_macro;
 use heck::*;
 use proc_quote::quote;
+use syn::parse::{Parse, ParseStream};
+use syn::{Result, Token, punctuated::Punctuated};
+use itertools::Itertools;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
+struct HyphenatedName(String);
+
+impl Parse for HyphenatedName {
+	fn parse(input: ParseStream) -> Result<Self> {
+		Ok(Self(<Punctuated<proc_macro2::TokenTree, Token![-]>>::parse_separated_nonempty(input)?.into_iter().map(|x| x.to_string()).join("-")))
+	}
+}
+
+#[derive(Debug)]
+struct Input {
+	property: HyphenatedName,
+	values: Vec<Value>,
+}
+
+impl Parse for Input {
+	fn parse(input: ParseStream) -> Result<Self> {
+		let mut values = vec![
+			Value::EnumVariant(HyphenatedName("initial".to_owned())),
+			Value::EnumVariant(HyphenatedName("inherit".to_owned())),
+			Value::EnumVariant(HyphenatedName("unset".to_owned())),
+			Value::EnumVariant(HyphenatedName("revert".to_owned())),
+		];
+		let property = input.parse()?;
+
+		while let Ok(value) = input.parse() {
+			values.push(value);
+		}
+
+		Ok(Self { property, values })
+	}
+}
+
+#[derive(Debug, Clone)]
 enum Value {
-	EnumVariant(String),
+	EnumVariant(HyphenatedName),
 	Unit,
 	String,
 	Number,
@@ -12,60 +47,43 @@ enum Value {
 	Raw,
 }
 
+impl Parse for Value {
+	fn parse(input: ParseStream) -> Result<Self> {
+		if input.parse::<Token![@]>().is_ok() {
+			return Ok(Self::Unit);
+		} else if input.parse::<Token![$]>().is_ok() {
+			return Ok(Self::String);
+		} else if input.parse::<Token![#]>().is_ok() {
+			return Ok(Self::Number);
+		} else if let Ok(x) = input.parse::<HyphenatedName>() {
+			return Ok(Self::EnumVariant(x));
+		} else {
+			syn::custom_keyword!(float);
+			syn::custom_keyword!(raw);
+
+			let content;
+			syn::bracketed!(content in input);
+			if content.parse::<float>().is_ok() {
+				return Ok(Self::Float);
+			} else if content.parse::<raw>().is_ok() {
+				return Ok(Self::Raw);
+			}
+		}
+
+		Err(input.error("unexpected tokens"))
+	}
+}
+
 #[proc_macro]
 pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-	let mut args: Vec<String> = vec![];
-	let mut current_ident: String = String::new();
-	let input = input.into_iter();
-	for t in input {
-		match t {
-			proc_macro::TokenTree::Punct(x) if x.as_char() == '-' => {
-				current_ident += "-";
-			},
-			x => {
-				if current_ident.is_empty() {
-					current_ident = x.to_string();
-				} else if current_ident.ends_with('-') {
-					current_ident += &x.to_string();
-				} else {
-					args.push(current_ident);
-					current_ident = x.to_string();
-				}
-			},
-		}
-	}
-	args.push(current_ident);
+	let input = syn::parse_macro_input!(input as Input);
 
-	let property: &str = args.get(0).unwrap();
-	let values = vec![
-		Value::EnumVariant("initial".to_owned()),
-		Value::EnumVariant("inherit".to_owned()),
-		Value::EnumVariant("unset".to_owned()),
-		Value::EnumVariant("revert".to_owned()),
-	]
-		.into_iter()
-		.chain(args
-			.get(1..)
-			.unwrap()
-			.iter()
-			.map(|x| match &x as &str {
-				"@" => Value::Unit,
-				"$" => Value::String,
-				"#" => Value::Number,
-				"[float]" => Value::Float,
-				"[raw]" => Value::Raw,
-				x => Value::EnumVariant(x.to_owned()),
-			})
-			.clone()
-		)
-		.collect::<Vec<_>>();
+	let property_snek = proc_macro2::Ident::new(&input.property.0.to_snek_case(), proc_macro2::Span::call_site());
+	let property_camel = proc_macro2::Ident::new(&input.property.0.to_camel_case(), proc_macro2::Span::call_site());
 
-	let property_snek = proc_macro2::Ident::new(&property.to_snek_case(), proc_macro2::Span::call_site());
-	let property_camel = proc_macro2::Ident::new(&property.to_camel_case(), proc_macro2::Span::call_site());
-
-	let enum_members = values.iter().map(|value| match value {
+	let enum_members = input.values.iter().map(|value| match value {
 		Value::EnumVariant(value) => {
-			let value_camel = proc_macro2::Ident::new(&value.to_camel_case(), proc_macro2::Span::call_site());
+			let value_camel = proc_macro2::Ident::new(&value.0.to_camel_case(), proc_macro2::Span::call_site());
 			quote! {#value_camel,}
 		},
 		Value::Unit => {
@@ -88,38 +106,38 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		},
 	});
 
-	let to_string_lines = values.iter().map(|value| match value {
+	let to_string_lines = input.values.iter().map(|value| match value {
 		Value::EnumVariant(value) => {
-			let value_camel = proc_macro2::Ident::new(&value.to_camel_case(), proc_macro2::Span::call_site());
-			let css_string = format!("{}:{};", property, value);
+			let value_camel = proc_macro2::Ident::new(&value.0.to_camel_case(), proc_macro2::Span::call_site());
+			let css_string = format!("{}:{};", input.property.0, value.0);
 			quote! {Self::#value_camel => #css_string.to_owned(),}
 		},
 		Value::Unit => {
-			let css_format_string = format!("{}:{{}};", property);
-			let css_zero_string = format!("{}:0;", property);
+			let css_format_string = format!("{}:{{}};", input.property.0);
+			let css_zero_string = format!("{}:0;", input.property.0);
 			quote! {
 				Self::Some(x) => format!(#css_format_string, x.to_string()),
 				Self::Zero => #css_zero_string.to_owned(),
 			}
 		},
 		Value::String => {
-			let css_format_string = format!(r#"{}:"{{}}";"#, property);
+			let css_format_string = format!(r#"{}:"{{}}";"#, input.property.0);
 			quote! {Self::String(x) => format!(#css_format_string, x),}
 		},
 		Value::Raw => {
-			let css_format_string = format!("{}:{{}};", property);
+			let css_format_string = format!("{}:{{}};", input.property.0);
 			quote! {Self::Raw(x) => format!(#css_format_string, x),}
 		},
 		Value::Number | Value::Float => {
-			let css_format_string = format!("{}:{{}};", property);
+			let css_format_string = format!("{}:{{}};", input.property.0);
 			quote! {Self::Number(x) => format!(#css_format_string, x),}
 		},
 	});
 
-	let macro_values = values.iter().map(|value| match value {
+	let macro_values = input.values.iter().map(|value| match value {
 		Value::EnumVariant(value) => {
-			let value_camel = proc_macro2::Ident::new(&value.to_camel_case(), proc_macro2::Span::call_site());
-			let value_tt: proc_macro2::TokenStream = syn::parse_str(value).unwrap();
+			let value_camel = proc_macro2::Ident::new(&value.0.to_camel_case(), proc_macro2::Span::call_site());
+			let value_tt: proc_macro2::TokenStream = syn::parse_str(&value.0).unwrap();
 			quote! {(#value_tt) => { $crate::Property::#property_camel($crate::#property_camel::#value_camel) };}
 		},
 		Value::Unit => {
