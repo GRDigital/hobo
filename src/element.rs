@@ -1,14 +1,12 @@
 use crate::{web_str, RawSetClass};
 use std::hash::{Hash, Hasher};
-use std::borrow::Cow;
 use std::cell::RefCell;
 
 pub trait Element {
 	// should probably be subsumed by BasicElement, which would also probably give me more control over ssr
-	fn element(&self) -> Cow<'_, web_sys::Element>;
+	fn element(&self) -> std::borrow::Cow<'_, web_sys::Element>;
 
-	fn class() -> String
-	where
+	fn class() -> String where
 		Self: Sized + 'static,
 	{
 		std::any::TypeId::of::<Self>().to_class_string("t")
@@ -16,8 +14,7 @@ pub trait Element {
 
 	fn append(&self, child: &dyn Element) { self.element().append_child(&child.element()).expect("Can't append child"); }
 
-	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>) -> &Self
-	where
+	fn set_class<'a>(&self, style: impl Into<std::borrow::Cow<'a, css::AtRules>>) -> &Self where
 		Self: Sized + 'static,
 	{
 		super::CONTEXT.with(move |ctx| {
@@ -28,8 +25,7 @@ pub trait Element {
 		})
 	}
 
-	fn set_style<'a>(&self, style: impl Into<Cow<'a, [css::Property]>>)
-	where
+	fn set_style<'a>(&self, style: impl Into<std::borrow::Cow<'a, [css::Property]>>) where
 		Self: Sized,
 	{
 		self.element().set_style(style.into());
@@ -39,8 +35,7 @@ pub trait Element {
 		self.element().remove_style();
 	}
 
-	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>) -> &Self
-	where
+	fn add_class<'a>(&self, style: impl Into<std::borrow::Cow<'a, css::AtRules>>) -> &Self where
 		Self: Sized+ 'static,
 	{
 		super::CONTEXT.with(move |ctx| {
@@ -54,13 +49,13 @@ pub trait Element {
 }
 
 impl Element for RefCell<dyn Element> {
-	fn element(&self) -> Cow<'_, web_sys::Element> {
-		Cow::Owned(self.borrow().element().into_owned())
+	fn element(&self) -> std::borrow::Cow<'_, web_sys::Element> {
+		std::borrow::Cow::Owned(self.borrow().element().into_owned())
 	}
 }
 
 impl Element for Box<dyn Element> {
-	fn element(&self) -> Cow<'_, web_sys::Element> {
+	fn element(&self) -> std::borrow::Cow<'_, web_sys::Element> {
 		self.as_ref().element()
 	}
 }
