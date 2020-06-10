@@ -7,6 +7,7 @@ edition = "2018"
 css = { path = "css", package = "hobo-css" }
 extend = "0.1"
 hobo_derive = { path = "hobo_derive" }
+log = "0.4"
 ordered-float = { version = "1", default-features = false }
 paste = "0.1"
 roxmltree = "0.11"
