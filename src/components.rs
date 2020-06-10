@@ -1,5 +1,6 @@
 use crate::prelude::*;
 pub use builder::*;
+pub use crate::create::*;
 
 macro_rules! declare_basic_shortcuts {
 	($($name:ident => $element:ident),+$(,)*) => {$(
@@ -23,8 +24,10 @@ declare_basic_shortcuts! {
 	Label => HtmlLabelElement,
 }
 
-pub fn build<'a>() -> Builder<'a> {
-	Builder::default()
+pub fn build<'a, T>(element: T) -> Builder<'a, T> where
+	T: AsRef<web_sys::Element>,
+{
+	Builder::new(element)
 }
 
 pub mod builder {
@@ -36,8 +39,10 @@ pub mod builder {
 		Ref(&'a dyn crate::Element),
 	}
 
-	#[derive(Default)]
-	pub struct Builder<'a> {
+	pub struct Builder<'a, T> where
+		T: AsRef<web_sys::Element> + 'static,
+	{
+		pub element: T,
 		pub text: Option<Cow<'a, str>>,
 		pub attributes: Option<Vec<[Cow<'a, str>; 2]>>,
 		pub class: Option<Cow<'a, crate::css::AtRules>>,
@@ -45,7 +50,10 @@ pub mod builder {
 		pub children: Vec<BuilderChild<'a>>,
 	}
 
-	impl<'a> Builder<'a> {
+	impl<'a, T> Builder<'a, T> where
+		T: AsRef<web_sys::Element> + 'static,
+	{
+		pub fn new(element: T) -> Self { Self { element, text: None, attributes: None, class: None, style: None, children: Vec::new() } }
 		pub fn text(mut self, x: impl Into<Cow<'a, str>>) -> Self { self.text = Some(x.into()); self }
 		pub fn class(mut self, x: impl Into<Cow<'a, crate::css::AtRules>>) -> Self { self.class = Some(x.into()); self }
 		pub fn style(mut self, x: impl Into<Cow<'a, [crate::css::Property]>>) -> Self { self.style = Some(x.into()); self }
@@ -71,36 +79,36 @@ pub mod builder {
 			self
 		}
 
-		pub fn build<T: AsRef<web_sys::Element> + 'static, E: BorrowMut<crate::BasicElement<T>>>(self, mut component: E) -> E {
-			{
-				let component = component.borrow_mut();
-				let element: &web_sys::Element = component.element.as_ref();
-				if let Some(x) = self.text {
-					element.unchecked_ref::<web_sys::HtmlElement>().set_inner_text(&x)
-				};
-				if let Some(x) = self.attributes {
-					for [k, v] in x {
-						element.set_attribute(&k, &v).expect("can't set attributes");
-					}
-				};
-				for child in self.children.into_iter() {
-					match child {
-						BuilderChild::Owned(x) => {
-							component.append(&*x);
-							component.children.push(x);
-						},
-						BuilderChild::Ref(x) => component.append(x),
-					}
-				}
-				if let Some(x) = self.class { component.add_class(x); };
-				if let Some(x) = self.style { component.set_style(x); };
-			}
-			component
-		}
+		// pub fn build<E: BorrowMut<crate::BasicElement<T>>>(self, mut component: E) -> E {
+		//     {
+		//         let component = component.borrow_mut();
+		//         let element: &web_sys::Element = component.element.as_ref();
+		//         if let Some(x) = self.text {
+		//             element.unchecked_ref::<web_sys::HtmlElement>().set_inner_text(&x)
+		//         };
+		//         if let Some(x) = self.attributes {
+		//             for [k, v] in x {
+		//                 element.set_attribute(&k, &v).expect("can't set attributes");
+		//             }
+		//         };
+		//         for child in self.children.into_iter() {
+		//             match child {
+		//                 BuilderChild::Owned(x) => {
+		//                     component.append(&*x);
+		//                     component.children.push(x);
+		//                 },
+		//                 BuilderChild::Ref(x) => component.append(x),
+		//             }
+		//         }
+		//         if let Some(x) = self.class { component.add_class(x); };
+		//         if let Some(x) = self.style { component.set_style(x); };
+		//     }
+		//     component
+		// }
 
-		pub fn build_raw<T: AsRef<web_sys::Element> + 'static>(self, element: T) -> crate::BasicElement<T> {
+		pub fn build(self) -> crate::BasicElement<T> {
 			{
-				let element: &web_sys::Element = element.as_ref();
+				let element: &web_sys::Element = self.element.as_ref();
 				if let Some(x) = self.text {
 					element.unchecked_ref::<web_sys::HtmlElement>().set_inner_text(&x)
 				};
@@ -117,7 +125,7 @@ pub mod builder {
 				}
 			}
 			let cmp = crate::BasicElement {
-				element,
+				element: self.element,
 				children: self.children.into_iter().filter_map(|c| if let BuilderChild::Owned(x) = c { Some(x) } else { None }).collect::<Vec<_>>(),
 				event_handlers: crate::EventHandlers::default(),
 			};

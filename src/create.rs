@@ -3,25 +3,31 @@
 use super::{dom, cmp, basic_element::BasicElement, EventHandlers};
 
 macro_rules! html_create {
-	($($name:ident, $t:ident),+$(,)*) => {
+	($($name:ident, $t:ident),+$(,)*) => {paste::item!{
 		$(
-			pub fn $name() -> web_sys::$t { web_sys::$t::from(wasm_bindgen::JsValue::from(dom().create_element(crate::web_str::$name()).expect("can't create element"))) }
+			pub fn [<raw_$name>]() -> web_sys::$t { web_sys::$t::from(wasm_bindgen::JsValue::from(dom().create_element(crate::web_str::$name()).expect("can't create element"))) }
 
 			impl BasicElement<web_sys::$t> {
 				pub fn $name() -> Self {
-					BasicElement { element: $name(), children: vec![], event_handlers: EventHandlers::default() }
+					BasicElement { element: [<raw_$name>](), children: vec![], event_handlers: EventHandlers::default() }
 				}
 			}
 		)+
 
-		impl<'a> cmp::Builder<'a> {
-			$(
-				pub fn $name(self) -> BasicElement<web_sys::$t> {
-					self.build_raw($name())
-				}
-			)+
-		}
-	};
+		$(
+			pub fn $name<'a>() -> cmp::Builder<'a, web_sys::$t> {
+				cmp::Builder::new([<raw_$name>]())
+			}
+		)+
+
+		// impl<'a> cmp::Builder<'a> {
+		//     $(
+		//         pub fn $name(self) -> BasicElement<web_sys::$t> {
+		//             self.build_raw($name())
+		//         }
+		//     )+
+		// }
+	}};
 }
 
 #[rustfmt::skip]

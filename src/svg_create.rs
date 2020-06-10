@@ -24,9 +24,9 @@ macro_rules! svg_create {
 	};
 }
 
-#[rustfmt::skip]
-svg_create![
-	svg, SvgsvgElement,
-	filter, SvgFilterElement,
-	feColorMatrix, SvgfeColorMatrixElement,
-];
+// #[rustfmt::skip]
+// svg_create![
+//     svg, SvgsvgElement,
+//     filter, SvgFilterElement,
+//     feColorMatrix, SvgfeColorMatrixElement,
+// ];
