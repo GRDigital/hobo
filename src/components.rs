@@ -32,7 +32,7 @@ pub fn build<'a, T>(element: T) -> Builder<'a, T> where
 
 pub mod builder {
 	use crate::prelude::*;
-	use std::borrow::{BorrowMut, Cow};
+	use std::borrow::Cow;
 
 	pub enum BuilderChild<'a> {
 		Owned(Box<dyn crate::Element>),

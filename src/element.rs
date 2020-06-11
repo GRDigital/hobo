@@ -14,6 +14,13 @@ pub trait Element {
 
 	fn append(&self, child: &dyn Element) { self.element().append_child(&child.element()).expect("Can't append child"); }
 
+	fn with_class<'a>(self, style: impl Into<std::borrow::Cow<'a, css::AtRules>>) -> Self where
+		Self: Sized + 'static,
+	{
+		self.set_class(style);
+		self
+	}
+
 	fn set_class<'a>(&self, style: impl Into<std::borrow::Cow<'a, css::AtRules>>) -> &Self where
 		Self: Sized + 'static,
 	{
