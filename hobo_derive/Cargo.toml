@@ -7,6 +7,7 @@ edition = "2018"
 proc-macro = true
 
 [dependencies]
-syn = "1"
+derive_utils = "0.10"
 proc-macro2 = "1"
 proc-quote = "0.3"
+syn = "1"
