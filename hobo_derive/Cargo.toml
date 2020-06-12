@@ -10,4 +10,5 @@ proc-macro = true
 derive_utils = "0.10"
 proc-macro2 = "1"
 proc-quote = "0.3"
+quote = "1"
 syn = "1"
