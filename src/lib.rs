@@ -1,4 +1,4 @@
-#![feature(proc_macro_hygiene)]
+#![feature(proc_macro_hygiene, trait_alias)]
 
 mod basic_element;
 mod element;

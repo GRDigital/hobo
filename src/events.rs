@@ -33,7 +33,7 @@ macro_rules! generate_events {
 			)+
 		}
 
-		impl<T: AsRef<web_sys::Element>> BasicElement<T> {
+		impl<T: AsRef<web_sys::Element> + 'static> BasicElement<T> {
 			$(
 				pub fn [<with_$f>](self, f: impl FnMut($event_kind) + 'static) -> Self {
 					self.$f(f);
