@@ -9,7 +9,7 @@ macro_rules! html_create {
 
 			impl BasicElement<web_sys::$t> {
 				pub fn $name() -> Self {
-					BasicElement { element: [<raw_$name>](), children: vec![], event_handlers: EventHandlers::default() }
+					BasicElement { element: [<raw_$name>](), children: Vec::new(), event_handlers: EventHandlers::default() }
 				}
 			}
 		)+
