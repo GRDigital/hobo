@@ -6,7 +6,7 @@ mod enclose;
 pub mod prelude;
 mod svg_element;
 pub mod web_str;
-pub mod components;
+// pub mod components;
 pub mod create;
 pub mod svg_create;
 pub mod events;
@@ -25,7 +25,7 @@ use std::{
 	borrow::Cow,
 };
 pub use web_sys;
-pub use components as cmp;
+pub use create::components as cmp;
 pub use create::*;
 pub use svg_create::*;
 pub use events::*;
