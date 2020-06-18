@@ -6,7 +6,7 @@ pub trait Element {
 	// should probably be subsumed by BasicElement, which would also probably give me more control over ssr
 	fn element(&self) -> std::borrow::Cow<'_, web_sys::Element>;
 
-	fn class() -> String where
+	fn to_class_string() -> String where
 		Self: Sized + 'static,
 	{
 		std::any::TypeId::of::<Self>().to_class_string("t")
@@ -14,10 +14,24 @@ pub trait Element {
 
 	fn append(&self, child: &dyn Element) { self.element().append_child(&child.element()).expect("Can't append child"); }
 
-	fn with_class<'a>(self, style: impl Into<std::borrow::Cow<'a, css::AtRules>>) -> Self where
+	fn class<'a>(self, style: impl Into<std::borrow::Cow<'a, css::AtRules>>) -> Self where
 		Self: Sized + 'static,
 	{
 		self.set_class(style);
+		self
+	}
+
+	fn style<'a>(self, style: impl Into<std::borrow::Cow<'a, [css::Property]>>) -> Self where
+		Self: Sized + 'static,
+	{
+		self.set_style(style);
+		self
+	}
+
+	fn attr<'a>(self, key: impl Into<std::borrow::Cow<'a, str>>, value: impl Into<std::borrow::Cow<'a, str>>) -> Self where
+		Self: Sized + 'static
+	{
+		self.element().set_attribute(&key.into(), &value.into()).expect("can't set attribute");
 		self
 	}
 
@@ -27,7 +41,7 @@ pub trait Element {
 		super::CONTEXT.with(move |ctx| {
 			let element = self.element();
 			let element_class = ctx.style_storage.fetch(&element, style);
-			element.set_attribute(web_str::class(), &format!("{} {}", Self::class(), element_class)).unwrap();
+			element.set_attribute(web_str::class(), &format!("{} {}", Self::to_class_string(), element_class)).unwrap();
 			self
 		})
 	}
@@ -48,7 +62,7 @@ pub trait Element {
 		super::CONTEXT.with(move |ctx| {
 			let element = self.element();
 			let element_class = ctx.style_storage.fetch(&element, style);
-			let existing_class = element.get_attribute(web_str::class()).unwrap_or_else(Self::class);
+			let existing_class = element.get_attribute(web_str::class()).unwrap_or_else(Self::to_class_string);
 			element.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).unwrap();
 			self
 		})

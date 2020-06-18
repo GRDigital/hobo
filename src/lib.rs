@@ -128,6 +128,16 @@ pub trait Container: Element {
 		self.append(&child);
 		self.children_mut().push(child);
 	}
+
+	fn child(mut self, child: impl crate::Element + 'static) -> Self where Self: Sized {
+		self.attach_child(child);
+		self
+	}
+
+	fn child_ref(self, child: &(impl crate::Element + 'static)) -> Self where Self: Sized {
+		self.element().append_child(&child.element()).expect("can't append child");
+		self
+	}
 }
 
 pub trait Basic: Element + Container + EventTarget { }

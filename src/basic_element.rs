@@ -27,21 +27,7 @@ impl<T: Bound> BasicElement<T> {
 		}
 	}
 
-	pub fn child(mut self, child: impl crate::Element + 'static) -> Self {
-		self.element().append_child(&child.element()).expect("can't append child");
-		self.children_mut().push(Box::new(child));
-		self
-	}
-
-	pub fn child_ref(self, child: &(impl crate::Element + 'static)) -> Self {
-		self.element().append_child(&child.element()).expect("can't append child");
-		self
-	}
-
 	pub fn text<'a>(self, x: impl Into<Cow<'a, str>>) -> Self { self.element().unchecked_ref::<web_sys::HtmlElement>().set_inner_text(&x.into()); self }
-	pub fn class<'a>(self, x: impl Into<Cow<'a, crate::css::AtRules>>) -> Self { self.set_class(x.into()); self }
-	pub fn style<'a>(self, x: impl Into<Cow<'a, [crate::css::Property]>>) -> Self { self.set_style(x.into()); self }
-	pub fn attr<'a>(self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) -> Self { self.element().set_attribute(&key.into(), &value.into()).expect("can't set attribute"); self }
 }
 
 impl<T: AsRef<web_sys::Node> + Bound + wasm_bindgen::JsCast> BasicElement<T> {
