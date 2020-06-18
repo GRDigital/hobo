@@ -100,27 +100,3 @@ pub fn derive_replaceable(input: proc_macro::TokenStream) -> proc_macro::TokenSt
 		},
 	}
 }
-
-#[proc_macro_derive(Component)]
-pub fn derive_component(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-	let element = TokenStream::from(derive_element(input.clone()));
-	let event_target = TokenStream::from(derive_event_target(input.clone()));
-	let container = TokenStream::from(derive_container(input));
-
-	(quote! {
-		#element
-		#event_target
-		#container
-	}).into()
-}
-
-#[proc_macro_derive(Slot)]
-pub fn derive_slot(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-	let element = TokenStream::from(derive_element(input.clone()));
-	let replaceable = TokenStream::from(derive_replaceable(input));
-
-	(quote! {
-		#element
-		#replaceable
-	}).into()
-}
