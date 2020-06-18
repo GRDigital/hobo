@@ -140,36 +140,17 @@ pub trait Container: Element {
 	}
 }
 
-pub trait Basic: Element + Container + EventTarget { }
-impl<T: Element + Container + EventTarget> Basic for T {}
-
-pub trait Replaceable<T>: Basic {
+pub trait Replaceable<T>: Element {
 	fn replace_element(&self, element: T) where Self: Sized;
 }
 
-impl Element for Box<dyn Basic> {
-	fn element(&self) -> std::borrow::Cow<'_, web_sys::Element> {
-		self.as_ref().element()
-	}
-}
-
-impl Container for Box<dyn Basic> {
-	fn children(&self) -> &Vec<Box<dyn Element>> { self.as_ref().children() }
-	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>> { self.as_mut().children_mut() }
-}
-
 #[derive(Clone)]
-pub struct Slot(pub Rc<RefCell<Box<dyn Basic>>>);
+pub struct Slot(pub Rc<RefCell<Box<dyn Element>>>);
 
 impl Slot {
-	pub fn new(element: impl Basic + 'static) -> Self {
+	pub fn new(element: impl Element + 'static) -> Self {
 		Self(Rc::new(RefCell::new(Box::new(element))))
 	}
-}
-
-impl Container for Slot {
-	fn children(&self) -> &Vec<Box<dyn Element>> { unsafe { self.0.try_borrow_unguarded() }.expect("rc is mutably borrowed").children() }
-	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>> { Rc::get_mut(&mut self.0).expect("rc is mutably borrowed").get_mut().children_mut() }
 }
 
 impl<T: Element> Element for Rc<RefCell<T>> {
@@ -189,7 +170,7 @@ impl<T: EventTarget> EventTarget for Rc<RefCell<T>> {
 	}
 }
 
-impl<T: Basic> Replaceable<T> for Rc<RefCell<T>> {
+impl<T: Element> Replaceable<T> for Rc<RefCell<T>> {
 	fn replace_element(&self, element: T) {
 		let mut me = self.borrow_mut();
 		me.element().insert_adjacent_element(web_str::afterend(), &element.element()).unwrap();
@@ -203,13 +184,7 @@ impl Element for Slot {
 	}
 }
 
-impl EventTarget for Slot {
-	fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>> {
-		unsafe { self.0.try_borrow_unguarded() }.expect("rc is mutably borrowed").event_handlers()
-	}
-}
-
-impl<T: Basic + 'static> Replaceable<T> for Slot {
+impl<T: Element + 'static> Replaceable<T> for Slot {
 	fn replace_element(&self, element: T) {
 		let mut me = self.0.borrow_mut();
 		me.element().insert_adjacent_element(web_str::afterend(), &element.element()).unwrap();

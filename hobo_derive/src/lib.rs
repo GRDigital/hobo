@@ -93,7 +93,7 @@ pub fn derive_replaceable(input: proc_macro::TokenStream) -> proc_macro::TokenSt
 			let name = input.ident;
 			let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 			(quote! {
-				impl<T: ::hobo::Basic + 'static> ::hobo::Replaceable<T> for #name #ty_generics #where_clause {
+				impl<T: ::hobo::Element + 'static> ::hobo::Replaceable<T> for #name #ty_generics #where_clause {
 					fn replace_element(&self, element: T) { self.element.replace_element(element) }
 				}
 			}).into()
@@ -116,11 +116,11 @@ pub fn derive_component(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 
 #[proc_macro_derive(Slot)]
 pub fn derive_slot(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-	let component = TokenStream::from(derive_component(input.clone()));
+	let element = TokenStream::from(derive_element(input.clone()));
 	let replaceable = TokenStream::from(derive_replaceable(input));
 
 	(quote! {
-		#component
+		#element
 		#replaceable
 	}).into()
 }
