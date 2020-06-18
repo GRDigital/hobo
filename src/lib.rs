@@ -15,7 +15,7 @@ mod container;
 mod replaceable;
 mod slot;
 
-pub use basic_element::BasicElement;
+pub use basic_element::{BasicElement, RawElement};
 pub use css;
 pub use element::Element;
 pub use hobo_derive::*;

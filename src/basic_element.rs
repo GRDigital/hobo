@@ -10,8 +10,16 @@ pub struct BasicElement<T: Bound> {
 	pub event_handlers: EventHandlers,
 }
 
-impl<T: Bound> AsRef<T> for BasicElement<T> {
-	fn as_ref(&self) -> &T { &self.element }
+pub trait RawElement {
+	type RawElementType: AsRef<web_sys::Element>;
+
+	fn raw_element(&self) -> &Self::RawElementType;
+}
+
+impl<T: Bound> RawElement for BasicElement<T> {
+	type RawElementType = T;
+
+	fn raw_element(&self) -> &T { &self.element }
 }
 
 impl<T: Bound> EventTarget for BasicElement<T> {

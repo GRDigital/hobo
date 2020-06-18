@@ -100,3 +100,33 @@ pub fn derive_replaceable(input: proc_macro::TokenStream) -> proc_macro::TokenSt
 		},
 	}
 }
+
+#[proc_macro_derive(RawElement)]
+pub fn derive_raw_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	let input = syn::parse_macro_input!(input as syn::DeriveInput);
+	let name = input.ident;
+	let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+
+	let element_type = match &input.data {
+		syn::Data::Struct(syn::DataStruct { fields: syn::Fields::Named(syn::FieldsNamed { named, .. }), .. }) => {
+			let mut res = None;
+			for field in named.iter() {
+				if let Some(ident) = &field.ident {
+					if ident == "element" {
+						res = Some(&field.ty);
+						break;
+					}
+				}
+			}
+			if let Some(x) = res { x } else { panic!("element not found") }
+		},
+		_ => unimplemented!(),
+	};
+
+	(quote! {
+		impl #impl_generics ::hobo::RawElement for #name #ty_generics #where_clause {
+			type RawElementType = <#element_type as ::hobo::RawElement>::RawElementType;
+			fn raw_element(&self) -> &<#element_type as ::hobo::RawElement>::RawElementType { self.element.raw_element() }
+		}
+	}).into()
+}

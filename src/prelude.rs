@@ -6,6 +6,7 @@ pub use crate::{
 	state_slice::Unsub as _,
 	Container as _,
 	Replaceable as _,
+	RawElement as _,
 	Slot,
 };
 #[doc(hidden)]
