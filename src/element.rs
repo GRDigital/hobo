@@ -125,4 +125,3 @@ impl web_sys::Element {
 		let _ = self.remove_attribute(web_str::style());
 	}
 }
-

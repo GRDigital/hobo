@@ -6,9 +6,8 @@ pub mod prelude;
 
 pub use paste;
 pub use properties::*;
-use std::string::ToString;
+use std::{borrow::Cow, string::ToString};
 pub use units::Unit;
-use std::borrow::Cow;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Rule(pub selector::Selector, pub Vec<Property>);

@@ -14,21 +14,21 @@
 #[macro_use] mod clip_path;
 
 use crate::prelude::*;
+pub use animation::*;
 pub use background::*;
 pub use border::*;
+pub use clip_path::*;
 pub use dimensions::*;
+pub use filter::*;
 pub use flex::*;
+pub use grid::*;
 pub use margin::*;
 pub use padding::*;
 pub use position::*;
 use std::string::ToString;
 pub use svg::*;
 pub use text::*;
-pub use animation::*;
 pub use transform::*;
-pub use filter::*;
-pub use grid::*;
-pub use clip_path::*;
 
 pub use Property::{
 	MarginLeft, MarginRight, MarginTop, MarginBottom,
@@ -56,7 +56,6 @@ pub use Property::{
 	BackgroundPositionX, BackgroundPositionY,
 };
 
-
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum ColorValue {
 	Rgba(u8, u8, u8, u8),
@@ -67,21 +66,15 @@ pub enum ColorValue {
 }
 
 impl From<(u8, u8, u8, u8)> for ColorValue {
-	fn from((r, g, b, a): (u8, u8, u8, u8)) -> Self {
-		Self::Rgba(r, g, b, a)
-	}
+	fn from((r, g, b, a): (u8, u8, u8, u8)) -> Self { Self::Rgba(r, g, b, a) }
 }
 
 impl From<(u8, u8, u8)> for ColorValue {
-	fn from((r, g, b): (u8, u8, u8)) -> Self {
-		Self::Rgba(r, g, b, 1)
-	}
+	fn from((r, g, b): (u8, u8, u8)) -> Self { Self::Rgba(r, g, b, 1) }
 }
 
 impl From<u8> for ColorValue {
-	fn from(rgb: u8) -> Self {
-		Self::Rgba(rgb, rgb, rgb, 1)
-	}
+	fn from(rgb: u8) -> Self { Self::Rgba(rgb, rgb, rgb, 1) }
 }
 
 #[rustfmt::skip]

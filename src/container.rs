@@ -1,6 +1,5 @@
 use crate::Element;
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 pub trait Container: Element {
 	fn children(&self) -> &Vec<Box<dyn Element>>;
@@ -24,5 +23,6 @@ pub trait Container: Element {
 
 impl<T: Container> Container for Rc<RefCell<T>> {
 	fn children(&self) -> &Vec<Box<dyn Element>> { unsafe { self.try_borrow_unguarded() }.expect("rc is mutably borrowed").children() }
+
 	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>> { Rc::get_mut(self).expect("rc is mutably borrowed").get_mut().children_mut() }
 }

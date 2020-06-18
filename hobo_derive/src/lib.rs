@@ -1,7 +1,7 @@
+use derive_utils::quick_derive as enum_derive;
+use proc_macro2::TokenStream;
 use proc_quote::quote;
 use quote::ToTokens;
-use proc_macro2::TokenStream;
-use derive_utils::quick_derive as enum_derive;
 
 #[proc_macro_derive(Element)]
 pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

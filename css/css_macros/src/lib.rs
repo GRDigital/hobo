@@ -1,8 +1,11 @@
 use heck::*;
-use proc_quote::quote;
-use syn::parse::{Parse, ParseStream};
-use syn::{Result, Token, punctuated::Punctuated};
 use itertools::Itertools;
+use proc_quote::quote;
+use syn::{
+	parse::{Parse, ParseStream},
+	punctuated::Punctuated,
+	Result, Token,
+};
 
 #[derive(Debug, Clone)]
 struct HyphenatedName(String);

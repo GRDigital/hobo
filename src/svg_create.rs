@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use super::{dom, cmp, basic_element::BasicElement, EventHandlers};
+use super::{basic_element::BasicElement, cmp, dom, EventHandlers};
 
 macro_rules! svg_create {
 	($($name:ident, $t:ident),+$(,)*) => {

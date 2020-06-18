@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use super::{dom, basic_element::BasicElement, EventHandlers};
+use super::{basic_element::BasicElement, dom, EventHandlers};
 
 macro_rules! html_create {
 	($($name:ident, $t:ident),+$(,)*) => {

@@ -1,5 +1,5 @@
+use super::{Container, Element, EventHandler, EventHandlers, EventTarget};
 use crate::prelude::*;
-use super::{Element, EventHandler, EventHandlers, EventTarget, Container};
 use std::borrow::Cow;
 
 pub trait Bound = AsRef<web_sys::Element> + 'static;
@@ -55,5 +55,6 @@ impl<T: Bound> Element for BasicElement<T> {
 
 impl<T: Bound> Container for BasicElement<T> {
 	fn children(&self) -> &Vec<Box<dyn Element>> { &self.children }
+
 	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>> { &mut self.children }
 }

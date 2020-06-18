@@ -1,7 +1,11 @@
 #![allow(dead_code)]
 
-use std::{cell::{RefMut, RefCell}, rc::Rc, ops::{Deref, DerefMut}};
 use slotmap::SlotMap;
+use std::{
+	cell::{RefCell, RefMut},
+	ops::{Deref, DerefMut},
+	rc::Rc,
+};
 
 static MAX_NESTED_UPDATES: usize = 100;
 
@@ -122,9 +126,7 @@ impl<'a, T> Unsub<'a> for StateSlice<T> {
 pub struct State<T>(pub Rc<StateSlice<T>>);
 
 impl<T> Clone for State<T> {
-	fn clone(&self) -> Self {
-		Self(Rc::clone(&self.0))
-	}
+	fn clone(&self) -> Self { Self(Rc::clone(&self.0)) }
 }
 
 impl<T> State<T> {

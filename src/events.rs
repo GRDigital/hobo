@@ -1,8 +1,5 @@
-use crate::prelude::*;
-use crate::Element;
-use crate::basic_element::BasicElement;
-use std::cell::RefCell;
-use std::rc::Rc;
+use crate::{basic_element::BasicElement, prelude::*, Element};
+use std::{cell::RefCell, rc::Rc};
 
 pub struct EventHandler(Box<dyn std::any::Any>);
 pub type EventHandlers = RefCell<Vec<EventHandler>>;

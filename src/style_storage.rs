@@ -1,8 +1,10 @@
 use crate::prelude::*;
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::borrow::Cow;
-use std::hash::{Hash, Hasher};
+use std::{
+	borrow::Cow,
+	cell::RefCell,
+	collections::HashMap,
+	hash::{Hash, Hasher},
+};
 
 #[derive(Default)]
 pub struct StyleStorage {
