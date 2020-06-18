@@ -2,8 +2,7 @@
 pub use crate::{
 	Element as _,
 	EventTarget as _,
-	element::HashToClassString as _,
-	RawSetClass as _,
+	element::{HashToClassString as _, RawSetClass as _},
 	state_slice::Unsub as _,
 	Container as _,
 	Replaceable as _,

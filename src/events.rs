@@ -1,7 +1,8 @@
 use crate::prelude::*;
-use std::cell::RefCell;
 use crate::Element;
 use crate::basic_element::BasicElement;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub struct EventHandler(Box<dyn std::any::Any>);
 pub type EventHandlers = RefCell<Vec<EventHandler>>;
@@ -88,4 +89,10 @@ generate_events! {
 	web_sys::Event,         scroll,      OnScroll,      on_scroll;
 	web_sys::FocusEvent,    blur,        OnBlur,        on_blur;
 	web_sys::FocusEvent,    focus,       OnFocus,       on_focus;
+}
+
+impl<T: EventTarget> EventTarget for Rc<RefCell<T>> {
+	fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>> {
+		unsafe { self.try_borrow_unguarded() }.expect("rc is mutably borrowed").event_handlers()
+	}
 }
