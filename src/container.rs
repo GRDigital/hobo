@@ -6,17 +6,13 @@ pub trait Container: Element {
 	fn children(&self) -> &Vec<Box<dyn Element>>;
 	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>>;
 
-	fn attach_child(&mut self, child: impl Element + 'static) where Self: Sized {
-		self.attach_child_box(Box::new(child))
-	}
-
 	fn attach_child_box(&mut self, child: Box<dyn Element + 'static>) {
 		self.append(&child);
 		self.children_mut().push(child);
 	}
 
 	fn child(mut self, child: impl crate::Element + 'static) -> Self where Self: Sized {
-		self.attach_child(child);
+		self.attach_child_box(Box::new(child));
 		self
 	}
 
