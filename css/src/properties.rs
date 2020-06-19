@@ -276,6 +276,7 @@ pub enum Property {
 	Filter(Filter),
 	BackfaceVisibility(BackfaceVisibility),
 	Perspective(Perspective),
+	Appearance(Appearance),
 }
 
 #[rustfmt::skip]
@@ -449,6 +450,7 @@ impl ToString for Property {
 			Self::OverflowWrap(x)            => x.to_string(),
 			Self::BoxShadow(x)               => x.to_string(),
 			Self::TransformOrigin(x)         => x.to_string(),
+			Self::Appearance(x)              => x.to_string(),
 		}
 	}
 }
@@ -562,6 +564,7 @@ from_properties! {
 	ColumnGap,
 	BoxShadow,
 	TransformOrigin,
+	Appearance,
 }
 
 css_macros::easy_enum! {box-sizing content-box border-box}
@@ -587,3 +590,37 @@ css_macros::easy_enum! {perspective none @}
 css_macros::easy_enum! {backface-visibility visible hidden}
 css_macros::easy_enum! {overflow-x visible hidden scroll auto}
 css_macros::easy_enum! {overflow-y visible hidden scroll auto}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub enum Appearance {
+	Initial,
+	Inherit,
+	Unset,
+	Revert,
+	None,
+	Auto,
+}
+
+#[rustfmt::skip]
+impl ToString for Appearance {
+	fn to_string(&self) -> String {
+		match self {
+			Self::Initial => "appearance:initial;-webkit-appearance:initial;-moz-appearance:initial;".to_owned(),
+			Self::Inherit => "appearance:inherit;-webkit-appearance:inherit;-moz-appearance:inherit;".to_owned(),
+			Self::Unset   => "appearance:unset;-webkit-appearance:unset;-moz-appearance:unset;".to_owned(),
+			Self::Revert  => "appearance:revert;-webkit-appearance:revert;-moz-appearance:revert;".to_owned(),
+			Self::None    => "appearance:none;-webkit-appearance:none;-moz-appearance:none;".to_owned(),
+			Self::Auto    => "appearance:auto;-webkit-appearance:auto;-moz-appearance:auto;".to_owned(),
+		}
+	}
+}
+
+#[macro_export]
+macro_rules! appearance {
+	(initial) => {$crate::Property::Appearance($crate::Appearance::Initial)};
+	(inherit) => {$crate::Property::Appearance($crate::Appearance::Inherit)};
+	(unset)   => {$crate::Property::Appearance($crate::Appearance::Unset)};
+	(revert)  => {$crate::Property::Appearance($crate::Appearance::Revert)};
+	(none)    => {$crate::Property::Appearance($crate::Appearance::None)};
+	(auto)    => {$crate::Property::Appearance($crate::Appearance::Auto)};
+}
