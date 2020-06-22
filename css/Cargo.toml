@@ -6,6 +6,6 @@ edition = "2018"
 [dependencies]
 ordered-float = { version = "1", default-features = false }
 smart-default = "0.6"
-paste = "=0.1.16"
+paste = "0.1"
 strum = { version = "0.18", features = ["derive"] }
 css_macros = { path = "css_macros" }
