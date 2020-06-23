@@ -3,6 +3,22 @@ use proc_macro2::TokenStream;
 use proc_quote::quote;
 use quote::ToTokens;
 
+#[proc_macro_attribute]
+pub fn trick(_: proc_macro::TokenStream, item: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	let syn::ImplItemMethod { attrs, vis, defaultness, mut sig, block } = syn::parse_macro_input!(item as syn::ImplItemMethod);
+	sig.output = syn::parse_quote!(-> ::std::rc::Rc<::std::cell::RefCell<Self>>);
+	(quote! {
+		#(#attrs)* #vis #defaultness #sig {
+			let mut this: ::std::rc::Rc<::std::mem::MaybeUninit<::std::cell::RefCell<Self>>> = ::std::rc::Rc::new_uninit();
+			let new_this = #block;
+			unsafe {
+				::std::mem::MaybeUninit::write(::std::rc::Rc::get_mut_unchecked(&mut this), ::std::cell::RefCell::new(new_this));
+				::std::rc::Rc::<::std::mem::MaybeUninit<_>>::assume_init(this)
+			}
+		}
+	}).into()
+}
+
 #[proc_macro_derive(Element)]
 pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = syn::parse_macro_input!(input as syn::DeriveInput);

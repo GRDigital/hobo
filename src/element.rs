@@ -83,9 +83,15 @@ impl Element for Box<dyn Element> {
 	}
 }
 
-impl<T: Element> Element for Rc<RefCell<T>> {
+impl<T: Element> Element for RefCell<T> {
 	fn element(&self) -> Cow<'_, web_sys::Element> {
 		Cow::Owned(self.borrow().element().into_owned())
+	}
+}
+
+impl<T: Element> Element for Rc<T> {
+	fn element(&self) -> Cow<'_, web_sys::Element> {
+		T::element(&self)
 	}
 }
 

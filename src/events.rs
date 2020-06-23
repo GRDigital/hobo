@@ -1,5 +1,6 @@
 use crate::{basic_element::BasicElement, prelude::*, Element};
 use std::{cell::RefCell, rc::Rc};
+use std::mem::MaybeUninit;
 
 pub struct EventHandler(Box<dyn std::any::Any>);
 pub type EventHandlers = RefCell<Vec<EventHandler>>;
@@ -16,6 +17,15 @@ macro_rules! generate_events {
 					self.event_handlers().push(handler);
 				}
 
+				fn [<$f _mut>]<T: 'static>(&self, this: &Rc<MaybeUninit<RefCell<T>>>, mut f: impl FnMut(&mut T, $event_kind) + 'static) where Self: Sized {
+					let weak = Rc::downgrade(this);
+					self.$f(move |event| {
+						let strong = if let Some(x) = weak.upgrade() { x } else { return; };
+						let inited = unsafe { strong.assume_init() };
+						f(&mut inited.borrow_mut(), event);
+					})
+				}
+
 				#[allow(clippy::missing_safety_doc)]
 				unsafe fn [<unsafe_ $f>]<'a>(&'a self, f: impl FnMut($event_kind) + 'a) where Self: Sized {
 					use event_raw_exts::*;
@@ -24,8 +34,13 @@ macro_rules! generate_events {
 					self.event_handlers().push(handler);
 				}
 
-				fn [<with_$f>](self, f: impl FnMut($event_kind) + 'static) -> Self where Self: Sized {
+				fn [<with_ $f>](self, f: impl FnMut($event_kind) + 'static) -> Self where Self: Sized {
 					self.$f(f);
+					self
+				}
+
+				fn [<with_ $f _mut>]<T: 'static>(self, this: &Rc<MaybeUninit<RefCell<T>>>, f: impl FnMut(&mut T, $event_kind) + 'static) -> Self where Self: Sized {
+					self.[<$f _mut>](this, f);
 					self
 				}
 			)+
