@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use super::{basic_element::BasicElement, cmp, dom, EventHandlers};
+use super::{basic_element::BasicElement, dom};
 
 macro_rules! svg_create {
 	($($name:ident, $t:ident),+$(,)*) => {
@@ -9,24 +9,28 @@ macro_rules! svg_create {
 
 			impl BasicElement<web_sys::$t> {
 				pub fn $name() -> Self {
-					BasicElement { element: $name(), children: vec![], event_handlers: EventHandlers::default() }
+					BasicElement { element: $name(), children: Vec::new(), event_handlers: Default::default() }
 				}
 			}
 		)+
 
-		impl<'a> cmp::Builder<'a> {
+		pub mod components {
 			$(
-				pub fn $name(self) -> BasicElement<web_sys::$t> {
-					self.build_raw($name())
+				pub fn $name() -> crate::basic_element::BasicElement<web_sys::$t> {
+					crate::basic_element::BasicElement::$name()
+				}
+
+				paste::item! {
+					pub type [<$name:camel>] = crate::BasicElement<web_sys::$t>;
 				}
 			)+
 		}
 	};
 }
 
-// #[rustfmt::skip]
-// svg_create![
-//     svg, SvgsvgElement,
-//     filter, SvgFilterElement,
-//     feColorMatrix, SvgfeColorMatrixElement,
-// ];
+#[rustfmt::skip]
+svg_create![
+	svg, SvgsvgElement,
+	filter, SvgFilterElement,
+	feColorMatrix, SvgfeColorMatrixElement,
+];

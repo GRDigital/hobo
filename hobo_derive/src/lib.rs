@@ -1,5 +1,5 @@
 use derive_utils::quick_derive as enum_derive;
-use proc_macro2::TokenStream;
+// use proc_macro2::TokenStream;
 use proc_quote::quote;
 use quote::ToTokens;
 
@@ -107,7 +107,7 @@ pub fn derive_replaceable(input: proc_macro::TokenStream) -> proc_macro::TokenSt
 		},
 		_ => {
 			let name = input.ident;
-			let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+			let (_impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 			(quote! {
 				impl<T: ::hobo::Element + 'static> ::hobo::Replaceable<T> for #name #ty_generics #where_clause {
 					fn replace_element(&self, element: T) { self.element.replace_element(element) }

@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use super::{basic_element::BasicElement, dom, EventHandlers};
+use super::{basic_element::BasicElement, dom};
 
 macro_rules! html_create {
 	($($name:ident, $t:ident),+$(,)*) => {
@@ -9,7 +9,7 @@ macro_rules! html_create {
 
 			impl BasicElement<web_sys::$t> {
 				pub fn $name() -> Self {
-					BasicElement { element: $name(), children: Vec::new(), event_handlers: EventHandlers::default() }
+					BasicElement { element: $name(), children: Vec::new(), event_handlers: Default::default() }
 				}
 			}
 		)+
