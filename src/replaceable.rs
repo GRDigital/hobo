@@ -2,7 +2,7 @@ use crate::{prelude::*, Element};
 use std::{cell::RefCell, rc::Rc};
 
 pub trait Replaceable<T>: Element {
-	fn replace_element(&self, element: T) where Self: Sized;
+	fn replace_element(&self, element: T);
 }
 
 impl<T: Element> Replaceable<T> for RefCell<T> {

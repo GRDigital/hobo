@@ -10,28 +10,20 @@ macro_rules! generate_events {
 		pub trait EventTarget: Element {
 			fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>>;
 			$(
-				fn $f(&self, f: impl FnMut($event_kind) + 'static) where Self: Sized {
+				fn $f(&self, f: impl FnMut($event_kind) + 'static) {
 					use event_raw_exts::*;
 
 					let handler = self.element().$f(f);
 					self.event_handlers().push(handler);
 				}
 
-				fn [<$f _mut>]<T: 'static>(&self, this: &Rc<MaybeUninit<RefCell<T>>>, mut f: impl FnMut(&mut T, $event_kind) + 'static) where Self: Sized {
+				fn [<$f _mut>]<T: 'static>(&self, this: &Rc<MaybeUninit<RefCell<T>>>, mut f: impl FnMut(&mut T, $event_kind) + 'static) {
 					let weak = Rc::downgrade(this);
 					self.$f(move |event| {
 						let strong = if let Some(x) = weak.upgrade() { x } else { return; };
 						let inited = unsafe { strong.assume_init() };
 						f(&mut inited.borrow_mut(), event);
 					})
-				}
-
-				#[allow(clippy::missing_safety_doc)]
-				unsafe fn [<unsafe_ $f>]<'a>(&'a self, f: impl FnMut($event_kind) + 'a) where Self: Sized {
-					use event_raw_exts::*;
-
-					let handler = self.element().[<unsafe_ $f>](f);
-					self.event_handlers().push(handler);
 				}
 
 				fn [<with_ $f>](self, f: impl FnMut($event_kind) + 'static) -> Self where Self: Sized {
@@ -62,19 +54,8 @@ macro_rules! generate_events {
 				#[extend::ext(pub, name = [<Raw $trait>])]
 				impl web_sys::EventTarget {
 					#[must_use]
-					fn $f(&self, f: impl FnMut($event_kind) + 'static) -> EventHandler where Self: Sized {
-						let fbox: Box<dyn FnMut($event_kind) + 'static> = Box::new(f);
-						let handler = Closure::wrap(fbox);
-						self.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).unwrap();
-						EventHandler(Box::new(handler))
-					}
-
-					#[must_use]
-					#[allow(clippy::missing_safety_doc)]
-					unsafe fn [<unsafe_ $f>]<'a>(&'a self, f: impl FnMut($event_kind) + 'a) -> EventHandler where Self: Sized {
-						let fbox: Box<dyn FnMut($event_kind) + 'a> = Box::new(f);
-						let long_fbox: Box<dyn FnMut($event_kind) + 'static> = std::mem::transmute(fbox);
-						let handler = Closure::wrap(long_fbox);
+					fn $f(&self, f: impl FnMut($event_kind) + 'static) -> EventHandler {
+						let handler = Closure::<dyn FnMut($event_kind) + 'static>::new(f);
 						self.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).unwrap();
 						EventHandler(Box::new(handler))
 					}
