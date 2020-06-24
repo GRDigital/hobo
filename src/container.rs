@@ -5,6 +5,10 @@ pub trait Container: Element {
 	fn children(&self) -> &Vec<Box<dyn Element>>;
 	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>>;
 
+	fn attach_child(&mut self, child: impl Element + 'static) {
+		self.attach_child_box(Box::new(child));
+	}
+
 	fn attach_child_box(&mut self, child: Box<dyn Element + 'static>) {
 		self.append(&child);
 		self.children_mut().push(child);
