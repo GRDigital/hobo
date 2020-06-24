@@ -28,6 +28,7 @@ pub enum PseudoClass {
 	only_child,
 	read_only,
 	valid,
+	raw(String),
 	// etc
 }
 
@@ -51,6 +52,7 @@ impl ToString for PseudoClass {
 			Self::only_child           => ":only-child".to_owned(),
 			Self::read_only            => ":read-only".to_owned(),
 			Self::valid                => ":valid".to_owned(),
+			Self::raw(x)               => format!(":{}", x),
 		}
 	}
 }
@@ -181,6 +183,7 @@ macro_rules! selector {
 	(@($acc:expr) :nth_child($offset:expr))                       => { $acc.pseudo_class($crate::selector::PseudoClass::nth_child(0, $offset)) };
 	(@($acc:expr) :nth_of_type($n:expr))                          => { $acc.pseudo_class($crate::selector::PseudoClass::nth_of_type($n)) };
 	(@($acc:expr) :not($($selector:tt)+))                         => { $acc.pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+))) };
+	(@($acc:expr) :[$raw:expr])                                   => { $acc.pseudo_class($crate::selector::PseudoClass::raw($raw.into())) };
 	(@($acc:expr) :$pseudo_class:ident)                           => { $acc.pseudo_class($crate::selector::PseudoClass::$pseudo_class) };
 	(@($acc:expr) ::$pseudo_element:ident)                        => { $crate::selector::Selector::from($acc.pseudo_element($crate::selector::PseudoElement::$pseudo_element)) };
 	(@($acc:expr) *)                                              => { $acc.any() };
@@ -200,6 +203,7 @@ macro_rules! selector {
 	(@($acc:expr) :nth_child($offset:expr) $($rest:tt)+)          => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::nth_child(0, $n))) $($rest)+) };
 	(@($acc:expr) :nth_of_type($n:expr) $($rest:tt)+)             => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::nth_of_type($n))) $($rest)+) };
 	(@($acc:expr) :not($($selector:tt)+) $($rest:tt)+)            => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+)))) $($rest)+) };
+	(@($acc:expr) :[$raw:expr] $($rest:tt)+)                      => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::raw($raw.into()))) $($rest)+) };
 	(@($acc:expr) :$pseudo_class:ident $($rest:tt)+)              => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::$pseudo_class)) $($rest)+) };
 	(@($acc:expr) ::$pseudo_element:ident $($rest:tt)+)           => { $crate::selector!(@($acc.pseudo_element($crate::selector::PseudoElement::$pseudo_element)) $($rest)+) };
 	(@($acc:expr) * $($rest:tt)+)                                 => { $crate::selector!(@($acc.any()) $($rest)+) };
@@ -225,6 +229,7 @@ macro_rules! selector {
 	(:nth_child($offset:expr))                                    => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::nth_child(0, $offset)) };
 	(:nth_of_type($n:expr))                                       => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::nth_of_type($n)) };
 	(:not($($selector:tt)+))                                      => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+))) };
+	(:[$raw:expr])                                                => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::raw($raw.into())) };
 	(:$pseudo_class:ident)                                        => { $crate::selector::Selector::build().pseudo_class($crate::selector::PseudoClass::$pseudo_class) };
 	(::$pseudo_element:ident)                                     => { $crate::selector::Selector::build().pseudo_element($crate::selector::PseudoElement::$pseudo_element) };
 	(*)                                                           => { $crate::selector::Selector::build().any() };
