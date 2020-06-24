@@ -34,8 +34,6 @@ impl<T: Bound> BasicElement<T> {
 			event_handlers: EventHandlers::default(),
 		}
 	}
-
-	pub fn text<'a>(self, x: impl Into<Cow<'a, str>>) -> Self { self.element().unchecked_ref::<web_sys::HtmlElement>().set_inner_text(&x.into()); self }
 }
 
 impl<T: AsRef<web_sys::Node> + Bound + wasm_bindgen::JsCast> BasicElement<T> {
