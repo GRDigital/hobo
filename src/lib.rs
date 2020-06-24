@@ -41,17 +41,21 @@ thread_local! {
 	static CONTEXT: Context = Default::default();
 }
 
-pub trait SetText<T>: Sized + RawElement<RawElementType = T> where
+pub trait SetText<T>: RawElement<RawElementType = T> where
 	T: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement>,
 {
-	fn text<'a>(self, x: impl Into<std::borrow::Cow<'a, str>>) -> Self {
+	fn set_text<'a>(&self, x: impl Into<std::borrow::Cow<'a, str>>) {
 		let html_element: &web_sys::HtmlElement = self.raw_element().as_ref();
 		html_element.set_inner_text(&x.into());
+	}
+
+	fn text<'a>(self, x: impl Into<std::borrow::Cow<'a, str>>) -> Self where Self: Sized {
+		self.set_text(x);
 		self
 	}
 }
 
 impl<T, E> SetText<E> for T where
-	T: Sized + RawElement<RawElementType = E>,
+	T: RawElement<RawElementType = E>,
 	E: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement>,
 {}
