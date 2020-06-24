@@ -28,18 +28,14 @@ impl<T: Bound> EventTarget for BasicElement<T> {
 
 impl<T: Bound> BasicElement<T> {
 	pub fn new(element: T) -> Self {
-		Self {
-			element,
-			children: vec![],
-			event_handlers: EventHandlers::default(),
-		}
+		Self { element, children: Vec::new(), event_handlers: EventHandlers::default() }
 	}
 }
 
 impl<T: AsRef<web_sys::Node> + Bound + wasm_bindgen::JsCast> BasicElement<T> {
 	pub fn clone_html(&self) -> Self {
 		let node: &web_sys::Node = self.element.as_ref();
-		Self { element: node.clone_node_with_deep(true).unwrap().dyn_into().unwrap(), children: vec![], event_handlers: crate::EventHandlers::default() }
+		Self { element: node.clone_node_with_deep(true).unwrap().dyn_into().unwrap(), children: Vec::new(), event_handlers: crate::EventHandlers::default() }
 	}
 }
 
