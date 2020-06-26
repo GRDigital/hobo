@@ -200,7 +200,7 @@ macro_rules! selector {
 	(@($acc:expr) .& $($rest:tt)+)                                => { $crate::selector!(@($acc.class_placeholder()) $($rest)+) };
 	(@($acc:expr) #($id:expr) $($rest:tt)+)                       => { $crate::selector!(@($acc.id($id.into())) $($rest)+) };
 	(@($acc:expr) :nth_child($n:expr, $offset:expr) $($rest:tt)+) => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::nth_child($n, $offset))) $($rest)+) };
-	(@($acc:expr) :nth_child($offset:expr) $($rest:tt)+)          => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::nth_child(0, $n))) $($rest)+) };
+	(@($acc:expr) :nth_child($offset:expr) $($rest:tt)+)          => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::nth_child(0, $offset))) $($rest)+) };
 	(@($acc:expr) :nth_of_type($n:expr) $($rest:tt)+)             => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::nth_of_type($n))) $($rest)+) };
 	(@($acc:expr) :not($($selector:tt)+) $($rest:tt)+)            => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+)))) $($rest)+) };
 	(@($acc:expr) :[$raw:expr] $($rest:tt)+)                      => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::raw($raw.into()))) $($rest)+) };
