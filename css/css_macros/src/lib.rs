@@ -58,9 +58,7 @@ impl Parse for Value {
 			return Ok(Self::String);
 		} else if input.parse::<Token![#]>().is_ok() {
 			return Ok(Self::Number);
-		} else if let Ok(x) = input.parse::<HyphenatedName>() {
-			return Ok(Self::EnumVariant(x));
-		} else {
+		} else if input.peek(syn::token::Bracket) {
 			syn::custom_keyword!(float);
 			syn::custom_keyword!(raw);
 
@@ -71,6 +69,8 @@ impl Parse for Value {
 			} else if content.parse::<raw>().is_ok() {
 				return Ok(Self::Raw);
 			}
+		} else if let Ok(x) = input.parse::<HyphenatedName>() {
+			return Ok(Self::EnumVariant(x));
 		}
 
 		Err(input.error("unexpected tokens"))
