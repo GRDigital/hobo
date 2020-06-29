@@ -5,7 +5,6 @@ use std::rc::Rc;
 use std::borrow::Cow;
 
 pub trait Element {
-	// should probably be subsumed by BasicElement, which would also probably give me more control over ssr
 	fn element(&self) -> Cow<'_, web_sys::Element>;
 
 	fn to_class_string() -> String where
@@ -13,8 +12,6 @@ pub trait Element {
 	{
 		std::any::TypeId::of::<Self>().to_class_string("t")
 	}
-
-	fn append(&self, child: &dyn Element) { self.element().append_child(&child.element()).expect("Can't append child"); }
 
 	fn class<'a>(self, style: impl Into<Cow<'a, css::AtRules>>) -> Self where
 		Self: Sized + 'static,

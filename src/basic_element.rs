@@ -4,6 +4,7 @@ use std::borrow::Cow;
 
 pub trait Bound = AsRef<web_sys::Element> + 'static;
 
+/// This is the most common kind of hobo element - both children and event handlign
 pub struct BasicElement<T: Bound> {
 	pub element: T,
 	pub children: Vec<Box<dyn Element>>,

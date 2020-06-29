@@ -7,12 +7,92 @@ pub enum EventHandler {
 	KeyboardEvent(Closure<dyn FnMut(web_sys::KeyboardEvent) + 'static>),
 	Event(Closure<dyn FnMut(web_sys::Event) + 'static>),
 	FocusEvent(Closure<dyn FnMut(web_sys::FocusEvent) + 'static>),
+
+	// AnimationEvent
+	// AnimationPlaybackEvent
+	// DeviceMotionEvent
+	// DeviceOrientationEvent
+	// DeviceProximityEvent
+	// DragEvent
+	// ErrorEvent
+	// ExtendableEvent
+	// ExtendableMessageEvent
+	// FetchEvent
+	// AudioProcessingEvent
+	// FontFaceSetLoadEvent
+	// GamepadAxisMoveEvent
+	// GamepadButtonEvent
+	// GamepadEvent
+	// GpuUncapturedErrorEvent
+	// HashChangeEvent
+	// IdbVersionChangeEvent
+	// ImageCaptureErrorEvent
+	// InputEvent
+	// BeforeUnloadEvent
+	// MediaEncryptedEvent
+	// MediaKeyError
+	// MediaKeyMessageEvent
+	// MediaQueryListEvent
+	// MediaRecorderErrorEvent
+	// MediaStreamEvent
+	// MediaStreamTrackEvent
+	// MessageEvent
+	// MidiConnectionEvent
+	// MidiMessageEvent
+	// BlobEvent
+	// MouseScrollEvent
+	// MutationEvent
+	// NotificationEvent
+	// OfflineAudioCompletionEvent
+	// PageTransitionEvent
+	// PaymentMethodChangeEvent
+	// PaymentRequestUpdateEvent
+	// PointerEvent
+	// PopStateEvent
+	// ClipboardEvent
+	// PopupBlockedEvent
+	// PresentationConnectionAvailableEvent
+	// PresentationConnectionCloseEvent
+	// ProgressEvent
+	// PromiseRejectionEvent
+	// PushEvent
+	// RtcDataChannelEvent
+	// RtcPeerConnectionIceEvent
+	// RtcTrackEvent
+	// RtcdtmfToneChangeEvent
+	// CloseEvent
+	// ScrollAreaEvent
+	// SecurityPolicyViolationEvent
+	// SpeechRecognitionError
+	// SpeechRecognitionEvent
+	// SpeechSynthesisErrorEvent
+	// SpeechSynthesisEvent
+	// StorageEvent
+	// TcpServerSocketEvent
+	// TcpSocketErrorEvent
+	// TcpSocketEvent
+	// CompositionEvent
+	// TimeEvent
+	// TouchEvent
+	// TrackEvent
+	// TransitionEvent
+	// UiEvent
+	// UserProximityEvent
+	// WebGlContextEvent
+	// WheelEvent
+	// XrInputSourceEvent
+	// XrInputSourcesChangeEvent
+	// CustomEvent
+	// XrReferenceSpaceEvent
+	// XrSessionEvent
+	// DeviceLightEvent
 }
 
 pub type EventHandlers = RefCell<Vec<EventHandler>>;
 
 macro_rules! generate_events {
 	($($event_kind:ident, $name:ident, $f:ident);+$(;)*) => {paste::item!{
+		/// Trait for all hobo elements that can handle various browser events
 		pub trait EventTarget: Element {
 			fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>>;
 			$(

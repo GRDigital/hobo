@@ -1,26 +1,31 @@
 use crate::Element;
 use std::{cell::RefCell, rc::Rc};
 
+/// Trait for all hobo elements that can have children
 pub trait Container: Element {
 	fn children(&self) -> &Vec<Box<dyn Element>>;
 	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>>;
 
-	fn attach_child(&mut self, child: impl Element + 'static) {
-		self.attach_child_box(Box::new(child));
-	}
-
 	fn attach_child_box(&mut self, child: Box<dyn Element + 'static>) {
-		self.append(&child);
+		self.element().append_child(&child.element()).expect("can't append child");
 		self.children_mut().push(child);
 	}
 
-	fn child(mut self, child: impl crate::Element + 'static) -> Self where Self: Sized {
+	fn add_child(&mut self, child: impl crate::Element + 'static) {
 		self.attach_child_box(Box::new(child));
+	}
+
+	fn add_child_ref(&self, child: &(impl crate::Element + 'static)) {
+		self.element().append_child(&child.element()).expect("can't append child");
+	}
+
+	fn child(mut self, child: impl crate::Element + 'static) -> Self where Self: Sized {
+		self.add_child(child);
 		self
 	}
 
 	fn child_ref(self, child: &(impl crate::Element + 'static)) -> Self where Self: Sized {
-		self.element().append_child(&child.element()).expect("can't append child");
+		self.add_child_ref(child);
 		self
 	}
 }

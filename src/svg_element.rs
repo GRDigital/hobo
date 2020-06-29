@@ -6,8 +6,7 @@ impl<'a> From<roxmltree::Document<'a>> for crate::BasicElement<web_sys::SvgEleme
 
 impl<'a, 'b> From<roxmltree::Node<'a, 'b>> for crate::BasicElement<web_sys::SvgElement> {
 	fn from(node: roxmltree::Node) -> Self {
-		let dom = crate::dom();
-		let element = web_sys::SvgElement::from(wasm_bindgen::JsValue::from(dom.create_element_ns(Some("http://www.w3.org/2000/svg"), node.tag_name().name()).unwrap()));
+		let element = web_sys::SvgElement::from(wasm_bindgen::JsValue::from(crate::dom().create_element_ns(Some("http://www.w3.org/2000/svg"), node.tag_name().name()).unwrap()));
 		for attribute in node.attributes() {
 			element.set_attribute(attribute.name(), attribute.value()).unwrap();
 		}
@@ -20,9 +19,10 @@ impl<'a, 'b> From<roxmltree::Node<'a, 'b>> for crate::BasicElement<web_sys::SvgE
 				}
 			})
 			.collect::<Vec<_>>();
+
 		let me = Self { children, element, event_handlers: crate::EventHandlers::default() };
 		for child in me.children.iter() {
-			me.append(child.as_ref());
+			me.element.append_child(&child.element()).expect("can't append child");
 		}
 		me
 	}

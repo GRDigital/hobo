@@ -17,16 +17,23 @@ pub struct StyleStorage {
 // if no, inserts it into <style> and then returns the class name
 impl StyleStorage {
 	pub fn fetch<'a>(&self, element: &web_sys::Element, at_rules: impl Into<Cow<'a, css::AtRules>>) -> String {
-		let at_rules = at_rules.into();
+		let mut at_rules = at_rules.into().into_owned();
+
+		// check if style exists in cache, in which case it's already inserted - just retrieve clas name
 		if let Some(id) = self.map.borrow().get(&at_rules) {
 			return format!("s{}", id);
 		}
+
+		// just getting the u64 hash from rules
 		let mut hasher = std::collections::hash_map::DefaultHasher::new();
 		at_rules.hash(&mut hasher);
 		let id = hasher.finish();
-		self.map.borrow_mut().insert(at_rules.clone().into_owned(), id);
+
+		// caching the id
+		self.map.borrow_mut().insert(at_rules.clone(), id);
 		let class = format!("s{}", id);
-		let mut at_rules = at_rules.into_owned();
+
+		// replace the ClassPlaceholder with actual element class
 		for rule in at_rules.0.iter_mut() {
 			for style_rule in rule.style.0.iter_mut() {
 				for selector_component in (style_rule.0).0.iter_mut() {
@@ -36,8 +43,11 @@ impl StyleStorage {
 				}
 			}
 		}
+
 		let dom = element.owner_document().expect("element not attached to a dom");
 		let head = dom.head().expect("dom has no head");
+
+		// either get or construct a <style> element
 		let style_element = if let Some(x) = head.get_elements_by_tag_name("style").get_with_index(0) {
 			x
 		} else {
@@ -45,6 +55,8 @@ impl StyleStorage {
 			head.append_child(&element).unwrap();
 			element
 		};
+
+		// insert the stringified generated css into the style tag
 		style_element.append_with_str_1(&at_rules.to_string()).unwrap();
 		class
 	}
