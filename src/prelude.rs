@@ -9,7 +9,7 @@ pub use crate::{
 #[doc(hidden)] pub use wasm_bindgen::JsCast as _;
 
 pub use crate::{
-	event_raw_exts::*,
+	RawEventTarget as _,
 	state_slice::{State, StateSlice, Subscription, SubscriptionKey},
 	web_str,
 };
