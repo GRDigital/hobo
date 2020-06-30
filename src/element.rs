@@ -7,10 +7,10 @@ use std::borrow::Cow;
 pub trait Element {
 	fn element(&self) -> Cow<'_, web_sys::Element>;
 
-	fn to_class_string() -> String where
+	fn type_class_string() -> String where
 		Self: Sized + 'static,
 	{
-		std::any::TypeId::of::<Self>().to_class_string("t")
+		std::any::TypeId::of::<Self>().type_class_string("t")
 	}
 
 	fn class<'a>(self, style: impl Into<Cow<'a, css::AtRules>>) -> Self where
@@ -40,7 +40,7 @@ pub trait Element {
 		CONTEXT.with(move |ctx| {
 			let element = self.element();
 			let element_class = ctx.style_storage.fetch(&element, style);
-			element.set_attribute(web_str::class(), &format!("{} {}", Self::to_class_string(), element_class)).unwrap();
+			element.set_attribute(web_str::class(), &format!("{} {}", Self::type_class_string(), element_class)).unwrap();
 			self
 		})
 	}
@@ -61,7 +61,7 @@ pub trait Element {
 		CONTEXT.with(move |ctx| {
 			let element = self.element();
 			let element_class = ctx.style_storage.fetch(&element, style);
-			let existing_class = element.get_attribute(web_str::class()).unwrap_or_else(Self::to_class_string);
+			let existing_class = element.get_attribute(web_str::class()).unwrap_or_else(Self::type_class_string);
 			element.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).unwrap();
 			self
 		})
@@ -94,7 +94,7 @@ impl<T: Element> Element for Rc<T> {
 
 #[extend::ext(pub, name = HashToClassString)]
 impl<T: Hash> T {
-	fn to_class_string(&self, prefix: &str) -> String {
+	fn type_class_string(&self, prefix: &str) -> String {
 		let mut hasher = std::collections::hash_map::DefaultHasher::new();
 		self.hash(&mut hasher);
 		let id = hasher.finish();

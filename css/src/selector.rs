@@ -175,7 +175,7 @@ macro_rules! selector {
 	// finish
 	(@($acc:expr) $element:ident)                                 => { $acc.element($crate::selector::Element::$element) };
 	(@($acc:expr) .($class:expr))                                 => { $acc.class($class.into()) };
-	(@($acc:expr) .[$ty:ty])                                      => { $acc.class(<$ty>::class().into()) };
+	(@($acc:expr) .[$ty:ty])                                      => { $acc.class(<$ty>::type_class_string().into()) };
 	(@($acc:expr) [$($attr:tt)+])                                 => { $acc.attribute(stringify!($($attr)+).into()) };
 	(@($acc:expr) .&)                                             => { $acc.class_placeholder() };
 	(@($acc:expr) #($id:expr))                                    => { $acc.id($id.into()) };
@@ -195,7 +195,7 @@ macro_rules! selector {
 	(@($acc:expr) , $($rest:tt)+)                                 => { $crate::selector!(@($acc.and()) $($rest)+) };
 	(@($acc:expr) $element:ident $($rest:tt)+)                    => { $crate::selector!(@($acc.element($crate::selector::Element::$element)) $($rest)+) };
 	(@($acc:expr) .($class:expr) $($rest:tt)+)                    => { $crate::selector!(@($acc.class($class.into())) $($rest)+) };
-	(@($acc:expr) .[$ty:ty] $($rest:tt)+)                         => { $crate::selector!(@($acc.class(<$ty>::class().into())) $($rest)+) };
+	(@($acc:expr) .[$ty:ty] $($rest:tt)+)                         => { $crate::selector!(@($acc.class(<$ty>::type_class_string().into())) $($rest)+) };
 	(@($acc:expr) [$($attr:tt)+] $($rest:tt)+)                    => { $crate::selector!(@($acc.attribute(stringify!($($attr)+).into())) $($rest)+) };
 	(@($acc:expr) .& $($rest:tt)+)                                => { $crate::selector!(@($acc.class_placeholder()) $($rest)+) };
 	(@($acc:expr) #($id:expr) $($rest:tt)+)                       => { $crate::selector!(@($acc.id($id.into())) $($rest)+) };
@@ -211,7 +211,7 @@ macro_rules! selector {
 	// start
 	($element:ident $($rest:tt)+)                                 => { $crate::selector!(@($crate::selector::Selector::build().element($crate::selector::Element::$element)) $($rest)+) };
 	(.($class:expr) $($rest:tt)+)                                 => { $crate::selector!(@($crate::selector::Selector::build().class($class.into())) $($rest)+) };
-	(.[$ty:ty] $($rest:tt)+)                                      => { $crate::selector!(@($crate::selector::Selector::build().class(<$ty>::class().into())) $($rest)+) };
+	(.[$ty:ty] $($rest:tt)+)                                      => { $crate::selector!(@($crate::selector::Selector::build().class(<$ty>::type_class_string().into())) $($rest)+) };
 	([$($attr:tt)+] $($rest:tt)+)                                 => { $crate::selector!(@($crate::selector::Selector::build().attribute(stringify!($($attr)+).into())) $($rest)+) };
 	(.& $($rest:tt)+)                                             => { $crate::selector!(@($crate::selector::Selector::build().class_placeholder()) $($rest)+) };
 	(#($id:expr) $($rest:tt)+)                                    => { $crate::selector!(@($crate::selector::Selector::build().id($id.into())) $($rest)+) };
@@ -221,7 +221,7 @@ macro_rules! selector {
 	(@font-face)                                                  => { $crate::selector::Selector::font_face() };
 	($elem:ident)                                                 => { $crate::selector::Selector::build().element($crate::selector::Element::$elem) };
 	(.($class:expr))                                              => { $crate::selector::Selector::build().class($class.into()) };
-	(.[$ty:ty])                                                   => { $crate::selector::Selector::build().class(<$ty>::class().into()) };
+	(.[$ty:ty])                                                   => { $crate::selector::Selector::build().class(<$ty>::type_class_string().into()) };
 	([$($attr:tt)+])                                              => { $crate::selector::Selector::build().attribute(stringify!($($attr)+).into()) };
 	(.&)                                                          => { $crate::selector::Selector::build().class_placeholder() };
 	(#($id:expr))                                                 => { $crate::selector::Selector::build().id($id.into()) };
