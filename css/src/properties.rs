@@ -30,32 +30,6 @@ pub use svg::*;
 pub use text::*;
 pub use transform::*;
 
-pub use Property::{
-	MarginLeft, MarginRight, MarginTop, MarginBottom,
-	PaddingLeft, PaddingRight, PaddingTop, PaddingBottom,
-	Width, Height, MinWidth, MaxWidth, MinHeight, MaxHeight,
-	Top, Right, Left, Bottom,
-
-	BorderLeftColor, BorderRightColor, BorderTopColor, BorderBottomColor,
-	BorderLeftStyle, BorderRightStyle, BorderTopStyle, BorderBottomStyle,
-	BorderLeftWidth, BorderRightWidth, BorderTopWidth, BorderBottomWidth,
-	BorderTopLeftRadius, BorderTopRightRadius, BorderBottomLeftRadius, BorderBottomRightRadius,
-
-	GridTemplateColumns, GridTemplateRows, GridAutoColumns, GridAutoRows,
-	GridColumnStart, GridColumnEnd, GridRowStart, GridRowEnd,
-
-	BackgroundColor,
-	Color,
-	TextDecorationColor,
-	Fill,
-	Stroke,
-	OutlineColor,
-	TextIndent,
-	OutlineOffset,
-
-	BackgroundPositionX, BackgroundPositionY,
-};
-
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum ColorValue {
 	Rgba(u8, u8, u8, u8),
@@ -174,397 +148,203 @@ impl ToString for BasicShape {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub enum Property {
-	Raw(String),
-	All(All),
+macro_rules! generate_properties {
+	(
+		stutter => ($($stutter_name:ident),*$(,)?),
+		named => ($($css_name:expr => $named_name:ident($named_type:ty)),*$(,)?),
+	) => {
+		pub use Property::{$($named_name),*};
 
-	Display(Display), BoxSizing(BoxSizing), Visibility(Visibility),
-	OverflowX(OverflowX), OverflowY(OverflowY),
-	Opacity(Opacity),
-
-	// dimensions
-	MarginLeft(Margin), MarginRight(Margin), MarginTop(Margin), MarginBottom(Margin),
-	PaddingLeft(UnitValue), PaddingRight(UnitValue), PaddingTop(UnitValue), PaddingBottom(UnitValue),
-	Width(Dimension), Height(Dimension),
-	MinWidth(DimensionExtremity), MaxWidth(DimensionExtremity), MinHeight(DimensionExtremity), MaxHeight(DimensionExtremity),
-
-	// flex
-	FlexWrap(FlexWrap), FlexDirection(FlexDirection), JustifyContent(JustifyContent),
-	AlignItems(AlignItems), AlignContent(AlignContent), AlignSelf(AlignSelf),
-	FlexBasis(FlexBasis), FlexGrow(FlexGrow), FlexShrink(FlexShrink), Order(Order),
-
-	// position
-	Position(Position), Top(Dimension), Right(Dimension), Left(Dimension), Bottom(Dimension), ZIndex(ZIndex),
-
-	// grid
-	GridTemplateColumns(GridTemplate), GridTemplateRows(GridTemplate), RowGap(RowGap), ColumnGap(ColumnGap),
-	GridColumnStart(GridSpan), GridColumnEnd(GridSpan), GridRowStart(GridSpan), GridRowEnd(GridSpan),
-	GridAutoFlow(GridAutoFlow), GridAutoRows(GridAuto), GridAutoColumns(GridAuto),
-
-	// background
-	BackgroundColor(ColorValue), BackgroundBlendMode(BackgroundBlendMode),
-	BackgroundRepeat(BackgroundRepeat), BackgroundAttachment(BackgroundAttachment),
-	BackgroundImage(BackgroundImage), BackgroundSize(BackgroundSize),
-	BackgroundPositionX(UnitValue), BackgroundPositionY(UnitValue), BackgroundOrigin(BackgroundOrigin),
-
-	// border
-	BorderLeftColor(ColorValue), BorderRightColor(ColorValue), BorderTopColor(ColorValue), BorderBottomColor(ColorValue),
-	BorderLeftStyle(BorderStyle), BorderRightStyle(BorderStyle), BorderTopStyle(BorderStyle), BorderBottomStyle(BorderStyle),
-	BorderLeftWidth(BorderWidth), BorderRightWidth(BorderWidth), BorderTopWidth(BorderWidth), BorderBottomWidth(BorderWidth),
-	BorderTopLeftRadius(UnitValue), BorderTopRightRadius(UnitValue), BorderBottomLeftRadius(UnitValue), BorderBottomRightRadius(UnitValue),
-	BorderImageSource(BorderImageSource), BorderImageSlice(BorderImageSlice), BorderImageWidth(BorderImageWidth), BorderImageOutset(BorderImageOutset),
-	BorderImageRepeat(BorderImageRepeat),
-	BorderCollapse(BorderCollapse),
-	OutlineWidth(OutlineWidth), OutlineColor(ColorValue), OutlineStyle(OutlineStyle),
-	OutlineOffset(UnitValue),
-	BoxShadow(BoxShadow),
-
-	// animation
-	AnimationDirection(AnimationDirection),
-	AnimationFillMode(AnimationFillMode),
-	AnimationIterationCount(AnimationIterationCount),
-	AnimationName(AnimationName),
-	AnimationPlayState(AnimationPlayState),
-	AnimationTimingFunction(AnimationTimingFunction),
-	// AnimationDuration(AnimationDuration),
-	// AnimationDelay(AnimationDelay),
-
-	// svg
-	Fill(ColorValue), Stroke(ColorValue),
-	VectorEffect(VectorEffect),
-	ClipPath(ClipPath),
-
-	// pointer/cursor-related
-	UserSelect(UserSelect), Resize(Resize),
-	Cursor(Cursor), ScrollBehavior(ScrollBehavior), PointerEvents(PointerEvents),
-
-	// text
-	Color(ColorValue),
-	Direction(Direction),
-	UnicodeBidi(UnicodeBidi),
-	WhiteSpace(WhiteSpace),
-	WritingMode(WritingMode),
-	HangingPunctuation(HangingPunctuation),
-	Hyphens(Hyphens),
-	TextAlign(TextAlign), TextAlignLast(TextAlignLast), TextJustify(TextJustify),
-	BreakAfter(BreakAfter), BreakBefore(BreakBefore), BreakInside(BreakInside),
-	WordBreak(WordBreak), WordWrap(WordWrap),
-	FontFamily(FontFamily), FontStyle(FontStyle), FontVariant(FontVariant), FontSize(FontSize),
-	FontWeight(FontWeight), FontStretch(FontStretch), FontKerning(FontKerning),
-	TextTransform(TextTransform),
-	WordSpacing(WordSpacing),
-	TextIndent(UnitValue),
-	TextOverflow(TextOverflow),
-	OverflowWrap(OverflowWrap),
-	VerticalAlign(VerticalAlign),
-	LineHeight(LineHeight), LetterSpacing(LetterSpacing),
-	TabSize(TabSize),
-	TextDecorationStyle(TextDecorationStyle), TextDecorationLine(TextDecorationLine), TextDecorationColor(ColorValue), TextRendering(TextRendering),
-
-	// etc
-	BoxDecorationBreak(BoxDecorationBreak),
-	ListStyleType(ListStyleType),
-	MixBlendMode(MixBlendMode),
-	Isolation(Isolation),
-	CaptionSide(CaptionSide),
-	EmptyCells(EmptyCells),
-	TableLayout(TableLayout),
-	Content(Content),
-	ObjectFit(ObjectFit),
-	Transform(Transform), TransformStyle(TransformStyle), TransformOrigin(TransformOrigin),
-	Filter(Filter),
-	BackfaceVisibility(BackfaceVisibility),
-	Perspective(Perspective),
-	Appearance(Appearance),
-}
-
-#[rustfmt::skip]
-impl ToString for Property {
-	fn to_string(&self) -> String {
-		match self {
-			Self::Raw(x) => x.clone(),
-
-			// different properties that take the same argument
-			Self::MarginLeft(x)              => format!("margin-left:{};", x.to_string()),
-			Self::MarginRight(x)             => format!("margin-right:{};", x.to_string()),
-			Self::MarginTop(x)               => format!("margin-top:{};", x.to_string()),
-			Self::MarginBottom(x)            => format!("margin-bottom:{};", x.to_string()),
-
-			Self::PaddingLeft(x)             => format!("padding-left:{};", x.to_string()),
-			Self::PaddingRight(x)            => format!("padding-right:{};", x.to_string()),
-			Self::PaddingTop(x)              => format!("padding-top:{};", x.to_string()),
-			Self::PaddingBottom(x)           => format!("padding-bottom:{};", x.to_string()),
-
-			Self::Width(x)                   => format!("width:{};", x.to_string()),
-			Self::Height(x)                  => format!("height:{};", x.to_string()),
-			Self::MinWidth(x)                => format!("min-width:{};", x.to_string()),
-			Self::MaxWidth(x)                => format!("max-width:{};", x.to_string()),
-			Self::MinHeight(x)               => format!("min-height:{};", x.to_string()),
-			Self::MaxHeight(x)               => format!("max-height:{};", x.to_string()),
-
-			Self::Top(x)                     => format!("top:{};", x.to_string()),
-			Self::Right(x)                   => format!("right:{};", x.to_string()),
-			Self::Left(x)                    => format!("left:{};", x.to_string()),
-			Self::Bottom(x)                  => format!("bottom:{};", x.to_string()),
-
-			Self::BorderLeftColor(x)         => format!("border-left-color:{};", x.to_string()),
-			Self::BorderRightColor(x)        => format!("border-right-color:{};", x.to_string()),
-			Self::BorderTopColor(x)          => format!("border-top-color:{};", x.to_string()),
-			Self::BorderBottomColor(x)       => format!("border-bottom-color:{};", x.to_string()),
-
-			Self::BorderLeftStyle(x)         => format!("border-left-style:{};", x.to_string()),
-			Self::BorderRightStyle(x)        => format!("border-right-style:{};", x.to_string()),
-			Self::BorderTopStyle(x)          => format!("border-top-style:{};", x.to_string()),
-			Self::BorderBottomStyle(x)       => format!("border-bottom-style:{};", x.to_string()),
-
-			Self::BorderLeftWidth(x)         => format!("border-left-width:{};", x.to_string()),
-			Self::BorderRightWidth(x)        => format!("border-right-width:{};", x.to_string()),
-			Self::BorderTopWidth(x)          => format!("border-top-width:{};", x.to_string()),
-			Self::BorderBottomWidth(x)       => format!("border-bottom-width:{};", x.to_string()),
-
-			Self::BorderTopLeftRadius(x)     => format!("border-top-left-radius:{};", x.to_string()),
-			Self::BorderTopRightRadius(x)    => format!("border-top-right-radius:{};", x.to_string()),
-			Self::BorderBottomLeftRadius(x)  => format!("border-bottom-left-radius:{};", x.to_string()),
-			Self::BorderBottomRightRadius(x) => format!("border-bottom-right-radius:{};", x.to_string()),
-
-			Self::BackgroundColor(x)         => format!("background-color:{};", x.to_string()),
-			Self::Color(x)                   => format!("color:{};", x.to_string()),
-			Self::TextDecorationColor(x)     => format!("text-decoration-color:{};", x.to_string()),
-			Self::Fill(x)                    => format!("fill:{};", x.to_string()),
-			Self::Stroke(x)                  => format!("stroke:{};", x.to_string()),
-			Self::OutlineColor(x)            => format!("outline-color:{};", x.to_string()),
-
-			Self::GridTemplateColumns(x)     => format!("grid-template-columns:{};", x.to_string()),
-			Self::GridTemplateRows(x)        => format!("grid-template-rows:{};", x.to_string()),
-			Self::GridAutoColumns(x)         => format!("grid-auto-columns:{};", x.to_string()),
-			Self::GridAutoRows(x)            => format!("grid-auto-rows:{};", x.to_string()),
-
-			Self::TextIndent(x)              => format!("text-indent:{};", x.to_string()),
-			Self::OutlineOffset(x)           => format!("outline-offset:{};", x.to_string()),
-
-			Self::GridColumnStart(x)         => format!("grid-column-start:{};", x.to_string()),
-			Self::GridColumnEnd(x)           => format!("grid-column-end:{};", x.to_string()),
-			Self::GridRowStart(x)            => format!("grid-row-start:{};", x.to_string()),
-			Self::GridRowEnd(x)              => format!("grid-row-end:{};", x.to_string()),
-
-			Self::BackgroundPositionX(x)     => format!("background-position-x:{};", x.to_string()),
-			Self::BackgroundPositionY(x)     => format!("background-position-y:{};", x.to_string()),
-
-			// different properties that have specific to them arguments
-			// basis/grow/shrink/order kind of take the same, but basis and shrink are 1 by default while others are 0 so /shrug
-			Self::FlexWrap(x)                => x.to_string(),
-			Self::FlexDirection(x)           => x.to_string(),
-			Self::JustifyContent(x)          => x.to_string(),
-			Self::AlignItems(x)              => x.to_string(),
-			Self::AlignContent(x)            => x.to_string(),
-			Self::AlignSelf(x)               => x.to_string(),
-			Self::FlexBasis(x)               => x.to_string(),
-			Self::FlexGrow(x)                => x.to_string(),
-			Self::FlexShrink(x)              => x.to_string(),
-			Self::Order(x)                   => x.to_string(),
-			Self::Position(x)                => x.to_string(),
-			Self::Display(x)                 => x.to_string(),
-			Self::BoxSizing(x)               => x.to_string(),
-			Self::Visibility(x)              => x.to_string(),
-			Self::ZIndex(x)                  => x.to_string(),
-			Self::OverflowX(x)               => x.to_string(),
-			Self::OverflowY(x)               => x.to_string(),
-			Self::Direction(x)               => x.to_string(),
-			Self::UnicodeBidi(x)             => x.to_string(),
-			Self::WhiteSpace(x)              => x.to_string(),
-			Self::WritingMode(x)             => x.to_string(),
-			Self::HangingPunctuation(x)      => x.to_string(),
-			Self::Hyphens(x)                 => x.to_string(),
-			Self::TextAlign(x)               => x.to_string(),
-			Self::TextAlignLast(x)           => x.to_string(),
-			Self::TextJustify(x)             => x.to_string(),
-			Self::FontStretch(x)             => x.to_string(),
-			Self::UserSelect(x)              => x.to_string(),
-			Self::ScrollBehavior(x)          => x.to_string(),
-			Self::PointerEvents(x)           => x.to_string(),
-			Self::Resize(x)                  => x.to_string(),
-			Self::ObjectFit(x)               => x.to_string(),
-			Self::ListStyleType(x)           => x.to_string(),
-			Self::BreakAfter(x)              => x.to_string(),
-			Self::BreakBefore(x)             => x.to_string(),
-			Self::BreakInside(x)             => x.to_string(),
-			Self::FontVariant(x)             => x.to_string(),
-			Self::WordBreak(x)               => x.to_string(),
-			Self::WordWrap(x)                => x.to_string(),
-			Self::FontStyle(x)               => x.to_string(),
-			Self::TransformStyle(x)          => x.to_string(),
-			Self::BackgroundBlendMode(x)     => x.to_string(),
-			Self::MixBlendMode(x)            => x.to_string(),
-			Self::Isolation(x)               => x.to_string(),
-			Self::CaptionSide(x)             => x.to_string(),
-			Self::EmptyCells(x)              => x.to_string(),
-			Self::TableLayout(x)             => x.to_string(),
-			Self::BorderCollapse(x)          => x.to_string(),
-			Self::All(x)                     => x.to_string(),
-			Self::FontWeight(x)              => x.to_string(),
-			Self::FontSize(x)                => x.to_string(),
-			Self::BackgroundRepeat(x)        => x.to_string(),
-			Self::BackgroundAttachment(x)    => x.to_string(),
-			Self::Cursor(x)                  => x.to_string(),
-			Self::TextTransform(x)           => x.to_string(),
-			Self::FontKerning(x)             => x.to_string(),
-			Self::FontFamily(x)              => x.to_string(),
-			Self::WordSpacing(x)             => x.to_string(),
-			Self::TextOverflow(x)            => x.to_string(),
-			Self::VerticalAlign(x)           => x.to_string(),
-			Self::LineHeight(x)              => x.to_string(),
-			Self::LetterSpacing(x)           => x.to_string(),
-			Self::TabSize(x)                 => x.to_string(),
-			Self::BoxDecorationBreak(x)      => x.to_string(),
-			Self::OutlineWidth(x)            => x.to_string(),
-			Self::OutlineStyle(x)            => x.to_string(),
-			Self::Content(x)                 => x.to_string(),
-			Self::Opacity(x)                 => x.to_string(),
-			Self::Perspective(x)             => x.to_string(),
-			Self::BackfaceVisibility(x)      => x.to_string(),
-			Self::TextDecorationStyle(x)     => x.to_string(),
-			Self::TextDecorationLine(x)      => x.to_string(),
-			Self::TextRendering(x)           => x.to_string(),
-			Self::VectorEffect(x)            => x.to_string(),
-			Self::BackgroundImage(x)         => x.to_string(),
-			Self::BackgroundSize(x)          => x.to_string(),
-			Self::AnimationDirection(x)      => x.to_string(),
-			Self::AnimationFillMode(x)       => x.to_string(),
-			Self::AnimationIterationCount(x) => x.to_string(),
-			Self::AnimationName(x)           => x.to_string(),
-			Self::AnimationPlayState(x)      => x.to_string(),
-			Self::AnimationTimingFunction(x) => x.to_string(),
-			Self::Transform(x)               => x.to_string(),
-			Self::Filter(x)                  => x.to_string(),
-			Self::BorderImageSource(x)       => x.to_string(),
-			Self::BorderImageSlice(x)        => x.to_string(),
-			Self::BorderImageWidth(x)        => x.to_string(),
-			Self::BorderImageOutset(x)       => x.to_string(),
-			Self::BorderImageRepeat(x)       => x.to_string(),
-			Self::ClipPath(x)                => x.to_string(),
-			Self::BackgroundOrigin(x)        => x.to_string(),
-			Self::GridAutoFlow(x)            => x.to_string(),
-			Self::RowGap(x)                  => x.to_string(),
-			Self::ColumnGap(x)               => x.to_string(),
-			Self::OverflowWrap(x)            => x.to_string(),
-			Self::BoxShadow(x)               => x.to_string(),
-			Self::TransformOrigin(x)         => x.to_string(),
-			Self::Appearance(x)              => x.to_string(),
-		}
-	}
-}
-
-macro_rules! from_properties {
-	($($name:ident),+$(,)*) => {$(
-		impl From<$name> for Property {
-			fn from(x: $name) -> Self { Self::$name(x) }
+		#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+		pub enum Property {
+			Raw(String),
+			$($stutter_name($stutter_name),)*
+			$($named_name($named_type)),*
 		}
 
-		impl crate::AppendProperty for $name {
-			fn append_property(self, decls: &mut Vec<Property>) { decls.push(Property::$name(self)); }
+		impl ToString for Property {
+			fn to_string(&self) -> String {
+				match self {
+					Self::Raw(x) => x.clone(),
+					$(Self::$named_name(x) => format!("{}:{};", $css_name, x.to_string()),)*
+					$(Self::$stutter_name(x) => x.to_string()),*
+				}
+			}
 		}
-	)+};
+
+		$(
+			impl From<$stutter_name> for Property {
+				fn from(x: $stutter_name) -> Self { Self::$stutter_name(x) }
+			}
+
+			impl crate::AppendProperty for $stutter_name {
+				fn append_property(self, decls: &mut Vec<Property>) { decls.push(Property::$stutter_name(self)); }
+			}
+		)*
+	};
 }
 
-from_properties! {
-	FlexWrap,
-	FlexDirection,
-	JustifyContent,
-	AlignItems,
-	AlignContent,
-	AlignSelf,
-	FlexBasis,
-	FlexGrow,
-	FlexShrink,
-	Order,
-	Position,
-	Display,
-	BoxSizing,
-	Visibility,
-	ZIndex,
-	OverflowX,
-	OverflowY,
-	Direction,
-	UnicodeBidi,
-	WhiteSpace,
-	WritingMode,
-	HangingPunctuation,
-	Hyphens,
-	TextAlign,
-	TextAlignLast,
-	TextJustify,
-	FontStretch,
-	UserSelect,
-	ScrollBehavior,
-	PointerEvents,
-	Resize,
-	ObjectFit,
-	ListStyleType,
-	BreakAfter,
-	BreakBefore,
-	BreakInside,
-	FontVariant,
-	WordBreak,
-	WordWrap,
-	FontStyle,
-	TransformStyle,
-	BackgroundBlendMode,
-	MixBlendMode,
-	Isolation,
-	CaptionSide,
-	EmptyCells,
-	TableLayout,
-	BorderCollapse,
-	All,
-	FontWeight,
-	FontSize,
-	BackgroundRepeat,
-	BackgroundAttachment,
-	Cursor,
-	TextTransform,
-	FontKerning,
-	FontFamily,
-	WordSpacing,
-	TextOverflow,
-	VerticalAlign,
-	LineHeight,
-	LetterSpacing,
-	TabSize,
-	BoxDecorationBreak,
-	OutlineWidth,
-	OutlineStyle,
-	Content,
-	Opacity,
-	Perspective,
-	BackfaceVisibility,
-	TextDecorationStyle,
-	TextDecorationLine,
-	TextRendering,
-	VectorEffect,
-	BackgroundImage,
-	BackgroundSize,
-	AnimationDirection,
-	AnimationFillMode,
-	AnimationIterationCount,
-	AnimationName,
-	AnimationPlayState,
-	AnimationTimingFunction,
-	Transform,
-	Filter,
-	BorderImageSource,
-	BorderImageSlice,
-	BorderImageWidth,
-	BorderImageOutset,
-	BorderImageRepeat,
-	ClipPath,
-	BackgroundOrigin,
-	GridAutoFlow,
-	RowGap,
-	ColumnGap,
-	BoxShadow,
-	TransformOrigin,
-	Appearance,
+generate_properties! {
+	// different properties that have specific to them arguments
+	// basis/grow/shrink/order kind of take the same, but basis and shrink are 1 by default while others are 0 so /shrug
+	stutter => (
+		FlexWrap, FlexDirection,
+		JustifyContent, AlignItems, AlignContent, AlignSelf,
+		FlexBasis, FlexGrow, FlexShrink,
+
+		Order,
+		Position,
+		Display,
+		BoxSizing,
+		Visibility,
+		ZIndex,
+		OverflowX, OverflowY,
+		Direction,
+		UnicodeBidi,
+		WhiteSpace,
+		WritingMode,
+		HangingPunctuation,
+		Hyphens,
+		TextAlign,
+		TextAlignLast,
+		TextJustify,
+		FontStretch,
+		UserSelect,
+		ScrollBehavior,
+		PointerEvents,
+		Resize,
+		ObjectFit,
+		ListStyleType,
+
+		BreakAfter, BreakBefore, BreakInside,
+
+		FontVariant,
+		WordBreak,
+		WordWrap,
+		FontStyle,
+		TransformStyle,
+		BackgroundBlendMode,
+		MixBlendMode,
+		Isolation,
+		CaptionSide,
+		EmptyCells,
+		TableLayout,
+		BorderCollapse,
+		All,
+		FontWeight,
+		FontSize,
+		BackgroundRepeat,
+		BackgroundAttachment,
+		Cursor,
+		TextTransform,
+		FontKerning,
+		FontFamily,
+		WordSpacing,
+		TextOverflow,
+		VerticalAlign,
+		LineHeight,
+		LetterSpacing,
+		TabSize,
+		BoxDecorationBreak,
+		OutlineWidth,
+		OutlineStyle,
+		Content,
+		Opacity,
+		Perspective,
+		BackfaceVisibility,
+		TextDecorationStyle,
+		TextDecorationLine,
+		TextRendering,
+		VectorEffect,
+		BackgroundImage,
+		BackgroundSize,
+
+		AnimationDirection, AnimationFillMode, AnimationIterationCount,
+		AnimationName, AnimationPlayState, AnimationTimingFunction,
+
+		Transform,
+		Filter,
+
+		BorderImageSource, BorderImageSlice, BorderImageWidth,
+		BorderImageOutset, BorderImageRepeat,
+
+		ClipPath,
+		BackgroundOrigin,
+		GridAutoFlow,
+		RowGap,
+		ColumnGap,
+		OverflowWrap,
+		BoxShadow,
+		TransformOrigin,
+		Appearance,
+	),
+	// different properties that take the same argument
+	named => (
+		"margin-left" => MarginLeft(Margin),
+		"margin-right" => MarginRight(Margin),
+		"margin-top" => MarginTop(Margin),
+		"margin-bottom" => MarginBottom(Margin),
+
+		"padding-left" => PaddingLeft(UnitValue),
+		"padding-right" => PaddingRight(UnitValue),
+		"padding-top" => PaddingTop(UnitValue),
+		"padding-bottom" => PaddingBottom(UnitValue),
+
+		"width" => Width(Dimension),
+		"height" => Height(Dimension),
+		"min-width" => MinWidth(DimensionExtremity),
+		"max-width" => MaxWidth(DimensionExtremity),
+		"min-height" => MinHeight(DimensionExtremity),
+		"max-height" => MaxHeight(DimensionExtremity),
+
+		"top" => Top(Dimension),
+		"right" => Right(Dimension),
+		"left" => Left(Dimension),
+		"bottom" => Bottom(Dimension),
+
+		"border-left-color" => BorderLeftColor(ColorValue),
+		"border-right-color" => BorderRightColor(ColorValue),
+		"border-top-color" => BorderTopColor(ColorValue),
+		"border-bottom-color" => BorderBottomColor(ColorValue),
+
+		"border-left-style" => BorderLeftStyle(BorderStyle),
+		"border-right-style" => BorderRightStyle(BorderStyle),
+		"border-top-style" => BorderTopStyle(BorderStyle),
+		"border-bottom-style" => BorderBottomStyle(BorderStyle),
+
+		"border-left-width" => BorderLeftWidth(BorderWidth),
+		"border-right-width" => BorderRightWidth(BorderWidth),
+		"border-top-width" => BorderTopWidth(BorderWidth),
+		"border-bottom-width" => BorderBottomWidth(BorderWidth),
+
+		"border-top-left-radius" => BorderTopLeftRadius(UnitValue),
+		"border-top-right-radius" => BorderTopRightRadius(UnitValue),
+		"border-bottom-left-radius" => BorderBottomLeftRadius(UnitValue),
+		"border-bottom-right-radius" => BorderBottomRightRadius(UnitValue),
+
+		"background-color" => BackgroundColor(ColorValue),
+		"color" => Color(ColorValue),
+		"text-decoration-color" => TextDecorationColor(ColorValue),
+		"fill" => Fill(ColorValue),
+		"stroke" => Stroke(ColorValue),
+		"outline-color" => OutlineColor(ColorValue),
+
+		"grid-template-columns" => GridTemplateColumns(GridTemplate),
+		"grid-template-rows" => GridTemplateRows(GridTemplate),
+		"grid-auto-columns" => GridAutoColumns(GridAuto),
+		"grid-auto-rows" => GridAutoRows(GridAuto),
+
+		"text-indent" => TextIndent(UnitValue),
+		"outline-offset" => OutlineOffset(UnitValue),
+
+		"grid-column-start" => GridColumnStart(GridSpan),
+		"grid-column-end" => GridColumnEnd(GridSpan),
+		"grid-row-start" => GridRowStart(GridSpan),
+		"grid-row-end" => GridRowEnd(GridSpan),
+
+		"background-position-x" => BackgroundPositionX(UnitValue),
+		"background-position-y" => BackgroundPositionY(UnitValue),
+	),
 }
 
 css_macros::easy_enum! {box-sizing content-box border-box}
