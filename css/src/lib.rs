@@ -10,6 +10,7 @@ pub use paste;
 pub use properties::*;
 use std::{borrow::Cow, string::ToString};
 pub use units::Unit;
+pub use css_macros;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Rule(pub selector::Selector, pub Vec<Property>);
@@ -231,7 +232,7 @@ macro_rules! rule {
 	// finished
 	(($($selector:tt)+) { $($rules:tt)* }) => {
 		$crate::Rule(
-			$crate::selector!($($selector)+),
+			$crate::css_macros::selector!($($selector)+),
 			$crate::properties!($($rules)*),
 		)
 	};
