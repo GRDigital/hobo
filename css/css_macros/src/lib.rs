@@ -5,6 +5,7 @@ use syn::{
 	parse::{Parse, ParseStream},
 	punctuated::Punctuated,
 	Result, Token,
+	ext::IdentExt as _,
 };
 
 #[derive(Debug, Clone)]
@@ -210,4 +211,101 @@ pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	);
 
 	res.into()
+}
+
+struct SelectorElement(proc_macro2::TokenStream);
+
+impl Parse for SelectorElement {
+	fn parse(input: ParseStream) -> Result<Self> {
+		syn::custom_punctuation!(ClassPlaceholder, .&);
+
+		Ok(Self({
+			if input.parse::<Token![+]>().is_ok() { quote! { .adjacent() } }
+			else if input.parse::<Token![>>]>().is_ok() { quote! { .descendant() } }
+			else if input.parse::<Token![>]>().is_ok() { quote! { .child() } }
+			else if input.parse::<Token![,]>().is_ok() { quote! { .and() } }
+			else if input.parse::<ClassPlaceholder>().is_ok() { quote! { .class_placeholder() } }
+			else if input.parse::<Token![*]>().is_ok() { quote! { .any() } }
+			// html/svg element like div/span/a/p/img
+			else if let Ok(element) = input.parse::<syn::Ident>() { quote! { .element(crate::selector::Element::#element) } }
+			else if input.parse::<Token![.]>().is_ok() {
+				if input.peek(syn::token::Bracket) {
+					// some element type
+					let content = { let content; syn::bracketed!(content in input); content.parse::<syn::Type>().unwrap() };
+					quote! { .class(<#content>::type_class_string()) }
+				} else if input.peek(syn::token::Paren) {
+					// class expr
+					let content = { let content; syn::parenthesized!(content in input); content.parse::<syn::Expr>().unwrap() };
+					quote! { .class(#content.into()) }
+				} else {
+					panic!("unknown token")
+				}
+			} else if input.peek(syn::token::Bracket) {
+				// literal attribute
+				let content = { let content; syn::bracketed!(content in input); content.parse::<syn::Ident>().unwrap() };
+				quote! { .attribute(stringify!(#content)) }
+			} else if input.peek(Token![#]) {
+				// id expr
+				let content = { let content; syn::parenthesized!(content in input); content.parse::<syn::Expr>().unwrap() };
+				quote! { .id(#content.into()) }
+			} else if input.is_empty() {
+				return Err(syn::Error::new(proc_macro2::Span::call_site(), "finished"))
+			} else {
+				panic!("unknown token")
+			}
+		}))
+	}
+}
+
+impl quote::ToTokens for SelectorElement {
+	fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+		self.0.to_tokens(tokens)
+	}
+}
+
+struct Selector(Vec<SelectorElement>);
+
+impl Parse for Selector {
+	fn parse(input: ParseStream) -> Result<Self> {
+		let mut selector = Vec::new();
+
+		while let Ok(element) = input.parse::<SelectorElement>() {
+			selector.push(element);
+		}
+
+		Ok(Self(selector))
+	}
+}
+
+impl quote::ToTokens for Selector {
+	fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+		self.0.iter().for_each(|x| x.to_tokens(tokens));
+	}
+}
+
+// (@($acc:expr) + $($rest:tt)+)                                 => { $crate::selector!(@($acc.adjacent()) $($rest)+) };
+// (@($acc:expr) >> $($rest:tt)+)                                => { $crate::selector!(@($acc.descendant()) $($rest)+) };
+// (@($acc:expr) > $($rest:tt)+)                                 => { $crate::selector!(@($acc.child()) $($rest)+) };
+// (@($acc:expr) , $($rest:tt)+)                                 => { $crate::selector!(@($acc.and()) $($rest)+) };
+// (@($acc:expr) .& $($rest:tt)+)                                => { $crate::selector!(@($acc.class_placeholder()) $($rest)+) };
+// (@($acc:expr) * $($rest:tt)+)                                 => { $crate::selector!(@($acc.any()) $($rest)+) };
+// (@($acc:expr) $element:ident $($rest:tt)+)                    => { $crate::selector!(@($acc.element($crate::selector::Element::$element)) $($rest)+) };
+//
+// (@($acc:expr) .[$ty:ty] $($rest:tt)+)                         => { $crate::selector!(@($acc.class(<$ty>::type_class_string().into())) $($rest)+) };
+// (@($acc:expr) .($class:expr) $($rest:tt)+)                    => { $crate::selector!(@($acc.class($class.into())) $($rest)+) };
+// (@($acc:expr) [$($attr:tt)+] $($rest:tt)+)                    => { $crate::selector!(@($acc.attribute(stringify!($($attr)+).into())) $($rest)+) };
+// (@($acc:expr) #($id:expr) $($rest:tt)+)                       => { $crate::selector!(@($acc.id($id.into())) $($rest)+) };
+//
+// (@($acc:expr) :nth_child($n:expr, $offset:expr) $($rest:tt)+) => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::nth_child($n, $offset))) $($rest)+) };
+// (@($acc:expr) :nth_child($offset:expr) $($rest:tt)+)          => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::nth_child(0, $offset))) $($rest)+) };
+// (@($acc:expr) :nth_of_type($n:expr) $($rest:tt)+)             => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::nth_of_type($n))) $($rest)+) };
+// (@($acc:expr) :not($($selector:tt)+) $($rest:tt)+)            => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::not($crate::selector!($($selector)+)))) $($rest)+) };
+// (@($acc:expr) :[$raw:expr] $($rest:tt)+)                      => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::raw($raw.into()))) $($rest)+) };
+// (@($acc:expr) :$pseudo_class:ident $($rest:tt)+)              => { $crate::selector!(@($acc.pseudo_class($crate::selector::PseudoClass::$pseudo_class)) $($rest)+) };
+// (@($acc:expr) ::$pseudo_element:ident $($rest:tt)+)           => { $crate::selector!(@($acc.pseudo_element($crate::selector::PseudoElement::$pseudo_element)) $($rest)+) };
+#[proc_macro]
+pub fn selector(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	let selector = syn::parse_macro_input!(input as Selector);
+
+	(quote! {crate::selector::Selector::build() #selector}).into()
 }

@@ -1,3 +1,5 @@
+#![feature(proc_macro_hygiene)]
+
 pub mod prelude;
 #[macro_use] pub mod properties;
 #[macro_use] pub mod shortcuts;

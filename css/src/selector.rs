@@ -163,6 +163,12 @@ impl ToString for Selector {
 	fn to_string(&self) -> String { self.0.iter().map(ToString::to_string).collect::<String>() }
 }
 
+#[test]
+fn test_new_selector() {
+	dbg!(css_macros::selector!(div > .("raw class")));
+	todo!()
+}
+
 /// ```edition2018,compile_fail
 /// selector!(> div);
 /// ```
