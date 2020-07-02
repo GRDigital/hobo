@@ -40,6 +40,10 @@ pub trait Element {
 		CONTEXT.with(move |ctx| {
 			let element = self.element();
 			let element_class = ctx.style_storage.fetch(&element, style);
+
+			#[cfg(debug_assertions)]
+			element.set_attribute("data-hobo-type", &std::any::type_name::<Self>()).unwrap();
+
 			element.set_attribute(web_str::class(), &format!("{} {}", Self::type_class_string(), element_class)).unwrap();
 			self
 		})
@@ -61,6 +65,10 @@ pub trait Element {
 		CONTEXT.with(move |ctx| {
 			let element = self.element();
 			let element_class = ctx.style_storage.fetch(&element, style);
+
+			#[cfg(debug_assertions)]
+			element.set_attribute("data-hobo-type", &std::any::type_name::<Self>()).unwrap();
+
 			let existing_class = element.get_attribute(web_str::class()).unwrap_or_else(Self::type_class_string);
 			element.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).unwrap();
 			self
