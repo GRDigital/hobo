@@ -2,7 +2,9 @@ use derive_utils::quick_derive as enum_derive;
 // use proc_macro2::TokenStream;
 use proc_quote::quote;
 use quote::ToTokens;
+use proc_macro_error::proc_macro_error;
 
+#[proc_macro_error]
 #[proc_macro_attribute]
 pub fn trick(_: proc_macro::TokenStream, item: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let syn::ImplItemMethod { attrs, vis, defaultness, mut sig, block } = syn::parse_macro_input!(item as syn::ImplItemMethod);

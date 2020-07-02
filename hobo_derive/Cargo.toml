@@ -8,6 +8,7 @@ proc-macro = true
 
 [dependencies]
 derive_utils = "0.10"
+proc-macro-error = "1"
 proc-macro2 = "1"
 proc-quote = "0.3"
 quote = "1"
