@@ -28,6 +28,22 @@ pub trait Container: Element {
 		self.add_child_ref(child);
 		self
 	}
+
+	fn with_children<Item>(mut self, children: impl IntoIterator<Item = Item>) -> Self where
+		Self: Sized,
+		Item: crate::Element + 'static,
+	{
+		children.into_iter().for_each(|child| self.add_child(child));
+		self
+	}
+
+	fn with_children_refs<'a, Item>(self, children: impl IntoIterator<Item = &'a Item>) -> Self where
+		Self: Sized,
+		Item: crate::Element + 'static,
+	{
+		children.into_iter().for_each(|child| self.add_child_ref(child));
+		self
+	}
 }
 
 impl<T: Container> Container for Rc<RefCell<T>> {
