@@ -36,7 +36,7 @@ impl<T: Bound> BasicElement<T> {
 impl<T: AsRef<web_sys::Node> + Bound + wasm_bindgen::JsCast> BasicElement<T> {
 	pub fn clone_html(&self) -> Self {
 		let node: &web_sys::Node = self.element.as_ref();
-		Self { element: node.clone_node_with_deep(true).unwrap().dyn_into().unwrap(), children: Vec::new(), event_handlers: crate::EventHandlers::default() }
+		Self { element: node.clone_node_with_deep(true).expect("can't clone_node_with_deep").dyn_into().expect("can't convert after clone_node_with_deep"), children: Vec::new(), event_handlers: crate::EventHandlers::default() }
 	}
 }
 

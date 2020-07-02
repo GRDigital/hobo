@@ -19,7 +19,7 @@ impl Element for Slot {
 impl<T: Element + 'static> Replaceable<T> for Slot {
 	fn replace_element(&self, element: T) {
 		let mut me = self.0.borrow_mut();
-		me.element().insert_adjacent_element(web_str::afterend(), &element.element()).unwrap();
+		me.element().insert_adjacent_element(web_str::afterend(), &element.element()).expect("can't insert adjacent element");
 		*me = Box::new(element);
 	}
 }

@@ -44,7 +44,7 @@ pub trait Element {
 			#[cfg(debug_assertions)]
 			element.set_attribute("data-hobo-type", &std::any::type_name::<Self>()).unwrap();
 
-			element.set_attribute(web_str::class(), &format!("{} {}", Self::type_class_string(), element_class)).unwrap();
+			element.set_attribute(web_str::class(), &format!("{} {}", Self::type_class_string(), element_class)).expect("can't set attribute");
 			self
 		})
 	}
@@ -70,7 +70,7 @@ pub trait Element {
 			element.set_attribute("data-hobo-type", &std::any::type_name::<Self>()).unwrap();
 
 			let existing_class = element.get_attribute(web_str::class()).unwrap_or_else(Self::type_class_string);
-			element.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).unwrap();
+			element.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).expect("can't set attribute");
 			self
 		})
 	}
@@ -116,7 +116,7 @@ impl web_sys::Element {
 	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>) {
 		CONTEXT.with(move |ctx| {
 			let element_class = ctx.style_storage.fetch(&self, style);
-			self.set_attribute(web_str::class(), &element_class).unwrap();
+			self.set_attribute(web_str::class(), &element_class).expect("can't set attribute");
 		})
 	}
 
@@ -124,7 +124,7 @@ impl web_sys::Element {
 		CONTEXT.with(move |ctx| {
 			let element_class = ctx.style_storage.fetch(&self, style);
 			let existing_class = self.get_attribute(web_str::class()).unwrap_or_else(String::new);
-			self.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).unwrap();
+			self.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).expect("can't set attribute");
 		})
 	}
 

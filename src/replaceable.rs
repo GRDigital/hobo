@@ -9,7 +9,7 @@ pub trait Replaceable<T>: Element {
 impl<T: Element> Replaceable<T> for RefCell<T> {
 	fn replace_element(&self, element: T) {
 		let mut me = self.borrow_mut();
-		me.element().insert_adjacent_element(web_str::afterend(), &element.element()).unwrap();
+		me.element().insert_adjacent_element(web_str::afterend(), &element.element()).expect("can't insert adjacent element");
 		*me = element;
 	}
 }

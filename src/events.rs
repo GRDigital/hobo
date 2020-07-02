@@ -127,7 +127,7 @@ macro_rules! generate_events {
 			#[must_use]
 			fn $f(&self, f: impl FnMut(web_sys::$event_kind) + 'static) -> EventHandler {
 				let handler = Closure::<dyn FnMut(web_sys::$event_kind) + 'static>::new(f);
-				self.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).unwrap();
+				self.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).expect("can't add event listener");
 				EventHandler::$event_kind(handler)
 			}
 		)+}

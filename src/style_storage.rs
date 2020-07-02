@@ -49,13 +49,13 @@ impl StyleStorage {
 		let style_element = if let Some(x) = head.get_elements_by_tag_name("style").get_with_index(0) {
 			x
 		} else {
-			let element = dom.create_element(web_str::style()).unwrap();
-			head.append_child(&element).unwrap();
+			let element = dom.create_element(web_str::style()).expect("can't create style element");
+			head.append_child(&element).expect("can't append child");
 			element
 		};
 
 		// insert the stringified generated css into the style tag
-		style_element.append_with_str_1(&at_rules.to_string()).unwrap();
+		style_element.append_with_str_1(&at_rules.to_string()).expect("can't append css string");
 		class
 	}
 }

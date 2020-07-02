@@ -6,9 +6,9 @@ impl<'a> From<roxmltree::Document<'a>> for crate::BasicElement<web_sys::SvgEleme
 
 impl<'a, 'b> From<roxmltree::Node<'a, 'b>> for crate::BasicElement<web_sys::SvgElement> {
 	fn from(node: roxmltree::Node) -> Self {
-		let element = web_sys::SvgElement::from(wasm_bindgen::JsValue::from(crate::dom().create_element_ns(Some("http://www.w3.org/2000/svg"), node.tag_name().name()).unwrap()));
+		let element = web_sys::SvgElement::from(wasm_bindgen::JsValue::from(crate::dom().create_element_ns(Some("http://www.w3.org/2000/svg"), node.tag_name().name()).expect("can't create svg element")));
 		for attribute in node.attributes() {
-			element.set_attribute(attribute.name(), attribute.value()).unwrap();
+			element.set_attribute(attribute.name(), attribute.value()).expect("can't set attribute on an svg element");
 		}
 		let children = node
 			.children()
