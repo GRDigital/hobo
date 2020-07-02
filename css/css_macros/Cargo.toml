@@ -10,6 +10,7 @@ proc-macro = true
 heck = "0.3"
 itertools = "0.9"
 proc-macro-crate = "0.1"
+proc-macro-error = "1"
 proc-macro2 = "1"
 proc-quote = "0.3"
 quote = "1"

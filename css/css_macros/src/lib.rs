@@ -8,6 +8,7 @@ use syn::{
 	ext::IdentExt as _,
 };
 use proc_macro2::{Span, TokenStream};
+use proc_macro_error::{proc_macro_error, abort};
 
 #[derive(Debug, Clone)]
 struct HyphenatedName(String);
@@ -242,7 +243,7 @@ impl Parse for Selector {
 					} else if input.parse::<Token![&]>().is_ok() {
 						quote! { .class_placeholder() }
 					} else {
-						panic!("unknown token for a class")
+						abort!(input.parse::<proc_macro2::TokenTree>().unwrap(), "unknown token for a class")
 					}
 				} else if input.peek(syn::token::Bracket) {
 					// literal attribute
@@ -275,18 +276,18 @@ impl Parse for Selector {
 							quote! { .pseudo_class(#crate_name::selector::PseudoClass::#pseudo_class) }
 						}
 					} else {
-						panic!("unknown token for a pseudo_class")
+						abort!(input.parse::<proc_macro2::TokenTree>().unwrap(), "unknown token for a pseudo_class")
 					}
 				} else if input.parse::<Token![@]>().is_ok() {
 					// at-rules
 					if let Ok(at_name) = input.parse::<HyphenatedName>() {
 						if at_name.0 == "font-face" { quote! { ; #crate_name::selector::Selector::font_face() } }
-						else { panic!("unknown at-rule") }
+						else { abort!(input.parse::<proc_macro2::TokenTree>().unwrap(), "unknown at-rule") }
 					} else {
-						panic!("unknown token for an at-rule")
+						abort!(input.parse::<proc_macro2::TokenTree>().unwrap(), "unknown token for an at-rule")
 					}
 				} else {
-					panic!("unknown token")
+					abort!(input.parse::<proc_macro2::TokenTree>().unwrap(), "unknown token")
 				}
 			};
 			selector.push(element);
@@ -313,6 +314,7 @@ fn css_crate_name() -> TokenStream {
 	}
 }
 
+#[proc_macro_error]
 #[proc_macro]
 pub fn selector(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let crate_name = css_crate_name();
