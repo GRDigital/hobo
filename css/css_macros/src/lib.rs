@@ -5,7 +5,7 @@ use syn::{
 	parse::{Parse, ParseStream},
 	punctuated::Punctuated,
 	Result, Token,
-	ext::IdentExt as _,
+	// ext::IdentExt as _,
 };
 use proc_macro2::{Span, TokenStream};
 use proc_macro_error::{proc_macro_error, abort};

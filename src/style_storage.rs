@@ -3,8 +3,8 @@ use std::{
 	borrow::Cow,
 	cell::RefCell,
 	collections::HashMap,
-	hash::{Hash, Hasher},
 };
+pub use sugars::hash;
 
 #[derive(Default)]
 pub struct StyleStorage {
@@ -25,9 +25,7 @@ impl StyleStorage {
 		}
 
 		// just getting the u64 hash from rules
-		let mut hasher = std::collections::hash_map::DefaultHasher::new();
-		at_rules.hash(&mut hasher);
-		let id = hasher.finish();
+		let id = hash!(at_rules);
 
 		// caching the id
 		self.map.borrow_mut().insert(at_rules.clone(), id);

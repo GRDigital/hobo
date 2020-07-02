@@ -14,6 +14,7 @@ roxmltree = "0.13"
 shrinkwraprs = "0.3"
 slotmap = { version = "0.4", features = ["unstable"] }
 strum = { version = "0.18", features = ["derive"] }
+sugars = "1"
 wasm-bindgen = { version = "0.2", features = ["serde-serialize", "nightly", "strict-macro", "enable-interning"] }
 
 [dependencies.web-sys]
