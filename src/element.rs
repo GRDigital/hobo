@@ -59,7 +59,7 @@ pub trait Element {
 		self.element().remove_style();
 	}
 
-	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>) -> &Self where
+	fn add_class<'a>(self, style: impl Into<Cow<'a, css::AtRules>>) -> Self where
 		Self: Sized + 'static,
 	{
 		CONTEXT.with(move |ctx| {
