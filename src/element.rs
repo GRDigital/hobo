@@ -34,6 +34,12 @@ pub trait Element {
 		self
 	}
 
+	fn bool_attr<'a>(self, key: impl Into<Cow<'a, str>>) -> Self where
+		Self: Sized + 'static
+	{
+		self.attr(key, "")
+	}
+
 	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>) -> &Self where
 		Self: Sized + 'static,
 	{
