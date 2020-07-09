@@ -321,5 +321,5 @@ pub fn selector(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let selector = syn::parse_macro_input!(input as Selector);
 
 	// maybe move into selector's to tokens
-	(quote! ({#crate_name::selector::Selector::build() #selector})).into()
+	(quote! ({#crate_name::selector::Selector::from(#crate_name::selector::Selector::build() #selector)})).into()
 }

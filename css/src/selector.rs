@@ -175,8 +175,8 @@ fn test_new_selector() {
 		.& >> div:nth_child(2, 1),
 		.& >> *,
 		div + * >> span > .&,
-		div > .("raw class") [active] #("raw id") ::after,
 		span :["raw pseudo_class"] > div :nth_child(0, 2) > span :nth_of_type(15) :hover,
-		:not(div > span)
+		:not(div > span),
+		div > .("raw class") [active] #("raw id") ::after
 	);
 }
