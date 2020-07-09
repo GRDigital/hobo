@@ -58,8 +58,15 @@ intern_strings! {
 	// elements
 	div; span; input; a; img; p;
 	textarea; script; object; iframe; embed;
-	select; option; nav; filter; svg;
-	feColorMatrix; footer; address;
+	select; option; nav;
+	footer; address;
 	h1; h2; h3; h4; h5; h6;
 	ul; li; main; label;
+
+	// svg elements
+	svg; feColorMatrix; filter;
+	circle; clipPath; defs;
+	desc; ellipse; g;
+	line; path; polygon;
+	polyline; rect;
 }

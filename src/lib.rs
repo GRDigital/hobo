@@ -11,13 +11,12 @@ mod replaceable;
 mod slot;
 pub mod state_slice;
 mod style_storage;
-pub mod svg_create;
 mod svg_element;
 pub mod web_str;
 
 pub use basic_element::{BasicElement, RawElement};
 pub use container::*;
-pub use create::{components as cmp, *};
+pub use create::components as cmp;
 pub use css;
 pub use element::Element;
 pub use events::*;
@@ -25,7 +24,6 @@ pub use hobo_derive::*;
 pub use paste;
 pub use replaceable::*;
 pub use slot::*;
-pub use svg_create::*;
 pub use web_sys;
 
 pub type Color = (u8, u8, u8, u8);
