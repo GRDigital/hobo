@@ -7,7 +7,6 @@ edition = "2018"
 css = { path = "css", package = "hobo-css" }
 extend = "0.1"
 hobo_derive = { path = "hobo_derive" }
-log = "0.4"
 ordered-float = { version = "1", default-features = false }
 paste = "0.1"
 roxmltree = "0.13"
@@ -16,6 +15,13 @@ slotmap = { version = "0.4", features = ["unstable"] }
 strum = { version = "0.18", features = ["derive"] }
 sugars = "1"
 wasm-bindgen = { version = "0.2", features = ["serde-serialize", "nightly", "strict-macro", "enable-interning"] }
+
+[dev-dependencies]
+console_error_panic_hook = "0.1"
+console_log = "0.2"
+log = "0.4"
+stats_alloc = "0.1"
+wasm-bindgen-test = "0.3"
 
 [dependencies.web-sys]
 version = "0.3"
