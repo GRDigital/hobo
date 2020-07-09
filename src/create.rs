@@ -12,7 +12,7 @@ macro_rules! html_create {
 		],
 	) => {
 		$(
-			pub fn $html_name() -> web_sys::$html_t { web_sys::$html_t::from(wasm_bindgen::JsValue::from(dom().create_element(crate::web_str::$html_name()).expect("can't create element"))) }
+			pub fn $html_name() -> web_sys::$html_t { wasm_bindgen::JsCast::unchecked_into(dom().create_element(crate::web_str::$html_name()).expect("can't create element")) }
 
 			impl BasicElement<web_sys::$html_t> {
 				pub fn $html_name() -> Self {
@@ -22,7 +22,7 @@ macro_rules! html_create {
 		)*
 
 		$(
-			pub fn $svg_name() -> web_sys::$svg_t { web_sys::$svg_t::from(wasm_bindgen::JsValue::from(dom().create_element_ns(Some(wasm_bindgen::intern("http://www.w3.org/2000/svg")), crate::web_str::$svg_name()).expect("can't create svg element"))) }
+			pub fn $svg_name() -> web_sys::$svg_t { wasm_bindgen::JsCast::unchecked_into(dom().create_element_ns(Some(wasm_bindgen::intern("http://www.w3.org/2000/svg")), crate::web_str::$svg_name()).expect("can't create svg element")) }
 
 			impl BasicElement<web_sys::$svg_t> {
 				pub fn $svg_name() -> Self {

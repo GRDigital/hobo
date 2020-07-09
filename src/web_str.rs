@@ -1,13 +1,26 @@
 #![allow(non_snake_case)]
 
+// interning disabled in debug mode to help track memory leaks
 macro_rules! intern_strings {
 	() => {};
 	($name:ident, $s:expr; $($rest:tt)*) => {
-		pub fn $name() -> &'static str { wasm_bindgen::intern($s) }
+		pub fn $name() -> &'static str {
+			#[cfg(debug_assertions)]
+			{$s}
+
+			#[cfg(not(debug_assertions))]
+			{wasm_bindgen::intern($s)}
+		}
 		intern_strings! {$($rest)*}
 	};
 	($name:ident; $($rest:tt)*) => {
-		pub fn $name() -> &'static str { wasm_bindgen::intern(stringify!($name)) }
+		pub fn $name() -> &'static str {
+			#[cfg(debug_assertions)]
+			{stringify!($name)}
+
+			#[cfg(not(debug_assertions))]
+			{wasm_bindgen::intern(stringify!($name))}
+		}
 		intern_strings! {$($rest)*}
 	};
 }
