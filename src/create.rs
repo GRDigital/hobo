@@ -2,7 +2,7 @@
 
 use super::{basic_element::BasicElement, dom};
 
-macro_rules! html_create {
+macro_rules! create {
 	(
 		HTML => [
 			$($html_name:ident, $html_t:ident),*$(,)?
@@ -56,7 +56,7 @@ macro_rules! html_create {
 }
 
 #[rustfmt::skip]
-html_create![
+create![
 	HTML => [
 		div, HtmlDivElement,
 		span, HtmlSpanElement,
