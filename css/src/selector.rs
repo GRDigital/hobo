@@ -115,26 +115,44 @@ pub struct PseudoElementSelector(Vec<SelectorComponent>);
 #[derive(Debug, Default, PartialEq, Eq, Hash, Clone)]
 pub struct CombiningSelector(Vec<SelectorComponent>);
 
+#[derive(Debug, Default, PartialEq, Eq, Hash, Clone)]
+pub struct SelectorBuilder;
+
+#[rustfmt::skip]
+impl SelectorBuilder {
+	pub fn element(self, x: Element)                  -> Selector              { Selector(vec![SelectorComponent::Element(x)]) }
+	pub fn any(self)                                  -> Selector              { Selector(vec![SelectorComponent::Any]) }
+
+	pub fn class(self, x: String)                     -> Selector              { Selector(vec![SelectorComponent::Class(x)]) }
+	pub fn class_placeholder(self)                    -> Selector              { Selector(vec![SelectorComponent::ClassPlaceholder]) }
+	pub fn id(self, x: String)                        -> Selector              { Selector(vec![SelectorComponent::Id(x)]) }
+	pub fn pseudo_class(self, x: PseudoClass)         -> Selector              { Selector(vec![SelectorComponent::PseudoClass(x)]) }
+	pub fn pseudo_element(self, x: PseudoElement)     -> Selector              { Selector(vec![SelectorComponent::PseudoElement(x)]) }
+	pub fn attribute(self, x: String)                 -> Selector              { Selector(vec![SelectorComponent::Attribute(x)]) }
+
+	pub fn font_face()                                -> Selector              { Selector(vec![SelectorComponent::FontFace]) }
+}
+
 #[rustfmt::skip]
 impl Selector {
-	pub fn build()                                    -> CombiningSelector     { CombiningSelector::default() }
 	pub fn class(mut self, x: String)                 -> Self                  { self.0.push(SelectorComponent::Class(x)); self }
 	pub fn class_placeholder(mut self)                -> Self                  { self.0.push(SelectorComponent::ClassPlaceholder); self }
 	pub fn id(mut self, x: String)                    -> Self                  { self.0.push(SelectorComponent::Id(x)); self }
 	pub fn pseudo_class(mut self, x: PseudoClass)     -> Self                  { self.0.push(SelectorComponent::PseudoClass(x)); self }
 	pub fn pseudo_element(mut self, x: PseudoElement) -> PseudoElementSelector { self.0.push(SelectorComponent::PseudoElement(x)); PseudoElementSelector(self.0) }
+	pub fn attribute(mut self, x: String)             -> Self                  { self.0.push(SelectorComponent::Attribute(x)); self }
+
 	pub fn child(mut self)                            -> CombiningSelector     { self.0.push(SelectorComponent::Child); CombiningSelector(self.0) }
 	pub fn descendant(mut self)                       -> CombiningSelector     { self.0.push(SelectorComponent::Descendant); CombiningSelector(self.0) }
 	pub fn adjacent(mut self)                         -> CombiningSelector     { self.0.push(SelectorComponent::Adjacent); CombiningSelector(self.0) }
 	pub fn and(mut self)                              -> CombiningSelector     { self.0.push(SelectorComponent::And); CombiningSelector(self.0) }
-	pub fn font_face()                                -> Self                  { Selector(vec![SelectorComponent::FontFace]) }
-	pub fn attribute(mut self, x: String)             -> Self                  { self.0.push(SelectorComponent::Attribute(x)); self }
 }
 
 #[rustfmt::skip]
 impl CombiningSelector {
 	pub fn element(mut self, x: Element)              -> Selector              { self.0.push(SelectorComponent::Element(x)); Selector(self.0) }
 	pub fn any(mut self)                              -> Selector              { self.0.push(SelectorComponent::Any); Selector(self.0) }
+
 	pub fn class(mut self, x: String)                 -> Selector              { self.0.push(SelectorComponent::Class(x)); Selector(self.0) }
 	pub fn class_placeholder(mut self)                -> Selector              { self.0.push(SelectorComponent::ClassPlaceholder); Selector(self.0) }
 	pub fn id(mut self, x: String)                    -> Selector              { self.0.push(SelectorComponent::Id(x)); Selector(self.0) }

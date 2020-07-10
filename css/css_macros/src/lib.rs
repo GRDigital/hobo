@@ -217,6 +217,9 @@ pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 struct Selector(Vec<TokenStream>);
 
+// TODO: I could factor out the literal quoted code if I return a Vec of some enum rather than just TokenStream
+// and then each enum variant can have their own arguments etc
+// in this way, parsing the selector and what code it outputs would be more cleanly seaprated
 impl Parse for Selector {
 	fn parse(input: ParseStream) -> Result<Self> {
 		let crate_name = css_crate_name();
@@ -267,7 +270,7 @@ impl Parse for Selector {
 						quote! { .pseudo_class(#crate_name::selector::PseudoClass::raw(#content.into())) }
 					} else if input.parse::<not>().is_ok() {
 						let content = { let content; syn::parenthesized!(content in input); content.parse::<Selector>()? };
-						quote! { .pseudo_class(#crate_name::selector::PseudoClass::not(#crate_name::selector::Selector::build() #content)) }
+						quote! { .pseudo_class(#crate_name::selector::PseudoClass::not(#crate_name::selector::SelectorBuilder #content)) }
 					} else if let Ok(pseudo_class) = input.parse::<syn::Ident>() {
 						if input.peek(syn::token::Paren) {
 							let content = { let content; syn::parenthesized!(content in input); content.parse::<TokenStream>()? };
@@ -281,7 +284,7 @@ impl Parse for Selector {
 				} else if input.parse::<Token![@]>().is_ok() {
 					// at-rules
 					if let Ok(at_name) = input.parse::<HyphenatedName>() {
-						if at_name.0 == "font-face" { quote! { ; #crate_name::selector::Selector::font_face() } }
+						if at_name.0 == "font-face" { quote! { .font_face() } }
 						else { abort!(input.parse::<proc_macro2::TokenTree>().unwrap(), "unknown at-rule") }
 					} else {
 						abort!(input.parse::<proc_macro2::TokenTree>().unwrap(), "unknown token for an at-rule")
@@ -321,5 +324,5 @@ pub fn selector(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let selector = syn::parse_macro_input!(input as Selector);
 
 	// maybe move into selector's to tokens
-	(quote! ({#crate_name::selector::Selector::build() #selector .into()})).into()
+	(quote! ({#crate_name::selector::Selector::from(#crate_name::selector::SelectorBuilder #selector)})).into()
 }
