@@ -1,5 +1,7 @@
 #![allow(non_snake_case)]
 
+pub use crate::create::strings::*;
+
 // interning disabled in debug mode to help track memory leaks
 macro_rules! intern_strings {
 	() => {};
@@ -67,19 +69,4 @@ intern_strings! {
 	click; contextmenu; dblclick; mousedown; mouseenter;
 	mouseleave; mousemove; mouseover; mouseout; mouseup;
 	change; keydown; keyup; scroll; resize; blur; focus;
-
-	// elements
-	div; span; input; a; img; p;
-	textarea; script; object; iframe; embed;
-	select; option; nav;
-	footer; address;
-	h1; h2; h3; h4; h5; h6;
-	ul; li; main; label;
-
-	// svg elements
-	svg; feColorMatrix; filter;
-	circle; clipPath; defs;
-	desc; ellipse; g;
-	line; path; polygon;
-	polyline; rect;
 }
