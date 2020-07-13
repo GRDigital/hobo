@@ -130,7 +130,7 @@ impl SelectorBuilder {
 	pub fn pseudo_element(self, x: PseudoElement)     -> Selector              { Selector(vec![SelectorComponent::PseudoElement(x)]) }
 	pub fn attribute(self, x: String)                 -> Selector              { Selector(vec![SelectorComponent::Attribute(x)]) }
 
-	pub fn font_face()                                -> Selector              { Selector(vec![SelectorComponent::FontFace]) }
+	pub fn font_face(self)                            -> Selector              { Selector(vec![SelectorComponent::FontFace]) }
 }
 
 #[rustfmt::skip]
