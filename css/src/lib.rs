@@ -96,7 +96,7 @@ macro_rules! class {
 	($($rules:tt)*) => {
 		$crate::Style(vec![
 			$crate::Rule(
-				$crate::selector::Selector::build().class_placeholder(),
+				$crate::selector::SelectorBuilder.class_placeholder(),
 				$crate::properties!($($rules)*),
 			),
 		])
