@@ -209,22 +209,10 @@ macro_rules! __border_color {
 	]
 }}
 
-#[rustfmt::skip]
-#[macro_export]
-#[doc(hidden)]
-macro_rules! __border_radius {
-	($side:ident, initial)     => {$crate::paste::item!{$crate::Property::[<Border $side Radius>]($crate::UnitValue::Initial)}};
-	($side:ident, inherit)     => {$crate::paste::item!{$crate::Property::[<Border $side Radius>]($crate::UnitValue::Inherit)}};
-	($side:ident, unset)       => {$crate::paste::item!{$crate::Property::[<Border $side Radius>]($crate::UnitValue::Unset)}};
-	($side:ident, revert)      => {$crate::paste::item!{$crate::Property::[<Border $side Radius>]($crate::UnitValue::Revert)}};
-	($side:ident, 0)           => {$crate::paste::item!{$crate::Property::[<Border $side Radius>]($crate::UnitValue::Zero)}};
-	($side:ident, $($val:tt)+) => {$crate::paste::item!{$crate::Property::[<Border $side Radius>]($crate::UnitValue::Unit($crate::unit!($($val)+)))}};
-}
-
-#[macro_export] macro_rules! border_top_left_radius {($($tt:tt)+)     => {$crate::__border_radius!(TopLeft, $($tt)+)}}
-#[macro_export] macro_rules! border_top_right_radius {($($tt:tt)+)    => {$crate::__border_radius!(TopRight, $($tt)+)}}
-#[macro_export] macro_rules! border_bottom_left_radius {($($tt:tt)+)  => {$crate::__border_radius!(BottomLeft, $($tt)+)}}
-#[macro_export] macro_rules! border_bottom_right_radius {($($tt:tt)+) => {$crate::__border_radius!(BottomRight, $($tt)+)}}
+css_macros::unit_value_macro! {border_top_left_radius BorderTopLeftRadius}
+css_macros::unit_value_macro! {border_top_right_radius BorderTopRightRadius}
+css_macros::unit_value_macro! {border_bottom_left_radius BorderBottomLeftRadius}
+css_macros::unit_value_macro! {border_bottom_right_radius BorderBottomRightRadius}
 #[macro_export] macro_rules! border_radius {($($tt:tt)+) => {
 	vec![
 		$crate::border_top_left_radius!($($tt)+),

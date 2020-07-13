@@ -3,6 +3,8 @@ css_macros::easy_enum! {background-attachment scroll fixed local}
 css_macros::easy_enum! {background-size auto cover contain @}
 css_macros::easy_enum! {background-origin border-box padding-box content-box}
 css_macros::easy_color! {background-color}
+css_macros::unit_value_macro! {background_position_x BackgroundPositionX}
+css_macros::unit_value_macro! {background_position_y BackgroundPositionY}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum BackgroundImage {
@@ -25,28 +27,4 @@ impl ToString for BackgroundImage {
 			Self::Some(x) => format!("background-image:{};", x.iter().map(std::string::ToString::to_string).collect::<Vec<_>>().join(",")),
 		}
 	}
-}
-
-#[rustfmt::skip]
-#[macro_export]
-#[doc(hidden)]
-macro_rules! background_position_x {
-	(initial)     => {$crate::Property::BackgroundPositionX($crate::UnitValue::Initial)};
-	(inherit)     => {$crate::Property::BackgroundPositionX($crate::UnitValue::Inherit)};
-	(unset)       => {$crate::Property::BackgroundPositionX($crate::UnitValue::Unset)};
-	(revert)      => {$crate::Property::BackgroundPositionX($crate::UnitValue::Revert)};
-	(0)           => {$crate::Property::BackgroundPositionX($crate::UnitValue::Zero)};
-	($($val:tt)+) => {$crate::Property::BackgroundPositionX($crate::UnitValue::Unit($crate::unit!($($val)+)))};
-}
-
-#[rustfmt::skip]
-#[macro_export]
-#[doc(hidden)]
-macro_rules! background_position_y {
-	(initial)     => {$crate::Property::BackgroundPositionY($crate::UnitValue::Initial)};
-	(inherit)     => {$crate::Property::BackgroundPositionY($crate::UnitValue::Inherit)};
-	(unset)       => {$crate::Property::BackgroundPositionY($crate::UnitValue::Unset)};
-	(revert)      => {$crate::Property::BackgroundPositionY($crate::UnitValue::Revert)};
-	(0)           => {$crate::Property::BackgroundPositionY($crate::UnitValue::Zero)};
-	($($val:tt)+) => {$crate::Property::BackgroundPositionY($crate::UnitValue::Unit($crate::unit!($($val)+)))};
 }

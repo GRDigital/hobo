@@ -35,6 +35,8 @@ css_macros::easy_enum! {overflow-wrap normal break-word anywhere}
 css_macros::easy_enum! {font-weight normal bold bolder lighter #}
 css_macros::easy_color! {color}
 css_macros::easy_color! {text-decoration-color}
+css_macros::unit_value_macro! {text_indent TextIndent}
+css_macros::unit_value_macro! {outline_offset OutlineOffset}
 
 // css::font!(
 //     font "Roboto" 500 italic normal,

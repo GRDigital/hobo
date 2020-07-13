@@ -327,6 +327,7 @@ generate_properties! {
 		"text-decoration-color" => TextDecorationColor(ColorValue),
 		"fill" => Fill(ColorValue),
 		"stroke" => Stroke(ColorValue),
+		"stroke-width" => StrokeWidth(UnitValue),
 		"outline-color" => OutlineColor(ColorValue),
 
 		"grid-template-columns" => GridTemplateColumns(GridTemplate),

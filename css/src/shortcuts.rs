@@ -23,22 +23,22 @@ mod flexbox;
 
 #[macro_export] macro_rules! padding_vertical { ($($tt:tt)+) => {
 	vec![
-		$crate::__padding!(Top, $($tt)+),
-		$crate::__padding!(Bottom, $($tt)+),
+		$crate::padding_top!($($tt)+),
+		$crate::padding_bottom!($($tt)+),
 	]
 } }
 #[macro_export] macro_rules! padding_horizontal { ($($tt:tt)+) => {
 	vec![
-		$crate::__padding!(Left, $($tt)+),
-		$crate::__padding!(Right, $($tt)+),
+		$crate::padding_left!($($tt)+),
+		$crate::padding_right!($($tt)+),
 	]
 } }
 #[macro_export] macro_rules! padding { ($($tt:tt)+) => {
 	vec![
-		$crate::__padding!(Left, $($tt)+),
-		$crate::__padding!(Right, $($tt)+),
-		$crate::__padding!(Top, $($tt)+),
-		$crate::__padding!(Bottom, $($tt)+),
+		$crate::padding_left!($($tt)+),
+		$crate::padding_right!($($tt)+),
+		$crate::padding_top!($($tt)+),
+		$crate::padding_bottom!($($tt)+),
 	]
 } }
 

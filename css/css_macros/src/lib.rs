@@ -326,3 +326,34 @@ pub fn selector(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	// maybe move into selector's to tokens
 	(quote! ({#crate_name::selector::Selector::from(#crate_name::selector::SelectorBuilder #selector)})).into()
 }
+
+struct UnitValueMacro {
+	macro_name: syn::Ident,
+	property_name: syn::Ident,
+}
+
+impl Parse for UnitValueMacro {
+	fn parse(input: ParseStream) -> Result<Self> {
+		Ok(Self {
+			macro_name: input.parse()?,
+			property_name: input.parse()?,
+		})
+	}
+}
+
+#[proc_macro_error]
+#[proc_macro]
+pub fn unit_value_macro(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	let UnitValueMacro { macro_name, property_name } = syn::parse_macro_input!(input);
+	(quote! {
+		#[macro_export]
+		macro_rules! #macro_name {
+			(initial)     => {$crate::Property::#property_name($crate::UnitValue::Initial)};
+			(inherit)     => {$crate::Property::#property_name($crate::UnitValue::Inherit)};
+			(unset)       => {$crate::Property::#property_name($crate::UnitValue::Unset)};
+			(revert)      => {$crate::Property::#property_name($crate::UnitValue::Revert)};
+			(0)           => {$crate::Property::#property_name($crate::UnitValue::Zero)};
+			($($val:tt)+) => {$crate::Property::#property_name($crate::UnitValue::Unit($crate::unit!($($val)+)))};
+		}
+	}).into()
+}
