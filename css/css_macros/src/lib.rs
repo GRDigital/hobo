@@ -56,19 +56,22 @@ enum Value {
 
 impl Parse for Value {
 	fn parse(input: ParseStream) -> Result<Self> {
-		if input.parse::<Token![@]>().is_ok() {
-			return Ok(Self::Unit);
-		} else if input.parse::<Token![$]>().is_ok() {
-			return Ok(Self::String);
-		} else if input.parse::<Token![#]>().is_ok() {
-			return Ok(Self::Number);
-		} else if input.peek(syn::token::Bracket) {
+		if input.peek(syn::token::Bracket) {
+			syn::custom_keyword!(unit);
+			syn::custom_keyword!(string);
+			syn::custom_keyword!(number);
 			syn::custom_keyword!(float);
 			syn::custom_keyword!(raw);
 
 			let content;
 			syn::bracketed!(content in input);
-			if content.parse::<float>().is_ok() {
+			if content.parse::<unit>().is_ok() {
+				return Ok(Self::Unit);
+			} else if content.parse::<string>().is_ok() {
+				return Ok(Self::String);
+			} else if content.parse::<number>().is_ok() {
+				return Ok(Self::Number);
+			} else if content.parse::<float>().is_ok() {
 				return Ok(Self::Float);
 			} else if content.parse::<raw>().is_ok() {
 				return Ok(Self::Raw);

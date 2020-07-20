@@ -8,5 +8,5 @@ css_macros::easy_enum! {align-content center start end flex-start flex-end norma
 css_macros::easy_enum! {align-self auto normal center start end self-start self-end flex-start flex-end baseline stretch}
 css_macros::easy_enum! {flex-grow [float]}
 css_macros::easy_enum! {flex-shrink [float]}
-css_macros::easy_enum! {order #}
-css_macros::easy_enum! {flex-basis content auto fill max-content min-content fit-content @}
+css_macros::easy_enum! {order [number]}
+css_macros::easy_enum! {flex-basis content auto fill max-content min-content fit-content [unit]}

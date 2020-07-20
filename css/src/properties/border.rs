@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 css_macros::easy_enum! {border-collapse separate collapse}
 css_macros::easy_enum! {box-decoration-break slice clone}
-css_macros::easy_enum! {outline-width medium thin thick @}
+css_macros::easy_enum! {outline-width medium thin thick [unit]}
 css_macros::easy_enum! {outline-style none hidden dotted dashed solid double groove ridge inset outset}
 css_macros::easy_enum! {border-image-slice fill [raw]} // TODO:
 css_macros::easy_enum! {border-image-width auto [raw]} // TODO:

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-css_macros::easy_enum! {row-gap normal @}
-css_macros::easy_enum! {column-gap normal @}
+css_macros::easy_enum! {row-gap normal [unit]}
+css_macros::easy_enum! {column-gap normal [unit]}
 
 /*
 css::grid!(

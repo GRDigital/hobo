@@ -353,9 +353,9 @@ css_macros::easy_enum! {empty-cells show hide}
 css_macros::easy_enum! {table-layout auto fixed}
 css_macros::easy_enum! {all}
 css_macros::easy_enum! {cursor auto alias all-scroll cell context-menu col-resize copy crosshair default e-resize ew-resize grab grabbing help move n-resize ne-resize nesw-resize ns-resize nw-resize nwse-resize no-drop none not-allowed pointer progress row-resize s-resize se-resize sw-resize text vertical-text w-resize wait zoom-in zoom-out}
-css_macros::easy_enum! {content normal none counter open-quote close-quote no-open-quote no-close-quote $}
+css_macros::easy_enum! {content normal none counter open-quote close-quote no-open-quote no-close-quote [string]}
 css_macros::easy_enum! {opacity [float]}
-css_macros::easy_enum! {perspective none @}
+css_macros::easy_enum! {perspective none [unit]}
 css_macros::easy_enum! {backface-visibility visible hidden}
 css_macros::easy_enum! {overflow-x visible hidden scroll auto}
 css_macros::easy_enum! {overflow-y visible hidden scroll auto}
