@@ -24,7 +24,7 @@ pub use replaceable::*;
 pub use slot::*;
 pub use web_sys;
 
-pub type Color = (u8, u8, u8, u8);
+pub type Color = css::color::Color;
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
 

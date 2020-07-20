@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-ordered-float = { version = "2", default-features = false }
-smart-default = "0.6"
-paste = "0.1"
-strum = { version = "0.18", features = ["derive"] }
 css_macros = { path = "css_macros" }
 css_macros_decl = { path = "css_macros_decl" }
+ordered-float = { version = "2", default-features = false }
+paste = "0.1"
+smart-default = "0.6"
+strum = { version = "0.18", features = ["derive"] }

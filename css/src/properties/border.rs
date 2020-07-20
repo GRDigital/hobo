@@ -186,14 +186,11 @@ macro_rules! __border_style {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __border_color {
-	($side:ident, initial)                 => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Initial)}};
-	($side:ident, inherit)                 => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Inherit)}};
-	($side:ident, unset)                   => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Unset)}};
-	($side:ident, revert)                  => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Revert)}};
-	($side:ident, ...$($tuple:tt)*)        => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Rgba($($tuple)*.0, $($tuple)*.1, $($tuple)*.2, $($tuple)*.3))}};
-	($side:ident, $rgb:expr)               => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Rgba($rgb, $rgb, $rgb, 255))}};
-	($side:ident, $r:tt $g:tt $b:tt $a:tt) => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Rgba($r, $g, $b, $a))}};
-	($side:ident, $r:tt $g:tt $b:tt)       => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Rgba($r, $g, $b, 255))}};
+	($side:ident, initial)   => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Initial)}};
+	($side:ident, inherit)   => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Inherit)}};
+	($side:ident, unset)     => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Unset)}};
+	($side:ident, revert)    => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Revert)}};
+	($side:ident, $rgb:expr) => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Rgba($rgb.into()))}};
 }
 
 #[macro_export] macro_rules! border_left_color {($($tt:tt)+)   => {$crate::__border_color!(Left, $($tt)+)}}

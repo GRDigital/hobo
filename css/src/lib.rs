@@ -3,6 +3,7 @@ pub mod prelude;
 #[macro_use] pub mod shortcuts;
 #[macro_use] pub mod units;
 #[macro_use] pub mod selector;
+pub mod color;
 
 pub use paste;
 pub use properties::*;

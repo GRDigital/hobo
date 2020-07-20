@@ -32,34 +32,22 @@ pub use transform::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum ColorValue {
-	Rgba(u8, u8, u8, u8),
+	Rgba(crate::color::Color),
 	Initial,
 	Inherit,
 	Unset,
 	Revert,
 }
 
-impl From<(u8, u8, u8, u8)> for ColorValue {
-	fn from((r, g, b, a): (u8, u8, u8, u8)) -> Self { Self::Rgba(r, g, b, a) }
-}
-
-impl From<(u8, u8, u8)> for ColorValue {
-	fn from((r, g, b): (u8, u8, u8)) -> Self { Self::Rgba(r, g, b, 1) }
-}
-
-impl From<u8> for ColorValue {
-	fn from(rgb: u8) -> Self { Self::Rgba(rgb, rgb, rgb, 1) }
-}
-
 #[rustfmt::skip]
 impl ToString for ColorValue {
 	fn to_string(&self) -> String {
 		match self {
-			Self::Rgba(r, g, b, a) => format!("#{:02x}{:02x}{:02x}{:02x}", r, g, b, a),
-			Self::Initial          => "initial".to_owned(),
-			Self::Inherit          => "inherit".to_owned(),
-			Self::Unset            => "unset".to_owned(),
-			Self::Revert           => "revert".to_owned(),
+			Self::Rgba(rgba) => format!("#{:02x}{:02x}{:02x}{:02x}", rgba.r, rgba.g, rgba.b, rgba.a),
+			Self::Initial    => "initial".to_owned(),
+			Self::Inherit    => "inherit".to_owned(),
+			Self::Unset      => "unset".to_owned(),
+			Self::Revert     => "revert".to_owned(),
 		}
 	}
 }
