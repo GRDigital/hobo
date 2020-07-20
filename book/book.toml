@@ -1,0 +1,7 @@
+[book]
+title = "title test"
+description = "desc test"
+authors = ["Awpteamoose"]
+
+[rust]
+edition = "2018"
