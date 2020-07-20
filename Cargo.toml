@@ -10,10 +10,10 @@ hobo_derive = { path = "hobo_derive" }
 paste = "0.1"
 roxmltree = "0.13"
 shrinkwraprs = "0.3"
-slotmap = { version = "0.4", features = ["unstable"] }
+slotmap = { version = "0.4" }
 strum = { version = "0.18", features = ["derive"] }
 sugars = "1"
-wasm-bindgen = { version = "0.2", features = ["serde-serialize", "nightly", "strict-macro", "enable-interning"] }
+wasm-bindgen = { version = "0.2", features = ["serde-serialize", "strict-macro", "enable-interning"] }
 
 [dev-dependencies]
 console_error_panic_hook = "0.1"

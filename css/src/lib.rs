@@ -1,5 +1,3 @@
-#![feature(proc_macro_hygiene)]
-
 pub mod prelude;
 #[macro_use] pub mod properties;
 #[macro_use] pub mod shortcuts;
@@ -11,6 +9,7 @@ pub use properties::*;
 use std::{borrow::Cow, string::ToString};
 pub use units::Unit;
 pub use css_macros;
+pub use css_macros_decl;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Rule(pub selector::Selector, pub Vec<Property>);
@@ -232,7 +231,7 @@ macro_rules! rule {
 	// finished
 	(($($selector:tt)+) { $($rules:tt)* }) => {
 		$crate::Rule(
-			$crate::css_macros::selector!($($selector)+),
+			$crate::css_macros_decl::selector!($($selector)+),
 			$crate::properties!($($rules)*),
 		)
 	};

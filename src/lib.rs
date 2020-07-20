@@ -1,5 +1,3 @@
-#![feature(proc_macro_hygiene, trait_alias, new_uninit)]
-
 mod basic_element;
 mod container;
 pub mod create;

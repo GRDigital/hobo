@@ -1,0 +1,8 @@
+[package]
+name = "css_macros_decl"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+css_macros = { path = "../css_macros" }
+proc-macro-hack = "0.5"

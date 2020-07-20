@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use slotmap::SlotMap;
+use slotmap::DenseSlotMap;
 use std::{
 	cell::{RefCell, RefMut},
 	ops::{Deref, DerefMut},
@@ -18,7 +18,7 @@ type SubscriptionFn = Rc<RefCell<dyn FnMut()>>;
 #[derive(Default)]
 pub struct StateSlice<T> {
 	data: RefCell<T>,
-	subscribers: RefCell<SlotMap<SubscriptionKey, SubscriptionFn>>,
+	subscribers: RefCell<DenseSlotMap<SubscriptionKey, SubscriptionFn>>,
 	update_ongoing: RefCell<bool>,
 	dirty: RefCell<bool>,
 }

@@ -9,6 +9,7 @@ use syn::{
 };
 use proc_macro2::{Span, TokenStream};
 use proc_macro_error::{proc_macro_error, abort};
+use proc_macro_hack::proc_macro_hack;
 
 #[derive(Debug, Clone)]
 struct HyphenatedName(String);
@@ -318,7 +319,7 @@ fn css_crate_name() -> TokenStream {
 }
 
 #[proc_macro_error]
-#[proc_macro]
+#[proc_macro_hack]
 pub fn selector(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let crate_name = css_crate_name();
 	let selector = syn::parse_macro_input!(input as Selector);

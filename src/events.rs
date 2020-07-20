@@ -105,7 +105,7 @@ macro_rules! generate_events {
 					let weak = Rc::downgrade(this);
 					self.$f(move |event| {
 						let strong = if let Some(x) = weak.upgrade() { x } else { return; };
-						let inited = unsafe { strong.assume_init() };
+						let inited: Rc<RefCell<T>> = unsafe { Rc::from_raw((&*Rc::into_raw(strong)).as_ptr()) };
 						f(&mut inited.borrow_mut(), event);
 					})
 				}
@@ -126,7 +126,7 @@ macro_rules! generate_events {
 		impl web_sys::EventTarget {$(
 			#[must_use]
 			fn $f(&self, f: impl FnMut(web_sys::$event_kind) + 'static) -> EventHandler {
-				let handler = Closure::<dyn FnMut(web_sys::$event_kind) + 'static>::new(f);
+				let handler = Closure::wrap(Box::new(f) as Box<dyn FnMut(web_sys::$event_kind) + 'static>);
 				self.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).expect("can't add event listener");
 				EventHandler::$event_kind(handler)
 			}
