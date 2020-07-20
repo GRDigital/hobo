@@ -1,16 +1,10 @@
-#![feature(try_blocks, proc_macro_hygiene, async_closure, new_uninit, maybe_uninit_extra, get_mut_unchecked)]
-#![recursion_limit = "1024"]
-
-use stats_alloc::{Region, Stats, StatsAlloc};
-use std::alloc::System;
-
 #[global_allocator]
-pub static ALLOC: &StatsAlloc<System> = &stats_alloc::INSTRUMENTED_SYSTEM;
+pub static ALLOC: &stats_alloc::StatsAlloc<std::alloc::System> = &stats_alloc::INSTRUMENTED_SYSTEM;
+
+use wasm_bindgen_test::*;
+wasm_bindgen_test_configure!(run_in_browser);
 
 use hobo::{cmp, enclose as e, prelude::*};
-use wasm_bindgen_test::*;
-
-wasm_bindgen_test_configure!(run_in_browser);
 
 #[derive(hobo::Element, hobo::Container, hobo::EventTarget, hobo::RawElement)]
 struct SomeElement {
@@ -39,7 +33,7 @@ fn trick_leak() {
 	console_error_panic_hook::set_once();
 
 	{
-		let region = Region::new(ALLOC);
+		let region = stats_alloc::Region::new(ALLOC);
 		for _ in 0..100000 {
 			let element = SomeElement::trick_new();
 			let raw_element = element.borrow().raw_element().clone();
@@ -50,8 +44,3 @@ fn trick_leak() {
 		assert_eq!(change.bytes_allocated, change.bytes_deallocated);
 	}
 }
-
-// #[wasm_bindgen_test]
-// fn fail() {
-//     assert_eq!(1, 2);
-// }
