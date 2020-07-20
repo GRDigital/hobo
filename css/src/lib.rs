@@ -85,7 +85,7 @@ impl<F: FnOnce(&mut Vec<Property>)> AppendProperty for F {
 
 #[macro_export]
 macro_rules! properties {
-	($($e:expr),*$(,)*) => {{
+	($($e:expr),*$(,)?) => {{
 		let mut v = Vec::new();
 		$($crate::AppendProperty::append_property($e, &mut v);)*
 		v
