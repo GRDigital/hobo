@@ -11,11 +11,13 @@ pub fn trick(_: proc_macro::TokenStream, item: proc_macro::TokenStream) -> proc_
 	sig.output = syn::parse_quote!(-> ::std::rc::Rc<::std::cell::RefCell<Self>>);
 	(quote! {
 		#(#attrs)* #vis #defaultness #sig {
-			let mut this: ::std::rc::Rc<::std::mem::MaybeUninit<::std::cell::RefCell<Self>>> = ::std::rc::Rc::new_uninit();
+			let mut this: ::std::rc::Rc<::std::mem::MaybeUninit<::std::cell::RefCell<Self>>> = ::std::rc::Rc::new(::std::mem::MaybeUninit::uninit());
 			let new_this = #block;
 			unsafe {
-				::std::mem::MaybeUninit::write(::std::rc::Rc::get_mut_unchecked(&mut this), ::std::cell::RefCell::new(new_this));
-				::std::rc::Rc::<::std::mem::MaybeUninit<_>>::assume_init(this)
+				let raw_uninit = ::std::rc::Rc::into_raw(this) as *mut ::std::mem::MaybeUninit<_>;
+				let raw_init = (&mut *raw_uninit).as_mut_ptr();
+				std::ptr::write(raw_init, ::std::cell::RefCell::new(new_this));
+				::std::rc::Rc::from_raw(raw_init)
 			}
 		}
 	}).into()
