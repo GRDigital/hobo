@@ -1,6 +1,5 @@
 use crate::{prelude::*, Element};
-use std::{cell::RefCell, rc::Rc};
-use std::mem::MaybeUninit;
+use std::{cell::RefCell, mem::MaybeUninit, rc::Rc};
 
 pub enum EventHandler {
 	MouseEvent(Closure<dyn FnMut(web_sys::MouseEvent) + 'static>),

@@ -25,9 +25,7 @@ pub struct StateSlice<T> {
 
 // TODO: better debug impl
 impl<T: std::fmt::Debug> std::fmt::Debug for StateSlice<T> {
-	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-		self.data.borrow().fmt(f)
-	}
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { self.data.borrow().fmt(f) }
 }
 
 // This is only permissible because JS/WASM is single-threaded
@@ -57,7 +55,9 @@ impl<'a, T> Drop for StateSliceGuard<'a, T> {
 	fn drop(&mut self) {
 		drop(self.data_ref.take());
 		*self.state.dirty.borrow_mut() = true;
-		if *self.state.update_ongoing.borrow() { return; }
+		if *self.state.update_ongoing.borrow() {
+			return;
+		}
 		*self.state.update_ongoing.borrow_mut() = true;
 
 		for _ in 0..MAX_NESTED_UPDATES {
@@ -91,19 +91,11 @@ pub trait Unsub<'a> {
 
 impl<T> StateSlice<T> {
 	pub fn new(initial: T) -> Self {
-		Self {
-			data: RefCell::new(initial),
-			subscribers: Default::default(),
-			update_ongoing: Default::default(),
-			dirty: Default::default(),
-		}
+		Self { data: RefCell::new(initial), subscribers: Default::default(), update_ongoing: Default::default(), dirty: Default::default() }
 	}
 
 	pub fn update<'a>(&'a self) -> impl DerefMut<Target = T> + 'a {
-		StateSliceGuard {
-			data_ref: Some(self.data.borrow_mut()),
-			state: self,
-		}
+		StateSliceGuard { data_ref: Some(self.data.borrow_mut()), state: self }
 	}
 
 	pub fn view<'a>(&'a self) -> impl Deref<Target = T> + 'a { self.data.borrow() }

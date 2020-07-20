@@ -1,14 +1,14 @@
 #![feature(try_blocks, proc_macro_hygiene, async_closure, new_uninit, maybe_uninit_extra, get_mut_unchecked)]
-#![recursion_limit="1024"]
+#![recursion_limit = "1024"]
 
-use stats_alloc::{StatsAlloc, Stats, Region};
+use stats_alloc::{Region, Stats, StatsAlloc};
 use std::alloc::System;
 
 #[global_allocator]
 pub static ALLOC: &StatsAlloc<System> = &stats_alloc::INSTRUMENTED_SYSTEM;
 
+use hobo::{cmp, enclose as e, prelude::*};
 use wasm_bindgen_test::*;
-use hobo::{enclose as e, prelude::*, cmp};
 
 wasm_bindgen_test_configure!(run_in_browser);
 
@@ -27,10 +27,9 @@ impl SomeElement {
 	#[hobo::trick]
 	fn trick_new() -> Self {
 		let element = cmp::div();
-		Self { element, flag: false }
-			.with_on_click_mut(&this, move |this, _| {
-				this.flag = true;
-			})
+		Self { element, flag: false }.with_on_click_mut(&this, move |this, _| {
+			this.flag = true;
+		})
 	}
 }
 
@@ -41,7 +40,7 @@ fn trick_leak() {
 
 	{
 		let region = Region::new(ALLOC);
-		for _ in 0 .. 100000 {
+		for _ in 0..100000 {
 			let element = SomeElement::trick_new();
 			let raw_element = element.borrow().raw_element().clone();
 			raw_element.click();

@@ -11,25 +11,30 @@ pub trait Container: Element {
 		self.children_mut().push(child);
 	}
 
-	fn add_child(&mut self, child: impl crate::Element + 'static) {
-		self.attach_child_box(Box::new(child));
-	}
+	fn add_child(&mut self, child: impl crate::Element + 'static) { self.attach_child_box(Box::new(child)); }
 
 	fn add_child_ref(&self, child: &(impl crate::Element + 'static)) {
 		self.element().append_child(&child.element()).expect("can't append child");
 	}
 
-	fn child(mut self, child: impl crate::Element + 'static) -> Self where Self: Sized {
+	fn child(mut self, child: impl crate::Element + 'static) -> Self
+	where
+		Self: Sized,
+	{
 		self.add_child(child);
 		self
 	}
 
-	fn child_ref(self, child: &(impl crate::Element + 'static)) -> Self where Self: Sized {
+	fn child_ref(self, child: &(impl crate::Element + 'static)) -> Self
+	where
+		Self: Sized,
+	{
 		self.add_child_ref(child);
 		self
 	}
 
-	fn with_children<Item>(mut self, children: impl IntoIterator<Item = Item>) -> Self where
+	fn with_children<Item>(mut self, children: impl IntoIterator<Item = Item>) -> Self
+	where
 		Self: Sized,
 		Item: crate::Element + 'static,
 	{
@@ -37,7 +42,8 @@ pub trait Container: Element {
 		self
 	}
 
-	fn with_children_refs<'a, Item>(self, children: impl IntoIterator<Item = &'a Item>) -> Self where
+	fn with_children_refs<'a, Item>(self, children: impl IntoIterator<Item = &'a Item>) -> Self
+	where
 		Self: Sized,
 		Item: crate::Element + 'static,
 	{

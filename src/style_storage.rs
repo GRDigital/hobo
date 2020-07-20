@@ -1,9 +1,5 @@
 use crate::prelude::*;
-use std::{
-	borrow::Cow,
-	cell::RefCell,
-	collections::HashMap,
-};
+use std::{borrow::Cow, cell::RefCell, collections::HashMap};
 pub use sugars::hash;
 
 #[derive(Default)]

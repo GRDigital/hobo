@@ -15,7 +15,5 @@ impl<T: Element> Replaceable<T> for RefCell<T> {
 }
 
 impl<T: Element, R: Replaceable<T>> Replaceable<T> for Rc<R> {
-	fn replace_element(&self, element: T) {
-		R::replace_element(&self, element);
-	}
+	fn replace_element(&self, element: T) { R::replace_element(&self, element); }
 }

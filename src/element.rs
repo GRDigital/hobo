@@ -1,46 +1,54 @@
-use crate::{CONTEXT, prelude::*};
-use std::hash::{Hash, Hasher};
-use std::cell::RefCell;
-use std::rc::Rc;
-use std::borrow::Cow;
+use crate::{prelude::*, CONTEXT};
+use std::{
+	borrow::Cow,
+	cell::RefCell,
+	hash::{Hash, Hasher},
+	rc::Rc,
+};
 
 pub trait Element {
 	fn element(&self) -> Cow<'_, web_sys::Element>;
 
-	fn type_class_string() -> String where
+	fn type_class_string() -> String
+	where
 		Self: Sized + 'static,
 	{
 		std::any::TypeId::of::<Self>().type_class_string("t")
 	}
 
-	fn class<'a>(self, style: impl Into<Cow<'a, css::AtRules>>) -> Self where
+	fn class<'a>(self, style: impl Into<Cow<'a, css::AtRules>>) -> Self
+	where
 		Self: Sized + 'static,
 	{
 		self.set_class(style);
 		self
 	}
 
-	fn style<'a>(self, style: impl Into<Cow<'a, [css::Property]>>) -> Self where
+	fn style<'a>(self, style: impl Into<Cow<'a, [css::Property]>>) -> Self
+	where
 		Self: Sized + 'static,
 	{
 		self.set_style(style);
 		self
 	}
 
-	fn attr<'a>(self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) -> Self where
-		Self: Sized + 'static
+	fn attr<'a>(self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) -> Self
+	where
+		Self: Sized + 'static,
 	{
 		self.element().set_attribute(&key.into(), &value.into()).expect("can't set attribute");
 		self
 	}
 
-	fn bool_attr<'a>(self, key: impl Into<Cow<'a, str>>) -> Self where
-		Self: Sized + 'static
+	fn bool_attr<'a>(self, key: impl Into<Cow<'a, str>>) -> Self
+	where
+		Self: Sized + 'static,
 	{
 		self.attr(key, "")
 	}
 
-	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>) -> &Self where
+	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>) -> &Self
+	where
 		Self: Sized + 'static,
 	{
 		CONTEXT.with(move |ctx| {
@@ -50,22 +58,24 @@ pub trait Element {
 			#[cfg(debug_assertions)]
 			element.set_attribute("data-hobo-type", &std::any::type_name::<Self>()).unwrap();
 
-			element.set_attribute(web_str::class(), &format!("{} {}", Self::type_class_string(), element_class)).expect("can't set attribute");
+			element
+				.set_attribute(web_str::class(), &format!("{} {}", Self::type_class_string(), element_class))
+				.expect("can't set attribute");
 			self
 		})
 	}
 
-	fn set_style<'a>(&self, style: impl Into<Cow<'a, [css::Property]>>) where
+	fn set_style<'a>(&self, style: impl Into<Cow<'a, [css::Property]>>)
+	where
 		Self: Sized,
 	{
 		self.element().set_style(style.into());
 	}
 
-	fn remove_style(&self) {
-		self.element().remove_style();
-	}
+	fn remove_style(&self) { self.element().remove_style(); }
 
-	fn add_class<'a>(self, style: impl Into<Cow<'a, css::AtRules>>) -> Self where
+	fn add_class<'a>(self, style: impl Into<Cow<'a, css::AtRules>>) -> Self
+	where
 		Self: Sized + 'static,
 	{
 		CONTEXT.with(move |ctx| {
@@ -83,27 +93,19 @@ pub trait Element {
 }
 
 impl Element for RefCell<dyn Element> {
-	fn element(&self) -> Cow<'_, web_sys::Element> {
-		Cow::Owned(self.borrow().element().into_owned())
-	}
+	fn element(&self) -> Cow<'_, web_sys::Element> { Cow::Owned(self.borrow().element().into_owned()) }
 }
 
 impl Element for Box<dyn Element> {
-	fn element(&self) -> Cow<'_, web_sys::Element> {
-		self.as_ref().element()
-	}
+	fn element(&self) -> Cow<'_, web_sys::Element> { self.as_ref().element() }
 }
 
 impl<T: Element> Element for RefCell<T> {
-	fn element(&self) -> Cow<'_, web_sys::Element> {
-		Cow::Owned(self.borrow().element().into_owned())
-	}
+	fn element(&self) -> Cow<'_, web_sys::Element> { Cow::Owned(self.borrow().element().into_owned()) }
 }
 
 impl<T: Element> Element for Rc<T> {
-	fn element(&self) -> Cow<'_, web_sys::Element> {
-		T::element(&self)
-	}
+	fn element(&self) -> Cow<'_, web_sys::Element> { T::element(&self) }
 }
 
 #[extend::ext(pub, name = HashToClassString)]
@@ -138,7 +140,5 @@ impl web_sys::Element {
 		let _ = self.set_attribute(web_str::style(), &style.into().iter().map(std::string::ToString::to_string).collect::<String>());
 	}
 
-	fn remove_style(&self) {
-		let _ = self.remove_attribute(web_str::style());
-	}
+	fn remove_style(&self) { let _ = self.remove_attribute(web_str::style()); }
 }

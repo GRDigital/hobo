@@ -26,15 +26,21 @@ impl<T: AsRef<web_sys::Element> + 'static> EventTarget for BasicElement<T> {
 }
 
 impl<T: AsRef<web_sys::Element> + 'static> BasicElement<T> {
-	pub fn new(element: T) -> Self {
-		Self { element, children: Vec::new(), event_handlers: EventHandlers::default() }
-	}
+	pub fn new(element: T) -> Self { Self { element, children: Vec::new(), event_handlers: EventHandlers::default() } }
 }
 
 impl<T: AsRef<web_sys::Node> + AsRef<web_sys::Element> + 'static + wasm_bindgen::JsCast> BasicElement<T> {
 	pub fn clone_html(&self) -> Self {
 		let node: &web_sys::Node = self.element.as_ref();
-		Self { element: node.clone_node_with_deep(true).expect("can't clone_node_with_deep").dyn_into().expect("can't convert after clone_node_with_deep"), children: Vec::new(), event_handlers: crate::EventHandlers::default() }
+		Self {
+			element: node
+				.clone_node_with_deep(true)
+				.expect("can't clone_node_with_deep")
+				.dyn_into()
+				.expect("can't convert after clone_node_with_deep"),
+			children: Vec::new(),
+			event_handlers: crate::EventHandlers::default(),
+		}
 	}
 }
 
