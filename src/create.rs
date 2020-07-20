@@ -2,6 +2,9 @@
 
 use super::{basic_element::BasicElement, dom};
 
+#[cfg(test)] use wasm_bindgen_test::*;
+#[cfg(test)] wasm_bindgen_test_configure!(run_in_browser);
+
 macro_rules! create {
 	(
 		HTML => [
@@ -10,7 +13,7 @@ macro_rules! create {
 		SVG => [
 			$($svg_name:ident, $svg_t:ident),*$(,)?
 		],
-	) => {
+	) => {paste::item! {
 		$(
 			pub fn $html_name() -> web_sys::$html_t { wasm_bindgen::JsCast::unchecked_into(dom().create_element(crate::web_str::$html_name()).expect("can't create element")) }
 
@@ -18,6 +21,12 @@ macro_rules! create {
 				pub fn $html_name() -> Self {
 					BasicElement { element: $html_name(), children: Vec::new(), event_handlers: Default::default() }
 				}
+			}
+
+			#[cfg(test)]
+			#[wasm_bindgen_test]
+			fn [<can_create_$html_name>]() {
+				components::$html_name();
 			}
 		)*
 
@@ -37,13 +46,11 @@ macro_rules! create {
 					crate::basic_element::BasicElement::$html_name()
 				}
 
-				paste::item! {
-					pub type [<$html_name:camel>] = crate::BasicElement<web_sys::$html_t>;
+				pub type [<$html_name:camel>] = crate::BasicElement<web_sys::$html_t>;
 
-					#[test]
-					fn [<$html_name _has_selector>]() {
-						crate::css::css_macros_decl::selector!($html_name);
-					}
+				#[test]
+				fn [<$html_name _has_selector>]() {
+					crate::css::css_macros_decl::selector!($html_name);
 				}
 			)*
 
@@ -52,9 +59,7 @@ macro_rules! create {
 					crate::basic_element::BasicElement::$svg_name()
 				}
 
-				paste::item! {
-					pub type [<$svg_name:camel>] = crate::BasicElement<web_sys::$svg_t>;
-				}
+				pub type [<$svg_name:camel>] = crate::BasicElement<web_sys::$svg_t>;
 			)*
 		}
 
@@ -79,7 +84,7 @@ macro_rules! create {
 				}
 			)*
 		}
-	};
+	}};
 }
 
 #[rustfmt::skip]
