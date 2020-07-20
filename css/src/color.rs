@@ -1,5 +1,3 @@
-use crate::prelude::*;
-
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub struct Color { pub r: u8, pub g: u8, pub b: u8, pub a: u8 }
 
@@ -9,7 +7,7 @@ impl Color {
 	}
 
 	pub const fn from_hex(hex: u32) -> Self {
-		let [r, g, b, a] = hex.to_ne_bytes();
+		let [r, g, b, a] = hex.to_be_bytes();
 		Self { r, g, b, a }
 	}
 }
