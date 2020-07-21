@@ -87,6 +87,7 @@ macro_rules! create {
 	}};
 }
 
+// TODO: sort out SVG*HTML name collisions
 #[rustfmt::skip]
 create![
 	HTML => [
