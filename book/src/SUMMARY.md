@@ -1,6 +1,6 @@
 # Summary
 
-- [hobo](README.md)
+- [hobo](../../README.md)
 - [Getting Started](getting-started.md)
 - [Core Concepts](basic-concepts.md)
 	- [hobo::Element components](basic-concepts/element.md)
