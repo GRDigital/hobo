@@ -2,11 +2,13 @@
 name = "hobo"
 version = "0.1.0"
 edition = "2018"
+license = "MIT"
+repository = "https://github.com/grdigital/hobo"
 
 [dependencies]
-css = { path = "css", package = "hobo-css" }
+css = { package = "hobo_css", version = "0.1" }
 extend = "0.1"
-hobo_derive = { path = "hobo_derive" }
+derive = { package = "hobo_derive", version = "0.1" }
 paste = "0.1"
 roxmltree = "0.13"
 shrinkwraprs = "0.3"
@@ -14,6 +16,10 @@ slotmap = { version = "0.4" }
 strum = { version = "0.18", features = ["derive"] }
 sugars = "1"
 wasm-bindgen = { version = "0.2", features = ["serde-serialize", "strict-macro", "enable-interning"] }
+
+[patch.crates-io]
+css = { package = "hobo_css", path = "css" }
+derive = { package = "hobo_derive", path = "derive" }
 
 [dev-dependencies]
 console_error_panic_hook = "0.1"

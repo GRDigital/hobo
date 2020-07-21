@@ -19,7 +19,7 @@ pub use css;
 pub use element::Element;
 #[doc(inline)]
 pub use events::*;
-pub use hobo_derive::*;
+pub use derive::*;
 #[doc(hidden)]
 pub use paste;
 pub use replaceable::*;

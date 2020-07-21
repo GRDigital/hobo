@@ -1,8 +1,13 @@
 [package]
-name = "css_macros_decl"
+name = "hobo_css_macros_decl"
 version = "0.1.0"
 edition = "2018"
+license = "MIT"
+repository = "https://github.com/grdigital/hobo"
 
 [dependencies]
-css_macros = { path = "../css_macros" }
+css_macros = { package = "hobo_css_macros", version = "0.1" }
 proc-macro-hack = "0.5"
+
+[patch.crates-io]
+css_macros = { package = "hobo_css_macros", path = "../css_macros" }

@@ -1,12 +1,18 @@
 [package]
-name = "hobo-css"
+name = "hobo_css"
 version = "0.1.0"
 edition = "2018"
+license = "MIT"
+repository = "https://github.com/grdigital/hobo"
 
 [dependencies]
-css_macros = { path = "css_macros" }
-css_macros_decl = { path = "css_macros_decl" }
+css_macros = { package = "hobo_css_macros", version = "0.1" }
+css_macros_decl = { package = "hobo_macros_decl", version = "0.1" }
 ordered-float = { version = "2", default-features = false }
 paste = "0.1"
 smart-default = "0.6"
 strum = { version = "0.18", features = ["derive"] }
+
+[patch.crates-io]
+css_macros = { package = "hobo_css_macros", path = "css_macros" }
+css_macros_decl = { package = "hobo_css_macros_decl", path = "css_macros_decl" }

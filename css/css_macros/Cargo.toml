@@ -1,7 +1,9 @@
 [package]
-name = "css_macros"
+name = "hobo_css_macros"
 version = "0.1.0"
 edition = "2018"
+license = "MIT"
+repository = "https://github.com/grdigital/hobo"
 
 [lib]
 proc-macro = true
