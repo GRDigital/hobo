@@ -11,6 +11,10 @@ pub struct Counter {
 	count: i32,
 }
 
+// <div>
+//   <button>PLUS</button>
+//   <div>0</div>
+// </div>
 impl Counter {
 	#[hobo::trick]
 	fn new() -> Self {
@@ -21,22 +25,10 @@ impl Counter {
 			.class(css::class!(
 				css::width!(128 px),
 				css::height!(128 px),
+				// #AA0000FF or #AA0000 of #A00 in css
+				// hobo requires full rgba though
 				css::background_color!(0xAA_00_00_FF),
 			))
-			// <div>
-			//   <button>MINUS</button>
-			//   <button>PLUS</button>
-			//   <div>0</div>
-			// </div>
-			.child(cmp::button()
-				.text("MINUS")
-				// `*text` in `e!()` clones a reference to a html element in it
-				// `this` is a variable injected by `#[hobo::trick]`
-				.with_on_click_mut(&this, e!((*text) move |this, _| {
-					this.count -= 1;
-					text.set_inner_text(&this.count.to_string());
-				}))
-			)
 			.child(cmp::button()
 				.text("PLUS")
 				.with_on_click_mut(&this, e!((*text) move |this, _| {
