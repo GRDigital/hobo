@@ -1,16 +1,19 @@
 pub mod prelude;
 #[macro_use] pub mod properties;
+#[doc(hidden)]
 #[macro_use] pub mod shortcuts;
 #[macro_use] pub mod units;
 #[macro_use] pub mod selector;
 pub mod color;
 
+#[doc(hidden)]
 pub use paste;
 pub use properties::*;
 use std::{borrow::Cow, string::ToString};
 pub use units::Unit;
 pub use css_macros;
 pub use css_macros_decl;
+pub use color::Color;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Rule(pub selector::Selector, pub Vec<Property>);

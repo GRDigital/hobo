@@ -1,7 +1,7 @@
 use crate::{prelude::*, Element};
 use std::{cell::RefCell, rc::Rc};
 
-/// Trait for all hobo elements that can be replaced with a different instance of itself
+/// Trait for all hobo components that can be replaced with a different instance of itself
 pub trait Replaceable<T>: Element {
 	fn replace_element(&self, element: T);
 }

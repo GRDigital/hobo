@@ -1,3 +1,5 @@
+//! everything that has to do with HTML event handling
+
 use crate::{prelude::*, Element};
 use std::{cell::RefCell, mem::MaybeUninit, rc::Rc};
 
@@ -95,32 +97,33 @@ macro_rules! generate_events {
 		pub trait EventTarget: Element {
 			fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>>;
 			$(
-				fn $f(&self, f: impl FnMut(web_sys::$event_kind) + 'static) {
+				fn [<add_ $f>](&self, f: impl FnMut(web_sys::$event_kind) + 'static) {
 					let handler = self.element().$f(f);
 					self.event_handlers().push(handler);
 				}
 
-				fn [<$f _mut>]<T: 'static>(&self, this: &Rc<MaybeUninit<RefCell<T>>>, mut f: impl FnMut(&mut T, web_sys::$event_kind) + 'static) {
+				fn [<add_ $f _mut>]<T: 'static>(&self, this: &Rc<MaybeUninit<RefCell<T>>>, mut f: impl FnMut(&mut T, web_sys::$event_kind) + 'static) {
 					let weak = Rc::downgrade(this);
-					self.$f(move |event| {
+					self.[<add_ $f>](move |event| {
 						let strong = if let Some(x) = weak.upgrade() { x } else { return; };
 						let inited: Rc<RefCell<T>> = unsafe { Rc::from_raw((&*Rc::into_raw(strong)).as_ptr()) };
 						f(&mut inited.borrow_mut(), event);
 					})
 				}
 
-				fn [<with_ $f>](self, f: impl FnMut(web_sys::$event_kind) + 'static) -> Self where Self: Sized {
-					self.$f(f);
+				fn $f(self, f: impl FnMut(web_sys::$event_kind) + 'static) -> Self where Self: Sized {
+					self.[<add_ $f>](f);
 					self
 				}
 
-				fn [<with_ $f _mut>]<T: 'static>(self, this: &Rc<MaybeUninit<RefCell<T>>>, f: impl FnMut(&mut T, web_sys::$event_kind) + 'static) -> Self where Self: Sized {
-					self.[<$f _mut>](this, f);
+				fn [<$f _mut>]<T: 'static>(self, this: &Rc<MaybeUninit<RefCell<T>>>, f: impl FnMut(&mut T, web_sys::$event_kind) + 'static) -> Self where Self: Sized {
+					self.[<add_ $f _mut>](this, f);
 					self
 				}
 			)+
 		}
 
+		/// Extension event for raw web_sys elements for convenient attaching of event handlers
 		#[extend::ext(pub, name = [<RawEventTarget>])]
 		impl web_sys::EventTarget {$(
 			#[must_use]

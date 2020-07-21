@@ -17,14 +17,14 @@ pub use container::*;
 pub use create::components as cmp;
 pub use css;
 pub use element::Element;
+#[doc(inline)]
 pub use events::*;
 pub use hobo_derive::*;
+#[doc(hidden)]
 pub use paste;
 pub use replaceable::*;
 pub use slot::*;
 pub use web_sys;
-
-pub type Color = css::color::Color;
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
 
@@ -37,6 +37,7 @@ thread_local! {
 	static CONTEXT: Context = Default::default();
 }
 
+/// Trait for hobo components with textual contents
 pub trait SetText<T>: RawElement<RawElementType = T>
 where
 	T: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement>,

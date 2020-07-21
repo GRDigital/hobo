@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+//! pub/sub event-based state management
+
 use slotmap::DenseSlotMap;
 use std::{
 	cell::{RefCell, RefMut},

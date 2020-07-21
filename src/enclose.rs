@@ -1,6 +1,6 @@
 #[doc(hidden)]
 #[macro_export]
-macro_rules! make_rc_upgrade_stmt {
+macro_rules! __make_rc_upgrade_stmt {
 	(%slot $expr:expr => $ident:ident) => {
 		let $ident = if let Some(x) = ::std::rc::Weak::upgrade(&$ident) { $crate::Slot(x) } else { return; };
 	};
@@ -24,7 +24,7 @@ macro_rules! make_rc_upgrade_stmt {
 
 #[doc(hidden)]
 #[macro_export]
-macro_rules! make_stmt {
+macro_rules! __make_stmt {
 	(%slot $expr:expr => $ident:ident) => {
 		let $ident = ::std::rc::Rc::downgrade(&$expr.0);
 	};
@@ -96,8 +96,8 @@ macro_rules! __e_inner {
 		$crate::__e_inner!{
 			input = ($($rest)*),
 			current_input = (),
-			rc_upgrade_stmts = ($crate::make_rc_upgrade_stmt!{$($current_input)*} $($rc_upgrade_stmt)*),
-			stmts = ($crate::make_stmt!{$($current_input)*} $($stmt)*),
+			rc_upgrade_stmts = ($crate::__make_rc_upgrade_stmt!{$($current_input)*} $($rc_upgrade_stmt)*),
+			stmts = ($crate::__make_stmt!{$($current_input)*} $($stmt)*),
 			closure_input = (),
 			header = ($($header)*),
 			body = ($body),
@@ -117,8 +117,8 @@ macro_rules! __e_inner {
 		$crate::__e_inner!{
 			input = (),
 			current_input = (),
-			rc_upgrade_stmts = ($crate::make_rc_upgrade_stmt!{$($current_input)*} $($rc_upgrade_stmt)*),
-			stmts = ($crate::make_stmt!{$($current_input)*} $($stmt)*),
+			rc_upgrade_stmts = ($crate::__make_rc_upgrade_stmt!{$($current_input)*} $($rc_upgrade_stmt)*),
+			stmts = ($crate::__make_stmt!{$($current_input)*} $($stmt)*),
 			closure_input = (),
 			header = ($($header)*),
 			body = ($body),
@@ -231,6 +231,8 @@ macro_rules! __e_inner {
 	};
 }
 
+/// Essentially a "move-by-clone" closure creator with some special cases for common hobo idioms
+/// for more information, refer to the book
 #[macro_export]
 macro_rules! enclose {
 	(($($input:tt)*) $($closure_input:tt)+) => {

@@ -21,7 +21,7 @@ impl SomeElement {
 	#[hobo::trick]
 	fn trick_new() -> Self {
 		let element = cmp::div();
-		Self { element, flag: false }.with_on_click_mut(&this, move |this, _| {
+		Self { element, flag: false }.on_click_mut(&this, move |this, _| {
 			this.flag = true;
 		})
 	}

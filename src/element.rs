@@ -6,6 +6,7 @@ use std::{
 	rc::Rc,
 };
 
+/// Core hobo trait for all components
 pub trait Element {
 	fn element(&self) -> Cow<'_, web_sys::Element>;
 
@@ -36,8 +37,15 @@ pub trait Element {
 	where
 		Self: Sized + 'static,
 	{
-		self.element().set_attribute(&key.into(), &value.into()).expect("can't set attribute");
+		self.set_attr(key, value);
 		self
+	}
+
+	fn set_attr<'a>(&self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>)
+	where
+		Self: Sized + 'static,
+	{
+		self.element().set_attribute(&key.into(), &value.into()).expect("can't set attribute");
 	}
 
 	fn bool_attr<'a>(self, key: impl Into<Cow<'a, str>>) -> Self
@@ -45,6 +53,13 @@ pub trait Element {
 		Self: Sized + 'static,
 	{
 		self.attr(key, "")
+	}
+
+	fn set_bool_attr<'a>(&self, key: impl Into<Cow<'a, str>>)
+	where
+		Self: Sized + 'static,
+	{
+		self.set_attr(key, "")
 	}
 
 	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>) -> &Self

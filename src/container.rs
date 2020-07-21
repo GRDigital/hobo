@@ -1,7 +1,7 @@
 use crate::Element;
 use std::{cell::RefCell, rc::Rc};
 
-/// Trait for all hobo elements that can have children
+/// Trait for all hobo components that can have children
 pub trait Container: Element {
 	fn children(&self) -> &Vec<Box<dyn Element>>;
 	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>>;

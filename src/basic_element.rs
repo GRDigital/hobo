@@ -9,6 +9,7 @@ pub struct BasicElement<T: AsRef<web_sys::Element> + 'static> {
 	pub event_handlers: EventHandlers,
 }
 
+/// Trait for all hobo components which have a particular known `web_sys::Element` at their root
 pub trait RawElement {
 	type RawElementType: AsRef<web_sys::Element>;
 

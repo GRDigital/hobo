@@ -175,6 +175,7 @@ impl ToString for GridAuto {
 	}
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! __repeat_number {
 	(auto-fit) => {$crate::GridRepeatNumber::AutoFit};
@@ -182,11 +183,13 @@ macro_rules! __repeat_number {
 	($x:expr) => {$crate::GridRepeatNumber::Some($x)};
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! __nested_unit {
 	(($($tt:tt)+)) => {$crate::unit!($($tt)+)};
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! __repeat {
 	($($repeat_number:tt)-+, $($v:tt)+) => {
@@ -197,12 +200,14 @@ macro_rules! __repeat {
 	}
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! __grid_template_value {
 	(repeat($($tt:tt)+)) => {$crate::GridTemplateValue::Repeat($crate::__repeat!($($tt)+))};
 	(($($tt:tt)+)) => {$crate::GridTemplateValue::Unit($crate::unit!($($tt)+))};
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! __grid_template {
 	(

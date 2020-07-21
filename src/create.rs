@@ -1,5 +1,9 @@
 #![allow(non_snake_case)]
 
+//! everything that has to do with raw HTML elements
+//!
+//! all of these functions return the most fitting web_sys element types
+
 use super::{basic_element::BasicElement, dom};
 
 #[cfg(test)] use wasm_bindgen_test::*;
@@ -63,6 +67,7 @@ macro_rules! create {
 			)*
 		}
 
+		#[doc(hidden)]
 		pub mod strings {
 			$(
 				pub fn $html_name() -> &'static str {

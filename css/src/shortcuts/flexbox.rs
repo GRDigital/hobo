@@ -1,5 +1,6 @@
 // wrap nowrap?
 // border?
+#[doc(hidden)]
 #[macro_export]
 macro_rules! __flexbox_line {
 	($acc:expr, size $($rest:tt)*) => {
@@ -62,6 +63,7 @@ macro_rules! __flexbox_line {
 	($acc:expr, [$($inner:tt)*]) => { $crate::__flexbox_line!($acc, $($inner)*) };
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! __flexbox_inner {
 	(
