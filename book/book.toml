@@ -1,6 +1,0 @@
-[book]
-title = "hobo book"
-description = "hobo is a Rust frontend framework"
-
-[rust]
-edition = "2018"
