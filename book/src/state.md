@@ -1,4 +1,4 @@
-# e!() macro
+# Managing state with e!()
 
 The `e!()`'s basic use is to just clone variables into closures, similar to what [enclose](https://crates.io/crates/enclose) does.
 

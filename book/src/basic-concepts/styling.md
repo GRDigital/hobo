@@ -1,6 +1,6 @@
 # Styling facilities
 
-Most hobo components will be styled with either `.class()` or `.style()` functions, where either `css::class!()`, `css::style!()` or `css::properties!()` macros. The naming is confusing somewhat, but the distinction is important.
+Most hobo components will be styled with either `.class()` or `.style()` functions, where either `css::class!()`, `css::style!()` or `css::properties!()` macros are used. The naming is confusing somewhat, but the distinction is important.
 
 * `.style()` and `.set_style()` use the `style` attribute, which can only take a bunch of properties without any selectors, so `css::properties!()` macro is used.
 * `.class()`, `.set_class()` and `.add_class()` use the `class` attribute:
