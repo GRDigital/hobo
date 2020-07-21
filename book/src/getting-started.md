@@ -31,7 +31,7 @@ impl Counter {
 			))
 			.child(cmp::button()
 				.text("PLUS")
-				.with_on_click_mut(&this, e!((*text) move |this, _| {
+				.on_click_mut(&this, e!((*text) move |this, _| {
 					this.count += 1;
 					text.set_inner_text(&this.count.to_string());
 				}))

@@ -25,3 +25,20 @@ svg![
 	mail => r"images/mail.svg",
 ];
 ```
+
+## Constructing inline SVGs
+
+Of course, if you need to algorithmically construct an svg, such as if you're making a chart, you can do that too:
+
+```rust
+let mut svg = cmp::svg()
+	.attr("viewBox", "-1 -1 2 2")
+	.child(cmp::circle()
+		.attr("cx", "0")
+		.attr("cy", "0")
+		.attr("r", "1")
+		.class(css::class!(
+			css::fill!(...colors::gray6),
+		))
+	);
+```

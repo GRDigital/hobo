@@ -53,3 +53,5 @@ cmp::div()
 		}
 	))
 ```
+
+> **Chaining vs non-chaining syntax:** `.style()` is the chaining syntax, `.set_style()` is the non-chaining alternative. Similarly, `.class()` and `.set_class()`. On the other hand, `.add_class()` doesn't have a chanining equivalent. More about chaining vs non-chaining syntax in [Building the DOM](../building-the-dom.md#chaining-vs-non-chaining-syntax).
