@@ -90,7 +90,7 @@ dependencies = [
 
 [[package]]
 name = "hobo"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "console_error_panic_hook",
  "console_log",
@@ -112,9 +112,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_css"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac2e00201565205403dab37bf91227cc7d5bd728522376ff30646e993168c928"
+version = "0.1.1"
 dependencies = [
  "hobo_css_macros",
  "hobo_css_macros_decl",
@@ -126,9 +124,9 @@ dependencies = [
 
 [[package]]
 name = "hobo_css_macros"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a6181920af2c095664f7d72db6e1a2864af311f06672eba369ade62be62f7e2"
+checksum = "a37301589a2e0031ab92214415891a6260716b1115f125c0ce8985807de8601d"
 dependencies = [
  "heck",
  "itertools 0.9.0",
@@ -143,9 +141,9 @@ dependencies = [
 
 [[package]]
 name = "hobo_css_macros_decl"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c8cb2d70e81f0f99889b223ab75ccc00e4d0de3e9ccf81a416b56bbbc6b53b4"
+checksum = "b7a93ab6337d52d330b9e9e56af35f0651a9fc1d5160d71b9c7cf430d9f96393"
 dependencies = [
  "hobo_css_macros",
  "proc-macro-hack",
@@ -153,9 +151,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_derive"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eca861c40474073ecce119739e7c4abc80c13e31584dd1b5342b4db8c3cf92eb"
+version = "0.1.1"
 dependencies = [
  "derive_utils",
  "proc-macro-error",
