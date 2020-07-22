@@ -5,6 +5,7 @@ pub mod prelude;
 #[macro_use] pub mod units;
 #[macro_use] pub mod selector;
 pub mod color;
+// pub mod font_face;
 
 #[doc(hidden)]
 pub use paste;
@@ -94,6 +95,7 @@ macro_rules! properties {
 		v
 	}};
 }
+
 #[macro_export]
 macro_rules! class {
 	($($rules:tt)*) => {
@@ -172,66 +174,9 @@ impl ToString for Media {
 //     }
 // }
 
-// TODO: replace @font-face selector with regular rust struct
-/*
-pub enum FontDisplay {
-	Auto,
-	Block,
-	Swap,
-	Fallback,
-	Optional,
-}
-
-pub enum FontStretch {
-	UltraCondensed,
-	ExtraCondensed,
-	Condensed,
-	SemiCondensed,
-	Normal,
-	SemiExpanded,
-	Expanded,
-	ExtraExpanded,
-	UltraExpanded,
-	Percentage(f32),
-}
-
-pub enum FontStyle {
-	Normal,
-	Italic,
-	Oblique,
-	ObliqueAngle(f32),
-	ObliqueAngleRange(f32, f32),
-}
-
-pub enum FontWeight {
-	Normal,
-	Bold,
-	Number(u16),
-}
-
-pub struct FontFace {
-	font_family: String,
-	src: Vec<(String, String)>,
-	font_display: FontDisplay,
-	font_stretch: Vec<FontStretch>,
-	font_style: FontStyle,
-	font_weight: Vec<FontWeight>,
-	// font_variant:
-	// font-feature-settings
-	// font-variation-settings:
-	unicode_range: Vec<(u32, u32)>,
-}
-*/
-
+// TODO: procmacroify
 #[macro_export]
 macro_rules! rule {
-	// ((@font-face) { $($rules:tt),*$(,)* }) => {
-	//     $crate::Rule::FontFace {
-	//         $($tt:tt),*,
-	//         ...$crate::FontFace::default()
-	//     }
-	// };
-
 	// finished
 	(($($selector:tt)+) { $($rules:tt)* }) => {
 		$crate::Rule(
@@ -251,6 +196,7 @@ macro_rules! rule {
 	};
 }
 
+// TODO: procmacroify
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __accumulate_style {
@@ -270,6 +216,7 @@ macro_rules! __accumulate_style {
 	}};
 }
 
+// TODO: procmacroify
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __style {
