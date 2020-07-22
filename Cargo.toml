@@ -20,9 +20,9 @@ strum = { version = "0.18", features = ["derive"] }
 sugars = "1"
 wasm-bindgen = { version = "0.2", features = ["serde-serialize", "strict-macro", "enable-interning"] }
 
-[patch.crates-io]
-css = { package = "hobo_css", path = "css" }
-derive = { package = "hobo_derive", path = "derive" }
+# [patch.crates-io]
+# css = { package = "hobo_css", path = "css" }
+# derive = { package = "hobo_derive", path = "derive" }
 
 [dev-dependencies]
 console_error_panic_hook = "0.1"
