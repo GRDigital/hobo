@@ -181,22 +181,10 @@ macro_rules! __border_style {
 	]
 }}
 
-
-#[rustfmt::skip]
-#[macro_export]
-#[doc(hidden)]
-macro_rules! __border_color {
-	($side:ident, initial)   => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Initial)}};
-	($side:ident, inherit)   => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Inherit)}};
-	($side:ident, unset)     => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Unset)}};
-	($side:ident, revert)    => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Revert)}};
-	($side:ident, $rgb:expr) => {$crate::paste::item!{$crate::Property::[<Border $side Color>]($crate::ColorValue::Rgba($rgb.into()))}};
-}
-
-#[macro_export] macro_rules! border_left_color {($($tt:tt)+)   => {$crate::__border_color!(Left, $($tt)+)}}
-#[macro_export] macro_rules! border_right_color {($($tt:tt)+)  => {$crate::__border_color!(Right, $($tt)+)}}
-#[macro_export] macro_rules! border_top_color {($($tt:tt)+)    => {$crate::__border_color!(Top, $($tt)+)}}
-#[macro_export] macro_rules! border_bottom_color {($($tt:tt)+) => {$crate::__border_color!(Bottom, $($tt)+)}}
+css_macros::easy_color! {border_left_color}
+css_macros::easy_color! {border_right_color}
+css_macros::easy_color! {border_top_color}
+css_macros::easy_color! {border_bottom_color}
 #[macro_export] macro_rules! border_color {($($tt:tt)+) => {
 	vec![
 		$crate::border_left_color!($($tt)+),
