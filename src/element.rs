@@ -89,7 +89,7 @@ pub trait Element {
 
 	fn remove_style(&self) { self.element().remove_style(); }
 
-	fn add_class<'a>(self, style: impl Into<Cow<'a, css::AtRules>>) -> Self
+	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>)
 	where
 		Self: Sized + 'static,
 	{
@@ -102,7 +102,6 @@ pub trait Element {
 
 			let existing_class = element.get_attribute(web_str::class()).unwrap_or_else(Self::type_class_string);
 			element.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).expect("can't set attribute");
-			self
 		})
 	}
 }
