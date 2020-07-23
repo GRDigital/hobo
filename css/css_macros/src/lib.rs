@@ -205,11 +205,13 @@ pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let res = quote!(
 		#[macro_export]
 		macro_rules! #property_snek {
-			(initial)    => {$crate::Property::#property_camel($crate::ColorValue::Initial)};
-			(inherit)    => {$crate::Property::#property_camel($crate::ColorValue::Inherit)};
-			(unset)      => {$crate::Property::#property_camel($crate::ColorValue::Unset)};
-			(revert)     => {$crate::Property::#property_camel($crate::ColorValue::Revert)};
-			($rgba:expr) => {$crate::Property::#property_camel($crate::ColorValue::Rgba($rgba.into()))};
+			(initial)       => {$crate::Property::#property_camel($crate::ColorValue::Initial)};
+			(inherit)       => {$crate::Property::#property_camel($crate::ColorValue::Inherit)};
+			(unset)         => {$crate::Property::#property_camel($crate::ColorValue::Unset)};
+			(revert)        => {$crate::Property::#property_camel($crate::ColorValue::Revert)};
+			(gray $c:expr)  => {$crate::Property::#property_camel($crate::ColorValue::Rgba($crate::Color { r: $c, g: $c, b: $c, a: 0xFF }))};
+			(rgb $rgb:expr) => {$crate::Property::#property_camel($crate::ColorValue::Rgba(($rgb << 8 | 0xFF).into()))};
+			($rgba:expr)    => {$crate::Property::#property_camel($crate::ColorValue::Rgba($rgba.into()))};
 		}
 	);
 
