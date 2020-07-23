@@ -15,6 +15,9 @@ pub use units::Unit;
 pub use hobo_css_macros as css_macros;
 pub use hobo_css_macros_decl as css_macros_decl;
 pub use color::Color;
+pub use units::F32;
+
+pub fn new_f32(x: f32) -> F32 { F32::new(x).unwrap() }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Rule(pub selector::Selector, pub Vec<Property>);
