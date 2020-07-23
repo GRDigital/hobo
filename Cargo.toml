@@ -1,6 +1,6 @@
 [package]
 name = "hobo"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2018"
 license = "MIT"
 repository = "https://github.com/grdigital/hobo"
@@ -9,9 +9,9 @@ authors = ["GR Digital <contact@grdigital.co.uk>"]
 readme = "README.md"
 
 [dependencies]
-css = { package = "hobo_css", version = "0.1" }
+css = { package = "hobo_css", version = "=0.1.2" }
 extend = "0.1"
-derive = { package = "hobo_derive", version = "0.1" }
+derive = { package = "hobo_derive", version = "=0.1.2" }
 paste = "0.1"
 roxmltree = "0.13"
 shrinkwraprs = "0.3"
