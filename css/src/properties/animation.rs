@@ -1,3 +1,5 @@
+use crate::prelude::*;
+
 css_macros::easy_enum! {animation-direction normal reverse alternate alternate-reverse}
 css_macros::easy_enum! {animation-fill-mode none forwards backwards both}
 css_macros::easy_enum! {animation-iteration-count [number]}

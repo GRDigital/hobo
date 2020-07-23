@@ -1,3 +1,5 @@
+use crate::prelude::*;
+
 css_macros::easy_enum! {position static absolute fixed relative sticky}
 css_macros::easy_enum! {z-index auto [number]}
 

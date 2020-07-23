@@ -11,6 +11,6 @@ pub use crate::{
 	state_slice::{State, StateSlice, Subscription, SubscriptionKey},
 	web_str, RawEventTarget as _,
 };
-pub use css::{self, AppendProperty};
+pub use crate::css::{self, AppendProperty};
 pub use wasm_bindgen::prelude::*;
 pub use web_sys;

@@ -1,3 +1,5 @@
+use crate::prelude::*;
+
 css_macros::easy_enum! {direction ltr rtl}
 css_macros::easy_enum! {unicode-bidi normal embed bidi-override isolate isolate-override plaintext}
 css_macros::easy_enum! {white-space normal nowrap pre pre-line pre-wrap}

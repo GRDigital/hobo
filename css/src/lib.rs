@@ -12,8 +12,8 @@ pub use paste;
 pub use properties::*;
 use std::{borrow::Cow, string::ToString};
 pub use units::Unit;
-pub use css_macros;
-pub use css_macros_decl;
+pub use hobo_css_macros as css_macros;
+pub use hobo_css_macros_decl as css_macros_decl;
 pub use color::Color;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]

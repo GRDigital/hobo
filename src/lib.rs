@@ -15,11 +15,11 @@ pub mod web_str;
 pub use basic_element::{BasicElement, RawElement};
 pub use container::*;
 pub use create::components as cmp;
-pub use css;
+pub use hobo_css as css;
 pub use element::Element;
 #[doc(inline)]
 pub use events::*;
-pub use derive::*;
+pub use hobo_derive::*;
 #[doc(hidden)]
 pub use paste;
 pub use replaceable::*;

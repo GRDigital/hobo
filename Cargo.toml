@@ -1,6 +1,6 @@
 [package]
 name = "hobo"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2018"
 license = "MIT"
 repository = "https://github.com/grdigital/hobo"
@@ -9,13 +9,13 @@ authors = ["GR Digital <contact@grdigital.co.uk>"]
 readme = "README.md"
 
 [dependencies]
-css = { package = "hobo_css", version = "=0.1.2" }
+hobo_css = "=0.1.3"
 extend = "0.1"
-derive = { package = "hobo_derive", version = "=0.1.2" }
+hobo_derive = "=0.1.3"
 paste = "0.1"
 roxmltree = "0.13"
 shrinkwraprs = "0.3"
-slotmap = { version = "0.4" }
+slotmap = "0.4"
 strum = { version = "0.18", features = ["derive"] }
 sugars = "1"
 wasm-bindgen = { version = "0.2", features = ["serde-serialize", "strict-macro", "enable-interning"] }
