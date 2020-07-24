@@ -133,7 +133,6 @@ pub enum SelectorComponent {
 	And,
 	ClassPlaceholder,
 	Any,
-	FontFace,
 	Attribute(String),
 }
 
@@ -152,7 +151,6 @@ impl ToString for SelectorComponent {
 			Self::And              => ",".to_owned(),
 			Self::ClassPlaceholder => ".&".to_owned(),
 			Self::Any              => "*".to_owned(),
-			Self::FontFace         => "@font-face".to_owned(),
 			Self::Attribute(x)     => format!("[{}]", x),
 		}
 	}
@@ -181,8 +179,6 @@ impl SelectorBuilder {
 	pub fn pseudo_class(self, x: PseudoClass)         -> Selector              { Selector(vec![SelectorComponent::PseudoClass(x)]) }
 	pub fn pseudo_element(self, x: PseudoElement)     -> Selector              { Selector(vec![SelectorComponent::PseudoElement(x)]) }
 	pub fn attribute(self, x: String)                 -> Selector              { Selector(vec![SelectorComponent::Attribute(x)]) }
-
-	pub fn font_face(self)                            -> Selector              { Selector(vec![SelectorComponent::FontFace]) }
 }
 
 #[rustfmt::skip]

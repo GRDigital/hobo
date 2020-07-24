@@ -2,8 +2,8 @@ use crate::prelude::*;
 
 // TODO: replace @font-face selector with regular rust struct
 
-#[derive(SmartDefault, strum::Display)]
-pub enum FontDisplay {
+#[derive(SmartDefault, strum::Display, Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub enum Display {
 	#[default]
 	#[strum(to_string = "auto")] Auto,
 	#[strum(to_string = "block")] Block,
@@ -12,8 +12,8 @@ pub enum FontDisplay {
 	#[strum(to_string = "optional")] Optional,
 }
 
-#[derive(SmartDefault)]
-pub enum FontStretch {
+#[derive(SmartDefault, Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub enum Stretch {
 	UltraCondensed,
 	ExtraCondensed,
 	Condensed,
@@ -24,10 +24,10 @@ pub enum FontStretch {
 	Expanded,
 	ExtraExpanded,
 	UltraExpanded,
-	Percentage(f32),
+	Percentage(F32),
 }
 
-impl std::fmt::Display for FontStretch {
+impl std::fmt::Display for Stretch {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			Self::UltraCondensed => write!(f, "ultra-condensed"),
@@ -44,17 +44,17 @@ impl std::fmt::Display for FontStretch {
 	}
 }
 
-#[derive(SmartDefault)]
-pub enum FontStyle {
+#[derive(SmartDefault,  Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub enum Style {
 	#[default]
 	Normal,
 	Italic,
 	Oblique,
-	ObliqueAngle(f32),
-	ObliqueAngleRange(f32, f32),
+	ObliqueAngle(F32),
+	ObliqueAngleRange(F32, F32),
 }
 
-impl std::fmt::Display for FontStyle {
+impl std::fmt::Display for Style {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			Self::Normal => write!(f, "normal"),
@@ -66,15 +66,15 @@ impl std::fmt::Display for FontStyle {
 	}
 }
 
-#[derive(SmartDefault)]
-pub enum FontWeight {
+#[derive(SmartDefault, Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub enum Weight {
 	#[default]
 	Normal,
 	Bold,
 	Number(u16),
 }
 
-impl std::fmt::Display for FontWeight {
+impl std::fmt::Display for Weight {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			Self::Normal => write!(f, "normal"),
@@ -85,7 +85,7 @@ impl std::fmt::Display for FontWeight {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]
-pub enum FontFormat {
+pub enum Format {
 	#[strum(to_string = "woff")] Woff,
 	#[strum(to_string = "woff2")] Woff2,
 	#[strum(to_string = "truetype")] TrueType,
@@ -94,29 +94,29 @@ pub enum FontFormat {
 	#[strum(to_string = "svg")] Svg,
 }
 
-#[derive(SmartDefault)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, SmartDefault)]
 pub struct FontFace {
-	font_family: String,
-	src: Vec<(String, Option<FontFormat>)>,
-	font_display: FontDisplay,
-	font_stretch: (FontStretch, FontStretch),
-	font_style: FontStyle,
-	font_weight: (FontWeight, FontWeight),
+	pub font_family: String,
+	pub src: Vec<(String, Option<Format>)>,
+	pub font_display: Display,
+	pub font_stretch: (Stretch, Option<Stretch>),
+	pub font_style: Style,
+	pub font_weight: (Weight, Option<Weight>),
 	// font_variant:
 	// font-feature-settings
 	// font-variation-settings:
 	// unicode_range: Vec<(u32, u32)>,
 }
 
-impl ToString for FontFace {
-	fn to_string(&self) -> String {
-		format!(r#"@font-face{{font-family:"{}";src:{};font-display:{};font-stretch:{} {};font-style:{};font-weight:{} {};}}"#,
+impl std::fmt::Display for FontFace {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, r#"@font-face{{font-family:"{}";src:{};font-display:{};font-stretch:{} {};font-style:{};font-weight:{} {};}}"#,
 			&self.font_family,
 			self.src.iter().map(|(src, fmt)| format!(r#"url("{}"){}"#, src, if let Some(fmt) = fmt { format!(r#" format("{}")"#, fmt) } else { "".to_string() })).collect::<Vec<_>>().join(","),
 			&self.font_display,
-			&self.font_stretch.0, &self.font_stretch.1,
+			&self.font_stretch.0, &if let Some(x) = self.font_stretch.1 { x } else { self.font_stretch.0 },
 			&self.font_style,
-			&self.font_weight.0, &self.font_weight.1,
+			&self.font_weight.0, &if let Some(x) = self.font_weight.1 { x } else { self.font_weight.0 },
 		)
 	}
 }
@@ -124,9 +124,9 @@ impl ToString for FontFace {
 #[test]
 fn font_face() {
 	FontFace {
-		src: vec![("https://fonts.gstatic.com/s/montserrat/v14/JTUSjIg1_i6t8kCHKm459Wlhyw.woff2".into(), Some(FontFormat::Woff2))],
+		src: vec![("https://fonts.gstatic.com/s/montserrat/v14/JTUSjIg1_i6t8kCHKm459Wlhyw.woff2".into(), Some(Format::Woff2))],
 		font_family: "Montserrat".into(),
-		font_weight: (FontWeight::Normal, FontWeight::Normal),
+		font_weight: (Weight::Normal, Weight::Normal),
 		..Default::default()
 	};
 }

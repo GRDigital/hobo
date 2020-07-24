@@ -286,9 +286,8 @@ impl Parse for Selector {
 					}
 				} else if input.parse::<Token![@]>().is_ok() {
 					// at-rules
-					if let Ok(at_name) = input.parse::<HyphenatedName>() {
-						if at_name.0 == "font-face" { quote! { .font_face() } }
-						else { abort!(input.parse::<proc_macro2::TokenTree>().unwrap(), "unknown at-rule") }
+					if let Ok(_) = input.parse::<HyphenatedName>() {
+						abort!(input.parse::<proc_macro2::TokenTree>().unwrap(), "unknown at-rule")
 					} else {
 						abort!(input.parse::<proc_macro2::TokenTree>().unwrap(), "unknown token for an at-rule")
 					}

@@ -5,7 +5,9 @@ pub mod prelude;
 #[macro_use] pub mod units;
 #[macro_use] pub mod selector;
 pub mod color;
-// pub mod font_face;
+pub mod font_face;
+pub mod media;
+pub mod append_property;
 
 #[doc(hidden)]
 pub use paste;
@@ -16,13 +18,31 @@ pub use hobo_css_macros as css_macros;
 pub use hobo_css_macros_decl as css_macros_decl;
 pub use color::Color;
 pub use units::F32;
+pub use append_property::AppendProperty;
 
 pub fn new_f32(x: f32) -> F32 { F32::new(x).unwrap() }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub struct Rule(pub selector::Selector, pub Vec<Property>);
+pub enum Rule {
+	Style(StyleRule),
+	// Media(MediaRule),
+	// Keyframes,
+	FontFace(font_face::FontFace),
+}
 
-impl ToString for Rule {
+impl std::fmt::Display for Rule {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Self::Style(x) => write!(f, "{}", x.to_string()),
+			Self::FontFace(x) => x.fmt(f),
+		}
+	}
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub struct StyleRule(pub selector::Selector, pub Vec<Property>);
+
+impl ToString for StyleRule {
 	fn to_string(&self) -> String { format!("{}{{{}}}", self.0.to_string(), self.1.iter().map(ToString::to_string).collect::<String>()) }
 }
 
@@ -49,47 +69,6 @@ impl<'a> From<Style> for Cow<'a, Style> {
 	}
 }
 
-impl<'a> From<&'a Style> for Cow<'a, AtRules> {
-	fn from(x: &Style) -> Cow<'a, AtRules> {
-		Cow::Owned(AtRules(vec![AtRule { style: x.clone(), media: None }]))
-	}
-}
-
-impl<'a> From<Style> for Cow<'a, AtRules> {
-	fn from(x: Style) -> Cow<'a, AtRules> {
-		Cow::Owned(AtRules(vec![AtRule { style: x, media: None }]))
-	}
-}
-
-#[doc(hidden)]
-pub trait AppendProperty {
-	fn append_property(self, decls: &mut Vec<Property>);
-}
-
-impl AppendProperty for () {
-	fn append_property(self, _: &mut Vec<Property>) {}
-}
-
-impl AppendProperty for Vec<Property> {
-	fn append_property(mut self, decls: &mut Vec<Property>) { decls.append(&mut self); }
-}
-
-impl AppendProperty for Property {
-	fn append_property(self, decls: &mut Vec<Property>) { decls.push(self); }
-}
-
-impl AppendProperty for String {
-	fn append_property(self, decls: &mut Vec<Property>) { decls.push(Property::Raw(self)); }
-}
-
-impl AppendProperty for &'static str {
-	fn append_property(self, decls: &mut Vec<Property>) { decls.push(Property::Raw(self.into())); }
-}
-
-impl<F: FnOnce(&mut Vec<Property>)> AppendProperty for F {
-	fn append_property(self, decls: &mut Vec<Property>) { self(decls); }
-}
-
 #[macro_export]
 macro_rules! properties {
 	($($e:expr),*$(,)?) => {{
@@ -103,89 +82,30 @@ macro_rules! properties {
 macro_rules! class {
 	($($rules:tt)*) => {
 		$crate::Style(vec![
-			$crate::Rule(
+			$crate::Rule::Style($crate::StyleRule(
 				$crate::selector::SelectorBuilder.class_placeholder(),
 				$crate::properties!($($rules)*),
-			),
+			)),
 		])
 	};
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub struct AtRule {
-	pub media: Option<Media>,
-	pub style: Style,
-}
-
-impl ToString for AtRule {
-	fn to_string(&self) -> String {
-		if let Some(media) = self.media.as_ref() {
-			format!("{}{{{}}}", media.to_string(), self.style.to_string())
-		} else {
-			self.style.to_string()
-		}
-	}
-}
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub struct AtRules(pub Vec<AtRule>);
-
-impl ToString for AtRules {
-	fn to_string(&self) -> String {
-		self.0.iter().map(ToString::to_string).collect::<String>()
-	}
-}
-
-impl<'a> From<AtRules> for Cow<'a, AtRules> {
-	fn from(x: AtRules) -> Cow<'a, AtRules> {
-		Cow::Owned(x)
-	}
-}
-
-impl<'a> From<&'a AtRules> for Cow<'a, AtRules> {
-	fn from(x: &'a AtRules) -> Cow<'a, AtRules> {
-		Cow::Borrowed(x)
-	}
-}
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub enum Media {
-	MinWidth(Unit),
-	MaxWidth(Unit),
-	MinAspectRatio(u32, u32),
-	MaxAspectRatio(u32, u32),
-}
-
-impl ToString for Media {
-	fn to_string(&self) -> String {
-		match self {
-			Self::MinWidth(unit) => format!("@media(min-width:{})", unit.to_string()),
-			Self::MaxWidth(unit) => format!("@media(max-width:{})", unit.to_string()),
-			Self::MinAspectRatio(width, height) => format!("@media(min-aspect-ratio:{}/{})", width, height),
-			Self::MaxAspectRatio(width, height) => format!("@media(max-aspect-ratio:{}/{})", width, height),
-		}
-	}
-}
-
-// TODO: kind of hacky
-// #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-// pub struct MediaMaxWidth(pub Unit);
-
-// impl ToString for MediaMaxWidth {
-//     fn to_string(&self) -> String {
-//         format!("@media (max-width:{})", self.0.to_string())
-//     }
-// }
-
-// TODO: procmacroify
+// TODO: procmacroify?
 #[macro_export]
 macro_rules! rule {
+	(@font-face { $($prop:ident : $value:expr),*$(,)? }) => {
+		$crate::Rule::FontFace($crate::font_face::FontFace {
+			$($prop: $value),*,
+			..$crate::font_face::FontFace::default()
+		})
+	};
+
 	// finished
 	(($($selector:tt)+) { $($rules:tt)* }) => {
-		$crate::Rule(
+		$crate::Rule::Style($crate::StyleRule(
 			$crate::css_macros_decl::selector!($($selector)+),
 			$crate::properties!($($rules)*),
-		)
+		))
 	};
 
 	// middle

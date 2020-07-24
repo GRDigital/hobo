@@ -17,7 +17,7 @@ pub trait Element {
 		std::any::TypeId::of::<Self>().type_class_string("t")
 	}
 
-	fn class<'a>(self, style: impl Into<Cow<'a, css::AtRules>>) -> Self
+	fn class<'a>(self, style: impl Into<Cow<'a, css::Style>>) -> Self
 	where
 		Self: Sized + 'static,
 	{
@@ -62,7 +62,7 @@ pub trait Element {
 		self.set_attr(key, "")
 	}
 
-	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>) -> &Self
+	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) -> &Self
 	where
 		Self: Sized + 'static,
 	{
@@ -89,7 +89,7 @@ pub trait Element {
 
 	fn remove_style(&self) { self.element().remove_style(); }
 
-	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>)
+	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>)
 	where
 		Self: Sized + 'static,
 	{
@@ -103,6 +103,14 @@ pub trait Element {
 			let existing_class = element.get_attribute(web_str::class()).unwrap_or_else(Self::type_class_string);
 			element.set_attribute(web_str::class(), &format!("{} {}", existing_class, element_class)).expect("can't set attribute");
 		})
+	}
+
+	fn with_add_class<'a>(self, style: impl Into<Cow<'a, css::Style>>) -> Self
+	where
+		Self: Sized + 'static,
+	{
+		self.add_class(style);
+		self
 	}
 }
 
@@ -135,14 +143,14 @@ impl<T: Hash> T {
 #[doc(hidden)]
 #[extend::ext(pub, name = RawSetClass)]
 impl web_sys::Element {
-	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>) {
+	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) {
 		CONTEXT.with(move |ctx| {
 			let element_class = ctx.style_storage.fetch(&self, style);
 			self.set_attribute(web_str::class(), &element_class).expect("can't set attribute");
 		})
 	}
 
-	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::AtRules>>) {
+	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) {
 		CONTEXT.with(move |ctx| {
 			let element_class = ctx.style_storage.fetch(&self, style);
 			let existing_class = self.get_attribute(web_str::class()).unwrap_or_else(String::new);
