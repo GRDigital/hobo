@@ -26,8 +26,7 @@ impl Counter {
 				css::width!(128 px),
 				css::height!(128 px),
 				// #AA0000FF or #AA0000 of #A00 in css
-				// hobo requires full rgba though
-				css::background_color!(0xAA_00_00_FF),
+				css::background_color!(rgb 0xAA_00_00),
 			))
 			.child(cmp::button()
 				.text("PLUS")

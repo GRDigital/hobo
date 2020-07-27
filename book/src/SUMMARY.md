@@ -9,6 +9,7 @@
 		- [Selector](basic-concepts/styling/selector.md)
 		- [Property](basic-concepts/styling/property.md)
 		- [@-rules](basic-concepts/styling/at-rules.md)
+		- [Colors](basic-concepts/styling/colors.md)
 - [Managing state with e!()](state.md)
 	- [Raw element access](state/raw_element.md)
 	- [`Rc\<RefCell\<T>>`](state/rc_refcell.md)
