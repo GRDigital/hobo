@@ -1,0 +1,92 @@
+use crate::prelude::*;
+use crate::HyphenatedName;
+
+pub struct Selector(Vec<TokenStream>);
+
+// TODO: I could factor out the literal quoted code if I return a Vec of some enum rather than just TokenStream
+// and then each enum variant can have their own arguments etc
+// in this way, parsing the selector and what code it outputs would be more cleanly seaprated
+impl Parse for Selector {
+	fn parse(input: ParseStream) -> Result<Self> {
+		let crate_name = crate::css_crate_name();
+		let mut selector = Vec::new();
+
+		while !input.is_empty() {
+			let element = {
+				if input.parse::<Token![+]>().is_ok() { quote! { .adjacent() } }
+				else if input.parse::<Token![>>]>().is_ok() { quote! { .descendant() } }
+				else if input.parse::<Token![>]>().is_ok() { quote! { .child() } }
+				else if input.parse::<Token![,]>().is_ok() { quote! { .and() } }
+				else if input.parse::<Token![*]>().is_ok() { quote! { .any() } }
+				// html/svg element like div/span/a/p/img
+				else if let Ok(element) = input.parse::<syn::Ident>() { quote! { .element(#crate_name::selector::Element::#element) } }
+				else if input.parse::<Token![.]>().is_ok() {
+					if input.peek(syn::token::Bracket) {
+						// some element type
+						let content = { let content; syn::bracketed!(content in input); content.parse::<syn::Type>()? };
+						quote! { .class(<#content>::type_class_string()) }
+					} else if input.peek(syn::token::Paren) {
+						// class expr
+						let content = { let content; syn::parenthesized!(content in input); content.parse::<syn::Expr>()? };
+						quote! { .class(#content.into()) }
+					} else if input.parse::<Token![&]>().is_ok() {
+						quote! { .class_placeholder() }
+					} else {
+						abort!(input.parse::<TokenTree>().unwrap(), "unknown token for a class")
+					}
+				} else if input.peek(syn::token::Bracket) {
+					// literal attribute
+					let content = { let content; syn::bracketed!(content in input); content.parse::<syn::Ident>()? };
+					let content_str = content.to_string();
+					quote! { .attribute(#content_str.into()) }
+				} else if input.parse::<Token![#]>().is_ok() {
+					// id expr
+					let content = { let content; syn::parenthesized!(content in input); content.parse::<syn::Expr>()? };
+					quote! { .id(#content.into()) }
+				} else if input.parse::<Token![::]>().is_ok() {
+					// pseudo element stuff
+					let pseudo_element = input.parse::<syn::Ident>()?;
+					quote! { .pseudo_element(#crate_name::selector::PseudoElement::#pseudo_element) }
+				} else if input.parse::<Token![:]>().is_ok() {
+					// pseudo class stuff
+					syn::custom_keyword!(not);
+
+					if input.peek(syn::token::Bracket) {
+						let content = { let content; syn::bracketed!(content in input); content.parse::<syn::Expr>()? };
+						quote! { .pseudo_class(#crate_name::selector::PseudoClass::raw(#content.into())) }
+					} else if input.parse::<not>().is_ok() {
+						let content = { let content; syn::parenthesized!(content in input); content.parse::<Selector>()? };
+						quote! { .pseudo_class(#crate_name::selector::PseudoClass::not(#crate_name::selector::SelectorBuilder #content)) }
+					} else if let Ok(pseudo_class) = input.parse::<syn::Ident>() {
+						if input.peek(syn::token::Paren) {
+							let content = { let content; syn::parenthesized!(content in input); content.parse::<TokenStream>()? };
+							quote! { .pseudo_class(#crate_name::selector::PseudoClass::#pseudo_class(#content)) }
+						} else {
+							quote! { .pseudo_class(#crate_name::selector::PseudoClass::#pseudo_class) }
+						}
+					} else {
+						abort!(input.parse::<TokenTree>().unwrap(), "unknown token for a pseudo_class")
+					}
+				} else if input.parse::<Token![@]>().is_ok() {
+					// at-rules
+					if let Ok(_) = input.parse::<HyphenatedName>() {
+						abort!(input.parse::<TokenTree>().unwrap(), "unknown at-rule")
+					} else {
+						abort!(input.parse::<TokenTree>().unwrap(), "unknown token for an at-rule")
+					}
+				} else {
+					abort!(input.parse::<TokenTree>().unwrap(), "unknown token")
+				}
+			};
+			selector.push(element);
+		}
+
+		Ok(Self(selector))
+	}
+}
+
+impl quote::ToTokens for Selector {
+	fn to_tokens(&self, tokens: &mut TokenStream) {
+		self.0.iter().for_each(|x| x.to_tokens(tokens));
+	}
+}
