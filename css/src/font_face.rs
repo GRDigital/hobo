@@ -108,6 +108,7 @@ pub struct FontFace {
 	// unicode_range: Vec<(u32, u32)>,
 }
 
+// TODO: fix to use regular iteration, remove format!
 impl std::fmt::Display for FontFace {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		write!(f, r#"@font-face{{font-family:"{}";src:{};font-display:{};font-stretch:{} {};font-style:{};font-weight:{} {};}}"#,

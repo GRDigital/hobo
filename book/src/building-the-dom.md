@@ -49,6 +49,10 @@ impl Input {
 
 `.child()` takes a component by value, while `.child_ref()` by reference. Taking a component by value ties that component's lifespan to the lifespan of its container, in other words when the container will be dropped - the child will as well. However, sometimes you need to mount a component first but later capture it in an event handler, expose it to parent or replace it later. In those cases, ownership of the component must be passed elsewhere.
 
+### `.with_children()`/`.with_children_refs()`
+
+Complimentary to `.child()`/`.child_ref()` but can consume an `impl IntoIterator`, convenient when taking a `Vec<T>` as an argument in list-like component constructors.
+
 ### Why is `.class()` called after `Self { element, input }` and not while `element` is being constructed?
 
 Class assignment in `hobo` is double duty - apart from applying the style, it also assigns class that's generated from the component's type so it can later be selected with a `.[T]` selector. If class where assigned at the `element`'s construction site - it would get the class of type for `cmp::Div` (alias for `hobo::BasicElement<web_sys::HtmlDivElement>`) rather than `Input`.
