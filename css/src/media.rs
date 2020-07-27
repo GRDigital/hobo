@@ -48,19 +48,12 @@ struct MediaQuery {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-struct MediaRule(Vec<MediaQuery>, Vec<crate::Rule>);
-
-// macro_rules! media_query {
-//     (! $media_type:ident && $() => {
-//     };
-// }
-
-// macro_rules! media_rule!(
+pub struct MediaSelector(Vec<MediaQuery>);
 
 #[test]
 fn woo() {
 	assert_eq!(
-		media_query!(!All && Orientation(Portrait) && !AspectRatio(4, 3)),
+		css_macros_decl::media_query!(!All && Orientation(Portrait) && !AspectRatio(4, 3)),
 		MediaQuery {
 			media: Nottable { not: true, data: MediaType::All },
 			features: vec![
@@ -71,20 +64,36 @@ fn woo() {
 	);
 
 	assert_eq!(
-		media_rule!(
+		css_macros_decl::media_selector!(
 			!All && Orientation(Portrait) && !AspectRatio(4, 3),
-			Print && Color(4) && !Width(css::unit!(200 px))
-			{
-				css::width!(200 px),
+			Print && Color(4) && !Width(crate::Unit::Px(crate::new_f32(200.)))
+		),
+		MediaSelector(
+			vec![
+				css_macros_decl::media_query!(!All && Orientation(Portrait) && !AspectRatio(4, 3)),
+				css_macros_decl::media_query!(Print && Color(4) && !Width(crate::Unit::Px(crate::new_f32(200.)))),
+			],
+		),
+	);
+
+	assert_eq!(
+		crate::style!(
+			@media !All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::new_f32(200.))) {
+				html {
+					background_color!(rgb 0xFF_00_00)
+				}
 			}
 		),
-		MediaRule(
+		crate::Style(
 			vec![
-				media_query!(!All && Orientation(Portrait) && !AspectRatio(4, 3)),
-				media_query!(Print && Color(4) && !Width(css::unit!(200 px))),
-			],
-			vec![
-				css::width!(200 px),
+				crate::Rule::Media(
+					css_macros_decl::media_selector!(!All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::new_f32(200.)))),
+					crate::style!(
+						html {
+							background_color!(rgb 0xFF_00_00)
+						}
+					),
+				),
 			],
 		),
 	);

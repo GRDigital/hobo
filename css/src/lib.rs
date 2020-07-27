@@ -25,7 +25,7 @@ pub fn new_f32(x: f32) -> F32 { F32::new(x).unwrap() }
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Rule {
 	Style(StyleRule),
-	// Media(MediaRule),
+	Media(media::MediaSelector, Style),
 	// Keyframes,
 	FontFace(font_face::FontFace),
 }
@@ -34,6 +34,7 @@ impl std::fmt::Display for Rule {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			Self::Style(x) => write!(f, "{}", x.to_string()),
+			Self::Media(selector, style) => todo!(),
 			Self::FontFace(x) => x.fmt(f),
 		}
 	}
@@ -98,6 +99,14 @@ macro_rules! rule {
 			$($prop: $value),*,
 			..$crate::font_face::FontFace::default()
 		})
+	};
+
+	// finished @media
+	((@media $($selector:tt)+) { $($style:tt)* }) => {
+		$crate::Rule::Media(
+			$crate::css_macros_decl::media_selector!($($selector)+),
+			$crate::style!($($style)*),
+		)
 	};
 
 	// finished

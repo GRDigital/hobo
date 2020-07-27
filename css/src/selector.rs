@@ -237,7 +237,7 @@ impl ToString for Selector {
 /// ```
 #[test]
 fn test_new_selector() {
-	css_macros_decl::selector!(
+	crate::css_macros_decl::selector!(
 		.& >> div:nth_child(2, 1),
 		.& >> *,
 		div + * >> span > .&,

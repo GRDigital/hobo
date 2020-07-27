@@ -126,7 +126,7 @@ fn font_face() {
 	FontFace {
 		src: vec![("https://fonts.gstatic.com/s/montserrat/v14/JTUSjIg1_i6t8kCHKm459Wlhyw.woff2".into(), Some(Format::Woff2))],
 		font_family: "Montserrat".into(),
-		font_weight: (Weight::Normal, Weight::Normal),
+		font_weight: (Weight::Normal, Some(Weight::Normal)),
 		..Default::default()
 	};
 }
