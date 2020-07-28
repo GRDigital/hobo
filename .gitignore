@@ -1,5 +1,9 @@
 /target/
-/css/target/
-/css/css_macros/target/
-/css/css_macros_decl/target/
 /derive/target/
+/derive/Cargo.lock
+/css/target/
+/css/Cargo.lock
+/css/css_macros/target/
+/css/css_macros/Cargo.lock
+/css/css_macros_decl/target/
+/css/css_macros_decl/Cargo.lock
