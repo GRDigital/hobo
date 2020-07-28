@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct Nottable {
 	not: bool,
 	stream: TokenStream,
@@ -24,7 +24,6 @@ impl Parse for Nottable {
 	}
 }
 
-#[derive(Debug)]
 pub struct Query(Punctuated<Nottable, Token![&&]>);
 impl Parse for Query {
 	fn parse(input: ParseStream) -> Result<Self> {
