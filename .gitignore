@@ -3,7 +3,7 @@
 /derive/Cargo.lock
 /css/target/
 /css/Cargo.lock
-/css/css_macros/target/
-/css/css_macros/Cargo.lock
-/css/css_macros_decl/target/
-/css/css_macros_decl/Cargo.lock
+/css/macros/target/
+/css/macros/Cargo.lock
+/css/macros_decl/target/
+/css/macros_decl/Cargo.lock
