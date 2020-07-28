@@ -7,7 +7,6 @@ use std::time::Duration;
 
 fn main() {
 	assert!(cmd!(cargo publish).current_dir("derive").status().unwrap().success());
-	sleep(Duration::from_secs(60));
 	assert!(cmd!(cargo publish).current_dir("css/css_macros").status().unwrap().success());
 	sleep(Duration::from_secs(60));
 	assert!(cmd!(cargo publish).current_dir("css/css_macros_decl").status().unwrap().success());
