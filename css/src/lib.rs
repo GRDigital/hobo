@@ -12,7 +12,7 @@ pub mod append_property;
 #[doc(hidden)]
 pub use paste;
 pub use properties::*;
-use std::{borrow::Cow, string::ToString};
+use std::borrow::Cow;
 pub use units::Unit;
 pub use hobo_css_macros as css_macros;
 pub use hobo_css_macros_decl as css_macros_decl;
@@ -33,8 +33,8 @@ pub enum Rule {
 impl std::fmt::Display for Rule {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Style(x) => write!(f, "{}", x.to_string()),
-			Self::Media(selector, style) => todo!(),
+			Self::Style(x) => x.fmt(f),
+			Self::Media(selector, style) => write!(f, "@media {}{{{}}}", selector, style),
 			Self::FontFace(x) => x.fmt(f),
 		}
 	}
@@ -43,15 +43,27 @@ impl std::fmt::Display for Rule {
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct StyleRule(pub selector::Selector, pub Vec<Property>);
 
-impl ToString for StyleRule {
-	fn to_string(&self) -> String { format!("{}{{{}}}", self.0.to_string(), self.1.iter().map(ToString::to_string).collect::<String>()) }
+impl std::fmt::Display for StyleRule {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		self.0.fmt(f)?;
+		"{".fmt(f)?;
+		for property in &self.1 {
+			property.fmt(f)?;
+		}
+		"}".fmt(f)
+	}
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Style(pub Vec<Rule>);
 
-impl ToString for Style {
-	fn to_string(&self) -> String { self.0.iter().map(ToString::to_string).collect::<String>() }
+impl std::fmt::Display for Style {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		for rule in &self.0 {
+			rule.fmt(f)?;
+		}
+		Ok(())
+	}
 }
 
 impl Style {

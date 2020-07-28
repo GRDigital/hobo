@@ -25,7 +25,6 @@ pub use grid::*;
 pub use margin::*;
 pub use padding::*;
 pub use position::*;
-use std::string::ToString;
 pub use svg::*;
 pub use text::*;
 pub use transform::*;
