@@ -90,7 +90,7 @@ dependencies = [
 
 [[package]]
 name = "hobo"
-version = "0.1.4"
+version = "0.1.6"
 dependencies = [
  "console_error_panic_hook",
  "console_log",
@@ -112,7 +112,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_css"
-version = "0.1.4"
+version = "0.1.6"
 dependencies = [
  "hobo_css_macros",
  "hobo_css_macros_decl",
@@ -124,7 +124,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_css_macros"
-version = "0.1.4"
+version = "0.1.6"
 dependencies = [
  "heck",
  "itertools 0.9.0",
@@ -139,7 +139,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_css_macros_decl"
-version = "0.1.4"
+version = "0.1.6"
 dependencies = [
  "hobo_css_macros",
  "proc-macro-hack",
@@ -147,7 +147,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_derive"
-version = "0.1.4"
+version = "0.1.6"
 dependencies = [
  "derive_utils",
  "proc-macro-error",
