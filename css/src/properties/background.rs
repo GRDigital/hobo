@@ -18,15 +18,24 @@ pub enum BackgroundImage {
 	Some(Vec<crate::Image>),
 }
 
-impl ToString for BackgroundImage {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for BackgroundImage {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None    => "background-image:none;".to_owned(),
-			Self::Initial => "background-image:initial;".to_owned(),
-			Self::Inherit => "background-image:inherit;".to_owned(),
-			Self::Unset   => "background-image:unset;".to_owned(),
-			Self::Revert  => "background-image:revert;".to_owned(),
-			Self::Some(x) => format!("background-image:{};", x.iter().map(std::string::ToString::to_string).collect::<Vec<_>>().join(",")),
+			Self::None    => "background-image:none;".fmt(f),
+			Self::Initial => "background-image:initial;".fmt(f),
+			Self::Inherit => "background-image:inherit;".fmt(f),
+			Self::Unset   => "background-image:unset;".fmt(f),
+			Self::Revert  => "background-image:revert;".fmt(f),
+			Self::Some(images) => {
+				"background-image:".fmt(f)?;
+				if let Some((first, rest)) = images.split_first() {
+					write!(f, "{}", first)?;
+					for image in rest {
+						write!(f, ",{}", image)?;
+					}
+				}
+				";".fmt(f)
+			},
 		}
 	}
 }

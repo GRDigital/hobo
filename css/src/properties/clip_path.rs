@@ -17,11 +17,11 @@ pub enum ClipPathShape {
 	GeometryBox(GeometryBox),
 }
 
-impl ToString for ClipPathShape {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for ClipPathShape {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::BasicShape(x) => x.to_string(),
-			Self::GeometryBox(x) => x.to_string(),
+			Self::BasicShape(x) => x.fmt(f),
+			Self::GeometryBox(x) => x.fmt(f),
 		}
 	}
 }
@@ -37,16 +37,31 @@ pub enum ClipPath {
 	Shape(Vec<ClipPathShape>),
 }
 
-impl ToString for ClipPath {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for ClipPath {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None => "-webkit-clip-path:none;clip-path:none;".to_owned(),
-			Self::Initial => "-webkit-clip-path:initial;clip-path:initial;".to_owned(),
-			Self::Inherit => "-webkit-clip-path:inherit;clip-path:inherit;".to_owned(),
-			Self::Unset => "-webkit-clip-path:unset;clip-path:unset;".to_owned(),
-			Self::Revert => "-webkit-clip-path:revert;clip-path:revert;".to_owned(),
-			Self::Url(x) => format!(r#"-webkit-clip-path:url("{0}");clip-path:url("{0}");"#, x),
-			Self::Shape(x) => format!("-webkit-clip-path:{0};clip-path:{0};", x.iter().map(std::string::ToString::to_string).collect::<Vec<_>>().join(" ")),
+			Self::None => "-webkit-clip-path:none;clip-path:none;".fmt(f),
+			Self::Initial => "-webkit-clip-path:initial;clip-path:initial;".fmt(f),
+			Self::Inherit => "-webkit-clip-path:inherit;clip-path:inherit;".fmt(f),
+			Self::Unset => "-webkit-clip-path:unset;clip-path:unset;".fmt(f),
+			Self::Revert => "-webkit-clip-path:revert;clip-path:revert;".fmt(f),
+			Self::Url(x) => write!(f, r#"-webkit-clip-path:url("{0}");clip-path:url("{0}");"#, x),
+			Self::Shape(shapes) => {
+				if let Some((first, rest)) = shapes.split_first() {
+					"-webkit-clip-path:".fmt(f)?;
+					first.fmt(f)?;
+					for shape in rest {
+						write!(f, " {}", shape)?;
+					}
+					";clip-path:".fmt(f)?;
+					first.fmt(f)?;
+					for shape in rest {
+						write!(f, " {}", shape)?;
+					}
+					";".fmt(f)?;
+				}
+				Ok(())
+			},
 		}
 	}
 }

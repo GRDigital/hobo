@@ -25,33 +25,33 @@ pub enum DimensionExtremity {
 }
 
 #[rustfmt::skip]
-impl ToString for Dimension {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for Dimension {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Zero       => "0".to_owned(),
-			Self::Auto       => "auto".to_owned(),
-			Self::Initial    => "initial".to_owned(),
-			Self::Inherit    => "inherit".to_owned(),
-			Self::Unset      => "unset;".to_owned(),
-			Self::Revert     => "revert;".to_owned(),
-			Self::Some(unit) => unit.to_string(),
+			Self::Zero       => "0".fmt(f),
+			Self::Auto       => "auto".fmt(f),
+			Self::Initial    => "initial".fmt(f),
+			Self::Inherit    => "inherit".fmt(f),
+			Self::Unset      => "unset".fmt(f),
+			Self::Revert     => "revert".fmt(f),
+			Self::Some(unit) => unit.fmt(f),
 		}
 	}
 }
 
 #[rustfmt::skip]
-impl ToString for DimensionExtremity {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for DimensionExtremity {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Zero       => "0".to_owned(),
-			Self::Initial    => "initial".to_owned(),
-			Self::Inherit    => "inherit".to_owned(),
-			Self::Unset      => "unset;".to_owned(),
-			Self::Revert     => "revert;".to_owned(),
-			Self::Some(unit) => unit.to_string(),
-			Self::None       => "none".to_owned(),
-			Self::MaxContent => "max-content".to_owned(),
-			Self::MinContent => "min-content".to_owned(),
+			Self::Zero       => "0".fmt(f),
+			Self::Initial    => "initial".fmt(f),
+			Self::Inherit    => "inherit".fmt(f),
+			Self::Unset      => "unset".fmt(f),
+			Self::Revert     => "revert".fmt(f),
+			Self::Some(unit) => unit.fmt(f),
+			Self::None       => "none".fmt(f),
+			Self::MaxContent => "max-content".fmt(f),
+			Self::MinContent => "min-content".fmt(f),
 		}
 	}
 }

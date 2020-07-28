@@ -33,26 +33,26 @@ pub enum PseudoClass {
 }
 
 #[rustfmt::skip]
-impl ToString for PseudoClass {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for PseudoClass {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::active               => ":active".to_owned(),
-			Self::first_child          => ":first-child".to_owned(),
-			Self::focus                => ":focus".to_owned(),
-			Self::hover                => ":hover".to_owned(),
-			Self::last_child           => ":last-child".to_owned(),
-			Self::checked              => ":checked".to_owned(),
-			Self::disabled             => ":disabled".to_owned(),
-			Self::enabled              => ":enabled".to_owned(),
-			Self::in_range             => ":in-range".to_owned(),
-			Self::invalid              => ":invalid".to_owned(),
-			Self::nth_child(n, offset) => format!(":nth-child({}n+{})", n, offset),
-			Self::nth_of_type(n)       => format!(":nth-of-type({})", n),
-			Self::not(selector)        => format!(":not({})", selector.to_string()),
-			Self::only_child           => ":only-child".to_owned(),
-			Self::read_only            => ":read-only".to_owned(),
-			Self::valid                => ":valid".to_owned(),
-			Self::raw(x)               => format!(":{}", x),
+			Self::active               => ":active".fmt(f),
+			Self::first_child          => ":first-child".fmt(f),
+			Self::focus                => ":focus".fmt(f),
+			Self::hover                => ":hover".fmt(f),
+			Self::last_child           => ":last-child".fmt(f),
+			Self::checked              => ":checked".fmt(f),
+			Self::disabled             => ":disabled".fmt(f),
+			Self::enabled              => ":enabled".fmt(f),
+			Self::in_range             => ":in-range".fmt(f),
+			Self::invalid              => ":invalid".fmt(f),
+			Self::nth_child(n, offset) => write!(f, ":nth-child({}n+{})", n, offset),
+			Self::nth_of_type(n)       => write!(f, ":nth-of-type({})", n),
+			Self::not(selector)        => write!(f, ":not({})", selector),
+			Self::only_child           => ":only-child".fmt(f),
+			Self::read_only            => ":read-only".fmt(f),
+			Self::valid                => ":valid".fmt(f),
+			Self::raw(x)               => write!(f, ":{}", x),
 		}
 	}
 }
@@ -137,21 +137,21 @@ pub enum SelectorComponent {
 }
 
 #[rustfmt::skip]
-impl ToString for SelectorComponent {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for SelectorComponent {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Element(x)       => x.to_string(),
-			Self::Class(x)         => format!(".{}", x),
-			Self::Id(x)            => format!("#{}", x),
-			Self::PseudoClass(x)   => x.to_string(),
-			Self::PseudoElement(x) => x.to_string(),
-			Self::Child            => ">".to_owned(),
-			Self::Descendant       => " ".to_owned(),
-			Self::Adjacent         => "+".to_owned(),
-			Self::And              => ",".to_owned(),
-			Self::ClassPlaceholder => ".&".to_owned(),
-			Self::Any              => "*".to_owned(),
-			Self::Attribute(x)     => format!("[{}]", x),
+			Self::Element(x)       => x.fmt(f),
+			Self::Class(x)         => write!(f, ".{}", x),
+			Self::Id(x)            => write!(f, "#{}", x),
+			Self::PseudoClass(x)   => x.fmt(f),
+			Self::PseudoElement(x) => x.fmt(f),
+			Self::Child            => ">".fmt(f),
+			Self::Descendant       => " ".fmt(f),
+			Self::Adjacent         => "+".fmt(f),
+			Self::And              => ",".fmt(f),
+			Self::ClassPlaceholder => ".&".fmt(f),
+			Self::Any              => "*".fmt(f),
+			Self::Attribute(x)     => write!(f, "[{}]", x),
 		}
 	}
 }
@@ -221,12 +221,12 @@ impl From<PseudoElementSelector> for Selector {
 	fn from(x: PseudoElementSelector) -> Self { Self(x.0) }
 }
 
-impl ToString for PseudoElementSelector {
-	fn to_string(&self) -> String { self.0.iter().map(ToString::to_string).collect::<String>() }
+impl std::fmt::Display for PseudoElementSelector {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { for x in &self.0 { x.fmt(f)? } Ok(()) }
 }
 
-impl ToString for Selector {
-	fn to_string(&self) -> String { self.0.iter().map(ToString::to_string).collect::<String>() }
+impl std::fmt::Display for Selector {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { for x in &self.0 { x.fmt(f)? } Ok(()) }
 }
 
 /// ```edition2018,compile_fail

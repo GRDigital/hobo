@@ -40,14 +40,14 @@ pub enum ColorValue {
 }
 
 #[rustfmt::skip]
-impl ToString for ColorValue {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for ColorValue {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Rgba(rgba) => format!("#{:02x}{:02x}{:02x}{:02x}", rgba.r, rgba.g, rgba.b, rgba.a),
-			Self::Initial    => "initial".to_owned(),
-			Self::Inherit    => "inherit".to_owned(),
-			Self::Unset      => "unset".to_owned(),
-			Self::Revert     => "revert".to_owned(),
+			Self::Rgba(x)    => x.fmt(f),
+			Self::Initial    => "initial".fmt(f),
+			Self::Inherit    => "inherit".fmt(f),
+			Self::Unset      => "unset".fmt(f),
+			Self::Revert     => "revert".fmt(f),
 		}
 	}
 }
@@ -63,15 +63,15 @@ pub enum UnitValue {
 }
 
 #[rustfmt::skip]
-impl ToString for UnitValue {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for UnitValue {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Zero    => "0".to_owned(),
-			Self::Unit(x) => x.to_string(),
-			Self::Initial => "initial".to_owned(),
-			Self::Inherit => "inherit".to_owned(),
-			Self::Unset   => "unset".to_owned(),
-			Self::Revert  => "revert".to_owned(),
+			Self::Zero    => "0".fmt(f),
+			Self::Unit(x) => x.fmt(f),
+			Self::Initial => "initial".fmt(f),
+			Self::Inherit => "inherit".fmt(f),
+			Self::Unset   => "unset".fmt(f),
+			Self::Revert  => "revert".fmt(f),
 		}
 	}
 }
@@ -93,12 +93,16 @@ pub struct RadialGradient {
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct LinearGradient {
 	pub angle: F32,
-	pub stop_list: Vec<((u8, u8, u8, u8), Unit)>,
+	pub stop_list: Vec<(crate::Color, Unit)>,
 }
 
-impl ToString for LinearGradient {
-	fn to_string(&self) -> String {
-		format!("{}deg,{}", self.angle, self.stop_list.iter().map(|(color, stop)| format!("#{:02x}{:02x}{:02x}{:02x} {}", color.0, color.1, color.2, color.3, stop.to_string())).collect::<Vec<_>>().join(","))
+impl std::fmt::Display for LinearGradient {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "{}deg", self.angle)?;
+		for (color, stop) in &self.stop_list {
+			write!(f, ",{} {}", color, stop)?;
+		}
+		Ok(())
 	}
 }
 
@@ -112,12 +116,12 @@ pub enum Image {
 	// conic ??
 }
 
-impl ToString for Image {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for Image {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Url(x) => format!(r#"url("{}")"#, x),
-			Self::LinearGradient(x) => format!("linear-gradient({})", x.to_string()),
-			Self::RepeatingLinearGradient(x) => format!("repeating-linear-gradient({})", x.to_string()),
+			Self::Url(x) => write!(f, r#"url("{}")"#, x),
+			Self::LinearGradient(x) => write!(f, "linear-gradient({})", x),
+			Self::RepeatingLinearGradient(x) => write!(f, "repeating-linear-gradient({})", x),
 		}
 	}
 }
@@ -128,10 +132,19 @@ pub enum BasicShape {
 	// etc
 }
 
-impl ToString for BasicShape {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for BasicShape {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Polygon(x) => format!("polygon({})", x.iter().map(|(x, y)| format!("{} {}", x.to_string(), y.to_string())).collect::<Vec<_>>().join(",")),
+			Self::Polygon(points) => {
+				"polygon(".fmt(f)?;
+				if let Some(((x, y), rest)) = points.split_first() {
+					write!(f, "{} {}", x, y)?;
+					for (x, y) in rest {
+						write!(f, ",{} {}", x, y)?;
+					}
+				}
+				")".fmt(f)
+			},
 		}
 	}
 }
@@ -150,12 +163,12 @@ macro_rules! generate_properties {
 			$($named_name($named_type)),*
 		}
 
-		impl ToString for Property {
-			fn to_string(&self) -> String {
+		impl std::fmt::Display for Property {
+			fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 				match self {
-					Self::Raw(x) => x.clone(),
-					$(Self::$named_name(x) => format!("{}:{};", $css_name, x.to_string()),)*
-					$(Self::$stutter_name(x) => x.to_string()),*
+					Self::Raw(x) => x.fmt(f),
+					$(Self::$named_name(x) => write!(f, "{}:{};", $css_name, x),)*
+					$(Self::$stutter_name(x) => x.fmt(f)),*
 				}
 			}
 		}
@@ -371,15 +384,15 @@ pub enum Appearance {
 }
 
 #[rustfmt::skip]
-impl ToString for Appearance {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for Appearance {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Initial => "appearance:initial;-webkit-appearance:initial;-moz-appearance:initial;".to_owned(),
-			Self::Inherit => "appearance:inherit;-webkit-appearance:inherit;-moz-appearance:inherit;".to_owned(),
-			Self::Unset   => "appearance:unset;-webkit-appearance:unset;-moz-appearance:unset;".to_owned(),
-			Self::Revert  => "appearance:revert;-webkit-appearance:revert;-moz-appearance:revert;".to_owned(),
-			Self::None    => "appearance:none;-webkit-appearance:none;-moz-appearance:none;".to_owned(),
-			Self::Auto    => "appearance:auto;-webkit-appearance:auto;-moz-appearance:auto;".to_owned(),
+			Self::Initial => "appearance:initial;-webkit-appearance:initial;-moz-appearance:initial;".fmt(f),
+			Self::Inherit => "appearance:inherit;-webkit-appearance:inherit;-moz-appearance:inherit;".fmt(f),
+			Self::Unset   => "appearance:unset;-webkit-appearance:unset;-moz-appearance:unset;".fmt(f),
+			Self::Revert  => "appearance:revert;-webkit-appearance:revert;-moz-appearance:revert;".fmt(f),
+			Self::None    => "appearance:none;-webkit-appearance:none;-moz-appearance:none;".fmt(f),
+			Self::Auto    => "appearance:auto;-webkit-appearance:auto;-moz-appearance:auto;".fmt(f),
 		}
 	}
 }

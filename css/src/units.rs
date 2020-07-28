@@ -18,19 +18,19 @@ pub enum Unit {
 }
 
 #[rustfmt::skip]
-impl ToString for Unit {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for Unit {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Zero       => "0".to_string(),
-			Self::Px(x)      => format!("{}px", x),
-			Self::Em(x)      => format!("{}em", x),
-			Self::Rem(x)     => format!("{}rem", x),
-			Self::Vw(x)      => format!("{}vw", x),
-			Self::Vh(x)      => format!("{}vh", x),
-			Self::Vmin(x)    => format!("{}vmin", x),
-			Self::Vmax(x)    => format!("{}vmax", x),
-			Self::Fr(x)      => format!("{}fr", x),
-			Self::Percent(x) => format!("{}%", x),
+			Self::Zero       => "0".fmt(f),
+			Self::Px(x)      => write!(f, "{}px", x),
+			Self::Em(x)      => write!(f, "{}em", x),
+			Self::Rem(x)     => write!(f, "{}rem", x),
+			Self::Vw(x)      => write!(f, "{}vw", x),
+			Self::Vh(x)      => write!(f, "{}vh", x),
+			Self::Vmin(x)    => write!(f, "{}vmin", x),
+			Self::Vmax(x)    => write!(f, "{}vmax", x),
+			Self::Fr(x)      => write!(f, "{}fr", x),
+			Self::Percent(x) => write!(f, "{}%", x),
 		}
 	}
 }

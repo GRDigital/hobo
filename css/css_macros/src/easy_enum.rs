@@ -96,31 +96,31 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		},
 	});
 
-	let to_string_lines = input.values.iter().map(|value| match value {
+	let display_lines = input.values.iter().map(|value| match value {
 		Value::EnumVariant(value) => {
 			let value_camel = proc_macro2::Ident::new(&value.0.to_camel_case(), Span::call_site());
 			let css_string = format!("{}:{};", input.property.0, value.0);
-			quote! {Self::#value_camel => #css_string.to_owned(),}
+			quote! {Self::#value_camel => write!(f, #css_string),}
 		},
 		Value::Unit => {
 			let css_format_string = format!("{}:{{}};", input.property.0);
 			let css_zero_string = format!("{}:0;", input.property.0);
 			quote! {
-				Self::Some(x) => format!(#css_format_string, x.to_string()),
-				Self::Zero => #css_zero_string.to_owned(),
+				Self::Some(x) => write!(f, #css_format_string, x),
+				Self::Zero => write!(f, #css_zero_string),
 			}
 		},
 		Value::String => {
 			let css_format_string = format!(r#"{}:"{{}}";"#, input.property.0);
-			quote! {Self::String(x) => format!(#css_format_string, x),}
+			quote! {Self::String(x) => write!(f, #css_format_string, x),}
 		},
 		Value::Raw => {
 			let css_format_string = format!("{}:{{}};", input.property.0);
-			quote! {Self::Raw(x) => format!(#css_format_string, x),}
+			quote! {Self::Raw(x) => write!(f, #css_format_string, x),}
 		},
 		Value::Number | Value::Float => {
 			let css_format_string = format!("{}:{{}};", input.property.0);
-			quote! {Self::Number(x) => format!(#css_format_string, x),}
+			quote! {Self::Number(x) => write!(f, #css_format_string, x),}
 		},
 	});
 
@@ -156,10 +156,10 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 			#(#enum_members)*
 		}
 
-		impl ToString for #property_camel {
-			fn to_string(&self) -> String {
+		impl ::std::fmt::Display for #property_camel {
+			fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
 				match self {
-					#(#to_string_lines)*
+					#(#display_lines)*
 				}
 			}
 		}

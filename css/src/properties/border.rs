@@ -20,15 +20,24 @@ pub enum BorderImageSource {
 	Some(Vec<crate::Image>),
 }
 
-impl ToString for BorderImageSource {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for BorderImageSource {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None    => "border-image-source:none;".to_owned(),
-			Self::Initial => "border-image-source:initial;".to_owned(),
-			Self::Inherit => "border-image-source:inherit;".to_owned(),
-			Self::Unset   => "border-image-source:unset;".to_owned(),
-			Self::Revert  => "border-image-source:revert;".to_owned(),
-			Self::Some(x) => format!("border-image-source:{};", x.iter().map(std::string::ToString::to_string).collect::<Vec<_>>().join(",")),
+			Self::None    => "border-image-source:none;".fmt(f),
+			Self::Initial => "border-image-source:initial;".fmt(f),
+			Self::Inherit => "border-image-source:inherit;".fmt(f),
+			Self::Unset   => "border-image-source:unset;".fmt(f),
+			Self::Revert  => "border-image-source:revert;".fmt(f),
+			Self::Some(images) => {
+				"border-image-source:".fmt(f)?;
+				if let Some((first, rest)) = images.split_first() {
+					write!(f, "{}", first)?;
+					for image in rest {
+						write!(f, ",{}", image)?;
+					}
+				}
+				";".fmt(f)
+			},
 		}
 	}
 }
@@ -62,16 +71,16 @@ pub enum BorderWidth {
 }
 
 #[rustfmt::skip]
-impl ToString for BorderWidth {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for BorderWidth {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Medium  => "medium".to_owned(),
-			Self::Thin    => "thin".to_owned(),
-			Self::Thick   => "thick".to_owned(),
-			Self::Zero    => "0".to_owned(),
-			Self::Some(x) => x.to_string(),
-			Self::Initial => "initial".to_owned(),
-			Self::Inherit => "inherit".to_owned(),
+			Self::Medium  => "medium".fmt(f),
+			Self::Thin    => "thin".fmt(f),
+			Self::Thick   => "thick".fmt(f),
+			Self::Zero    => "0".fmt(f),
+			Self::Some(x) => x.fmt(f),
+			Self::Initial => "initial".fmt(f),
+			Self::Inherit => "inherit".fmt(f),
 		}
 	}
 }
@@ -83,20 +92,13 @@ pub struct BoxShadowEffect {
 	pub offset_y: Unit,
 	pub blur_radius: Unit,
 	pub spread_radius: Unit,
-	pub color: (u8, u8, u8, u8),
+	pub color: crate::Color,
 }
 
-impl ToString for BoxShadowEffect {
-	fn to_string(&self) -> String {
-		format!(
-			"{}{} {} {} {} #{:02x}{:02x}{:02x}{:02x}",
-			if self.inset { "inset " } else { "" },
-			self.offset_x.to_string(),
-			self.offset_y.to_string(),
-			self.blur_radius.to_string(),
-			self.spread_radius.to_string(),
-			self.color.0, self.color.1, self.color.2, self.color.3,
-		)
+impl std::fmt::Display for BoxShadowEffect {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		if self.inset { "inset ".fmt(f)? }
+		write!(f, "{} {} {} {} {}", self.offset_x, self.offset_y, self.blur_radius, self.spread_radius, self.color)
 	}
 }
 
@@ -110,15 +112,24 @@ pub enum BoxShadow {
 	Some(Vec<BoxShadowEffect>),
 }
 
-impl ToString for BoxShadow {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for BoxShadow {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None    => "box-shadow:none;".to_owned(),
-			Self::Initial => "box-shadow:initial;".to_owned(),
-			Self::Inherit => "box-shadow:inherit;".to_owned(),
-			Self::Unset   => "box-shadow:unset;".to_owned(),
-			Self::Revert  => "box-shadow:revert;".to_owned(),
-			Self::Some(x) => format!("box-shadow:{};", x.iter().map(std::string::ToString::to_string).collect::<Vec<_>>().join(",")),
+			Self::None    => "box-shadow:none;".fmt(f),
+			Self::Initial => "box-shadow:initial;".fmt(f),
+			Self::Inherit => "box-shadow:inherit;".fmt(f),
+			Self::Unset   => "box-shadow:unset;".fmt(f),
+			Self::Revert  => "box-shadow:revert;".fmt(f),
+			Self::Some(effects) => {
+				"box-shadow:".fmt(f)?;
+				if let Some((first, rest)) = effects.split_first() {
+					write!(f, "{}", first)?;
+					for effect in rest {
+						write!(f, ",{}", effect)?;
+					}
+				}
+				";".fmt(f)
+			},
 		}
 	}
 }

@@ -12,13 +12,13 @@ pub enum TransformOrigin {
 }
 
 #[rustfmt::skip]
-impl ToString for TransformOrigin {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for TransformOrigin {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None              => "transform-origin:none;".to_owned(),
-			Self::Initial           => "transform-origin:initial;".to_owned(),
-			Self::Inherit           => "transform-origin:inherit;".to_owned(),
-			Self::Some(top, bottom) => format!("transform-origin:{} {};", top.to_string(), bottom.to_string()),
+			Self::None              => "transform-origin:none;".fmt(f),
+			Self::Initial           => "transform-origin:initial;".fmt(f),
+			Self::Inherit           => "transform-origin:inherit;".fmt(f),
+			Self::Some(top, bottom) => write!(f, "transform-origin:{} {};", top, bottom),
 		}
 	}
 }
@@ -33,13 +33,22 @@ pub enum Transform {
 }
 
 #[rustfmt::skip]
-impl ToString for Transform {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for Transform {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None       => "transform:none;".to_owned(),
-			Self::Initial    => "transform:initial;".to_owned(),
-			Self::Inherit    => "transform:inherit;".to_owned(),
-			Self::Some(fns)  => format!("transform:{};", fns.iter().map(ToString::to_string).collect::<Vec<_>>().join(" ")),
+			Self::None       => "transform:none;".fmt(f),
+			Self::Initial    => "transform:initial;".fmt(f),
+			Self::Inherit    => "transform:inherit;".fmt(f),
+			Self::Some(fns)  => {
+				"transform:".fmt(f)?;
+				if let Some((first, rest)) = fns.split_first() {
+					write!(f, "{}", first)?;
+					for func in rest {
+						write!(f, " {}", func)?;
+					}
+				}
+				";".fmt(f)
+			},
 		}
 	}
 }
@@ -63,24 +72,24 @@ pub enum TransformFunction {
 	Perspective(Unit),
 }
 
-impl ToString for TransformFunction {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for TransformFunction {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Matrix(a1, b1, a2, b2, a3, b3) => format!("matrix({}, {}, {}, {}, {}, {})", a1, b1, a2, b2, a3, b3),
-			Self::Matrix3d(a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3, a4, b4, c4, d4) => format!("matrix3d({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})", a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3, a4, b4, c4, d4),
-			Self::TranslateX(x) => format!("translateX({})", x.to_string()),
-			Self::TranslateY(x) => format!("translateY({})", x.to_string()),
-			Self::TranslateZ(x) => format!("translateZ({})", x.to_string()),
-			Self::ScaleX(x) => format!("scaleX({})", x),
-			Self::ScaleY(x) => format!("scaleY({})", x),
-			Self::ScaleZ(x) => format!("scaleZ({})", x),
-			Self::RotateX(x) => format!("rotateX({}deg)", x),
-			Self::RotateY(x) => format!("rotateY({}deg)", x),
-			Self::RotateZ(x) => format!("rotateZ({}deg)", x),
-			Self::SkewX(x) => format!("skewX({})", x),
-			Self::SkewY(x) => format!("skewY({})", x),
-			Self::SkewZ(x) => format!("skewZ({})", x),
-			Self::Perspective(x) => format!("perspective({})", x.to_string()),
+			Self::Matrix(a1, b1, a2, b2, a3, b3) => write!(f, "matrix({}, {}, {}, {}, {}, {})", a1, b1, a2, b2, a3, b3),
+			Self::Matrix3d(a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3, a4, b4, c4, d4) => write!(f, "matrix3d({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})", a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3, a4, b4, c4, d4),
+			Self::TranslateX(x) => write!(f, "translateX({})", x),
+			Self::TranslateY(x) => write!(f, "translateY({})", x),
+			Self::TranslateZ(x) => write!(f, "translateZ({})", x),
+			Self::ScaleX(x) => write!(f, "scaleX({})", x),
+			Self::ScaleY(x) => write!(f, "scaleY({})", x),
+			Self::ScaleZ(x) => write!(f, "scaleZ({})", x),
+			Self::RotateX(x) => write!(f, "rotateX({}deg)", x),
+			Self::RotateY(x) => write!(f, "rotateY({}deg)", x),
+			Self::RotateZ(x) => write!(f, "rotateZ({}deg)", x),
+			Self::SkewX(x) => write!(f, "skewX({})", x),
+			Self::SkewY(x) => write!(f, "skewY({})", x),
+			Self::SkewZ(x) => write!(f, "skewZ({})", x),
+			Self::Perspective(x) => write!(f, "perspective({})", x),
 		}
 	}
 }

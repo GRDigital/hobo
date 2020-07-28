@@ -23,16 +23,16 @@ pub enum GridSpan {
 	Absolute(i32),
 }
 
-impl ToString for GridSpan {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for GridSpan {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Auto => "auto".to_owned(),
-			Self::Initial => "initial".to_owned(),
-			Self::Inherit => "inherit".to_owned(),
-			Self::Unset => "unset".to_owned(),
-			Self::Revert => "revert".to_owned(),
-			Self::Span(x) => format!("span {}", x),
-			Self::Absolute(x) => x.to_string(),
+			Self::Auto => "auto".fmt(f),
+			Self::Initial => "initial".fmt(f),
+			Self::Inherit => "inherit".fmt(f),
+			Self::Unset => "unset".fmt(f),
+			Self::Revert => "revert".fmt(f),
+			Self::Span(x) => write!(f, "span {}", x),
+			Self::Absolute(x) => x.fmt(f),
 		}
 	}
 }
@@ -50,17 +50,17 @@ pub enum GridAutoFlow {
 }
 
 #[rustfmt::skip]
-impl ToString for GridAutoFlow {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for GridAutoFlow {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Inherit     => "grid-auto-flow:inherit;".to_owned(),
-			Self::Initial     => "grid-auto-flow:initial;".to_owned(),
-			Self::Unset       => "grid-auto-flow:unset;".to_owned(),
-			Self::Revert      => "grid-auto-flow:revert;".to_owned(),
-			Self::Row         => "grid-auto-flow:row;".to_owned(),
-			Self::Column      => "grid-auto-flow:column;".to_owned(),
-			Self::RowDense    => "grid-auto-flow:row dense;".to_owned(),
-			Self::ColumnDense => "grid-auto-flow:column dense;".to_owned(),
+			Self::Inherit     => "grid-auto-flow:inherit;".fmt(f),
+			Self::Initial     => "grid-auto-flow:initial;".fmt(f),
+			Self::Unset       => "grid-auto-flow:unset;".fmt(f),
+			Self::Revert      => "grid-auto-flow:revert;".fmt(f),
+			Self::Row         => "grid-auto-flow:row;".fmt(f),
+			Self::Column      => "grid-auto-flow:column;".fmt(f),
+			Self::RowDense    => "grid-auto-flow:row dense;".fmt(f),
+			Self::ColumnDense => "grid-auto-flow:column dense;".fmt(f),
 		}
 	}
 }
@@ -88,12 +88,12 @@ pub enum GridRepeatNumber {
 }
 
 #[rustfmt::skip]
-impl ToString for GridRepeatNumber {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for GridRepeatNumber {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::AutoFit  => "auto-fit".to_owned(),
-			Self::AutoFill => "auto-fill".to_owned(),
-			Self::Some(x)  => x.to_string(),
+			Self::AutoFit  => "auto-fit".fmt(f),
+			Self::AutoFill => "auto-fill".fmt(f),
+			Self::Some(x)  => x.fmt(f),
 		}
 	}
 }
@@ -105,9 +105,13 @@ pub struct GridRepeat {
 }
 
 #[rustfmt::skip]
-impl ToString for GridRepeat {
-	fn to_string(&self) -> String {
-		format!("repeat({}, {})", self.number.to_string(), self.values.iter().map(std::string::ToString::to_string).collect::<Vec<_>>().join(" "))
+impl std::fmt::Display for GridRepeat {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "repeat({},", self.number)?;
+		for value in &self.values {
+			write!(f, " {}", value)?;
+		}
+		")".fmt(f)
 	}
 }
 
@@ -122,15 +126,23 @@ pub enum GridTemplate {
 }
 
 #[rustfmt::skip]
-impl ToString for GridTemplate {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for GridTemplate {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Inherit     => "inherit".to_owned(),
-			Self::Initial     => "initial".to_owned(),
-			Self::Unset       => "unset".to_owned(),
-			Self::Revert      => "revert".to_owned(),
-			Self::None        => "none".to_owned(),
-			Self::Some(x)     => x.iter().map(std::string::ToString::to_string).collect::<Vec<_>>().join(" "),
+			Self::Inherit     => "inherit".fmt(f),
+			Self::Initial     => "initial".fmt(f),
+			Self::Unset       => "unset".fmt(f),
+			Self::Revert      => "revert".fmt(f),
+			Self::None        => "none".fmt(f),
+			Self::Some(values)     => {
+				if let Some((first, rest)) = values.split_first() {
+					write!(f, "{}", first)?;
+					for value in rest {
+						write!(f, " {}", value)?;
+					}
+				}
+				Ok(())
+			},
 		}
 	}
 }
@@ -142,11 +154,11 @@ pub enum GridTemplateValue {
 }
 
 #[rustfmt::skip]
-impl ToString for GridTemplateValue {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for GridTemplateValue {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Unit(x) => x.to_string(),
-			Self::Repeat(x) => x.to_string(),
+			Self::Unit(x) => x.fmt(f),
+			Self::Repeat(x) => x.fmt(f),
 		}
 	}
 }
@@ -162,15 +174,23 @@ pub enum GridAuto {
 }
 
 #[rustfmt::skip]
-impl ToString for GridAuto {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for GridAuto {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Inherit => "inherit".to_owned(),
-			Self::Initial => "initial".to_owned(),
-			Self::Unset   => "unset".to_owned(),
-			Self::Revert  => "revert".to_owned(),
-			Self::Auto    => "auto".to_owned(),
-			Self::Some(x) => x.iter().map(std::string::ToString::to_string).collect::<Vec<_>>().join(" "),
+			Self::Inherit => "inherit".fmt(f),
+			Self::Initial => "initial".fmt(f),
+			Self::Unset   => "unset".fmt(f),
+			Self::Revert  => "revert".fmt(f),
+			Self::Auto    => "auto".fmt(f),
+			Self::Some(units) => {
+				if let Some((first, rest)) = units.split_first() {
+					write!(f, "{}", first)?;
+					for unit in rest {
+						write!(f, " {}", unit)?;
+					}
+				}
+				Ok(())
+			},
 		}
 	}
 }

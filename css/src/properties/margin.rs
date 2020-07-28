@@ -11,14 +11,14 @@ pub enum Margin {
 }
 
 #[rustfmt::skip]
-impl ToString for Margin {
-	fn to_string(&self) -> String {
+impl std::fmt::Display for Margin {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None       => "0".to_owned(),
-			Self::Auto       => "auto".to_owned(),
-			Self::Initial    => "initial".to_owned(),
-			Self::Inherit    => "inherit".to_owned(),
-			Self::Some(unit) => unit.to_string(),
+			Self::None       => "0".fmt(f),
+			Self::Auto       => "auto".fmt(f),
+			Self::Initial    => "initial".fmt(f),
+			Self::Inherit    => "inherit".fmt(f),
+			Self::Some(unit) => unit.fmt(f),
 		}
 	}
 }

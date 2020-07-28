@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Default)]
 pub struct Color { pub r: u8, pub g: u8, pub b: u8, pub a: u8 }
 
 impl Color {
@@ -15,6 +15,12 @@ impl Color {
 impl From<u32> for Color {
 	fn from(x: u32) -> Self {
 		Self::from_hex(x)
+	}
+}
+
+impl std::fmt::Display for Color {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "#{:02x}{:02x}{:02x}{:02x}", self.r, self.g, self.b, self.a)
 	}
 }
 
