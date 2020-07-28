@@ -16,7 +16,4 @@ In practice, the code ends up being no more verbose than with more conventional 
 
 ## Roadmap/TODO:
 * **SSR**
-* @-rules support
-* More thorough testing
 * `CSSStyleSheet.insertRule()` in release
-* Threading support
