@@ -2,9 +2,9 @@
 # It is not intended for manual editing.
 [[package]]
 name = "anyhow"
-version = "1.0.31"
+version = "1.0.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85bb70cc08ec97ca5450e6eba421deeea5f172c0fc61f78b5357b2a8e8be195f"
+checksum = "6b602bfe940d21c130f3895acd65221e8a61270debe89d628b9cb4e3ccb8569b"
 
 [[package]]
 name = "autocfg"
@@ -90,7 +90,7 @@ dependencies = [
 
 [[package]]
 name = "hobo"
-version = "0.1.1"
+version = "0.1.4"
 dependencies = [
  "console_error_panic_hook",
  "console_log",
@@ -112,7 +112,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_css"
-version = "0.1.1"
+version = "0.1.4"
 dependencies = [
  "hobo_css_macros",
  "hobo_css_macros_decl",
@@ -124,9 +124,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_css_macros"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a37301589a2e0031ab92214415891a6260716b1115f125c0ce8985807de8601d"
+version = "0.1.4"
 dependencies = [
  "heck",
  "itertools 0.9.0",
@@ -141,9 +139,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_css_macros_decl"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7a93ab6337d52d330b9e9e56af35f0651a9fc1d5160d71b9c7cf430d9f96393"
+version = "0.1.4"
 dependencies = [
  "hobo_css_macros",
  "proc-macro-hack",
@@ -151,7 +147,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_derive"
-version = "0.1.1"
+version = "0.1.4"
 dependencies = [
  "derive_utils",
  "proc-macro-error",
@@ -245,22 +241,9 @@ dependencies = [
 
 [[package]]
 name = "paste"
-version = "0.1.18"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45ca20c77d80be666aef2b45486da86238fabe33e38306bd3118fe4af33fa880"
-dependencies = [
- "paste-impl",
- "proc-macro-hack",
-]
-
-[[package]]
-name = "paste-impl"
-version = "0.1.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d95a7db200b97ef370c8e6de0088252f7e0dfff7d047a28528e47456c0fc98b6"
-dependencies = [
- "proc-macro-hack",
-]
+checksum = "f6ddc8e145de01d9180ac7b78b9676f95a9c2447f6a88b2c2a04702211bc5d71"
 
 [[package]]
 name = "proc-macro-crate"
@@ -299,9 +282,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro-hack"
-version = "0.5.16"
+version = "0.5.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e0456befd48169b9f13ef0f0ad46d492cf9d2dbb918bcf38e01eed4ce3ec5e4"
+checksum = "99c605b9a0adc77b7211c6b1f722dcb613d68d66859a44f3d485a6da332b0598"
 
 [[package]]
 name = "proc-macro2"
@@ -374,9 +357,9 @@ checksum = "5317f7588f0a5078ee60ef675ef96735a1442132dc645eb1d12c018620ed8cd3"
 
 [[package]]
 name = "serde_json"
-version = "1.0.56"
+version = "1.0.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3433e879a558dde8b5e8feb2a04899cf34fdde1fafb894687e52105fc1162ac3"
+checksum = "164eacbdb13512ec2745fb09d51fd5b22b0d65ed294a1dcf7285a360c80a675c"
 dependencies = [
  "itoa",
  "ryu",
@@ -454,9 +437,9 @@ checksum = "38fad632f598f92d1560d0d8227600efd650d98426603fad600a7b0e5c8f9317"
 
 [[package]]
 name = "syn"
-version = "1.0.35"
+version = "1.0.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb7f4c519df8c117855e19dd8cc851e89eb746fe7a73f0157e0d95fdec5369b0"
+checksum = "4cdb98bcb1f9d81d07b536179c269ea15999b5d14ea958196413869445bb5250"
 dependencies = [
  "proc-macro2",
  "quote",
