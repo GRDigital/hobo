@@ -71,6 +71,11 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let property_snek = proc_macro2::Ident::new(&input.property.0.to_snek_case(), Span::call_site());
 	let property_camel = proc_macro2::Ident::new(&input.property.0.to_camel_case(), Span::call_site());
 
+	let test_fn_name = quote::format_ident!("{}_initial_inherit_unset", property_snek);
+	let result_initial = format!("{}:initial;", input.property.0);
+	let result_inherit = format!("{}:inherit;", input.property.0);
+	let result_unset = format!("{}:unset;", input.property.0);
+
 	let enum_members = input.values.iter().map(|value| match value {
 		Value::EnumVariant(value) => {
 			let value_camel = proc_macro2::Ident::new(&value.0.to_camel_case(), Span::call_site());
@@ -168,6 +173,13 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		macro_rules! #property_snek {
 			#(#macro_values)*
 		}
+
+		#[test]
+		fn #test_fn_name() {
+			assert_eq!(#property_snek!(initial).to_string(), #result_initial);
+			assert_eq!(#property_snek!(inherit).to_string(), #result_inherit);
+			assert_eq!(#property_snek!(unset).to_string(), #result_unset);
+		}
 	);
 
 	// println!("{}", res.to_string());
@@ -181,6 +193,11 @@ pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let property_snek = proc_macro2::Ident::new(&property.to_snek_case(), Span::call_site());
 	let property_camel = proc_macro2::Ident::new(&property.to_camel_case(), Span::call_site());
 
+	let test_fn_name = quote::format_ident!("{}_initial_inherit_unset", property_snek);
+	let result_initial = format!("{}:initial;", property.to_kebab_case());
+	let result_inherit = format!("{}:inherit;", property.to_kebab_case());
+	let result_unset = format!("{}:unset;", property.to_kebab_case());
+
 	let res = quote!(
 		#[macro_export]
 		macro_rules! #property_snek {
@@ -191,6 +208,13 @@ pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 			(gray $c:expr)  => {$crate::Property::#property_camel($crate::ColorValue::Rgba($crate::Color { r: $c, g: $c, b: $c, a: 0xFF }))};
 			(rgb $rgb:expr) => {$crate::Property::#property_camel($crate::ColorValue::Rgba(($rgb << 8 | 0xFF).into()))};
 			($rgba:expr)    => {$crate::Property::#property_camel($crate::ColorValue::Rgba($rgba.into()))};
+		}
+
+		#[test]
+		fn #test_fn_name() {
+			assert_eq!(#property_snek!(initial).to_string(), #result_initial);
+			assert_eq!(#property_snek!(inherit).to_string(), #result_inherit);
+			assert_eq!(#property_snek!(unset).to_string(), #result_unset);
 		}
 	);
 

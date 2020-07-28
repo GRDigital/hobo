@@ -57,6 +57,7 @@ pub enum BorderStyle {
 	#[strum(to_string = "outset")] Outset,
 	#[strum(to_string = "initial")] Initial,
 	#[strum(to_string = "inherit")] Inherit,
+	#[strum(to_string = "unset")] Unset,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -64,10 +65,10 @@ pub enum BorderWidth {
 	Medium,
 	Thin,
 	Thick,
-	Zero,
 	Some(crate::Unit),
 	Initial,
 	Inherit,
+	Unset,
 }
 
 #[rustfmt::skip]
@@ -77,10 +78,10 @@ impl std::fmt::Display for BorderWidth {
 			Self::Medium  => "medium".fmt(f),
 			Self::Thin    => "thin".fmt(f),
 			Self::Thick   => "thick".fmt(f),
-			Self::Zero    => "0".fmt(f),
 			Self::Some(x) => x.fmt(f),
 			Self::Initial => "initial".fmt(f),
 			Self::Inherit => "inherit".fmt(f),
+			Self::Unset   => "unset".fmt(f),
 		}
 	}
 }
@@ -143,7 +144,7 @@ macro_rules! __border_width {
 	($side:ident, thick)       => {$crate::paste::item!{$crate::Property::[<Border $side Width>]($crate::BorderWidth::Thick)}};
 	($side:ident, initial)     => {$crate::paste::item!{$crate::Property::[<Border $side Width>]($crate::BorderWidth::Initial)}};
 	($side:ident, inherit)     => {$crate::paste::item!{$crate::Property::[<Border $side Width>]($crate::BorderWidth::Inherit)}};
-	($side:ident, 0)           => {$crate::paste::item!{$crate::Property::[<Border $side Width>]($crate::BorderWidth::Zero)}};
+	($side:ident, unset)       => {$crate::paste::item!{$crate::Property::[<Border $side Width>]($crate::BorderWidth::Unset)}};
 	($side:ident, $($val:tt)+) => {$crate::paste::item!{$crate::Property::[<Border $side Width>]($crate::BorderWidth::Some($crate::unit!($($val)+)))}};
 }
 
@@ -177,6 +178,7 @@ macro_rules! __border_style {
 	($side:ident, outset)  => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Outset)}};
 	($side:ident, initial) => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Initial)}};
 	($side:ident, inherit) => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Inherit)}};
+	($side:ident, unset)   => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Unset)}};
 }
 
 #[macro_export] macro_rules! border_left_style {($($tt:tt)+)   => {$crate::__border_style!(Left, $($tt)+)}}

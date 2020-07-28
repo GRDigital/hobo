@@ -190,6 +190,7 @@ generate_properties! {
 	stutter => (
 		FlexWrap, FlexDirection,
 		JustifyContent, AlignItems, AlignContent, AlignSelf,
+		JustifyItems, JustifySelf,
 		FlexBasis, FlexGrow, FlexShrink,
 
 		Order,
@@ -214,7 +215,7 @@ generate_properties! {
 		PointerEvents,
 		Resize,
 		ObjectFit,
-		ListStyleType,
+		ListStyleType, ListStyleImage, ListStylePosition,
 
 		BreakAfter, BreakBefore, BreakInside,
 

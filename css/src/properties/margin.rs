@@ -8,6 +8,7 @@ pub enum Margin {
 	Initial,
 	Inherit,
 	Some(Unit),
+	Unset,
 }
 
 #[rustfmt::skip]
@@ -19,6 +20,7 @@ impl std::fmt::Display for Margin {
 			Self::Initial    => "initial".fmt(f),
 			Self::Inherit    => "inherit".fmt(f),
 			Self::Some(unit) => unit.fmt(f),
+			Self::Unset      => "unset".fmt(f),
 		}
 	}
 }
@@ -31,6 +33,7 @@ macro_rules! __margin {
 	($side:ident, auto)        => {$crate::paste::item!{ $crate::Property::[<Margin $side>]($crate::Margin::Auto) }};
 	($side:ident, initial)     => {$crate::paste::item!{ $crate::Property::[<Margin $side>]($crate::Margin::Initial) }};
 	($side:ident, inherit)     => {$crate::paste::item!{ $crate::Property::[<Margin $side>]($crate::Margin::Inherit) }};
+	($side:ident, unset)       => {$crate::paste::item!{ $crate::Property::[<Margin $side>]($crate::Margin::Unset) }};
 	($side:ident, $($val:tt)+) => {$crate::paste::item!{ $crate::Property::[<Margin $side>]($crate::Margin::Some($crate::unit!($($val)+))) }};
 }
 
