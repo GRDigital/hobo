@@ -5,7 +5,7 @@ use crate::prelude::*;
 // bunch of queries/not queries
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-enum MediaType {
+pub enum MediaType {
 	All,
 	Print,
 	Screen,
@@ -25,13 +25,13 @@ pub enum Scan {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-struct Nottable<T: std::fmt::Debug + PartialEq + Eq + std::hash::Hash + Clone> {
+pub struct Nottable<T: std::fmt::Debug + PartialEq + Eq + std::hash::Hash + Clone> {
 	not: bool,
 	data: T,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-enum MediaFeature {
+pub enum MediaFeature {
 	AspectRatio(u32, u32), MinAspectRatio(u32, u32), MaxAspectRatio(u32, u32),
 	Color(u32), MinColor(u32), MaxColor(u32),
 	Monochrome(u32), MinMonochrome(u32), MaxMonochrome(u32),
@@ -42,13 +42,13 @@ enum MediaFeature {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-struct MediaQuery {
+pub struct MediaQuery {
 	media: Nottable<MediaType>,
 	features: Vec<Nottable<MediaFeature>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub struct MediaSelector(Vec<MediaQuery>);
+pub struct MediaSelector(pub Vec<MediaQuery>);
 
 #[test]
 fn woo() {
