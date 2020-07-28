@@ -91,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> hobo</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="basic-concepts.html"><strong aria-hidden="true">3.</strong> Core Concepts</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="basic-concepts/element.html"><strong aria-hidden="true">3.1.</strong> hobo::Element components</a></li><li class="chapter-item expanded "><a href="basic-concepts/traits.html"><strong aria-hidden="true">3.2.</strong> Capability traits</a></li><li class="chapter-item expanded "><a href="basic-concepts/styling.html"><strong aria-hidden="true">3.3.</strong> Styling facilities</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="basic-concepts/styling/selector.html"><strong aria-hidden="true">3.3.1.</strong> Selector</a></li><li class="chapter-item expanded "><a href="basic-concepts/styling/property.html"><strong aria-hidden="true">3.3.2.</strong> Property</a></li><li class="chapter-item expanded "><a href="basic-concepts/styling/at-rules.html"><strong aria-hidden="true">3.3.3.</strong> @-rules</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="state.html"><strong aria-hidden="true">4.</strong> Managing state with e!()</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="state/raw_element.html"><strong aria-hidden="true">4.1.</strong> Raw element access</a></li><li class="chapter-item expanded "><a href="state/rc_refcell.html"><strong aria-hidden="true">4.2.</strong> Rc&lt;RefCell&lt;T&gt;&gt;</a></li><li class="chapter-item expanded "><a href="state/hobo_trick.html"><strong aria-hidden="true">4.3.</strong> #[hobo::trick]</a></li><li class="chapter-item expanded "><a href="state/state.html"><strong aria-hidden="true">4.4.</strong> State and StateSlice</a></li></ol></li><li class="chapter-item expanded "><a href="building-the-dom.html"><strong aria-hidden="true">5.</strong> Building the DOM</a></li><li class="chapter-item expanded "><a href="utilities.html"><strong aria-hidden="true">6.</strong> Other utilities</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="utilities/web_str.html"><strong aria-hidden="true">6.1.</strong> web_str</a></li><li class="chapter-item expanded "><a href="utilities/slot.html"><strong aria-hidden="true">6.2.</strong> Slot</a></li></ol></li><li class="chapter-item expanded "><a href="recipes.html"><strong aria-hidden="true">7.</strong> Recipes</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="recipes/elements-that-change.html"><strong aria-hidden="true">7.1.</strong> Elements that change</a></li><li class="chapter-item expanded "><a href="recipes/svgs.html"><strong aria-hidden="true">7.2.</strong> SVGs</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> hobo</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="basic-concepts.html"><strong aria-hidden="true">3.</strong> Core Concepts</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="basic-concepts/element.html"><strong aria-hidden="true">3.1.</strong> hobo::Element components</a></li><li class="chapter-item expanded "><a href="basic-concepts/traits.html"><strong aria-hidden="true">3.2.</strong> Capability traits</a></li><li class="chapter-item expanded "><a href="basic-concepts/styling.html"><strong aria-hidden="true">3.3.</strong> Styling facilities</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="basic-concepts/styling/selector.html"><strong aria-hidden="true">3.3.1.</strong> Selector</a></li><li class="chapter-item expanded "><a href="basic-concepts/styling/property.html"><strong aria-hidden="true">3.3.2.</strong> Property</a></li><li class="chapter-item expanded "><a href="basic-concepts/styling/at-rules.html"><strong aria-hidden="true">3.3.3.</strong> @-rules</a></li><li class="chapter-item expanded "><a href="basic-concepts/styling/colors.html"><strong aria-hidden="true">3.3.4.</strong> Colors</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="state.html"><strong aria-hidden="true">4.</strong> Managing state with e!()</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="state/raw_element.html"><strong aria-hidden="true">4.1.</strong> Raw element access</a></li><li class="chapter-item expanded "><a href="state/rc_refcell.html"><strong aria-hidden="true">4.2.</strong> Rc&lt;RefCell&lt;T&gt;&gt;</a></li><li class="chapter-item expanded "><a href="state/hobo_trick.html"><strong aria-hidden="true">4.3.</strong> #[hobo::trick]</a></li><li class="chapter-item expanded "><a href="state/state.html"><strong aria-hidden="true">4.4.</strong> State and StateSlice</a></li></ol></li><li class="chapter-item expanded "><a href="building-the-dom.html"><strong aria-hidden="true">5.</strong> Building the DOM</a></li><li class="chapter-item expanded "><a href="utilities.html"><strong aria-hidden="true">6.</strong> Other utilities</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="utilities/web_str.html"><strong aria-hidden="true">6.1.</strong> web_str</a></li><li class="chapter-item expanded "><a href="utilities/slot.html"><strong aria-hidden="true">6.2.</strong> Slot</a></li></ol></li><li class="chapter-item expanded "><a href="recipes.html"><strong aria-hidden="true">7.</strong> Recipes</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="recipes/elements-that-change.html"><strong aria-hidden="true">7.1.</strong> Elements that change</a></li><li class="chapter-item expanded "><a href="recipes/svgs.html"><strong aria-hidden="true">7.2.</strong> SVGs</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -158,8 +158,11 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#hobo" id="hobo">hobo</a></h1>
+<p><a href="https://crates.io/crates/hobo"><img alt="Crate Info" src="https://img.shields.io/crates/v/hobo.svg"/></a>
+<a href="https://docs.rs/hobo/"><img alt="API Docs" src="https://img.shields.io/badge/docs.rs-hobo-yellow"/></a></p>
 <p><strong>hobo</strong> is a Rust frontend framework. Works on <strong>stable Rust</strong>.<br />
-<strong>STILL WIP AND EXPERIMENTAL</strong> although used in production by <a href="https://grdigital.co.uk/">GR Digital</a>.</p>
+<strong>STILL WIP AND EXPERIMENTAL</strong> although used in production by <a href="https://grdigital.co.uk/">GR Digital</a><br />
+<a href="https://grdigital.github.io/hobo/index.html">Check out the Book</a>!</p>
 <ul>
 <li><strong>no virtual DOM</strong> - html elements are managed manually and can be accessed directly via <code>web_sys::HtmlElement</code> to manage attributes/contents/etc</li>
 <li>no Model-View-Update (aka Elm architecture) - state management is manual, although there are helpful utilities</li>
@@ -167,13 +170,10 @@
 <li>built-in macro-based styling, kind of like JS in CSS except it's just Rust</li>
 </ul>
 <p>In practice, the code ends up being no more verbose than with more conventional frontend frameworks, however quite a bit more straightforward.</p>
-<h1><a class="header" href="#roadmaptodo" id="roadmaptodo">Roadmap/TODO:</a></h1>
+<h2><a class="header" href="#roadmaptodo" id="roadmaptodo">Roadmap/TODO:</a></h2>
 <ul>
 <li><strong>SSR</strong></li>
-<li>@-rules support</li>
-<li>More thorough testing</li>
 <li><code>CSSStyleSheet.insertRule()</code> in release</li>
-<li>Threading support</li>
 </ul>
 <h1><a class="header" href="#getting-started" id="getting-started">Getting Started</a></h1>
 <p>Here's a basic counter component:</p>
@@ -203,8 +203,7 @@ impl Counter {
 				css::width!(128 px),
 				css::height!(128 px),
 				// #AA0000FF or #AA0000 of #A00 in css
-				// hobo requires full rgba though
-				css::background_color!(0xAA_00_00_FF),
+				css::background_color!(rgb 0xAA_00_00),
 			))
 			.child(cmp::button()
 				.text(&quot;PLUS&quot;)
@@ -358,17 +357,54 @@ enum Bar {
 <span class="boring">}
 </span></code></pre></pre>
 <h1><a class="header" href="#-rules" id="-rules">@-rules</a></h1>
-<p>Right now hobo only supports <code>@font-face</code>, but in the nearest future support for <code>@media</code>, <code>@import</code> and other is planned.</p>
+<p>Right now hobo only supports <code>@font-face</code> and a subset of <code>@media</code></p>
+<h1><a class="header" href="#font-face" id="font-face"><code>@font-face</code></a></h1>
+<p>The block following <code>@font-face</code> is passed as initialization for <code>css::font_face::FontFace</code>. Check out the <a href="https://docs.rs/hobo_css/0.1/hobo_css/font_face/struct.FontFace.html">docs</a>.<br />
+It looks something like this:</p>
 <pre><pre class="playground"><code class="language-rust edition2018">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>@font-face {
-	// raw string because this property hasn't been properly integrated into hobo yet
-	&quot;src:url(...) format('woff2');&quot;,
-	css::font_family!(&quot;Encode Sans&quot;),
-	css::font_weight!(400),
-	css::FontStyle::Normal,
+	src: vec![(&quot;https://fonts.gstatic.com/s/encodesans/v4/LDI2apOFNxEwR-Bd1O9uYPOreec.woff2&quot;.into(), Some(css::font_face::Format::Woff2))],
+	font_family: &quot;Encode Sans&quot;.into(),
+	font_weight: (css::font_face::Weight::Number(400), None),
 }
+<span class="boring">}
+</span></code></pre></pre>
+<h1><a class="header" href="#media" id="media"><code>@media</code></a></h1>
+<p>The syntax is different to <code>@media</code> rules in css:</p>
+<ul>
+<li>specifying media type is not optional</li>
+<li><code>!</code> instead of <code>not</code></li>
+<li><code>CamelCase</code> instead of <code>kebab-case</code></li>
+<li><code>&amp;&amp;</code> instead of <code>and</code></li>
+<li>no grouping rules in <code>not</code> clauses</li>
+</ul>
+<p>So these two would be equivalent:</p>
+<pre><pre class="playground"><code class="language-rust edition2018">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>@media !All &amp;&amp; Orientation(Portrait) &amp;&amp; !AspectRatio(4, 3), Print &amp;&amp; Color(4) &amp;&amp; !Width(css::unit!(200 px)) {
+	html {
+		css::background_color!(rgb 0xFF_00_00),
+	}
+}
+<span class="boring">}
+</span></code></pre></pre>
+<pre><code class="language-css">@media not all and (orientation: portrait) and (not (aspect-ratio: 4/3)), print and (color: 4) and (not (width: 200px)) {
+	html {
+		background-color: #FF0000;
+	}
+}
+</code></pre>
+<p>Support for <code>@keyframes</code> and <code>@page</code> is planned</p>
+<h1><a class="header" href="#colors" id="colors">Colors</a></h1>
+<p>Color property macros like <code>css::color!</code> and <code>css::fill!</code> and the like have shorthands for full-alpha RGB colors as well as greyscale.</p>
+<pre><pre class="playground"><code class="language-rust edition2018">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>css::color!(rgb 0xFF_00_00), // same as css::color!(0xFF_00_00_FF) or #F00 in css
+css::color!(gray 0xAD), // same as css::color!(0xAD_AD_AD_FF) or #ADADAD in css
 <span class="boring">}
 </span></code></pre></pre>
 <h1><a class="header" href="#managing-state-with-e" id="managing-state-with-e">Managing state with e!()</a></h1>
@@ -672,6 +708,8 @@ impl Input {
 </span></code></pre></pre>
 <h3><a class="header" href="#difference-between-childadd_child-and-child_refadd_child_ref" id="difference-between-childadd_child-and-child_refadd_child_ref">Difference between <code>.child()</code>/<code>.add_child()</code> and <code>.child_ref()</code>/<code>.add_child_ref()</code></a></h3>
 <p><code>.child()</code> takes a component by value, while <code>.child_ref()</code> by reference. Taking a component by value ties that component's lifespan to the lifespan of its container, in other words when the container will be dropped - the child will as well. However, sometimes you need to mount a component first but later capture it in an event handler, expose it to parent or replace it later. In those cases, ownership of the component must be passed elsewhere.</p>
+<h3><a class="header" href="#with_childrenwith_children_refs" id="with_childrenwith_children_refs"><code>.with_children()</code>/<code>.with_children_refs()</code></a></h3>
+<p>Complimentary to <code>.child()</code>/<code>.child_ref()</code> but can consume an <code>impl IntoIterator</code>, convenient when taking a <code>Vec&lt;T&gt;</code> as an argument in list-like component constructors.</p>
 <h3><a class="header" href="#why-is-class-called-after-self--element-input--and-not-while-element-is-being-constructed" id="why-is-class-called-after-self--element-input--and-not-while-element-is-being-constructed">Why is <code>.class()</code> called after <code>Self { element, input }</code> and not while <code>element</code> is being constructed?</a></h3>
 <p>Class assignment in <code>hobo</code> is double duty - apart from applying the style, it also assigns class that's generated from the component's type so it can later be selected with a <code>.[T]</code> selector. If class where assigned at the <code>element</code>'s construction site - it would get the class of type for <code>cmp::Div</code> (alias for <code>hobo::BasicElement&lt;web_sys::HtmlDivElement&gt;</code>) rather than <code>Input</code>.</p>
 <h3><a class="header" href="#chaining-vs-non-chaining-syntax" id="chaining-vs-non-chaining-syntax">Chaining vs non-chaining syntax</a></h3>
