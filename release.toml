@@ -1,0 +1,7 @@
+consolidate-commits = true
+pre-release-replacements = [
+	{ file = "lib/Cargo.toml",             search = "hobo_css = \"=[0-9\\.]+\"",             replace = "hobo_css = \"={{version}}\""             },
+	{ file = "css/Cargo.toml",             search = "hobo_css_macros = \"=[0-9\\.]+\"",      replace = "hobo_css_macros = \"={{version}}\""      },
+	{ file = "css/Cargo.toml",             search = "hobo_css_macros_decl = \"=[0-9\\.]+\"", replace = "hobo_css_macros_decl = \"={{version}}\"" },
+	{ file = "css/macros_decl/Cargo.toml", search = "hobo_css_macros = \"=[0-9\\.]+\"",      replace = "hobo_css_macros = \"={{version}}\""      },
+]
