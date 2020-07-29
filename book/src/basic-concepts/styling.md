@@ -3,7 +3,7 @@
 Most hobo components will be styled with either `.class()` or `.style()` functions, where either `css::class!()`, `css::style!()` or `css::properties!()` macros are used. The naming is confusing somewhat, but the distinction is important.
 
 * `.style()` and `.set_style()` use the `style` attribute, which can only take a bunch of properties without any selectors, so `css::properties!()` macro is used.
-* `.class()`, `.set_class()` and `.add_class()` use the `class` attribute:
+* `.class()`, `.set_class()` and `tagged` variants use the `class` attribute:
 	* `css::style!()` uses a css-like `{ <selector> { <properties> } <selector> { <properties> } }` syntax
 	* `css::class!()` is `css::style!(.& { <properties> })` or in other words - it's a bunch of properties applied just to the element being styled, similar to what can go in a `style` attribute, just using a class to refer to it.
 
@@ -54,4 +54,4 @@ cmp::div()
 	))
 ```
 
-> **Chaining vs non-chaining syntax:** `.style()` is the chaining syntax, `.set_style()` is the non-chaining alternative. Similarly, `.class()` and `.set_class()`. On the other hand, `.add_class()` doesn't have a chanining equivalent. More about chaining vs non-chaining syntax in [Building the DOM](../building-the-dom.md#chaining-vs-non-chaining-syntax).
+> **Chaining vs non-chaining syntax:** `.style()` is the chaining syntax, `.set_style()` is the non-chaining alternative. Similarly, `.class()` and `.set_class()`. More about chaining vs non-chaining syntax in [Building the DOM](../building-the-dom.md#chaining-vs-non-chaining-syntax).

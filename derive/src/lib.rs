@@ -33,6 +33,7 @@ pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 			::hobo::Element,
 			trait Element {
 				fn element(&self) -> ::std::borrow::Cow<'_, ::hobo::web_sys::Element>;
+				fn classes(&self) -> ::std::rc::Rc<::std::cell::RefCell<::std::collections::HashMap<u64, ::hobo::css::Style>>>;
 			}
 		},
 		_ => {
@@ -41,6 +42,7 @@ pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 			(quote! {
 				impl #impl_generics ::hobo::Element for #name #ty_generics #where_clause {
 					fn element(&self) -> ::std::borrow::Cow<'_, ::hobo::web_sys::Element> { self.element.element() }
+					fn classes(&self) -> ::std::rc::Rc<::std::cell::RefCell<::std::collections::HashMap<u64, ::hobo::css::Style>>> { self.element.classes() }
 				}
 			}).into()
 		},

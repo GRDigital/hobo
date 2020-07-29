@@ -1,12 +1,16 @@
 use super::{Container, Element, EventHandler, EventHandlers, EventTarget};
 use crate::prelude::*;
 use std::borrow::Cow;
+use std::collections::HashMap;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 /// This is the most common kind of hobo element - both children and event handlign
 pub struct BasicElement<T: AsRef<web_sys::Element> + 'static> {
 	pub element: T,
 	pub children: Vec<Box<dyn Element>>,
 	pub event_handlers: EventHandlers,
+	pub classes: Rc<RefCell<HashMap<u64, css::Style>>>,
 }
 
 /// Trait for all hobo components which have a particular known `web_sys::Element` at their root
@@ -27,7 +31,7 @@ impl<T: AsRef<web_sys::Element> + 'static> EventTarget for BasicElement<T> {
 }
 
 impl<T: AsRef<web_sys::Element> + 'static> BasicElement<T> {
-	pub fn new(element: T) -> Self { Self { element, children: Vec::new(), event_handlers: EventHandlers::default() } }
+	pub fn new(element: T) -> Self { Self { element, children: Default::default(), event_handlers: Default::default(), classes: Default::default() } }
 }
 
 impl<T: AsRef<web_sys::Node> + AsRef<web_sys::Element> + 'static + wasm_bindgen::JsCast> BasicElement<T> {
@@ -39,8 +43,9 @@ impl<T: AsRef<web_sys::Node> + AsRef<web_sys::Element> + 'static + wasm_bindgen:
 				.expect("can't clone_node_with_deep")
 				.dyn_into()
 				.expect("can't convert after clone_node_with_deep"),
-			children: Vec::new(),
-			event_handlers: crate::EventHandlers::default(),
+			children: Default::default(),
+			event_handlers: Default::default(),
+			classes: Default::default(),
 		}
 	}
 }
@@ -51,10 +56,10 @@ impl<T: AsRef<web_sys::Element> + 'static> Drop for BasicElement<T> {
 
 impl<T: AsRef<web_sys::Element> + 'static> Element for BasicElement<T> {
 	fn element(&self) -> Cow<'_, web_sys::Element> { Cow::Borrowed(self.element.as_ref()) }
+	fn classes(&self) -> Rc<RefCell<HashMap<u64, css::Style>>> { self.classes.clone() }
 }
 
 impl<T: AsRef<web_sys::Element> + 'static> Container for BasicElement<T> {
 	fn children(&self) -> &Vec<Box<dyn Element>> { &self.children }
-
 	fn children_mut(&mut self) -> &mut Vec<Box<dyn Element>> { &mut self.children }
 }

@@ -1,5 +1,5 @@
 use crate::{prelude::*, Element, Replaceable};
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, collections::HashMap};
 
 #[derive(Clone)]
 pub struct Slot(pub Rc<RefCell<Box<dyn Element>>>);
@@ -10,6 +10,7 @@ impl Slot {
 
 impl Element for Slot {
 	fn element(&self) -> std::borrow::Cow<'_, web_sys::Element> { std::borrow::Cow::Owned(self.0.borrow().element().into_owned()) }
+	fn classes(&self) -> Rc<RefCell<HashMap<u64, css::Style>>> { self.0.classes() }
 }
 
 impl<T: Element + 'static> Replaceable<T> for Slot {

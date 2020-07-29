@@ -62,7 +62,8 @@ Class assignment in `hobo` is double duty - apart from applying the style, it al
 Most functions have a chaining syntax, handy when constructing the component, and also non-chaining syntax for use in loops or other contexts. The convention is `.<foo>` for chaining and `.add_<foo>` for non-chaining. This goes against the more common Rust convention of `.with_<foo>` being the chaining syntax, this is because most code will be simple elements constructed in bulk, so most of these calls will be chaining so a shorter name is preferred.
 
 * `.child()`/`.child_ref()` vs `.add_child()`/`.add_child_ref()`
-* `.class()` vs `.set_class()`
+* `.with_children()`/`.with_children_refs()` vs `.add_children()`/`.add_children_refs()`
+* `.class()`/`.class_tagged()` vs `.set_class()`/`.set_class_tagged()`
 * `.style()` vs `.set_style()`
 * `.attr()`/`.bool_attr()` vs `.set_attr()`/`.set_bool_attr()`
 * `.<event>()`/`.<event>_mut()` vs `.add_<event>()`/`.add_<event>_mut()`

@@ -19,7 +19,7 @@ impl<'a> From<roxmltree::Document<'a>> for crate::BasicElement<web_sys::SvgsvgEl
 			})
 			.collect::<Vec<_>>();
 
-		let me = Self { children, element, event_handlers: crate::EventHandlers::default() };
+		let me = Self { children, element, event_handlers: crate::EventHandlers::default(), classes: Default::default() };
 		for child in me.children.iter() {
 			me.element.append_child(&child.element()).expect("can't append child");
 		}
@@ -45,7 +45,7 @@ impl<'a, 'b> From<roxmltree::Node<'a, 'b>> for crate::BasicElement<web_sys::SvgE
 			})
 			.collect::<Vec<_>>();
 
-		let me = Self { children, element, event_handlers: crate::EventHandlers::default() };
+		let me = Self { children, element, event_handlers: crate::EventHandlers::default(), classes: Default::default() };
 		for child in me.children.iter() {
 			me.element.append_child(&child.element()).expect("can't append child");
 		}

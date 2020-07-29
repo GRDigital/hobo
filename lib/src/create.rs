@@ -23,7 +23,7 @@ macro_rules! create {
 
 			impl BasicElement<web_sys::$html_t> {
 				pub fn $html_name() -> Self {
-					BasicElement { element: $html_name(), children: Vec::new(), event_handlers: Default::default() }
+					BasicElement { element: $html_name(), children: Vec::new(), event_handlers: Default::default(), classes: Default::default() }
 				}
 			}
 
@@ -39,7 +39,7 @@ macro_rules! create {
 
 			impl BasicElement<web_sys::$svg_t> {
 				pub fn $svg_name() -> Self {
-					BasicElement { element: $svg_name(), children: Vec::new(), event_handlers: Default::default() }
+					BasicElement { element: $svg_name(), children: Vec::new(), event_handlers: Default::default(), classes: Default::default() }
 				}
 			}
 		)*

@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use std::{borrow::Cow, cell::RefCell, collections::HashMap};
+use std::{cell::RefCell, collections::HashMap};
 pub use sugars::hash;
 
 #[derive(Default)]
@@ -12,9 +12,7 @@ pub struct StyleStorage {
 // if yes, just returns the class name
 // if no, inserts it into <style> and then returns the class name
 impl StyleStorage {
-	pub fn fetch<'a>(&self, element: &web_sys::Element, style: impl Into<Cow<'a, css::Style>>) -> String {
-		let mut style = style.into().into_owned();
-
+	pub fn fetch(&self, mut style: css::Style) -> String {
 		// check if style exists in cache, in which case it's already inserted - just retrieve clas name
 		if let Some(id) = self.map.borrow().get(&style) {
 			return format!("s{}", id);
@@ -38,7 +36,7 @@ impl StyleStorage {
 			}
 		}
 
-		let dom = element.owner_document().expect("element not attached to a dom");
+		let dom = crate::dom();
 		let head = dom.head().expect("dom has no head");
 
 		// either get or construct a <style> element
