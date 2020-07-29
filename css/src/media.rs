@@ -22,8 +22,8 @@ pub enum Scan {
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Nottable<T: std::fmt::Debug + PartialEq + Eq + std::hash::Hash + Clone + std::fmt::Display> {
-	not: bool,
-	data: T,
+	pub not: bool,
+	pub data: T,
 }
 
 impl<T: std::fmt::Debug + PartialEq + Eq + std::hash::Hash + Clone + std::fmt::Display> std::fmt::Display for Nottable<T> {
@@ -82,8 +82,8 @@ impl std::fmt::Display for MediaFeature {
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct MediaQuery {
-	media: Nottable<MediaType>,
-	features: Vec<Nottable<MediaFeature>>,
+	pub media: Nottable<MediaType>,
+	pub features: Vec<Nottable<MediaFeature>>,
 }
 
 impl std::fmt::Display for MediaQuery {
