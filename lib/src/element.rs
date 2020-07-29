@@ -22,7 +22,7 @@ pub trait Element {
 
 	/// Set a tagged class, which means that if a different tag is used - a new style will be applied
 	/// alternatively, if a tag that's been used previously is used again - that style is overwritten
-	fn set_class_tagged<'a, Tag: Hash + 'static>(&self, style: impl Into<Cow<'a, css::Style>>, tag: Tag) where Self: Sized + 'static {
+	fn set_class_tagged<'a, Tag: Hash + 'static>(&self, tag: Tag, style: impl Into<Cow<'a, css::Style>>) where Self: Sized + 'static {
 		let style = style.into().into_owned();
 		let element = self.element();
 
@@ -55,11 +55,11 @@ pub trait Element {
 	fn remove_style(&self) { self.element().remove_style(); }
 
 	/// Set a style with a `__default` tag
-	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) where Self: Sized + 'static { self.set_class_tagged(style, "__default") }
+	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) where Self: Sized + 'static { self.set_class_tagged("__default", style) }
 	/// Chaining alternative to `set_class`
 	fn class<'a>(self, style: impl Into<Cow<'a, css::Style>>) -> Self where Self: Sized + 'static { self.set_class(style); self }
 	/// Chaining alternative to `set_class_tagged`
-	fn class_tagged<'a>(self, style: impl Into<Cow<'a, css::Style>>, tag: impl Hash + 'static) -> Self where Self: Sized + 'static { self.set_class_tagged(style, tag); self }
+	fn class_tagged<'a>(self, tag: impl Hash + 'static, style: impl Into<Cow<'a, css::Style>>) -> Self where Self: Sized + 'static { self.set_class_tagged(tag, style); self }
 	/// Chaining alternative to `set_style`
 	fn style<'a>(self, style: impl Into<Cow<'a, [css::Property]>>) -> Self where Self: Sized + 'static { self.set_style(style); self }
 	/// Chaining alternative to `set_attr`
