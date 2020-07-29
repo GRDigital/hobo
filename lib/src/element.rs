@@ -104,6 +104,13 @@ impl<T: Hash> T {
 #[doc(hidden)]
 #[extend::ext(pub, name = RawSetClass)]
 impl web_sys::Element {
+	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) {
+		CONTEXT.with(move |ctx| {
+			let element_class = ctx.style_storage.fetch(style.into().into_owned());
+			self.set_attribute(web_str::class(), &element_class).expect("can't set attribute");
+		})
+	}
+
 	fn set_style<'a>(&self, style: impl Into<Cow<'a, [css::Property]>>) {
 		let _ = self.set_attribute(web_str::style(), &style.into().iter().map(std::string::ToString::to_string).collect::<String>());
 	}
