@@ -70,6 +70,7 @@ intern_strings! {
 	password;
 	text;
 	_blank;
+	viewBox; d; cx; cy; r;
 
 	// events
 	click; contextmenu; dblclick; mousedown; mouseenter;
