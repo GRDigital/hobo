@@ -1,5 +1,3 @@
-use crate::prelude::*;
-
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Appearance {
 	Initial,
