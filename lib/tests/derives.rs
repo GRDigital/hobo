@@ -19,7 +19,7 @@ impl TestDerives {
 
 #[derive(hobo::Element, hobo::Container, hobo::EventTarget)]
 enum SomeEnum {
-	Element(SomeElement),
+	Element(TestDerives),
 	Div(cmp::Div),
 }
 
