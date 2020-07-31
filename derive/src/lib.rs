@@ -16,7 +16,7 @@ pub fn trick(_: proc_macro::TokenStream, item: proc_macro::TokenStream) -> proc_
 			unsafe {
 				let raw_uninit = ::std::rc::Rc::into_raw(this) as *mut ::std::mem::MaybeUninit<_>;
 				let raw_init = (&mut *raw_uninit).as_mut_ptr();
-				std::ptr::write(raw_init, ::std::cell::RefCell::new(new_this));
+				::std::ptr::write(raw_init, ::std::cell::RefCell::new(new_this));
 				::std::rc::Rc::from_raw(raw_init)
 			}
 		}
@@ -99,6 +99,24 @@ pub fn derive_container(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 	}
 }
 
+fn extract_element_type(data: &syn::Data) -> syn::Type {
+	match data {
+		syn::Data::Struct(syn::DataStruct { fields: syn::Fields::Named(syn::FieldsNamed { named, .. }), .. }) => {
+			let mut res = None;
+			for field in named.iter() {
+				if let Some(ident) = &field.ident {
+					if ident == "element" {
+						res = Some(&field.ty);
+						break;
+					}
+				}
+			}
+			if let Some(x) = res { x.clone() } else { panic!("element not found") }
+		},
+		_ => unimplemented!(),
+	}
+}
+
 #[proc_macro_derive(Replaceable)]
 pub fn derive_replaceable(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = syn::parse_macro_input!(input as syn::DeriveInput);
@@ -113,9 +131,11 @@ pub fn derive_replaceable(input: proc_macro::TokenStream) -> proc_macro::TokenSt
 		},
 		_ => {
 			let name = input.ident;
-			let (_impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+			// TODO: respect struct generics
+			// let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+			let element_type = extract_element_type(&input.data);
 			(quote! {
-				impl<T: ::hobo::Element + 'static> ::hobo::Replaceable<T> for #name #ty_generics #where_clause {
+				impl<T> ::hobo::Replaceable<T> for #name where #element_type: ::hobo::Replaceable<T> {
 					fn replace_element(&self, element: T) { self.element.replace_element(element) }
 				}
 			}).into()
@@ -129,21 +149,7 @@ pub fn derive_raw_element(input: proc_macro::TokenStream) -> proc_macro::TokenSt
 	let name = input.ident;
 	let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
-	let element_type = match &input.data {
-		syn::Data::Struct(syn::DataStruct { fields: syn::Fields::Named(syn::FieldsNamed { named, .. }), .. }) => {
-			let mut res = None;
-			for field in named.iter() {
-				if let Some(ident) = &field.ident {
-					if ident == "element" {
-						res = Some(&field.ty);
-						break;
-					}
-				}
-			}
-			if let Some(x) = res { x } else { panic!("element not found") }
-		},
-		_ => unimplemented!(),
-	};
+	let element_type = extract_element_type(&input.data);
 
 	(quote! {
 		impl #impl_generics ::hobo::RawElement for #name #ty_generics #where_clause {
