@@ -64,7 +64,7 @@ pub fn media_query(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let crate_name = css_crate_name();
 	let input: media::Query = syn::parse_macro_input!(input);
 	(quote! {{
-		use #crate_name::media::{MediaQuery, MediaSelctor, MediaType, Orientation::*, Scan::*, Nottable, MediaFeature};
+		use #crate_name::media::{MediaQuery, MediaSelector, MediaType, Orientation::*, Scan::*, Nottable, MediaFeature};
 		#input
 	}}).into()
 }
