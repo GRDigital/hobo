@@ -1,6 +1,6 @@
 [package]
 name = "hobo_css_macros_decl"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2018"
 license = "MIT"
 repository = "https://github.com/grdigital/hobo"
@@ -9,5 +9,5 @@ authors = ["GR Digital <contact@grdigital.co.uk>"]
 readme = "../../README.md"
 
 [dependencies]
-hobo_css_macros = "=0.1.7"
+hobo_css_macros = "=0.1.8"
 proc-macro-hack = "0.5"
