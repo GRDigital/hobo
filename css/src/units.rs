@@ -35,19 +35,19 @@ impl std::fmt::Display for Unit {
 	}
 }
 
+/// As pixels is the most common unit type, specifying `px` is optional
 #[rustfmt::skip]
 #[macro_export]
 macro_rules! unit {
-	(0)                                      => { $crate::Unit::Zero };
-	(expr = ($($e:tt)+))                     => { $crate::Unit::Px(unsafe {      $crate::units::F32::unchecked_new(($($e)+) as _) }) };
-	(expr = ($($e:tt)+) px)                  => { $crate::Unit::Px(unsafe {      $crate::units::F32::unchecked_new(($($e)+) as _) }) };
-	(expr = ($($e:tt)+) em)                  => { $crate::Unit::Em(unsafe {      $crate::units::F32::unchecked_new(($($e)+) as _) }) };
-	(expr = ($($e:tt)+) rem)                 => { $crate::Unit::Rem(unsafe {     $crate::units::F32::unchecked_new(($($e)+) as _) }) };
-	(expr = ($($e:tt)+) vw)                  => { $crate::Unit::Vw(unsafe {      $crate::units::F32::unchecked_new(($($e)+) as _) }) };
-	(expr = ($($e:tt)+) vh)                  => { $crate::Unit::Vh(unsafe {      $crate::units::F32::unchecked_new(($($e)+) as _) }) };
-	(expr = ($($e:tt)+) vmin)                => { $crate::Unit::Vmin(unsafe {    $crate::units::F32::unchecked_new(($($e)+) as _) }) };
-	(expr = ($($e:tt)+) vmax)                => { $crate::Unit::Vmax(unsafe {    $crate::units::F32::unchecked_new(($($e)+) as _) }) };
-	(expr = ($($e:tt)+) fr)                  => { $crate::Unit::Fr(unsafe {      $crate::units::F32::unchecked_new(($($e)+) as _) }) };
+	(0)                                      => { $crate::Unit::Zero                                                                 };
+	(expr = ($($e:tt)+) $(px)?)              => { $crate::Unit::Px(     unsafe { $crate::units::F32::unchecked_new(($($e)+) as _) }) };
+	(expr = ($($e:tt)+) em)                  => { $crate::Unit::Em(     unsafe { $crate::units::F32::unchecked_new(($($e)+) as _) }) };
+	(expr = ($($e:tt)+) rem)                 => { $crate::Unit::Rem(    unsafe { $crate::units::F32::unchecked_new(($($e)+) as _) }) };
+	(expr = ($($e:tt)+) vw)                  => { $crate::Unit::Vw(     unsafe { $crate::units::F32::unchecked_new(($($e)+) as _) }) };
+	(expr = ($($e:tt)+) vh)                  => { $crate::Unit::Vh(     unsafe { $crate::units::F32::unchecked_new(($($e)+) as _) }) };
+	(expr = ($($e:tt)+) vmin)                => { $crate::Unit::Vmin(   unsafe { $crate::units::F32::unchecked_new(($($e)+) as _) }) };
+	(expr = ($($e:tt)+) vmax)                => { $crate::Unit::Vmax(   unsafe { $crate::units::F32::unchecked_new(($($e)+) as _) }) };
+	(expr = ($($e:tt)+) fr)                  => { $crate::Unit::Fr(     unsafe { $crate::units::F32::unchecked_new(($($e)+) as _) }) };
 	(expr = ($($e:tt)+) %)                   => { $crate::Unit::Percent(unsafe { $crate::units::F32::unchecked_new(($($e)+) as _) }) };
 	(expr = ($($e:tt)*) $tt:tt $($rest:tt)*) => { $crate::unit!(expr = ($($e)* $tt) $($rest)*) };
 	($head:tt $($rest:tt)*)                  => { $crate::unit!(expr = ($head) $($rest)*) };

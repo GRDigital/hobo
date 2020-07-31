@@ -7,8 +7,8 @@ pub enum Margin {
 	Auto,
 	Initial,
 	Inherit,
-	Some(Unit),
 	Unset,
+	Some(Unit),
 }
 
 #[rustfmt::skip]
@@ -19,8 +19,8 @@ impl std::fmt::Display for Margin {
 			Self::Auto       => "auto".fmt(f),
 			Self::Initial    => "initial".fmt(f),
 			Self::Inherit    => "inherit".fmt(f),
-			Self::Some(unit) => unit.fmt(f),
 			Self::Unset      => "unset".fmt(f),
+			Self::Some(unit) => unit.fmt(f),
 		}
 	}
 }

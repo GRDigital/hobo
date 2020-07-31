@@ -2,22 +2,18 @@ use crate::prelude::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Dimension {
-	Zero,
 	Auto,
 	Initial,
 	Inherit,
 	Unset,
-	Revert,
 	Some(Unit),
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum DimensionExtremity {
-	Zero,
 	Initial,
 	Inherit,
 	Unset,
-	Revert,
 	Some(Unit),
 	None,
 	MaxContent,
@@ -28,12 +24,10 @@ pub enum DimensionExtremity {
 impl std::fmt::Display for Dimension {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Zero       => "0".fmt(f),
 			Self::Auto       => "auto".fmt(f),
 			Self::Initial    => "initial".fmt(f),
 			Self::Inherit    => "inherit".fmt(f),
 			Self::Unset      => "unset".fmt(f),
-			Self::Revert     => "revert".fmt(f),
 			Self::Some(unit) => unit.fmt(f),
 		}
 	}
@@ -43,11 +37,9 @@ impl std::fmt::Display for Dimension {
 impl std::fmt::Display for DimensionExtremity {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Zero       => "0".fmt(f),
 			Self::Initial    => "initial".fmt(f),
 			Self::Inherit    => "inherit".fmt(f),
 			Self::Unset      => "unset".fmt(f),
-			Self::Revert     => "revert".fmt(f),
 			Self::Some(unit) => unit.fmt(f),
 			Self::None       => "none".fmt(f),
 			Self::MaxContent => "max-content".fmt(f),
@@ -60,12 +52,10 @@ impl std::fmt::Display for DimensionExtremity {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __dimension {
-	($kind:ident, 0)           => {$crate::Property::$kind($crate::Dimension::Zero)};
 	($kind:ident, auto)        => {$crate::Property::$kind($crate::Dimension::Auto)};
 	($kind:ident, initial)     => {$crate::Property::$kind($crate::Dimension::Initial)};
 	($kind:ident, inherit)     => {$crate::Property::$kind($crate::Dimension::Inherit)};
 	($kind:ident, unset)       => {$crate::Property::$kind($crate::Dimension::Unset)};
-	($kind:ident, revert)      => {$crate::Property::$kind($crate::Dimension::Revert)};
 	($kind:ident, $($val:tt)+) => {$crate::Property::$kind($crate::Dimension::Some($crate::unit!($($val)+)))};
 }
 
@@ -76,11 +66,9 @@ macro_rules! __dimension {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __dimension_extremity {
-	($kind:ident, 0)           => {$crate::Property::$kind($crate::DimensionExtremity::Zero)};
 	($kind:ident, initial)     => {$crate::Property::$kind($crate::DimensionExtremity::Initial)};
 	($kind:ident, inherit)     => {$crate::Property::$kind($crate::DimensionExtremity::Inherit)};
 	($kind:ident, unset)       => {$crate::Property::$kind($crate::DimensionExtremity::Unset)};
-	($kind:ident, revert)      => {$crate::Property::$kind($crate::DimensionExtremity::Revert)};
 	($kind:ident, none)        => {$crate::Property::$kind($crate::DimensionExtremity::None)};
 	($kind:ident, max-content) => {$crate::Property::$kind($crate::DimensionExtremity::MaxContent)};
 	($kind:ident, min-content) => {$crate::Property::$kind($crate::DimensionExtremity::MinContent)};

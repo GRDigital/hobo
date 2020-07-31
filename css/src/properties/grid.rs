@@ -18,7 +18,6 @@ pub enum GridSpan {
 	Initial,
 	Inherit,
 	Unset,
-	Revert,
 	Span(i32),
 	Absolute(i32),
 }
@@ -30,7 +29,6 @@ impl std::fmt::Display for GridSpan {
 			Self::Initial => "initial".fmt(f),
 			Self::Inherit => "inherit".fmt(f),
 			Self::Unset => "unset".fmt(f),
-			Self::Revert => "revert".fmt(f),
 			Self::Span(x) => write!(f, "span {}", x),
 			Self::Absolute(x) => x.fmt(f),
 		}
@@ -42,7 +40,6 @@ pub enum GridAutoFlow {
 	Inherit,
 	Initial,
 	Unset,
-	Revert,
 	Row,
 	Column,
 	RowDense,
@@ -56,7 +53,6 @@ impl std::fmt::Display for GridAutoFlow {
 			Self::Inherit     => "grid-auto-flow:inherit;".fmt(f),
 			Self::Initial     => "grid-auto-flow:initial;".fmt(f),
 			Self::Unset       => "grid-auto-flow:unset;".fmt(f),
-			Self::Revert      => "grid-auto-flow:revert;".fmt(f),
 			Self::Row         => "grid-auto-flow:row;".fmt(f),
 			Self::Column      => "grid-auto-flow:column;".fmt(f),
 			Self::RowDense    => "grid-auto-flow:row dense;".fmt(f),
@@ -70,7 +66,6 @@ macro_rules! grid_auto_flow {
 	(inherit)      => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::Inherit)};
 	(initial)      => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::Initial)};
 	(unset)        => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::Unset)};
-	(revert)       => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::Revert)};
 	(row)          => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::Row)};
 	(column)       => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::Column)};
 	(row dense)    => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::RowDense)};
@@ -120,7 +115,6 @@ pub enum GridTemplate {
 	Inherit,
 	Initial,
 	Unset,
-	Revert,
 	None,
 	Some(Vec<GridTemplateValue>),
 }
@@ -132,7 +126,6 @@ impl std::fmt::Display for GridTemplate {
 			Self::Inherit     => "inherit".fmt(f),
 			Self::Initial     => "initial".fmt(f),
 			Self::Unset       => "unset".fmt(f),
-			Self::Revert      => "revert".fmt(f),
 			Self::None        => "none".fmt(f),
 			Self::Some(values)     => {
 				if let Some((first, rest)) = values.split_first() {
@@ -168,7 +161,6 @@ pub enum GridAuto {
 	Inherit,
 	Initial,
 	Unset,
-	Revert,
 	Auto,
 	Some(Vec<Unit>),
 }
@@ -180,7 +172,6 @@ impl std::fmt::Display for GridAuto {
 			Self::Inherit => "inherit".fmt(f),
 			Self::Initial => "initial".fmt(f),
 			Self::Unset   => "unset".fmt(f),
-			Self::Revert  => "revert".fmt(f),
 			Self::Auto    => "auto".fmt(f),
 			Self::Some(units) => {
 				if let Some((first, rest)) = units.split_first() {

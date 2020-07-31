@@ -12,6 +12,7 @@
 #[macro_use] mod filter;
 #[macro_use] mod grid;
 #[macro_use] mod clip_path;
+#[macro_use] mod appearance;
 
 use crate::prelude::*;
 pub use animation::*;
@@ -28,6 +29,7 @@ pub use position::*;
 pub use svg::*;
 pub use text::*;
 pub use transform::*;
+pub use appearance::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum ColorValue {
@@ -35,7 +37,6 @@ pub enum ColorValue {
 	Initial,
 	Inherit,
 	Unset,
-	Revert,
 }
 
 #[rustfmt::skip]
@@ -46,31 +47,26 @@ impl std::fmt::Display for ColorValue {
 			Self::Initial    => "initial".fmt(f),
 			Self::Inherit    => "inherit".fmt(f),
 			Self::Unset      => "unset".fmt(f),
-			Self::Revert     => "revert".fmt(f),
 		}
 	}
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum UnitValue {
-	Zero,
 	Unit(Unit),
 	Initial,
 	Inherit,
 	Unset,
-	Revert,
 }
 
 #[rustfmt::skip]
 impl std::fmt::Display for UnitValue {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Zero    => "0".fmt(f),
 			Self::Unit(x) => x.fmt(f),
 			Self::Initial => "initial".fmt(f),
 			Self::Inherit => "inherit".fmt(f),
 			Self::Unset   => "unset".fmt(f),
-			Self::Revert  => "revert".fmt(f),
 		}
 	}
 }
@@ -372,37 +368,3 @@ css_macros::easy_enum! {perspective none [unit]}
 css_macros::easy_enum! {backface-visibility visible hidden}
 css_macros::easy_enum! {overflow-x visible hidden scroll auto}
 css_macros::easy_enum! {overflow-y visible hidden scroll auto}
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub enum Appearance {
-	Initial,
-	Inherit,
-	Unset,
-	Revert,
-	None,
-	Auto,
-}
-
-#[rustfmt::skip]
-impl std::fmt::Display for Appearance {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self {
-			Self::Initial => "appearance:initial;-webkit-appearance:initial;-moz-appearance:initial;".fmt(f),
-			Self::Inherit => "appearance:inherit;-webkit-appearance:inherit;-moz-appearance:inherit;".fmt(f),
-			Self::Unset   => "appearance:unset;-webkit-appearance:unset;-moz-appearance:unset;".fmt(f),
-			Self::Revert  => "appearance:revert;-webkit-appearance:revert;-moz-appearance:revert;".fmt(f),
-			Self::None    => "appearance:none;-webkit-appearance:none;-moz-appearance:none;".fmt(f),
-			Self::Auto    => "appearance:auto;-webkit-appearance:auto;-moz-appearance:auto;".fmt(f),
-		}
-	}
-}
-
-#[macro_export]
-macro_rules! appearance {
-	(initial) => {$crate::Property::Appearance($crate::Appearance::Initial)};
-	(inherit) => {$crate::Property::Appearance($crate::Appearance::Inherit)};
-	(unset)   => {$crate::Property::Appearance($crate::Appearance::Unset)};
-	(revert)  => {$crate::Property::Appearance($crate::Appearance::Revert)};
-	(none)    => {$crate::Property::Appearance($crate::Appearance::None)};
-	(auto)    => {$crate::Property::Appearance($crate::Appearance::Auto)};
-}

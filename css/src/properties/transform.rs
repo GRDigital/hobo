@@ -6,8 +6,7 @@ pub enum TransformOrigin {
 	None,
 	Initial,
 	Inherit,
-	// Unset,
-	// Revert,
+	Unset,
 	Some(Unit, Unit),
 }
 
@@ -18,6 +17,7 @@ impl std::fmt::Display for TransformOrigin {
 			Self::None              => "transform-origin:none;".fmt(f),
 			Self::Initial           => "transform-origin:initial;".fmt(f),
 			Self::Inherit           => "transform-origin:inherit;".fmt(f),
+			Self::Unset             => "transform-origin:unset;".fmt(f),
 			Self::Some(top, bottom) => write!(f, "transform-origin:{} {};", top, bottom),
 		}
 	}
@@ -29,6 +29,7 @@ pub enum Transform {
 	None,
 	Initial,
 	Inherit,
+	Unset,
 	Some(Vec<TransformFunction>),
 }
 
@@ -39,6 +40,7 @@ impl std::fmt::Display for Transform {
 			Self::None       => "transform:none;".fmt(f),
 			Self::Initial    => "transform:initial;".fmt(f),
 			Self::Inherit    => "transform:inherit;".fmt(f),
+			Self::Unset      => "transform:unset;".fmt(f),
 			Self::Some(fns)  => {
 				"transform:".fmt(f)?;
 				if let Some((first, rest)) = fns.split_first() {

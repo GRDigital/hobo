@@ -45,15 +45,23 @@ impl Parse for UnitValueMacro {
 #[proc_macro]
 pub fn unit_value_macro(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let UnitValueMacro { macro_name, property_name } = syn::parse_macro_input!(input);
+
+	let test_fn_name = quote::format_ident!("{}_initial_inherit_unset", macro_name);
+
 	(quote! {
 		#[macro_export]
 		macro_rules! #macro_name {
 			(initial)     => {$crate::Property::#property_name($crate::UnitValue::Initial)};
 			(inherit)     => {$crate::Property::#property_name($crate::UnitValue::Inherit)};
 			(unset)       => {$crate::Property::#property_name($crate::UnitValue::Unset)};
-			(revert)      => {$crate::Property::#property_name($crate::UnitValue::Revert)};
-			(0)           => {$crate::Property::#property_name($crate::UnitValue::Zero)};
 			($($val:tt)+) => {$crate::Property::#property_name($crate::UnitValue::Unit($crate::unit!($($val)+)))};
+		}
+
+		#[test]
+		fn #test_fn_name() {
+			assert_eq!(#macro_name!(initial), crate::Property::#property_name(crate::UnitValue::Initial));
+			assert_eq!(#macro_name!(inherit), crate::Property::#property_name(crate::UnitValue::Inherit));
+			assert_eq!(#macro_name!(unset), crate::Property::#property_name(crate::UnitValue::Unset));
 		}
 	}).into()
 }

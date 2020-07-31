@@ -14,7 +14,6 @@ pub enum BackgroundImage {
 	Initial,
 	Inherit,
 	Unset,
-	Revert,
 	Some(Vec<crate::Image>),
 }
 
@@ -25,7 +24,6 @@ impl std::fmt::Display for BackgroundImage {
 			Self::Initial => "background-image:initial;".fmt(f),
 			Self::Inherit => "background-image:inherit;".fmt(f),
 			Self::Unset   => "background-image:unset;".fmt(f),
-			Self::Revert  => "background-image:revert;".fmt(f),
 			Self::Some(images) => {
 				"background-image:".fmt(f)?;
 				if let Some((first, rest)) = images.split_first() {

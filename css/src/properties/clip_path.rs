@@ -32,7 +32,6 @@ pub enum ClipPath {
 	Initial,
 	Inherit,
 	Unset,
-	Revert,
 	Url(String),
 	Shape(Vec<ClipPathShape>),
 }
@@ -44,7 +43,6 @@ impl std::fmt::Display for ClipPath {
 			Self::Initial => "-webkit-clip-path:initial;clip-path:initial;".fmt(f),
 			Self::Inherit => "-webkit-clip-path:inherit;clip-path:inherit;".fmt(f),
 			Self::Unset => "-webkit-clip-path:unset;clip-path:unset;".fmt(f),
-			Self::Revert => "-webkit-clip-path:revert;clip-path:revert;".fmt(f),
 			Self::Url(x) => write!(f, r#"-webkit-clip-path:url("{0}");clip-path:url("{0}");"#, x),
 			Self::Shape(shapes) => {
 				if let Some((first, rest)) = shapes.split_first() {
