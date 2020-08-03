@@ -4,16 +4,14 @@
 
 use slotmap::DenseSlotMap;
 use std::{
-	cell::{RefCell, RefMut},
+	cell::{RefCell, RefMut, Cell},
 	ops::{Deref, DerefMut},
-	rc::Rc,
+	rc::{Rc, Weak},
 };
 
 static MAX_NESTED_UPDATES: usize = 100;
 
-slotmap::new_key_type! {
-	pub struct SubscriptionKey;
-}
+slotmap::new_key_type! {pub struct SubscriptionKey;}
 
 type SubscriptionFn = Rc<RefCell<dyn FnMut()>>;
 
@@ -21,8 +19,8 @@ type SubscriptionFn = Rc<RefCell<dyn FnMut()>>;
 pub struct StateSlice<T> {
 	data: RefCell<T>,
 	subscribers: RefCell<DenseSlotMap<SubscriptionKey, SubscriptionFn>>,
-	update_ongoing: RefCell<bool>,
-	dirty: RefCell<bool>,
+	update_ongoing: Cell<bool>,
+	dirty: Cell<bool>,
 }
 
 // TODO: better debug impl
@@ -56,14 +54,14 @@ impl<'a, T> DerefMut for StateSliceGuard<'a, T> {
 impl<'a, T> Drop for StateSliceGuard<'a, T> {
 	fn drop(&mut self) {
 		drop(self.data_ref.take());
-		*self.state.dirty.borrow_mut() = true;
-		if *self.state.update_ongoing.borrow() {
+		self.state.dirty.set(true);
+		if self.state.update_ongoing.get() {
 			return;
 		}
-		*self.state.update_ongoing.borrow_mut() = true;
+		self.state.update_ongoing.set(true);
 
 		for _ in 0..MAX_NESTED_UPDATES {
-			*self.state.dirty.borrow_mut() = false;
+			self.state.dirty.set(false);
 			let snapshot = self.state.subscribers.borrow().values().cloned().collect::<Vec<_>>();
 			for subscriber in snapshot {
 				let mut subscriber = subscriber.borrow_mut();
@@ -71,8 +69,8 @@ impl<'a, T> Drop for StateSliceGuard<'a, T> {
 				f();
 			}
 
-			if !*self.state.dirty.borrow() {
-				*self.state.update_ongoing.borrow_mut() = false;
+			if !self.state.dirty.get() {
+				self.state.update_ongoing.set(false);
 				return;
 			}
 		}
@@ -81,15 +79,22 @@ impl<'a, T> Drop for StateSliceGuard<'a, T> {
 	}
 }
 
-pub struct Subscription<'a>(&'a dyn Unsub<'a>, SubscriptionKey);
-
-impl<'a> Drop for Subscription<'a> {
-	fn drop(&mut self) { self.0.unsubscribe(self.1); }
+pub trait Unsub {
+	fn unsubscribe(&self, key: SubscriptionKey);
 }
 
-pub trait Unsub<'a> {
-	fn unsubscribe(&'a self, key: SubscriptionKey);
+impl<T> Unsub for Weak<StateSlice<T>> {
+	fn unsubscribe(&self, key: SubscriptionKey) {
+		if let Some(state) = self.upgrade() { state.unsubscribe(key); }
+	}
 }
+
+impl<T> Unsub for &'static StateSlice<T> {
+	fn unsubscribe(&self, key: SubscriptionKey) { StateSlice::unsubscribe(self, key); }
+}
+
+pub struct Subscription(Box<dyn Unsub>, SubscriptionKey);
+impl Drop for Subscription { fn drop(&mut self) { self.0.unsubscribe(self.1); } }
 
 impl<T> StateSlice<T> {
 	pub fn new(initial: T) -> Self {
@@ -102,27 +107,53 @@ impl<T> StateSlice<T> {
 
 	pub fn view<'a>(&'a self) -> impl Deref<Target = T> + 'a { self.data.borrow() }
 
-	#[must_use]
-	pub fn subscribe(&self, f: impl FnMut() + 'static) -> Subscription {
-		Subscription(self, self.subscribers.borrow_mut().insert(Rc::new(RefCell::new(f))))
-	}
-
 	pub fn subscribe_key(&self, f: impl FnMut() + 'static) -> SubscriptionKey {
 		self.subscribers.borrow_mut().insert(Rc::new(RefCell::new(f)))
 	}
+
+	fn unsubscribe(&self, key: SubscriptionKey) { self.subscribers.borrow_mut().remove(key); }
 }
 
-impl<'a, T> Unsub<'a> for StateSlice<T> {
-	fn unsubscribe(&'a self, key: SubscriptionKey) { self.subscribers.borrow_mut().remove(key); }
-}
-
-#[derive(shrinkwraprs::Shrinkwrap)]
+#[derive(shrinkwraprs::Shrinkwrap, Default)]
 pub struct State<T>(pub Rc<StateSlice<T>>);
 
 impl<T> Clone for State<T> {
 	fn clone(&self) -> Self { Self(Rc::clone(&self.0)) }
 }
 
-impl<T> State<T> {
+impl<T: 'static> State<T> {
 	pub fn new(initial: T) -> Self { State(Rc::new(StateSlice::new(initial))) }
+
+	#[must_use]
+	pub fn subscribe(&self, f: impl FnMut() + 'static) -> Subscription {
+		Subscription(Box::new(Rc::downgrade(&self.0)), self.0.subscribe_key(f))
+	}
+}
+
+impl<T> StateSlice<T> {
+	pub fn subscribe(&'static self, f: impl FnMut() + 'static) -> Subscription {
+		Subscription(Box::new(self), self.subscribe_key(f))
+	}
+}
+
+#[test]
+fn state_update() {
+	use crate::enclose as e;
+
+	let state = State::new(5);
+	let sub = state.subscribe(e!((%state state) move || {
+		assert_eq!(*state.view(), 10);
+	}));
+	*state.update() = 10;
+}
+
+#[test]
+fn sub_drop() {
+	use crate::enclose as e;
+
+	let state = State::new(5);
+	let sub = state.subscribe(move || panic!("sub ran after dropped"));
+	drop(sub);
+	*state.update() = 10;
+	assert_eq!(*state.view(), 10);
 }
