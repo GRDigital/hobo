@@ -7,7 +7,7 @@ pub mod events;
 pub mod prelude;
 mod replaceable;
 mod slot;
-pub mod state_slice;
+pub mod state;
 mod style_storage;
 mod svg_element;
 pub mod web_str;

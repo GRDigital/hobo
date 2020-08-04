@@ -8,10 +8,10 @@ macro_rules! __make_rc_upgrade_stmt {
 		let $e = if let Some(x) = ::std::rc::Weak::upgrade(&$e) { $crate::Slot(x) } else { return; };
 	};
 	(%state $expr:expr => $ident:ident) => {
-		let $ident = if let Some(x) = ::std::rc::Weak::upgrade(&$ident) { $crate::state_slice::State(x) } else { return; };
+		let $ident = if let Some(x) = ::std::rc::Weak::upgrade(&$ident) { $crate::state::State(x) } else { return; };
 	};
 	(%state $e:ident) => {
-		let $e = if let Some(x) = ::std::rc::Weak::upgrade(&$e) { $crate::state_slice::State(x) } else { return; };
+		let $e = if let Some(x) = ::std::rc::Weak::upgrade(&$e) { $crate::state::State(x) } else { return; };
 	};
 	(% $expr:expr => $ident:ident) => {
 		let $ident = if let Some(x) = ::std::rc::Weak::upgrade(&$ident) { x } else { return; };
