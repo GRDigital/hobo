@@ -56,3 +56,27 @@ where
 	T: RawElement<RawElementType = E>,
 	E: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement>,
 {}
+
+pub trait ToClassStr {
+	fn to_class_str(self) -> String;
+}
+
+impl ToClassStr for &str {
+	fn to_class_str(self) -> String { self.into() }
+}
+
+impl ToClassStr for String {
+	fn to_class_str(self) -> String { self }
+}
+
+impl ToClassStr for &css::Style {
+	fn to_class_str(self) -> String {
+		STYLE_STORAGE.with(move |style_storage| style_storage.fetch(self.clone()))
+	}
+}
+
+impl<T: Element + 'static> ToClassStr for &T {
+	fn to_class_str(self) -> String {
+		T::type_class_string()
+	}
+}

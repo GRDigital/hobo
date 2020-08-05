@@ -34,7 +34,7 @@ impl Parse for Selector {
 					} else if input.peek(syn::token::Paren) {
 						// class expr
 						let content = { let content; syn::parenthesized!(content in input); content.parse::<syn::Expr>()? };
-						quote! { .class(#content.into()) }
+						quote! { .class(#content.to_class_str()) }
 					} else if input.parse::<Token![&]>().is_ok() {
 						quote! { .class_placeholder() }
 					} else {
