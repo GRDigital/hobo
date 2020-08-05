@@ -8,7 +8,7 @@ pub use crate::{
 #[doc(hidden)] pub use wasm_bindgen::JsCast as _;
 
 pub use crate::{
-	state::{State, StateSlice},
+	state,
 	web_str, RawEventTarget as _,
 };
 pub use crate::css::{self, AppendProperty};
