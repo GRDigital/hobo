@@ -27,7 +27,7 @@ pub trait Element {
 		let element = self.element();
 
 		#[cfg(debug_assertions)]
-		element.set_attribute("data-hobo-type", &std::any::type_name::<Self>()).unwrap();
+		element.set_attribute(wasm_bindgen::intern("data-hobo-type"), &std::any::type_name::<Self>()).unwrap();
 
 		// tested and different types with same byte-level representation hash to the same thing (not surprising)
 		// i.e. the type is not taken into account when hashing so I have to do it manually
