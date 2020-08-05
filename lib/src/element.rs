@@ -1,4 +1,4 @@
-use crate::{prelude::*, CONTEXT};
+use crate::{prelude::*, STYLE_STORAGE};
 use std::{
 	borrow::Cow,
 	cell::RefCell,
@@ -18,6 +18,20 @@ pub trait Element {
 
 	fn set_attr<'a>(&self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) where Self: Sized + 'static {
 		self.element().set_attribute(&key.into(), &value.into()).expect("can't set attribute");
+	}
+
+	/// Set an attribute with an empty string value
+	/// https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes#Boolean_Attributes
+	fn set_bool_attr<'a>(&self, key: impl Into<Cow<'a, str>>, value: bool) where Self: Sized + 'static {
+		if value {
+			self.set_attr(key, "");
+		} else {
+			self.remove_attr(key);
+		}
+	}
+
+	fn remove_attr<'a>(&self, key: impl Into<Cow<'a, str>>) where Self: Sized + 'static {
+		self.element().remove_attribute(&key.into()).expect("can't set attribute");
 	}
 
 	/// Set a tagged class, which means that if a different tag is used - a new style will be applied
@@ -41,7 +55,7 @@ pub trait Element {
 		self.classes().borrow_mut().insert(tag_hash, style);
 
 		let mut final_class = Self::type_class_string();
-		for x in self.classes().borrow().values().map(|style| CONTEXT.with(|ctx| ctx.style_storage.fetch(style.clone()))) {
+		for x in self.classes().borrow().values().map(|style| STYLE_STORAGE.with(|style_storage| style_storage.fetch(style.clone()))) {
 			final_class.push_str(" ");
 			final_class.push_str(&x);
 		}
@@ -64,11 +78,8 @@ pub trait Element {
 	fn style<'a>(self, style: impl Into<Cow<'a, [css::Property]>>) -> Self where Self: Sized + 'static { self.set_style(style); self }
 	/// Chaining alternative to `set_attr`
 	fn attr<'a>(self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) -> Self where Self: Sized + 'static { self.set_attr(key, value); self }
-	/// Set an attribute with an empty string value
-	/// https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes#Boolean_Attributes
-	fn bool_attr<'a>(self, key: impl Into<Cow<'a, str>>) -> Self where Self: Sized + 'static { self.attr(key, "") }
 	/// Chaining alternative to `bool_attr`
-	fn set_bool_attr<'a>(&self, key: impl Into<Cow<'a, str>>) where Self: Sized + 'static { self.set_attr(key, "") }
+	fn bool_attr<'a>(self, key: impl Into<Cow<'a, str>>, value: bool) -> Self where Self: Sized + 'static { self.set_bool_attr(key, value); self }
 }
 
 impl Element for RefCell<dyn Element> {
@@ -105,8 +116,8 @@ impl<T: Hash> T {
 #[extend::ext(pub, name = RawSetClass)]
 impl web_sys::Element {
 	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) {
-		CONTEXT.with(move |ctx| {
-			let element_class = ctx.style_storage.fetch(style.into().into_owned());
+		STYLE_STORAGE.with(move |style_storage| {
+			let element_class = style_storage.fetch(style.into().into_owned());
 			self.set_attribute(web_str::class(), &element_class).expect("can't set attribute");
 		})
 	}

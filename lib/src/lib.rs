@@ -28,13 +28,8 @@ pub use web_sys;
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
 
-#[derive(Default)]
-pub struct Context {
-	style_storage: style_storage::StyleStorage,
-}
-
 thread_local! {
-	static CONTEXT: Context = Default::default();
+	static STYLE_STORAGE: style_storage::StyleStorage = Default::default();
 }
 
 /// Trait for hobo components with textual contents
