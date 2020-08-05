@@ -93,14 +93,7 @@ macro_rules! properties {
 
 #[macro_export]
 macro_rules! class {
-	($($rules:tt)*) => {
-		$crate::Style(vec![
-			$crate::Rule::Style($crate::StyleRule(
-				$crate::selector::SelectorBuilder.class_placeholder(),
-				$crate::properties!($($rules)*),
-			)),
-		])
-	};
+	($($rules:tt)*) => {$crate::style!(.& { $($rules)* })};
 }
 
 // TODO: procmacroify?
