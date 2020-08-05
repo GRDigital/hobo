@@ -28,7 +28,6 @@ pub enum PseudoClass {
 	only_child,
 	read_only,
 	valid,
-	raw(String),
 	// etc
 }
 
@@ -52,7 +51,6 @@ impl std::fmt::Display for PseudoClass {
 			Self::only_child           => ":only-child".fmt(f),
 			Self::read_only            => ":read-only".fmt(f),
 			Self::valid                => ":valid".fmt(f),
-			Self::raw(x)               => write!(f, ":{}", x),
 		}
 	}
 }
@@ -134,6 +132,7 @@ pub enum SelectorComponent {
 	ClassPlaceholder,
 	Any,
 	Attribute(String),
+	Raw(String),
 }
 
 #[rustfmt::skip]
@@ -152,6 +151,7 @@ impl std::fmt::Display for SelectorComponent {
 			Self::ClassPlaceholder => ".&".fmt(f),
 			Self::Any              => "*".fmt(f),
 			Self::Attribute(x)     => write!(f, "[{}]", x),
+			Self::Raw(x)           => x.fmt(f),
 		}
 	}
 }
@@ -179,6 +179,8 @@ impl SelectorBuilder {
 	pub fn pseudo_class(self, x: PseudoClass)         -> Selector              { Selector(vec![SelectorComponent::PseudoClass(x)]) }
 	pub fn pseudo_element(self, x: PseudoElement)     -> Selector              { Selector(vec![SelectorComponent::PseudoElement(x)]) }
 	pub fn attribute(self, x: String)                 -> Selector              { Selector(vec![SelectorComponent::Attribute(x)]) }
+
+	pub fn raw(self, x: String)                       -> Selector              { Selector(vec![SelectorComponent::Raw(x)]) }
 }
 
 #[rustfmt::skip]
@@ -194,6 +196,8 @@ impl Selector {
 	pub fn descendant(mut self)                       -> CombiningSelector     { self.0.push(SelectorComponent::Descendant); CombiningSelector(self.0) }
 	pub fn adjacent(mut self)                         -> CombiningSelector     { self.0.push(SelectorComponent::Adjacent); CombiningSelector(self.0) }
 	pub fn and(mut self)                              -> CombiningSelector     { self.0.push(SelectorComponent::And); CombiningSelector(self.0) }
+
+	pub fn raw(mut self, x: String)                   -> Self                  { self.0.push(SelectorComponent::Raw(x)); self }
 }
 
 #[rustfmt::skip]
@@ -207,6 +211,8 @@ impl CombiningSelector {
 	pub fn pseudo_class(mut self, x: PseudoClass)     -> Selector              { self.0.push(SelectorComponent::PseudoClass(x)); Selector(self.0) }
 	pub fn pseudo_element(mut self, x: PseudoElement) -> Selector              { self.0.push(SelectorComponent::PseudoElement(x)); Selector(self.0) }
 	pub fn attribute(mut self, x: String)             -> Selector              { self.0.push(SelectorComponent::Attribute(x)); Selector(self.0) }
+
+	pub fn raw(mut self, x: String)                   -> Selector              { self.0.push(SelectorComponent::Raw(x)); Selector(self.0) }
 }
 
 #[rustfmt::skip]
@@ -215,6 +221,8 @@ impl PseudoElementSelector {
 	pub fn descendant(mut self)                       -> CombiningSelector     { self.0.push(SelectorComponent::Descendant); CombiningSelector(self.0) }
 	pub fn adjacent(mut self)                         -> CombiningSelector     { self.0.push(SelectorComponent::Adjacent); CombiningSelector(self.0) }
 	pub fn and(mut self)                              -> CombiningSelector     { self.0.push(SelectorComponent::And); CombiningSelector(self.0) }
+
+	pub fn raw(mut self, x: String)                   -> Selector              { self.0.push(SelectorComponent::Raw(x)); Selector(self.0) }
 }
 
 impl From<PseudoElementSelector> for Selector {
@@ -241,7 +249,7 @@ fn test_new_selector() {
 		.& >> div:nth_child(2, 1),
 		.& >> *,
 		div + * >> span > .&,
-		span :["raw pseudo_class"] > div :nth_child(0, 2) > span :nth_of_type(15) :hover,
+		span raw("::raw_pseudo_class") > div :nth_child(0, 2) > span :nth_of_type(15) :hover,
 		:not(div > span),
 		div > .("raw class") [active] #("raw id") ::after
 	);

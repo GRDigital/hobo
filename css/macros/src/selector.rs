@@ -13,14 +13,20 @@ impl Parse for Selector {
 
 		while !input.is_empty() {
 			let element = {
+				syn::custom_keyword!(raw);
+
 				if input.parse::<Token![+]>().is_ok() { quote! { .adjacent() } }
 				else if input.parse::<Token![>>]>().is_ok() { quote! { .descendant() } }
 				else if input.parse::<Token![>]>().is_ok() { quote! { .child() } }
 				else if input.parse::<Token![,]>().is_ok() { quote! { .and() } }
 				else if input.parse::<Token![*]>().is_ok() { quote! { .any() } }
-				// html/svg element like div/span/a/p/img
-				else if let Ok(element) = input.parse::<syn::Ident>() { quote! { .element(#crate_name::selector::Element::#element) } }
-				else if input.parse::<Token![.]>().is_ok() {
+				else if input.parse::<raw>().is_ok() {
+					let content = { let content; syn::parenthesized!(content in input); content.parse::<syn::Expr>()? };
+					quote! { .raw(#content.into()) }
+				} else if let Ok(element) = input.parse::<syn::Ident>() {
+					// html/svg element like div/span/a/p/img
+					quote! { .element(#crate_name::selector::Element::#element) }
+				} else if input.parse::<Token![.]>().is_ok() {
 					if input.peek(syn::token::Bracket) {
 						// some element type
 						let content = { let content; syn::bracketed!(content in input); content.parse::<syn::Type>()? };
@@ -51,10 +57,7 @@ impl Parse for Selector {
 					// pseudo class stuff
 					syn::custom_keyword!(not);
 
-					if input.peek(syn::token::Bracket) {
-						let content = { let content; syn::bracketed!(content in input); content.parse::<syn::Expr>()? };
-						quote! { .pseudo_class(#crate_name::selector::PseudoClass::raw(#content.into())) }
-					} else if input.parse::<not>().is_ok() {
+					if input.parse::<not>().is_ok() {
 						let content = { let content; syn::parenthesized!(content in input); content.parse::<Selector>()? };
 						quote! { .pseudo_class(#crate_name::selector::PseudoClass::not(#crate_name::selector::SelectorBuilder #content)) }
 					} else if let Ok(pseudo_class) = input.parse::<syn::Ident>() {
@@ -66,13 +69,6 @@ impl Parse for Selector {
 						}
 					} else {
 						abort!(input.parse::<TokenTree>().unwrap(), "unknown token for a pseudo_class")
-					}
-				} else if input.parse::<Token![@]>().is_ok() {
-					// at-rules
-					if let Ok(_) = input.parse::<HyphenatedName>() {
-						abort!(input.parse::<TokenTree>().unwrap(), "unknown at-rule")
-					} else {
-						abort!(input.parse::<TokenTree>().unwrap(), "unknown token for an at-rule")
 					}
 				} else {
 					abort!(input.parse::<TokenTree>().unwrap(), "unknown token")
