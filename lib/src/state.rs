@@ -16,22 +16,13 @@ pub use state_slice::StateSlice;
 
 slotmap::new_key_type! {pub struct SubscriptionKey;}
 
-pub trait Unsub {
-	fn unsubscribe(&self, key: SubscriptionKey);
-}
-
-impl<T> Unsub for Weak<RefCell<StateSlice<T>>> {
-	fn unsubscribe(&self, key: SubscriptionKey) {
-		if let Some(state) = self.upgrade() { state.borrow_mut().unsubscribe(key); }
+pub struct Subscription(Weak<RefCell<StateSliceMeta>>, SubscriptionKey);
+impl Drop for Subscription {
+	fn drop(&mut self) {
+		let meta = if let Some(x) = self.0.upgrade() { x } else { return; };
+		meta.borrow_mut().subscribers.remove(self.1);
 	}
 }
-
-impl<T> Unsub for &'static State<T> {
-	fn unsubscribe(&self, key: SubscriptionKey) { self.0.borrow_mut().unsubscribe(key); }
-}
-
-pub struct Subscription(Box<dyn Unsub>, SubscriptionKey);
-impl Drop for Subscription { fn drop(&mut self) { self.0.unsubscribe(self.1); } }
 
 #[derive(Default)]
 pub struct State<T>(pub Rc<RefCell<StateSlice<T>>>);
@@ -81,7 +72,8 @@ impl<T: 'static> State<T> {
 
 	#[must_use]
 	pub fn subscribe(&self, f: impl FnMut() + 'static) -> Subscription {
-		Subscription(Box::new(Rc::downgrade(&self.0)), self.0.borrow_mut().subscribe_key(f))
+		let state_slice = self.0.borrow();
+		Subscription(Rc::downgrade(&state_slice.meta), state_slice.subscribe_key(f))
 	}
 
 	fn unsubscribe(&self, key: SubscriptionKey) { self.0.borrow().unsubscribe(key) }

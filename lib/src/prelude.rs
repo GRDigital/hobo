@@ -1,7 +1,6 @@
 #[doc(hidden)]
 pub use crate::{
 	element::{HashToClassString as _, RawSetClass as _},
-	state::Unsub as _,
 	Container as _, Element as _, EventTarget as _, RawElement as _, Replaceable as _, SetText as _, Slot,
 	ToClassStr as _,
 };

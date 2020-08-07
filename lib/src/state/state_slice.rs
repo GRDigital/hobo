@@ -55,8 +55,12 @@ impl<T> StateSlice<T> {
 		self.meta.borrow_mut().subscribers.insert(Rc::new(RefCell::new(f)))
 	}
 
-	pub fn unsubscribe(&self, key: SubscriptionKey) { self.meta.borrow_mut().subscribers.remove(key); }
+	#[must_use]
+	pub fn subscribe(&self, f: impl FnMut() + 'static) -> Subscription {
+		Subscription(Rc::downgrade(&self.meta), self.subscribe_key(f))
+	}
 
+	pub fn unsubscribe(&self, key: SubscriptionKey) { self.meta.borrow_mut().subscribers.remove(key); }
 }
 
 // TODO: better debug impl
