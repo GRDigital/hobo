@@ -13,6 +13,7 @@ use std::{
 };
 use state_slice::StateSliceMeta;
 pub use state_slice::StateSlice;
+pub use crate::{__view as view, __update as update};
 
 slotmap::new_key_type! {pub struct SubscriptionKey;}
 
@@ -77,4 +78,18 @@ impl<T: 'static> State<T> {
 	}
 
 	fn unsubscribe(&self, key: SubscriptionKey) { self.0.borrow().unsubscribe(key) }
+}
+
+#[macro_export]
+macro_rules! __view {
+	($($element:ident).*) => {
+		$($element.view()).*
+	};
+}
+
+#[macro_export]
+macro_rules! __update {
+	($($element:ident).*) => {
+		$($element.update()).*
+	};
 }
