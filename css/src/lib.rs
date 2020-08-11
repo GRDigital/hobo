@@ -20,7 +20,12 @@ pub use color::Color;
 pub use units::F32;
 pub use append_property::AppendProperty;
 
-pub fn new_f32(x: f32) -> F32 { F32::new(x).unwrap() }
+#[extend::ext(pub)]
+impl F32 {
+	fn new_unwrap(x: f32) -> Self {
+		F32::new(x).unwrap()
+	}
+}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Rule {
