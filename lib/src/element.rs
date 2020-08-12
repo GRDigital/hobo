@@ -68,10 +68,10 @@ pub trait Element {
 	/// Remove `style` tag altogether
 	fn remove_style(&self) { self.element().remove_style(); }
 
-	/// Set a style with a `__default` tag
-	fn set_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) where Self: Sized + 'static { self.set_class_tagged("__default", style) }
-	/// Chaining alternative to `set_class`
-	fn class<'a>(self, style: impl Into<Cow<'a, css::Style>>) -> Self where Self: Sized + 'static { self.set_class(style); self }
+	/// Set a style with a tag of how many styles the element has already
+	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) where Self: Sized + 'static { self.set_class_tagged(self.classes().borrow().len(), style) }
+	/// Chaining alternative to `add_class`
+	fn class<'a>(self, style: impl Into<Cow<'a, css::Style>>) -> Self where Self: Sized + 'static { self.add_class(style); self }
 	/// Chaining alternative to `set_class_tagged`
 	fn class_tagged<'a>(self, tag: impl Hash + 'static, style: impl Into<Cow<'a, css::Style>>) -> Self where Self: Sized + 'static { self.set_class_tagged(tag, style); self }
 	/// Chaining alternative to `set_style`
