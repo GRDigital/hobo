@@ -69,7 +69,7 @@ pub trait Element {
 	fn remove_style(&self) { self.element().remove_style(); }
 
 	/// Set a style with a tag of how many styles the element has already
-	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) where Self: Sized + 'static { self.set_class_tagged(self.classes().borrow().len(), style) }
+	fn add_class<'a>(&self, style: impl Into<Cow<'a, css::Style>>) where Self: Sized + 'static { let id = self.classes().borrow().len(); self.set_class_tagged(id, style) }
 	/// Chaining alternative to `add_class`
 	fn class<'a>(self, style: impl Into<Cow<'a, css::Style>>) -> Self where Self: Sized + 'static { self.add_class(style); self }
 	/// Chaining alternative to `set_class_tagged`
