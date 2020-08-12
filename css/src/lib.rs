@@ -104,12 +104,14 @@ macro_rules! class {
 // TODO: procmacroify?
 #[macro_export]
 macro_rules! rule {
-	(@font-face { $($prop:ident : $value:expr),*$(,)? }) => {
+	(@font-face { $($prop:ident : $value:expr),*$(,)? }) => {{
+		use $crate::font_face::*;
+
 		$crate::Rule::FontFace($crate::font_face::FontFace {
 			$($prop: $value),*,
 			..$crate::font_face::FontFace::default()
 		})
-	};
+	}};
 
 	// finished @media
 	((@media $($selector:tt)+) { $($style:tt)* }) => {
