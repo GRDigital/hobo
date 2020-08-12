@@ -94,10 +94,31 @@ pub enum Format {
 	#[strum(to_string = "svg")] Svg,
 }
 
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub enum Source {
+	Local(String),
+	Url(String, Option<Format>),
+}
+
+impl std::fmt::Display for Source {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Self::Local(name) => write!(f, r#"local("{}")"#, name),
+			Self::Url(name, format) => {
+				write!(f, r#"url("{}")"#, name)?;
+				if let Some(format) = format {
+					write!(f, r#" format("{}")"#, format)?;
+				}
+				Ok(())
+			},
+		}
+	}
+}
+
 #[derive(Debug, PartialEq, Eq, Hash, Clone, SmartDefault)]
 pub struct FontFace {
 	pub font_family: String,
-	pub src: Vec<(String, Option<Format>)>,
+	pub src: Vec<Source>,
 	pub font_display: Display,
 	pub font_stretch: (Stretch, Option<Stretch>),
 	pub font_style: Style,
@@ -105,33 +126,38 @@ pub struct FontFace {
 	// font_variant:
 	// font-feature-settings
 	// font-variation-settings:
-	// unicode_range: Vec<(u32, u32)>,
+	pub unicode_range: Vec<(u32, Option<u32>)>,
 }
 
 impl std::fmt::Display for FontFace {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, r#"@font-face{{font-family:"{}";"#, self.font_family)?;
-		if let Some((first, rest)) = self.src.split_first() {
-			"src:".fmt(f)?;
-			write!(f, r#"url("{}")"#, first.0)?;
-			if let Some(fmt) = first.1 {
-				write!(f, r#" format("{}")"#, fmt)?;
-			}
-			for (url, fmt) in rest {
-				write!(f, r#", url("{}")"#, url)?;
-				if let Some(fmt) = fmt {
-					write!(f, r#" format("{}")"#, fmt)?;
+		"@font-face{".fmt(f)?;
+			write!(f, r#"font-family:"{}";"#, self.font_family)?;
+			if let Some((first, rest)) = self.src.split_first() {
+				write!(f, "src:{}", first)?;
+				for src in rest {
+					write!(f, r#",{}"#, src)?;
 				}
+				";".fmt(f)?;
 			}
-			";".fmt(f)?;
-		}
-		write!(f,
-			"font-display:{};font-stretch:{} {};font-style:{};font-weight:{} {};}}",
-			self.font_display,
-			&self.font_stretch.0, &if let Some(x) = self.font_stretch.1 { x } else { self.font_stretch.0 },
-			&self.font_style,
-			&self.font_weight.0, &if let Some(x) = self.font_weight.1 { x } else { self.font_weight.0 },
-		)
+			write!(f, "font-display:{};", self.font_display)?;
+			write!(f, "font-stretch:{} {};", &self.font_stretch.0, &if let Some(x) = self.font_stretch.1 { x } else { self.font_stretch.0 })?;
+			write!(f, "font-style:{};", &self.font_style)?;
+			write!(f, "font-weight:{} {};", &self.font_weight.0, &if let Some(x) = self.font_weight.1 { x } else { self.font_weight.0 })?;
+			if let Some(((min, max), rest)) = self.unicode_range.split_first() {
+				write!(f, "unicode-range:U+{:X}", min)?;
+				if let Some(max) = max {
+					write!(f, "-{:X}", max)?;
+				}
+				for (min, max) in rest {
+					write!(f, ",U+{:X}", min)?;
+					if let Some(max) = max {
+						write!(f, "-{:X}", max)?;
+					}
+				}
+				";".fmt(f)?;
+			}
+		"}".fmt(f)
 	}
 }
 
