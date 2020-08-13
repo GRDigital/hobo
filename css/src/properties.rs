@@ -274,6 +274,8 @@ generate_properties! {
 		BoxShadow,
 		TransformOrigin,
 		Appearance,
+		Float,
+		Clear,
 	),
 	// different properties that take the same argument
 	named => (
@@ -368,3 +370,5 @@ css_macros::easy_enum! {perspective none [unit]}
 css_macros::easy_enum! {backface-visibility visible hidden}
 css_macros::easy_enum! {overflow-x visible hidden scroll auto}
 css_macros::easy_enum! {overflow-y visible hidden scroll auto}
+css_macros::easy_enum! {float none left right inline-start inline-end}
+css_macros::easy_enum! {clear none left right inline-start inline-end both}
