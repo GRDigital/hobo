@@ -117,12 +117,12 @@ impl std::fmt::Display for Source {
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, SmartDefault)]
 pub struct FontFace {
-	pub font_family: String,
+	pub family: String,
 	pub src: Vec<Source>,
-	pub font_display: Display,
-	pub font_stretch: (Stretch, Option<Stretch>),
-	pub font_style: Style,
-	pub font_weight: (Weight, Option<Weight>),
+	pub display: Display,
+	pub stretch: (Stretch, Option<Stretch>),
+	pub style: Style,
+	pub weight: (Weight, Option<Weight>),
 	// font_variant:
 	// font-feature-settings
 	// font-variation-settings:
@@ -132,7 +132,7 @@ pub struct FontFace {
 impl std::fmt::Display for FontFace {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		"@font-face{".fmt(f)?;
-			write!(f, r#"font-family:"{}";"#, self.font_family)?;
+			write!(f, r#"font-family:"{}";"#, self.family)?;
 			if let Some((first, rest)) = self.src.split_first() {
 				write!(f, "src:{}", first)?;
 				for src in rest {
@@ -140,10 +140,10 @@ impl std::fmt::Display for FontFace {
 				}
 				";".fmt(f)?;
 			}
-			write!(f, "font-display:{};", self.font_display)?;
-			write!(f, "font-stretch:{} {};", &self.font_stretch.0, &if let Some(x) = self.font_stretch.1 { x } else { self.font_stretch.0 })?;
-			write!(f, "font-style:{};", &self.font_style)?;
-			write!(f, "font-weight:{} {};", &self.font_weight.0, &if let Some(x) = self.font_weight.1 { x } else { self.font_weight.0 })?;
+			write!(f, "font-display:{};", self.display)?;
+			write!(f, "font-stretch:{} {};", &self.stretch.0, &if let Some(x) = self.stretch.1 { x } else { self.stretch.0 })?;
+			write!(f, "font-style:{};", &self.style)?;
+			write!(f, "font-weight:{} {};", &self.weight.0, &if let Some(x) = self.weight.1 { x } else { self.weight.0 })?;
 			if let Some(((min, max), rest)) = self.unicode_range.split_first() {
 				write!(f, "unicode-range:U+{:X}", min)?;
 				if let Some(max) = max {
@@ -165,9 +165,9 @@ impl std::fmt::Display for FontFace {
 fn font_face() {
 	assert_eq!(
 		FontFace {
-			src: vec![("https://fonts.gstatic.com/s/montserrat/v14/JTUSjIg1_i6t8kCHKm459Wlhyw.woff2".into(), Some(Format::Woff2))],
-			font_family: "Montserrat".into(),
-			font_weight: (Weight::Normal, Some(Weight::Normal)),
+			src: vec![Source::Url("https://fonts.gstatic.com/s/montserrat/v14/JTUSjIg1_i6t8kCHKm459Wlhyw.woff2".into(), Some(Format::Woff2))],
+			family: "Montserrat".into(),
+			weight: (Weight::Normal, Some(Weight::Normal)),
 			..Default::default()
 		}.to_string(),
 		r#"@font-face{font-family:"Montserrat";src:url("https://fonts.gstatic.com/s/montserrat/v14/JTUSjIg1_i6t8kCHKm459Wlhyw.woff2") format("woff2");font-display:auto;font-stretch:normal normal;font-style:normal;font-weight:normal normal;}"#,
