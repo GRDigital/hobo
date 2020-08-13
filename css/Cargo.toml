@@ -1,6 +1,6 @@
 [package]
 name = "hobo_css"
-version = "0.1.9"
+version = "0.1.10"
 edition = "2018"
 license = "MIT"
 repository = "https://github.com/grdigital/hobo"
@@ -10,7 +10,7 @@ readme = "../README.md"
 
 [dependencies]
 extend = "0.1"
-hobo_css_macros = "=0.1.9"
+hobo_css_macros = "=0.1.10"
 ordered-float = { version = "2", default-features = false }
 paste = "1"
 smart-default = "0.6"

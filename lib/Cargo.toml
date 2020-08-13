@@ -1,6 +1,6 @@
 [package]
 name = "hobo"
-version = "0.1.9"
+version = "0.1.10"
 edition = "2018"
 license = "MIT"
 repository = "https://github.com/grdigital/hobo"
@@ -9,9 +9,9 @@ authors = ["GR Digital <contact@grdigital.co.uk>"]
 readme = "../README.md"
 
 [dependencies]
-hobo_css = "=0.1.9"
+hobo_css = "=0.1.10"
 extend = "0.1"
-hobo_derive = "=0.1.9"
+hobo_derive = "=0.1.10"
 paste = "1"
 roxmltree = "0.13"
 slotmap = "0.4"
