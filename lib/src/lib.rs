@@ -11,6 +11,7 @@ pub mod state;
 mod style_storage;
 mod svg_element;
 pub mod web_str;
+pub mod ecs;
 
 pub use basic_element::{BasicElement, RawElement};
 pub use container::*;
