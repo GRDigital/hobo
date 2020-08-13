@@ -109,7 +109,6 @@ version = "0.1.9"
 dependencies = [
  "extend",
  "hobo_css_macros",
- "hobo_css_macros_decl",
  "ordered-float",
  "paste",
  "smart-default",
@@ -129,14 +128,6 @@ dependencies = [
  "proc-quote",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "hobo_css_macros_decl"
-version = "0.1.9"
-dependencies = [
- "hobo_css_macros",
- "proc-macro-hack",
 ]
 
 [[package]]

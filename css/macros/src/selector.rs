@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use crate::HyphenatedName;
 
 pub struct Selector(Vec<TokenStream>);
 

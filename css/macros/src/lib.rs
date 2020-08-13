@@ -18,7 +18,7 @@ impl Parse for HyphenatedName {
 #[proc_macro] pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream { easy_enum::easy_color(input) }
 
 #[proc_macro_error]
-#[proc_macro_hack]
+#[proc_macro]
 pub fn selector(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let crate_name = css_crate_name();
 	let selector = syn::parse_macro_input!(input as selector::Selector);
@@ -67,7 +67,7 @@ pub fn unit_value_macro(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 }
 
 #[proc_macro_error]
-#[proc_macro_hack]
+#[proc_macro]
 pub fn media_query(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let crate_name = css_crate_name();
 	let input: media::Query = syn::parse_macro_input!(input);
@@ -78,7 +78,7 @@ pub fn media_query(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 }
 
 #[proc_macro_error]
-#[proc_macro_hack]
+#[proc_macro]
 pub fn media_selector(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let crate_name = css_crate_name();
 	let media::Selector(input) = syn::parse_macro_input!(input);

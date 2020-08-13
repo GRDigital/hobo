@@ -20,7 +20,7 @@ impl StateSliceMeta {
 			this.borrow_mut().dirty = false;
 			let snapshot = this.borrow().subscribers.values().cloned().collect::<Vec<_>>();
 			for subscriber in snapshot {
-				let mut subscriber = subscriber.borrow_mut();
+				let subscriber = &mut *subscriber.borrow_mut();
 				subscriber();
 			}
 

@@ -115,7 +115,7 @@ impl std::fmt::Display for MediaSelector {
 #[test]
 fn woo() {
 	assert_eq!(
-		css_macros_decl::media_query!(!All && Orientation(Portrait) && !AspectRatio(4, 3)),
+		css_macros::media_query!(!All && Orientation(Portrait) && !AspectRatio(4, 3)),
 		MediaQuery {
 			media: Nottable { not: true, data: MediaType::All },
 			features: vec![
@@ -126,21 +126,21 @@ fn woo() {
 	);
 
 	assert_eq!(
-		css_macros_decl::media_selector!(
+		css_macros::media_selector!(
 			!All && Orientation(Portrait) && !AspectRatio(4, 3),
-			Print && Color(4) && !Width(crate::Unit::Px(crate::new_f32(200.)))
+			Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.)))
 		),
 		MediaSelector(
 			vec![
-				css_macros_decl::media_query!(!All && Orientation(Portrait) && !AspectRatio(4, 3)),
-				css_macros_decl::media_query!(Print && Color(4) && !Width(crate::Unit::Px(crate::new_f32(200.)))),
+				css_macros::media_query!(!All && Orientation(Portrait) && !AspectRatio(4, 3)),
+				css_macros::media_query!(Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.)))),
 			],
 		),
 	);
 
 	assert_eq!(
 		crate::style!(
-			@media !All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::new_f32(200.))) {
+			@media !All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.))) {
 				html {
 					background_color!(rgb 0xFF_00_00)
 				}
@@ -149,7 +149,7 @@ fn woo() {
 		crate::Style(
 			vec![
 				crate::Rule::Media(
-					css_macros_decl::media_selector!(!All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::new_f32(200.)))),
+					css_macros::media_selector!(!All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.)))),
 					crate::style!(
 						html {
 							background_color!(rgb 0xFF_00_00)
@@ -162,7 +162,7 @@ fn woo() {
 
 	assert_eq!(
 		crate::style!(
-			@media !All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::new_f32(200.))) {
+			@media !All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.))) {
 				html {
 					background_color!(rgb 0xFF_00_00)
 				}

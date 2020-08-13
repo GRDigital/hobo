@@ -15,7 +15,6 @@ pub use properties::*;
 use std::borrow::Cow;
 pub use units::Unit;
 pub use hobo_css_macros as css_macros;
-pub use hobo_css_macros_decl as css_macros_decl;
 pub use color::Color;
 pub use units::F32;
 pub use append_property::AppendProperty;
@@ -116,7 +115,7 @@ macro_rules! rule {
 	// finished @media
 	((@media $($selector:tt)+) { $($style:tt)* }) => {
 		$crate::Rule::Media(
-			$crate::css_macros_decl::media_selector!($($selector)+),
+			$crate::css_macros::media_selector!($($selector)+),
 			$crate::style!($($style)*),
 		)
 	};
@@ -124,7 +123,7 @@ macro_rules! rule {
 	// finished
 	(($($selector:tt)+) { $($rules:tt)* }) => {
 		$crate::Rule::Style($crate::StyleRule(
-			$crate::css_macros_decl::selector!($($selector)+),
+			$crate::css_macros::selector!($($selector)+),
 			$crate::properties!($($rules)*),
 		))
 	};

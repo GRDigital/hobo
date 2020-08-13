@@ -11,7 +11,6 @@ readme = "../README.md"
 [dependencies]
 extend = "0.1"
 hobo_css_macros = "=0.1.9"
-hobo_css_macros_decl = "=0.1.9"
 ordered-float = { version = "2", default-features = false }
 paste = "1"
 smart-default = "0.6"
