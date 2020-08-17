@@ -2,6 +2,8 @@ use crate::prelude::*;
 use std::collections::{HashMap, BTreeMap, BTreeSet, HashSet};
 use std::any::{Any, TypeId};
 use std::rc::Rc;
+use once_cell::sync::Lazy;
+use std::sync::Arc;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 struct Entity(u64);
@@ -15,12 +17,15 @@ trait Storage<'a, Component: 'static> {
 }
 
 struct SimpleStorage<Component: 'static> {
-	data: HashMap<Entity, Component>
+	data: HashMap<Entity, Component>,
+	added: HashSet<Entity>,
+	removed: HashSet<Entity>,
+	modified: HashSet<Entity>,
 }
 
-impl<Component> SimpleStorage<Component> {
-	fn new() -> Self {
-		Self { data: HashMap::new() }
+impl<Component> Default for SimpleStorage<Component> {
+	fn default() -> Self {
+		Self { data: Default::default(), added: Default::default(), removed: Default::default(), modified: Default::default() }
 	}
 }
 
@@ -28,14 +33,17 @@ impl<'a, Component: 'static> Storage<'a, Component> for SimpleStorage<Component>
 	type Item = &'a mut Component;
 
 	fn add(&mut self, entity: Entity, component: Component) {
+		self.added.insert(entity);
 		self.data.insert(entity, component);
 	}
 
 	fn get<'b: 'a>(&'b mut self, entity: Entity) -> Option<Self::Item> {
+		self.modified.insert(entity);
 		self.data.get_mut(&entity)
 	}
 
 	fn remove(&mut self, entity: Entity) {
+		self.removed.insert(entity);
 		self.data.remove(&entity);
 	}
 }
@@ -99,26 +107,48 @@ enum ComponentInterest {
 	Mutated(HashSet<TypeId>, HashSet<TypeId>),
 }
 
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// struct System {
-//     f: fn(&mut World),
-//     // interests: HashSet<ComponentInterest>,
-// }
+struct System {
+	f: fn(&mut World, Entity),
+	// interests: HashSet<ComponentInterest>,
+}
+
+macro_rules! system {
+	($($tt:tt)*) => {{
+		static SYSTEM: Lazy<Arc<System>> = Lazy::new(|| Arc::new($($tt)*));
+
+		Arc::clone(&SYSTEM as &Arc<_>)
+	}};
+}
 
 // systems register entities they care about upon creation
 // identical systems have their entities merged
+#[derive(Default)]
 struct World {
 	next_entity_id: u64,
 	storages: HashMap<TypeId, Box<dyn Any>>,
-	// systems: HashMap<Entity, Vec<Rc<System>>>,
+	systems: HashMap<Entity, Vec<Arc<System>>>,
+}
+
+struct StorageGuard<'a, Component: 'static>(&'a World, std::marker::PhantomData<Component>);
+
+impl<'a, Component: 'static> std::convert::AsMut<SimpleStorage<Component>> for StorageGuard<'a, Component> {
+	fn as_mut(&mut self) -> &mut SimpleStorage<Component> {
+		self.0.storages
+			.entry(TypeId::of::<SimpleStorage<Component>>())
+			.or_insert_with(|| Box::new(SimpleStorage::<Component>::default()))
+			.downcast_mut::<SimpleStorage<Component>>().unwrap()
+	}
+}
+
+impl<'a, Component: 'static> Drop for StorageGuard<'a, Component> {
+	fn drop(&mut self) {
+		// TODO: maintain world
+	}
 }
 
 impl World {
-	fn storage<Component: 'static>(&mut self) -> &mut SimpleStorage<Component> {
-		self.storages
-			.entry(TypeId::of::<Component>())
-			.or_insert_with(|| Box::new(<SimpleStorage<Component>>::new()))
-			.downcast_mut::<SimpleStorage<Component>>().unwrap()
+	fn storage<Component: 'static>(&self) -> StorageGuard<Component> {
+		StorageGuard(self, std::marker::PhantomData)
 	}
 
 	fn new_entity(&mut self) -> Entity {
@@ -128,4 +158,15 @@ impl World {
 	}
 
 	// fn new_system
+}
+
+fn fuck() {
+	let mut world = World::default();
+	let entity = world.new_entity();
+
+	let sys = system!(System {
+		f: |world, entity| {},
+	});
+
+	world.systems.entry(entity).or_insert_with(Vec::new).push(sys);
 }
