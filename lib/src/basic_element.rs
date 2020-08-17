@@ -37,6 +37,15 @@ impl<T, R> RawElement for RefCell<R> where
 	fn raw_element(&self) -> Self::RawElementType { self.borrow().raw_element() }
 }
 
+impl<T, R> RawElement for Rc<R> where
+	T: AsRef<web_sys::Element> + Clone + 'static,
+	R: RawElement<RawElementType = T>,
+{
+	type RawElementType = T;
+
+	fn raw_element(&self) -> Self::RawElementType { R::raw_element(&self) }
+}
+
 impl<T: AsRef<web_sys::Element> + 'static> EventTarget for BasicElement<T> {
 	fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>> { self.event_handlers.borrow_mut() }
 }
