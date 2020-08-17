@@ -155,8 +155,12 @@ generate_events! {
 	FocusEvent,    focus,       on_focus;
 }
 
-impl<T: EventTarget> EventTarget for Rc<RefCell<T>> {
+impl<T: EventTarget> EventTarget for RefCell<T> {
 	fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>> {
 		unsafe { self.try_borrow_unguarded() }.expect("rc is mutably borrowed").event_handlers()
 	}
+}
+
+impl<T: EventTarget> EventTarget for Rc<T> {
+	fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>> { T::event_handlers(&self) }
 }
