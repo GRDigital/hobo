@@ -154,7 +154,7 @@ pub fn derive_raw_element(input: proc_macro::TokenStream) -> proc_macro::TokenSt
 	(quote! {
 		impl #impl_generics ::hobo::RawElement for #name #ty_generics #where_clause {
 			type RawElementType = <#element_type as ::hobo::RawElement>::RawElementType;
-			fn raw_element(&self) -> &<#element_type as ::hobo::RawElement>::RawElementType { self.element.raw_element() }
+			fn raw_element(&self) -> <#element_type as ::hobo::RawElement>::RawElementType { self.element.raw_element() }
 		}
 	}).into()
 }

@@ -17,13 +17,24 @@ pub struct BasicElement<T: AsRef<web_sys::Element> + 'static> {
 pub trait RawElement {
 	type RawElementType: AsRef<web_sys::Element>;
 
-	fn raw_element(&self) -> &Self::RawElementType;
+	fn raw_element(&self) -> Self::RawElementType;
 }
 
-impl<T: AsRef<web_sys::Element> + 'static> RawElement for BasicElement<T> {
+impl<T> RawElement for BasicElement<T> where
+	T: AsRef<web_sys::Element> + Clone + 'static,
+{
 	type RawElementType = T;
 
-	fn raw_element(&self) -> &T { &self.element }
+	fn raw_element(&self) -> Self::RawElementType { self.element.clone() }
+}
+
+impl<T, R> RawElement for RefCell<R> where
+	T: AsRef<web_sys::Element> + Clone + 'static,
+	R: RawElement<RawElementType = T>,
+{
+	type RawElementType = T;
+
+	fn raw_element(&self) -> Self::RawElementType { self.borrow().raw_element() }
 }
 
 impl<T: AsRef<web_sys::Element> + 'static> EventTarget for BasicElement<T> {

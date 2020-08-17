@@ -36,10 +36,11 @@ thread_local! {
 /// Trait for hobo components with textual contents
 pub trait SetText<T>: RawElement<RawElementType = T>
 where
-	T: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement>,
+	T: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement> + Clone,
 {
 	fn set_text<'a>(&self, x: impl Into<std::borrow::Cow<'a, str>>) {
-		let html_element: &web_sys::HtmlElement = self.raw_element().as_ref();
+		let raw = self.raw_element();
+		let html_element: &web_sys::HtmlElement = raw.as_ref() as &web_sys::HtmlElement;
 		html_element.set_inner_text(&x.into());
 	}
 
@@ -55,7 +56,7 @@ where
 impl<T, E> SetText<E> for T
 where
 	T: RawElement<RawElementType = E>,
-	E: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement>,
+	E: AsRef<web_sys::Element> + AsRef<web_sys::HtmlElement> + Clone,
 {}
 
 pub trait ToClassStr {

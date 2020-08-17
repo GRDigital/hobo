@@ -7,6 +7,23 @@ pub struct StyleStorage {
 	map: RefCell<HashMap<css::Style, u64>>,
 }
 
+// replace the ClassPlaceholder with actual element class
+fn fixup_class_placeholders(style: &mut css::Style, class: String) {
+	for rule in style.0.iter_mut() {
+		match rule {
+			css::Rule::Style(style_rule) => {
+				for selector_component in (style_rule.0).0.iter_mut() {
+					if *selector_component == css::selector::SelectorComponent::ClassPlaceholder {
+						*selector_component = css::selector::SelectorComponent::Class(class.clone());
+					}
+				}
+			},
+			css::Rule::Media(_, style) => fixup_class_placeholders(style, class.clone()),
+			_ => {},
+		}
+	}
+}
+
 // TODO: right now if the same style is reused in multiple windows - won't work, need to track style insertion per window
 // it checks if the style is already inserted as css into <style>
 // if yes, just returns the class name
@@ -25,16 +42,7 @@ impl StyleStorage {
 		self.map.borrow_mut().insert(style.clone(), id);
 		let class = format!("s{}", id);
 
-		// replace the ClassPlaceholder with actual element class
-		for rule in style.0.iter_mut() {
-			if let css::Rule::Style(style_rule) = rule {
-				for selector_component in (style_rule.0).0.iter_mut() {
-					if *selector_component == css::selector::SelectorComponent::ClassPlaceholder {
-						*selector_component = css::selector::SelectorComponent::Class(class.clone());
-					}
-				}
-			}
-		}
+		fixup_class_placeholders(&mut style, class.clone());
 
 		let dom = crate::dom();
 		let head = dom.head().expect("dom has no head");
