@@ -13,27 +13,27 @@ macro_rules! tuple_query {
 		paste::item! {
 			impl<$first: 'static, $($id: 'static),*> Query for ($first, $($id),*) {
 				fn query(world: &World, entity: Entity) -> bool {
-					// world.storage::<$first>().0.borrow().downcast_ref::<SimpleStorage<$first>>().map_or(false, |x| x.data.contains_key(&entity)) &&
-					// $(world.storage::<$id>().0.borrow().downcast_ref::<SimpleStorage<$id>>().map_or(false, |x| x.data.contains_key(&entity))&&)*
+					world.storage::<$first>().has(entity) &&
+					$(world.storage::<$id>().has(entity) &&)*
 					true
 				}
 
 				fn added(world: &World, entity: Entity) -> bool {
-					// world.storage::<$first>().0.borrow().downcast_ref::<SimpleStorage<$first>>().map_or(false, |x| x.added.contains(&entity)) &&
-					// $(world.storage::<$id>().0.borrow().downcast_ref::<SimpleStorage<$id>>().map_or(false, |x| x.added.contains(&entity))&&)*
+					world.storage::<$first>().added.contains(&entity) &&
+					$(world.storage::<$id>().added.contains(&entity) &&)*
 					true
 				}
 
 				fn modified(world: &World, entity: Entity) -> bool {
-					// world.storage::<$first>().0.borrow().downcast_ref::<SimpleStorage<$first>>().map_or(false, |x| x.modified.contains(&entity)) &&
-					// $(world.storage::<$id>().0.borrow().downcast_ref::<SimpleStorage<$id>>().map_or(false, |x| x.modified.contains(&entity))&&)*
+					world.storage::<$first>().modified.contains(&entity) &&
+					$(world.storage::<$id>().modified.contains(&entity) &&)*
 					true
 				}
 
 				fn removed(world: &World, entity: Entity) -> bool {
-					// world.storage::<$first>().0.borrow().downcast_ref::<SimpleStorage<$first>>().map_or(false, |x| x.removed.contains(&entity)) &&
-					// $(world.storage::<$id>().0.borrow().downcast_ref::<SimpleStorage<$id>>().map_or(false, |x| x.removed.contains(&entity))&&)*
-					true
+					world.storage::<$first>().removed.contains(&entity) ||
+					$(world.storage::<$id>().removed.contains(&entity) ||)*
+					false
 				}
 			}
 		}
@@ -43,17 +43,17 @@ macro_rules! tuple_query {
 
 tuple_query! {A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
 
-pub struct Added<T: Query>(PhantomData<T>);
-impl<T: Query> Query for Added<T> {
-	fn query(world: &World, entity: Entity) -> bool { T::query(world, entity) && T::added(world, entity) }
+pub trait Added<T: Query + ?Sized> {}
+impl<T: Query + ?Sized> Query for dyn Added<T> {
+	fn query(world: &World, entity: Entity) -> bool { T::added(world, entity) }
 }
 
-pub struct Removed<T: Query>(PhantomData<T>);
-impl<T: Query> Query for Removed<T> {
-	fn query(world: &World, entity: Entity) -> bool { T::query(world, entity) && T::removed(world, entity) }
+pub trait Removed<T: Query + ?Sized> {}
+impl<T: Query + ?Sized> Query for dyn Removed<T> {
+	fn query(world: &World, entity: Entity) -> bool { T::removed(world, entity) }
 }
 
-pub struct Modified<T: Query>(PhantomData<T>);
-impl<T: Query> Query for Modified<T> {
-	fn query(world: &World, entity: Entity) -> bool { T::query(world, entity) && T::modified(world, entity) }
+pub trait Modified<T: Query + ?Sized> {}
+impl<T: Query + ?Sized> Query for dyn Modified<T> {
+	fn query(world: &World, entity: Entity) -> bool { T::modified(world, entity) }
 }

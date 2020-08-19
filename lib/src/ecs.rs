@@ -33,7 +33,7 @@ impl std::fmt::Debug for System {
 }
 
 impl System {
-	fn new<Q: Query>(f: fn(&World, Entity)) -> Self {
+	fn new<Q: Query + ?Sized>(f: fn(&World, Entity)) -> Self {
 		Self { f, query: Q::query, entities: Default::default() }
 	}
 
@@ -51,7 +51,7 @@ impl System {
 #[derive(Default)]
 pub struct World {
 	pub next_entity_id: Cell<u64>,
-	pub storages: RefCell<HashMap<TypeId, Rc<RefCell<Box<dyn Any>>>>>,
+	pub storages: RefCell<HashMap<TypeId, RefCell<Box<dyn DynStorage>>>>,
 	pub systems_interests: RefCell<HashMap<Entity, RefCell<Vec<Rc<RefCell<System>>>>>>,
 	pub systems: RefCell<HashMap<*const fn(&World, Entity), Weak<RefCell<System>>>>,
 }
@@ -60,24 +60,25 @@ unsafe impl Send for World {}
 unsafe impl Sync for World {}
 
 impl World {
-	pub fn storage_mut<'a, 'b: 'a, Component: 'static>(&'b self) -> StorageGuardMut<'b, Component, impl std::ops::DerefMut<Target = SimpleStorage<Component>> + 'a> {
-	// pub fn storage_mut<Component: 'static>(&self) -> StorageGuardMut<'_, Component, OwningRefMut<Box<dyn Erased>, SimpleStorage<Component>>> {
-		self.storages.borrow_mut().entry(TypeId::of::<SimpleStorage<Component>>()).or_insert_with(|| Rc::new(RefCell::new(Box::new(SimpleStorage::<Component>::default()))));
-		let storage_refcell = OwningRef::new(self.storages.borrow())
-			.map(|x| x.get(&TypeId::of::<SimpleStorage<Component>>()).unwrap());
-		let ref_res = OwningRefMut::new(OwningHandle::new_mut(RcRef::new(Rc::clone(&*storage_refcell))))
-			.map_mut(|x| x.downcast_mut::<SimpleStorage<Component>>().unwrap());
-		StorageGuardMut(self, ref_res)
+	fn assure_storage<Component: 'static>(&self) {
+		self.storages.borrow_mut().entry(TypeId::of::<SimpleStorage<Component>>()).or_insert_with(|| RefCell::new(Box::new(SimpleStorage::<Component>::default())));
 	}
 
-	pub fn storage<Component: 'static>(&self) -> StorageGuard<'_, Component, impl std::ops::Deref<Target = SimpleStorage<Component>> + '_> {
-		// self.storages.borrow_mut().entry(TypeId::of::<SimpleStorage<Component>>()).or_insert_with(|| RefCell::new(Box::new(SimpleStorage::<Component>::default())));
-		let storages = OwningHandle::new(&self.storages);
-		let storage_or = OwningRef::new(storages);
-		let x = storage_or.map(|x| x.get(&TypeId::of::<SimpleStorage<Component>>()).unwrap()).clone();
-		let y = OwningHandle::new(x);
-		let z = OwningRef::new(y);
-		StorageGuard::new(self, z.map(|x| x.downcast_ref::<SimpleStorage<Component>>().unwrap()))
+	pub fn storage_mut<Component: 'static>(&self) -> StorageGuard<'_, Component, impl std::ops::DerefMut<Target = SimpleStorage<Component>> + '_> {
+		self.assure_storage::<Component>();
+
+		let storages = OwningRef::new(self.storages.borrow());
+		let storage_cell = OwningRefMut::new(OwningHandle::new_mut(storages.map(|x| x.get(&TypeId::of::<SimpleStorage<Component>>()).unwrap())));
+		let storage = storage_cell.map_mut(|x| x.as_any_mut().downcast_mut::<SimpleStorage<Component>>().unwrap());
+		StorageGuard(self, Some(storage))
+	}
+
+	pub fn storage<Component: 'static>(&self) -> impl std::ops::Deref<Target = SimpleStorage<Component>> + '_ {
+		self.assure_storage::<Component>();
+
+		let storages = OwningRef::new(self.storages.borrow());
+		let storage_cell = OwningRef::new(OwningHandle::new(storages.map(|x| x.get(&TypeId::of::<SimpleStorage<Component>>()).unwrap())));
+		storage_cell.map(|x| x.as_any().downcast_ref::<SimpleStorage<Component>>().unwrap())
 	}
 
 	pub fn new_entity(&self) -> Entity {
@@ -101,9 +102,45 @@ impl World {
 			let mut systems_interests = self.systems_interests.borrow_mut();
 			systems_interests.entry(entity).or_insert_with(|| RefCell::new(Vec::new())).borrow_mut().push(Rc::clone(&sys_rc));
 		}
+	}
 
-		// pub fn remove_entity(&self) -> Entity {
-		// }
+	pub fn remove_entity(&self, entity: Entity) {
+		for storage in self.storages.borrow().values() {
+			storage.borrow_mut().remove(entity);
+		}
+
+		let systems = self.schedule_systems(vec![entity]);
+
+		for storage in self.storages.borrow().values() {
+			storage.borrow_mut().flush();
+		}
+
+		self.run_systems(systems);
+
+		self.systems_interests.borrow_mut().remove(&entity);
+	}
+
+	fn schedule_systems(&self, entities: impl IntoIterator<Item = Entity>) -> Vec<(Entity, Rc<RefCell<System>>)> {
+		let interests = self.systems_interests.borrow();
+
+		let mut v = vec![];
+		for entity in entities {
+			if let Some(systems) = interests.get(&entity) {
+				for system_rc in systems.borrow().iter() {
+					let system = system_rc.borrow();
+					if (system.query)(self, entity) {
+						v.push((entity, Rc::clone(&system_rc)));
+					}
+				}
+			}
+		}
+		v
+	}
+
+	fn run_systems(&self, v: Vec<(Entity, Rc<RefCell<System>>)>) {
+		for (entity, system) in v {
+			(system.borrow().f)(self, entity);
+		}
 	}
 }
 
@@ -112,26 +149,26 @@ fn fuck() {
 	static WORLD: Lazy<World> = Lazy::new(World::default);
 
 	let entity = WORLD.new_entity();
-	{
-		let mut sys = System::new::<Added<(String,)>>(|world, entity| {
-			dbg!(world.storage::<String>().get(entity));
-		});
-		sys.entities.insert(entity);
-		WORLD.new_system(sys);
-		dbg!("about to insert cmp");
-		WORLD.storage_mut::<String>().add(entity, String::from("poop"));
-		dbg!("inserted cmp");
-	}
-	panic!("AAAAAAAAAAA");
 
-	// let mut world = World::default();
-	// let entity = world.new_entity();
+	let mut sys = System::new::<Added<(String,)>>(|world, entity| {
+		let other_entity = WORLD.new_entity();
+		dbg!(world.storage::<String>().get(entity));
+		world.storage_mut::<String>().add(other_entity, String::from("big poop"));
+	});
 
-	// let sys = System::new::<(Modified<(String,)>, String)>(|world, entity| {});
-	// let sys2 = System::new::<Added<(String,)>>(|world, entity| {});
+	let mut panic_sys = System::new::<Removed<(String,)>>(|_, _| {
+		dbg!("AAAAAAAAAA");
+	});
 
-	// assert_ne!(sys.fn_ptr(), sys2.fn_ptr());
-	// assert_eq!(sys.fn_ptr(), sys.clone().fn_ptr());
+	sys.entities.insert(entity);
+	panic_sys.entities.insert(entity);
 
-	// world.new_system(sys);
+	WORLD.new_system(sys);
+	WORLD.new_system(panic_sys);
+
+	let mut storage = WORLD.storage_mut::<String>();
+	storage.add(entity, String::from("poop"));
+	drop(storage);
+	WORLD.remove_entity(entity);
+	// storage.remove(entity);
 }
