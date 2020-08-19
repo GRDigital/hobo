@@ -9,7 +9,7 @@ authors = ["GR Digital <contact@grdigital.co.uk>"]
 readme = "../README.md"
 
 [dependencies]
-chashmap = "2"
+as-any = "0.2"
 extend = "0.1"
 hobo_css = "=0.1.10"
 hobo_derive = "=0.1.10"

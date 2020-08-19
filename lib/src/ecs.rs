@@ -8,11 +8,10 @@ use std::rc::{Weak, Rc};
 use once_cell::sync::Lazy;
 use std::sync::Arc;
 use std::cell::{Ref, RefMut, RefCell, Cell};
-use chashmap::{ReadGuard, WriteGuard, CHashMap};
 use std::marker::PhantomData;
 use query::*;
 use storage::*;
-use owning_ref::{OwningRef, OwningRefMut, OwningHandle, RefMutRef, RefRef, Erased, RefMutRefMut, RcRef};
+use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Entity(u64);
@@ -33,7 +32,7 @@ impl std::fmt::Debug for System {
 }
 
 impl System {
-	fn new<Q: Query + ?Sized>(f: fn(&World, Entity)) -> Self {
+	fn new<Q: Query>(f: fn(&World, Entity)) -> Self {
 		Self { f, query: Q::query, entities: Default::default() }
 	}
 
@@ -147,28 +146,89 @@ impl World {
 #[test]
 fn fuck() {
 	static WORLD: Lazy<World> = Lazy::new(World::default);
+	static TEST: Lazy<std::sync::Mutex<u32>> = Lazy::new(|| std::sync::Mutex::new(0));
 
 	let entity = WORLD.new_entity();
 
-	let mut sys = System::new::<Added<(String,)>>(|world, entity| {
+	let mut sys = System::new::<(Added<(String,)>, (String,))>(|world, entity| {
 		let other_entity = WORLD.new_entity();
 		dbg!(world.storage::<String>().get(entity));
 		world.storage_mut::<String>().add(other_entity, String::from("big poop"));
+		*TEST.lock().unwrap() += 1;
 	});
 
-	let mut panic_sys = System::new::<Removed<(String,)>>(|_, _| {
+	let mut archetype_enter_sys = System::new::<(Added<(String, u64)>, (String, u64))>(|world, entity| {
+		dbg!("archetype entered");
+		*TEST.lock().unwrap() += 1;
+	});
+
+	let mut archetype_leave_sys = System::new::<(Removed<(String, u64)>,)>(|world, entity| {
+		dbg!("archetype left");
+		*TEST.lock().unwrap() += 1;
+	});
+
+	let mut simple_remove_sys = System::new::<(Removed<(String,)>,)>(|_, _| {
 		dbg!("AAAAAAAAAA");
+		*TEST.lock().unwrap() += 1;
 	});
 
 	sys.entities.insert(entity);
-	panic_sys.entities.insert(entity);
+	archetype_enter_sys.entities.insert(entity);
+	archetype_leave_sys.entities.insert(entity);
+	simple_remove_sys.entities.insert(entity);
 
 	WORLD.new_system(sys);
-	WORLD.new_system(panic_sys);
+	WORLD.new_system(archetype_enter_sys);
+	WORLD.new_system(archetype_leave_sys);
+	WORLD.new_system(simple_remove_sys);
 
-	let mut storage = WORLD.storage_mut::<String>();
-	storage.add(entity, String::from("poop"));
-	drop(storage);
+	WORLD.storage_mut::<String>().add(entity, String::from("poop"));
+	WORLD.storage_mut::<u64>().add(entity, 10u64);
+	WORLD.storage_mut::<u64>().remove(entity);
+	WORLD.storage_mut::<u64>().add(entity, 10u64);
+
 	WORLD.remove_entity(entity);
-	// storage.remove(entity);
+
+	assert_eq!(*TEST.lock().unwrap(), 6);
 }
+
+/*
+fn mock_world() -> &'static World { todo!() }
+
+struct EntityWrapper {
+	entity: Entity,
+}
+
+impl EntityWrapper {
+	fn child(self, child: EntityWrapper) -> Self {
+		// let storage = world.storage_mut::<Node>();
+		// storage.get_mut(child).unwrap().parent = Some(self.entity);
+		// storage.get_mut(self.entity).unwrap().children.push(child);
+		self
+	}
+
+	fn on_click(self, handler: impl FnMut(&World, Entity, web_sys::MouseEvent)) -> Self {
+		// world.storage_mut::<
+		self
+	}
+
+	fn class(self, style: String) -> Self {
+		let storage = mock_world().storage::<web_sys::Element>();
+		let element = storage.get(self.entity).unwrap();
+		let _ = element.set_attribute("class", &style).unwrap();
+		self
+	}
+}
+
+fn div() -> EntityWrapper {
+	let world = mock_world();
+	let entity = world.new_entity();
+	let div = crate::create::div();
+	world.storage_mut::<web_sys::Element>().add(entity, (div.as_ref() as &web_sys::Element).clone());
+	world.storage_mut::<web_sys::HtmlElement>().add(entity, (div.as_ref() as &web_sys::HtmlElement).clone());
+	world.storage_mut::<web_sys::HtmlDivElement>().add(entity, div);
+	// world.storage_mut::<Node>().add(entity, Node::default());
+
+	EntityWrapper { entity }
+}
+*/
