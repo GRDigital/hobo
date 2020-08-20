@@ -80,7 +80,7 @@ macro_rules! tuple_query {
 					// present - bitmask with 1s for every queried component that exists
 					// missing - bitmask with 1s for every queried component that is marked as removed
 
-					let mut total = 1u32;
+					let mut total: u32;
 					let mut present: u32;
 					let mut missing: u32;
 

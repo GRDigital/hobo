@@ -11,6 +11,10 @@ pub trait Storage<Component: 'static>: DynStorage {
 
 	fn get(&self, entity: Entity) -> Option<&Self::Item>;
 	fn get_mut(&mut self, entity: Entity) -> Option<&mut Self::Item>;
+	fn get_removed(&self, entity: Entity) -> Option<&Self::Item>;
+	fn get_removed_mut(&mut self, entity: Entity) -> Option<&mut Self::Item>;
+	fn take_removed(&mut self, entity: Entity) -> Option<Self::Item>;
+	fn get_mut_or(&mut self, entity: Entity, f: impl FnOnce() -> Self::Item) -> &mut Self::Item;
 	fn add(&mut self, entity: Entity, component: Component);
 }
 
@@ -49,7 +53,11 @@ impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 	type Item = Component;
 
 	fn add(&mut self, entity: Entity, component: Component) {
-		self.added.insert(entity);
+		if self.has(entity) {
+			self.modified.insert(entity);
+		} else {
+			self.added.insert(entity);
+		}
 		self.data.insert(entity, component);
 	}
 
@@ -57,9 +65,30 @@ impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 		self.data.get(&entity)
 	}
 
+	fn get_removed(&self, entity: Entity) -> Option<&Component> {
+		self.removed.get(&entity)
+	}
+
 	fn get_mut(&mut self, entity: Entity) -> Option<&mut Component> {
 		self.modified.insert(entity);
 		self.data.get_mut(&entity)
+	}
+
+	fn get_removed_mut(&mut self, entity: Entity) -> Option<&mut Component> {
+		self.removed.get_mut(&entity)
+	}
+
+	fn take_removed(&mut self, entity: Entity) -> Option<Component> {
+		self.removed.remove(&entity)
+	}
+
+	fn get_mut_or(&mut self, entity: Entity, f: impl FnOnce() -> Component) -> &mut Component {
+		if self.has(entity) {
+			self.modified.insert(entity);
+		} else {
+			self.add(entity, f());
+		}
+		self.data.get_mut(&entity).unwrap()
 	}
 }
 
