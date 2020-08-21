@@ -20,12 +20,6 @@ pub struct System {
 	query: fn(&World, Entity) -> bool,
 }
 
-impl System {
-	fn new<Q: Query, F: Fn(Entity) + 'static>(f: F) -> Self {
-		Self { f: Box::new(f), query: Q::query }
-	}
-}
-
 // systems register entities they care about upon creation
 // identical systems have their entities merged
 #[derive(Default)]
@@ -150,24 +144,24 @@ fn fuck() {
 
 	let entity = WORLD.new_entity();
 
-	let sys = System::new::<(Added<(String,)>, (String,)), _>(|entity| {
+	let sys = <Added<(String,)>>::run(|entity| {
 		let other_entity = WORLD.new_entity();
 		dbg!(WORLD.storage::<String>().get(entity));
 		WORLD.storage_mut::<String>().add(other_entity, String::from("big poop"));
 		*TEST.lock().unwrap() += 1;
 	});
 
-	let archetype_enter_sys = System::new::<(Added<(String, u64)>, (String, u64)), _>(|entity| {
+	let archetype_enter_sys = <(Added<(String, u64)>, Present<(String, u64)>)>::run(|entity| {
 		dbg!("archetype entered");
 		*TEST.lock().unwrap() += 1;
 	});
 
-	let archetype_leave_sys = System::new::<(Removed<(String, u64)>,), _>(|entity| {
+	let archetype_leave_sys = <Removed<(String, u64)>>::run(|entity| {
 		dbg!("archetype left");
 		*TEST.lock().unwrap() += 1;
 	});
 
-	let simple_remove_sys = System::new::<(Removed<(String,)>,), _>(|_| {
+	let simple_remove_sys = <Removed<(String,)>>::run(|_| {
 		dbg!("AAAAAAAAAA");
 		*TEST.lock().unwrap() += 1;
 	});
@@ -244,8 +238,8 @@ impl Element {
 		self
 	}
 
-	fn system<Q: Query, F: Fn(Entity) + 'static>(self, f: F) -> Self {
-		WORLD.new_system(System::new::<Q, _>(f), vec![self.entity]);
+	fn system(self, system: System) -> Self {
+		WORLD.new_system(system, vec![self.entity]);
 		self
 	}
 }
@@ -257,7 +251,7 @@ fn html_element(world: &'static World, entity: Entity, element: &impl AsRef<web_
 	world.storage_mut::<web_sys::EventTarget>().add(entity, (element.as_ref() as &web_sys::EventTarget).clone());
 	world.storage_mut::<web_sys::HtmlElement>().add(entity, element);
 
-	let sys = System::new::<(Removed<(web_sys::Element,)>,), _>(move |entity| {
+	let sys = <(Removed<(web_sys::Element,)>,)>::run(move |entity| {
 		world.storage_mut::<web_sys::Element>().take_removed(entity).unwrap().remove();
 		world.storage_mut::<web_sys::Node>().remove(entity);
 		world.storage_mut::<web_sys::Element>().remove(entity);
@@ -278,7 +272,7 @@ fn div() -> Element {
 	let element = crate::create::div();
 	html_element(&WORLD, entity, &element);
 	WORLD.storage_mut::<web_sys::HtmlDivElement>().add(entity, element);
-	let sys = System::new::<(Removed<(web_sys::HtmlElement,)>,), _>(move |entity| {
+	let sys = <(Removed<(web_sys::HtmlElement,)>,)>::run(move |entity| {
 		WORLD.storage_mut::<web_sys::HtmlDivElement>().remove(entity);
 	});
 	WORLD.new_system(sys, vec![entity]);
@@ -291,7 +285,7 @@ fn input() -> Element {
 	let element = crate::create::input();
 	html_element(&WORLD, entity, &element);
 	WORLD.storage_mut::<web_sys::HtmlInputElement>().add(entity, element);
-	let sys = System::new::<(Removed<(web_sys::HtmlElement,)>,), _>(move |entity| {
+	let sys = <(Removed<(web_sys::HtmlElement,)>,)>::run(move |entity| {
 		WORLD.storage_mut::<web_sys::HtmlInputElement>().remove(entity);
 	});
 	WORLD.new_system(sys, vec![entity]);
@@ -317,12 +311,13 @@ fn some_element() -> Element {
 			dbg!("woo");
 		})
 		.state(state)
-		.system::<(Modified<(SomeElementState,)>,), _>(move |entity| {
+		.system(<Modified<(SomeElementState,)>>::run(move |entity| {
 			let state_storage = WORLD.storage::<SomeElementState>();
 			let state = state_storage.get(entity).unwrap();
 			if WORLD.is_dead(input.entity) { return; }
 			let value = WORLD.storage::<web_sys::HtmlInputElement>().get(input.entity).unwrap().value();
 			dbg!(value, &state.bar);
-		})
+		}))
 }
+
 */

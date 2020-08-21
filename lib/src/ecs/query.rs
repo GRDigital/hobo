@@ -9,10 +9,9 @@ pub trait BasicQuery: 'static {
 
 pub trait Query {
 	fn query(world: &World, entity: Entity) -> bool;
-}
-
-pub trait SubQuery {
-	fn query(world: &World, entity: Entity) -> bool;
+	fn run<F: Fn(Entity) + 'static>(f: F) -> System {
+		System { f: Box::new(f), query: Self::query }
+	}
 }
 
 // Added<(T1, T2, T3)> implies that one of T1, T2, T3 was added
@@ -23,6 +22,8 @@ pub struct Added<T: BasicQuery>(PhantomData<T>);
 pub struct Removed<T: BasicQuery>(PhantomData<T>);
 // Modified<(T1, T2, T3)> implies that one of T1, T2, T3 was changed
 pub struct Modified<T: BasicQuery>(PhantomData<T>);
+// Present<(T1, T2, T3)> implies that all of T1, T2, T3 are attached to the entity
+pub struct Present<T: BasicQuery>(PhantomData<T>);
 
 impl<T: 'static> BasicQuery for T {
 	fn exists(world: &World, entity: Entity) -> bool {
@@ -46,35 +47,35 @@ macro_rules! tuple_query {
 	() => {};
 	($first:ident $($id:ident)*) => {
 		paste::item! {
-			impl<$first: SubQuery, $($id: SubQuery),*> Query for ($first, $($id),*) {
+			impl<$first: Query, $($id: Query),*> Query for ($first, $($id),*) {
 				fn query(world: &World, entity: Entity) -> bool {
 					$first::query(world, entity)
 					$(&& $id::query(world, entity))*
 				}
 			}
 
-			impl<$first: BasicQuery, $($id: BasicQuery),*> SubQuery for ($first, $($id),*) {
+			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Present<($first, $($id),*)> {
 				fn query(world: &World, entity: Entity) -> bool {
 					$first::exists(world, entity)
 					$(&& $id::exists(world, entity))*
 				}
 			}
 
-			impl<$first: BasicQuery, $($id: BasicQuery),*> SubQuery for Added<($first, $($id),*)> {
+			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Added<($first, $($id),*)> {
 				fn query(world: &World, entity: Entity) -> bool {
 					$first::added(world, entity)
 					$(|| $id::added(world, entity))*
 				}
 			}
 
-			impl<$first: BasicQuery, $($id: BasicQuery),*> SubQuery for Modified<($first, $($id),*)> {
+			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Modified<($first, $($id),*)> {
 				fn query(world: &World, entity: Entity) -> bool {
 					$first::modified(world, entity)
 					$(|| $id::modified(world, entity))*
 				}
 			}
 
-			impl<$first: BasicQuery, $($id: BasicQuery),*> SubQuery for Removed<($first, $($id),*)> {
+			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Removed<($first, $($id),*)> {
 				fn query(world: &World, entity: Entity) -> bool {
 					// total - bitmask with 1s for every component queried
 					// present - bitmask with 1s for every queried component that exists
