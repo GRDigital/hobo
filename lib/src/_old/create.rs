@@ -4,62 +4,10 @@
 //!
 //! all of these functions return the most fitting web_sys element types
 
-use crate::{dom, prelude::*, World, Entity, Children, query::*, storage::{Storage, DynStorage}, Element};
+use super::{basic_element::BasicElement, dom};
 
 #[cfg(test)] use wasm_bindgen_test::*;
 #[cfg(test)] wasm_bindgen_test_configure!(run_in_browser);
-
-pub fn html_element(world: &'static World, entity: Entity, element: &impl AsRef<web_sys::HtmlElement>) -> Element {
-	let element = element.as_ref().clone();
-	world.storage_mut::<web_sys::Node>().add(entity, (element.as_ref() as &web_sys::Node).clone());
-	world.storage_mut::<web_sys::Element>().add(entity, (element.as_ref() as &web_sys::Element).clone());
-	world.storage_mut::<web_sys::EventTarget>().add(entity, (element.as_ref() as &web_sys::EventTarget).clone());
-	world.storage_mut::<web_sys::HtmlElement>().add(entity, element);
-
-	let sys = <(Removed<(web_sys::Element,)>,)>::run(move |entity| {
-		world.storage_mut::<web_sys::Element>().take_removed(entity).unwrap().remove();
-		world.storage_mut::<web_sys::Node>().remove(entity);
-		world.storage_mut::<web_sys::Element>().remove(entity);
-		world.storage_mut::<web_sys::EventTarget>().remove(entity);
-		world.storage_mut::<web_sys::HtmlElement>().remove(entity);
-		world.storage_mut::<Vec<crate::events::EventHandler>>().remove(entity);
-		if let Some(children) = world.storage::<Children>().get(entity) {
-			for &child in &children.0 {
-				world.storage_mut::<web_sys::Element>().remove(child);
-			}
-		}
-	});
-	world.new_system(sys, vec![entity]);
-
-	crate::default_systems(entity);
-	Element { entity }
-}
-
-pub fn svg_element(world: &'static World, entity: Entity, element: &impl AsRef<web_sys::SvgElement>) -> Element {
-	let element = element.as_ref().clone();
-	world.storage_mut::<web_sys::Node>().add(entity, (element.as_ref() as &web_sys::Node).clone());
-	world.storage_mut::<web_sys::Element>().add(entity, (element.as_ref() as &web_sys::Element).clone());
-	world.storage_mut::<web_sys::EventTarget>().add(entity, (element.as_ref() as &web_sys::EventTarget).clone());
-	world.storage_mut::<web_sys::SvgElement>().add(entity, element);
-
-	let sys = <(Removed<(web_sys::Element,)>,)>::run(move |entity| {
-		world.storage_mut::<web_sys::Element>().take_removed(entity).unwrap().remove();
-		world.storage_mut::<web_sys::Node>().remove(entity);
-		world.storage_mut::<web_sys::Element>().remove(entity);
-		world.storage_mut::<web_sys::EventTarget>().remove(entity);
-		world.storage_mut::<web_sys::SvgElement>().remove(entity);
-		world.storage_mut::<Vec<crate::events::EventHandler>>().remove(entity);
-		if let Some(children) = world.storage::<Children>().get(entity) {
-			for &child in &children.0 {
-				world.storage_mut::<web_sys::Element>().remove(child);
-			}
-		}
-	});
-	world.new_system(sys, vec![entity]);
-
-	crate::default_systems(entity);
-	Element { entity }
-}
 
 macro_rules! create {
 	(
@@ -73,6 +21,12 @@ macro_rules! create {
 		$(
 			pub fn $html_name() -> web_sys::$html_t { wasm_bindgen::JsCast::unchecked_into(dom().create_element(crate::web_str::$html_name()).expect("can't create element")) }
 
+			impl BasicElement<web_sys::$html_t> {
+				pub fn $html_name() -> Self {
+					BasicElement { element: $html_name(), children: Vec::new(), event_handlers: Default::default(), classes: Default::default() }
+				}
+			}
+
 			#[cfg(test)]
 			#[wasm_bindgen_test]
 			fn [<can_create_$html_name>]() {
@@ -82,25 +36,21 @@ macro_rules! create {
 
 		$(
 			pub fn $svg_name() -> web_sys::$svg_t { wasm_bindgen::JsCast::unchecked_into(dom().create_element_ns(Some(wasm_bindgen::intern("http://www.w3.org/2000/svg")), crate::web_str::$svg_name()).expect("can't create svg element")) }
+
+			impl BasicElement<web_sys::$svg_t> {
+				pub fn $svg_name() -> Self {
+					BasicElement { element: $svg_name(), children: Vec::new(), event_handlers: Default::default(), classes: Default::default() }
+				}
+			}
 		)*
 
 		pub mod components {
-			use super::*;
-
 			$(
-				pub fn $html_name() -> crate::Element {
-					let entity = WORLD.new_entity();
-					let element = super::$html_name();
-					html_element(&WORLD, entity, &element);
-					// TODO:
-					WORLD.storage_mut::<web_sys::$html_t>().add(entity, element);
-					let sys = <(Removed<(web_sys::HtmlElement,)>,)>::run(move |entity| {
-						WORLD.storage_mut::<web_sys::$html_t>().remove(entity);
-					});
-					WORLD.new_system(sys, vec![entity]);
-
-					Element { entity }
+				pub fn $html_name() -> crate::basic_element::BasicElement<web_sys::$html_t> {
+					crate::basic_element::BasicElement::$html_name()
 				}
+
+				pub type [<$html_name:camel>] = crate::BasicElement<web_sys::$html_t>;
 
 				#[test]
 				fn [<$html_name _has_selector>]() {
@@ -109,19 +59,11 @@ macro_rules! create {
 			)*
 
 			$(
-				pub fn $svg_name() -> crate::Element {
-					let entity = WORLD.new_entity();
-					let element = super::$svg_name();
-					svg_element(&WORLD, entity, &element);
-					WORLD.storage_mut::<web_sys::$svg_t>().add(entity, element);
-					// TODO:
-					let sys = <(Removed<(web_sys::SvgElement,)>,)>::run(move |entity| {
-						WORLD.storage_mut::<web_sys::$svg_t>().remove(entity);
-					});
-					WORLD.new_system(sys, vec![entity]);
-
-					Element { entity }
+				pub fn $svg_name() -> crate::basic_element::BasicElement<web_sys::$svg_t> {
+					crate::basic_element::BasicElement::$svg_name()
 				}
+
+				pub type [<$svg_name:camel>] = crate::BasicElement<web_sys::$svg_t>;
 			)*
 		}
 

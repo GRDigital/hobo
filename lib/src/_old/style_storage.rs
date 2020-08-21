@@ -4,7 +4,7 @@ pub use sugars::hash;
 
 #[derive(Default)]
 pub struct StyleStorage {
-	map: HashMap<css::Style, u64>,
+	map: RefCell<HashMap<css::Style, u64>>,
 }
 
 // replace the ClassPlaceholder with actual element class
@@ -29,9 +29,9 @@ fn fixup_class_placeholders(style: &mut css::Style, class: String) {
 // if yes, just returns the class name
 // if no, inserts it into <style> and then returns the class name
 impl StyleStorage {
-	pub fn fetch(&mut self, mut style: css::Style) -> String {
+	pub fn fetch(&self, mut style: css::Style) -> String {
 		// check if style exists in cache, in which case it's already inserted - just retrieve clas name
-		if let Some(id) = self.map.get(&style) {
+		if let Some(id) = self.map.borrow().get(&style) {
 			return format!("s{}", id);
 		}
 
@@ -39,7 +39,7 @@ impl StyleStorage {
 		let id = hash!(style);
 
 		// caching the id
-		self.map.insert(style.clone(), id);
+		self.map.borrow_mut().insert(style.clone(), id);
 		let class = format!("s{}", id);
 
 		fixup_class_placeholders(&mut style, class.clone());

@@ -1,6 +1,6 @@
 //! everything that has to do with HTML event handling
 
-use crate::{prelude::*, Element, storage::{Storage, DynStorage}, Entity};
+use crate::{prelude::*, Element};
 use std::{cell::RefCell, mem::MaybeUninit, rc::Rc};
 
 pub enum EventHandler {
@@ -89,22 +89,50 @@ pub enum EventHandler {
 	// DeviceLightEvent
 }
 
+pub type EventHandlers = RefCell<Vec<EventHandler>>;
+
 macro_rules! generate_events {
 	($($event_kind:ident, $name:ident, $f:ident);+$(;)*) => {paste::item!{
-		impl Element {
+		/// Trait for all hobo elements that can handle various browser events
+		pub trait EventTarget: Element {
+			fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>>;
 			$(
-				pub fn [<add_ $f>](self, mut f: impl FnMut(Entity, web_sys::$event_kind) + 'static) {
-					if WORLD.is_dead(self.entity) { return; }
-					if let Some(target) = WORLD.storage::<web_sys::EventTarget>().get(self.entity) {
-						let handler = Closure::wrap(Box::new(move |e| f(self.entity, e)) as Box<dyn FnMut(web_sys::$event_kind) + 'static>);
-						target.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).expect("can't add event listener");
-						WORLD.storage_mut::<Vec<EventHandler>>().get_mut_or(self.entity, Vec::new).push(EventHandler::$event_kind(handler));
-					}
+				fn [<add_ $f>](&self, f: impl FnMut(web_sys::$event_kind) + 'static) {
+					let handler = self.element().$f(f);
+					self.event_handlers().push(handler);
 				}
 
-				pub fn $f(self, f: impl FnMut(Entity, web_sys::$event_kind) + 'static) -> Self { self.[<add_ $f>](f); self }
+				fn [<add_ $f _mut>]<T: 'static>(&self, this: &Rc<MaybeUninit<RefCell<T>>>, mut f: impl FnMut(&mut T, web_sys::$event_kind) + 'static) {
+					let weak = Rc::downgrade(this);
+					self.[<add_ $f>](move |event| {
+						let strong = if let Some(x) = weak.upgrade() { x } else { return; };
+						let inited: Rc<RefCell<T>> = unsafe { Rc::from_raw((&*Rc::into_raw(strong)).as_ptr()) };
+						f(&mut inited.borrow_mut(), event);
+					})
+				}
+
+				fn $f(self, f: impl FnMut(web_sys::$event_kind) + 'static) -> Self where Self: Sized {
+					self.[<add_ $f>](f);
+					self
+				}
+
+				fn [<$f _mut>]<T: 'static>(self, this: &Rc<MaybeUninit<RefCell<T>>>, f: impl FnMut(&mut T, web_sys::$event_kind) + 'static) -> Self where Self: Sized {
+					self.[<add_ $f _mut>](this, f);
+					self
+				}
 			)+
 		}
+
+		/// Extension event for raw web_sys elements for convenient attaching of event handlers
+		#[extend::ext(pub, name = [<RawEventTarget>])]
+		impl web_sys::EventTarget {$(
+			#[must_use]
+			fn $f(&self, f: impl FnMut(web_sys::$event_kind) + 'static) -> EventHandler {
+				let handler = Closure::wrap(Box::new(f) as Box<dyn FnMut(web_sys::$event_kind) + 'static>);
+				self.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).expect("can't add event listener");
+				EventHandler::$event_kind(handler)
+			}
+		)+}
 	}};
 }
 
@@ -125,4 +153,14 @@ generate_events! {
 	Event,         scroll,      on_scroll;
 	FocusEvent,    blur,        on_blur;
 	FocusEvent,    focus,       on_focus;
+}
+
+impl<T: EventTarget> EventTarget for RefCell<T> {
+	fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>> {
+		unsafe { self.try_borrow_unguarded() }.expect("rc is mutably borrowed").event_handlers()
+	}
+}
+
+impl<T: EventTarget> EventTarget for Rc<T> {
+	fn event_handlers(&self) -> std::cell::RefMut<Vec<EventHandler>> { T::event_handlers(&self) }
 }
