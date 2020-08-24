@@ -2,7 +2,6 @@
 
 //! pub/sub event-based state management
 
-mod state_slice;
 mod tests;
 
 use slotmap::DenseSlotMap;
@@ -11,13 +10,44 @@ use std::{
 	ops::{Deref, DerefMut},
 	rc::{Rc, Weak},
 };
-use state_slice::StateSliceMeta;
-pub use state_slice::StateSlice;
-pub use crate::{__view as view, __update as update};
+use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
 
 slotmap::new_key_type! {pub struct SubscriptionKey;}
+static MAX_NESTED_UPDATES: usize = 100;
+type SubscriptionFn = Rc<RefCell<dyn FnMut()>>;
 
-pub struct Subscription(Weak<RefCell<StateSliceMeta>>, SubscriptionKey);
+#[derive(Default)]
+pub struct StateMeta {
+	subscribers: DenseSlotMap<SubscriptionKey, SubscriptionFn>,
+	update_ongoing: bool,
+	dirty: bool,
+}
+
+impl StateMeta {
+	fn trigger_update(this: &Rc<RefCell<Self>>) {
+		this.borrow_mut().dirty = true;
+		if this.borrow().update_ongoing { return; }
+		this.borrow_mut().update_ongoing = true;
+
+		for _ in 0..MAX_NESTED_UPDATES {
+			this.borrow_mut().dirty = false;
+			let snapshot = this.borrow().subscribers.values().cloned().collect::<Vec<_>>();
+			for subscriber in snapshot {
+				let subscriber = &mut *subscriber.borrow_mut();
+				subscriber();
+			}
+
+			if !this.borrow().dirty {
+				this.borrow_mut().update_ongoing = false;
+				return;
+			}
+		}
+
+		panic!("too many nested updates");
+	}
+}
+
+pub struct Subscription(Weak<RefCell<StateMeta>>, SubscriptionKey);
 impl Drop for Subscription {
 	fn drop(&mut self) {
 		let meta = if let Some(x) = self.0.upgrade() { x } else { return; };
@@ -26,7 +56,10 @@ impl Drop for Subscription {
 }
 
 #[derive(Default)]
-pub struct State<T>(pub Rc<RefCell<StateSlice<T>>>);
+pub struct State<T> {
+	pub data: Rc<RefCell<T>>,
+	pub meta: Rc<RefCell<StateMeta>>,
+}
 
 // This is only permissible because JS/WASM is single-threaded
 // would have to be rethunked if/wheen threading arrives via std::thread
@@ -34,62 +67,57 @@ unsafe impl<T> Send for State<T> {}
 unsafe impl<T> Sync for State<T> {}
 
 impl<T> Clone for State<T> {
-	fn clone(&self) -> Self { Self(Rc::clone(&self.0)) }
+	fn clone(&self) -> Self { Self { data: Rc::clone(&self.data), meta: Rc::clone(&self.meta) } }
 }
 
-struct StateGuard<'a, T> {
-	state: Option<RefMut<'a, StateSlice<T>>>,
+struct StateGuard<'a, T, Inner: DerefMut<Target = T> + 'a> {
+	state: &'a State<T>,
+	data: Option<Inner>,
 }
 
-impl<'a, T> Deref for StateGuard<'a, T> {
+impl<'a, T, Inner: DerefMut<Target = T> + 'a> Deref for StateGuard<'a, T, Inner> {
 	type Target = T;
 
-	fn deref(&self) -> &Self::Target { &self.state.as_ref().unwrap().data }
+	fn deref(&self) -> &Self::Target { self.data.as_ref().unwrap() }
 }
 
-impl<'a, T> DerefMut for StateGuard<'a, T> {
-	fn deref_mut(&mut self) -> &mut Self::Target { &mut self.state.as_mut().unwrap().data }
+impl<'a, T, Inner: DerefMut<Target = T> + 'a> DerefMut for StateGuard<'a, T, Inner> {
+	fn deref_mut(&mut self) -> &mut Self::Target { self.data.as_mut().unwrap() }
 }
 
-impl<'a, T> Drop for StateGuard<'a, T> {
+impl<'a, T, Inner: DerefMut<Target = T> + 'a> Drop for StateGuard<'a, T, Inner> {
 	fn drop(&mut self) {
-		let meta = self.state.take().unwrap().meta.clone();
-		StateSliceMeta::trigger_update(&meta);
+		drop(self.data.take());
+		let meta = self.state.meta.clone();
+		StateMeta::trigger_update(&meta);
 	}
 }
 
 impl<T: 'static> State<T> {
-	pub fn new(initial: T) -> Self { State(Rc::new(RefCell::new(StateSlice::new(initial)))) }
-
-	pub fn update<'a>(&'a self) -> impl DerefMut<Target = T> + 'a {
-		StateGuard { state: Some(self.0.borrow_mut()) }
+	pub fn new(initial: T) -> Self {
+		Self {
+			data: Rc::new(RefCell::new(initial)),
+			meta: Rc::new(RefCell::new(StateMeta::default())),
+		}
 	}
 
-	pub fn view<'a>(&'a self) -> impl Deref<Target = T> + 'a { Ref::map(self.0.borrow(), StateSlice::view) }
+	pub fn update(&self) -> impl DerefMut<Target = T> + '_ {
+		StateGuard {
+			state: self,
+			data: Some(OwningRefMut::new(self.data.borrow_mut())),
+		}
+	}
+
+	pub fn view(&self) -> impl Deref<Target = T> + '_ { self.data.borrow() }
 
 	pub fn subscribe_key(&self, f: impl FnMut() + 'static) -> SubscriptionKey {
-		self.0.borrow().subscribe_key(f)
+		self.meta.borrow_mut().subscribers.insert(Rc::new(RefCell::new(f)))
 	}
 
 	#[must_use]
 	pub fn subscribe(&self, f: impl FnMut() + 'static) -> Subscription {
-		let state_slice = self.0.borrow();
-		Subscription(Rc::downgrade(&state_slice.meta), state_slice.subscribe_key(f))
+		Subscription(Rc::downgrade(&self.meta), self.subscribe_key(f))
 	}
 
-	fn unsubscribe(&self, key: SubscriptionKey) { self.0.borrow().unsubscribe(key) }
-}
-
-#[macro_export]
-macro_rules! __view {
-	($($element:ident).*) => {
-		$($element.view()).*
-	};
-}
-
-#[macro_export]
-macro_rules! __update {
-	($($element:ident).*) => {
-		$($element.update()).*
-	};
+	fn unsubscribe(&self, key: SubscriptionKey) { self.meta.borrow_mut().subscribers.remove(key); }
 }

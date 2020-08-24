@@ -8,10 +8,10 @@ macro_rules! __make_rc_upgrade_stmt {
 		let $e = if let Some(x) = ::std::rc::Weak::upgrade(&$e) { $crate::Slot(x) } else { return; };
 	};
 	(%state $expr:expr => $ident:ident) => {
-		let $ident = if let Some(x) = ::std::rc::Weak::upgrade(&$ident) { $crate::state::State(x) } else { return; };
+		let $ident = if let (Some(data), Some(meta)) = (::std::rc::Weak::upgrade(&$ident.0), ::std::rc::Weak::upgrade(&$ident.1)) { $crate::state::State { data, meta } } else { return; };
 	};
 	(%state $e:ident) => {
-		let $e = if let Some(x) = ::std::rc::Weak::upgrade(&$e) { $crate::state::State(x) } else { return; };
+		let $e = if let (Some(data), Some(meta)) = (::std::rc::Weak::upgrade(&$e.0), ::std::rc::Weak::upgrade(&$e.1)) { $crate::state::State { data, meta } } else { return; };
 	};
 	(% $expr:expr => $ident:ident) => {
 		let $ident = if let Some(x) = ::std::rc::Weak::upgrade(&$ident) { x } else { return; };
@@ -32,10 +32,10 @@ macro_rules! __make_stmt {
 		let $e = ::std::rc::Rc::downgrade(&$e.0);
 	};
 	(%state $expr:expr => $ident:ident) => {
-		let $ident = ::std::rc::Rc::downgrade(&$expr.0);
+		let $ident = (::std::rc::Rc::downgrade(&$expr.data), ::std::rc::Rc::downgrade(&$expr.meta));
 	};
 	(%state $e:ident) => {
-		let $e = ::std::rc::Rc::downgrade(&$e.0);
+		let $e = (::std::rc::Rc::downgrade(&$e.data), ::std::rc::Rc::downgrade(&$e.meta));
 	};
 	(% $expr:expr => $ident:ident) => {
 		let $ident = ::std::rc::Rc::downgrade(&$expr);
