@@ -104,6 +104,7 @@ dependencies = [
  "paste",
  "roxmltree",
  "slotmap",
+ "smart-default",
  "stats_alloc",
  "strum",
  "sugars",

@@ -18,6 +18,7 @@ owning_ref = "0.4"
 paste = "1"
 roxmltree = "0.13"
 slotmap = "0.4"
+smart-default = "0.6"
 strum = { version = "0.19", features = ["derive"] }
 sugars = "1"
 wasm-bindgen = { version = "0.2", features = ["serde-serialize", "strict-macro", "enable-interning"] }

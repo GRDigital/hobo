@@ -14,8 +14,8 @@ pub trait Query: 'static {
 		Self::components().into_iter().map(crate::Interest::Component).collect()
 	}
 	fn query(world: &World, entity: Entity) -> bool;
-	fn run<F: Fn(Entity) + 'static>(f: F) -> System {
-		System { f: Box::new(f), query: Self::query, scheduled: false, interests: Self::interests }
+	fn run<F: FnMut(Entity) + 'static>(f: F) -> System {
+		System { f: RefCell::new(Box::new(f)), query: Self::query, scheduled: Cell::new(false), interests: Self::interests }
 	}
 }
 

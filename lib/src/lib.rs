@@ -22,21 +22,22 @@ use std::marker::PhantomData;
 use storage::*;
 use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
 use std::borrow::Cow;
+use smart_default::SmartDefault;
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Entity(u64);
+pub struct Entity(pub u64);
 
 pub struct System {
-	f: Box<dyn FnMut(Entity) + 'static>,
+	f: RefCell<Box<dyn FnMut(Entity) + 'static>>,
 	query: fn(&World, Entity) -> bool,
 	interests: fn() -> Vec<Interest>,
-	scheduled: bool,
+	scheduled: Cell<bool>,
 }
 
 impl System {
-	pub fn f(&mut self, entity: Entity) { (self.f)(entity) }
+	pub fn f(&self, entity: Entity) { (self.f.borrow_mut())(entity) }
 	pub fn interests(&self) -> Vec<Interest> { (self.interests)() }
 	pub fn query(&self, world: &World, entity: Entity) -> bool { (self.query)(world, entity) }
 }
@@ -47,17 +48,16 @@ pub enum Interest {
 	Component(TypeId),
 }
 
-// systems register entities they care about upon creation
-// identical systems have their entities merged
-#[derive(Default)]
+// Entity(0) is for holding resources
+#[derive(SmartDefault)]
 pub struct World {
+	#[default(Cell::new(1))]
 	pub next_entity_id: Cell<u64>,
 	pub storages: RefCell<HashMap<TypeId, Rc<RefCell<Box<dyn DynStorage>>>>>,
-	pub resources: RefCell<HashMap<TypeId, RefCell<Box<dyn Any>>>>,
 	pub dead_entities: RefCell<HashSet<Entity>>,
 
 	// TODO: should keep weak refs and have a separate map with strong refs so systems can be deregistered
-	pub systems_interests: RefCell<HashMap<Interest, Vec<Rc<RefCell<System>>>>>,
+	pub systems_interests: RefCell<HashMap<Interest, Vec<Rc<System>>>>,
 }
 
 unsafe impl Send for World {}
@@ -102,41 +102,44 @@ pub static WORLD: Lazy<World> = Lazy::new(|| {
 
 impl World {
 	fn assure_storage<Component: 'static>(&self) {
-		self.storages.borrow_mut().entry(TypeId::of::<SimpleStorage<Component>>()).or_insert_with(|| Rc::new(RefCell::new(Box::new(SimpleStorage::<Component>::default()))));
+		self.storages.try_borrow_mut().expect("trying to borrow_mut storages to assure that one exists")
+			.entry(TypeId::of::<SimpleStorage<Component>>())
+			.or_insert_with(|| Rc::new(RefCell::new(Box::new(SimpleStorage::<Component>::default()))));
 	}
 
-	pub fn storage_mut<Component: 'static>(&self) -> StorageGuard<'_, Component, impl std::ops::DerefMut<Target = SimpleStorage<Component>> + '_> {
+	pub fn storage_mut<Component: 'static>(&self) -> StorageGuard<'_, Component, impl std::ops::DerefMut<Target = SimpleStorage<Component>> + owning_ref::StableAddress + '_> {
 		self.assure_storage::<Component>();
 
-		let storage_cell = OwningRefMut::new(OwningHandle::new_mut(self.storages.borrow().get(&TypeId::of::<SimpleStorage<Component>>()).unwrap().clone()));
+		let storage_cell = OwningRefMut::new(OwningHandle::new_mut(
+			self.storages.try_borrow().expect("trying to borrow storages to get a mut storage")
+				.get(&TypeId::of::<SimpleStorage<Component>>()).unwrap().clone()
+		));
 		let storage = storage_cell.map_mut(|x| x.as_any_mut().downcast_mut::<SimpleStorage<Component>>().unwrap());
 		StorageGuard(self, Some(storage))
 	}
 
-	pub fn storage<Component: 'static>(&self) -> impl std::ops::Deref<Target = SimpleStorage<Component>> + '_ {
+	pub fn storage<Component: 'static>(&self) -> impl std::ops::Deref<Target = SimpleStorage<Component>> + owning_ref::StableAddress + '_ {
 		self.assure_storage::<Component>();
 
-		let storage_cell = OwningRef::new(OwningHandle::new(self.storages.borrow().get(&TypeId::of::<SimpleStorage<Component>>()).unwrap().clone()));
+		let storage_cell = OwningRef::new(OwningHandle::new(
+			self.storages.try_borrow().expect("trying to borrow storages to get a storage")
+				.get(&TypeId::of::<SimpleStorage<Component>>()).unwrap().clone()
+		));
 		storage_cell.map(|x| x.as_any().downcast_ref::<SimpleStorage<Component>>().unwrap())
 	}
 
 	pub fn register_resource<T: 'static>(&self, resource: T) {
-		self.resources.borrow_mut().entry(TypeId::of::<T>()).or_insert_with(|| RefCell::new(Box::new(resource)));
+		self.storage_mut::<T>().add(Entity(0), resource);
 	}
 
-	pub fn resource<T: 'static>(&self) -> Option<impl std::ops::Deref<Target = T> + '_> {
-		let resources = OwningRef::new(self.resources.borrow());
-		resources.get(&TypeId::of::<T>())?;
-		let resource_cell = OwningRef::new(OwningHandle::new(resources.map(|x| x.get(&TypeId::of::<T>()).unwrap())));
-		Some(resource_cell.map(|x| x.downcast_ref::<T>().unwrap()))
+	pub fn resource<T: 'static>(&self) -> Option<impl std::ops::Deref<Target = T> + owning_ref::StableAddress + '_> {
+		if !self.storage::<T>().has(Entity(0)) { return None; }
+		Some(OwningRef::new(self.storage::<T>()).map(|x| x.get(Entity(0)).unwrap()))
 	}
 
-	pub fn resource_mut<T: 'static>(&self) -> Option<impl std::ops::DerefMut<Target = T> + '_> {
-		let resources = OwningRef::new(self.resources.borrow());
-		resources.get(&TypeId::of::<T>())?;
-		let resource_cell = OwningRefMut::new(OwningHandle::new_mut(resources.map(|x| x.get(&TypeId::of::<T>()).unwrap())));
-		// TODO: resource guard & resource watching
-		Some(resource_cell.map_mut(|x| x.downcast_mut::<T>().unwrap()))
+	pub fn resource_mut<T: 'static>(&self) -> Option<impl std::ops::DerefMut<Target = T> + owning_ref::StableAddress + '_> {
+		if !self.storage::<T>().has(Entity(0)) { return None; }
+		Some(OwningRefMut::new(self.storage_mut::<T>()).map_mut(|x| x.get_mut(Entity(0)).unwrap()))
 	}
 
 	pub fn new_entity(&self) -> Entity {
@@ -146,61 +149,63 @@ impl World {
 	}
 
 	pub fn new_system(&self, interests: impl IntoIterator<Item = Interest>, sys: System) {
-		let sys = Rc::new(RefCell::new(sys));
+		let sys = Rc::new(sys);
 		for interest in interests.into_iter() {
-			let mut systems_interests = self.systems_interests.borrow_mut();
+			let mut systems_interests = self.systems_interests.try_borrow_mut().expect("trying to borrow_mut systems_interests to add a new system");
 			systems_interests.entry(interest).or_insert_with(Vec::new).push(Rc::clone(&sys));
 		}
 	}
 
+	pub fn watch_resource(&self, sys: System) {
+		self.new_system(vec![Interest::Entity(Entity(0))], sys);
+	}
+
 	pub fn remove_entity(&self, entity: Entity) {
-		self.dead_entities.borrow_mut().insert(entity);
+		self.dead_entities.try_borrow_mut().expect("trying to borrow_mut dead_entities to remove one").insert(entity);
 
 		let mut set: HashSet<TypeId> = HashSet::new();
 
-		for (&component_id, storage) in self.storages.borrow().iter() {
-			if storage.borrow().has(entity) {
+		for (&component_id, storage) in self.storages.try_borrow().expect("trying to borrow storages to remove an entity").iter() {
+			if storage.try_borrow().expect("trying to borrow a storage to check if it has an entity to remove").has(entity) {
 				set.insert(component_id);
-				storage.borrow_mut().remove(entity);
+				storage.try_borrow_mut().expect("trying to borrow_mut storage to remove an entity").remove(entity);
 			}
 		}
 
 		let systems = self.schedule_systems(set.into_iter().map(|component_id| (entity, component_id)));
 
-		for storage in self.storages.borrow().values() {
-			storage.borrow_mut().flush();
+		for storage in self.storages.try_borrow().expect("trying to borrow storages to flush one after removing an entity").values() {
+			storage.try_borrow_mut().expect("trying to borrow_mut a storage to flush after removing an entity").flush();
 		}
 
 		self.run_systems(systems);
 
-		self.systems_interests.borrow_mut().remove(&Interest::Entity(entity));
+		self.systems_interests.try_borrow_mut().expect("trying to borrow systems_interests to get rid of an entity interest").remove(&Interest::Entity(entity));
 	}
 
 	pub fn is_dead(&self, entity: Entity) -> bool {
 		self.dead_entities.borrow().contains(&entity)
 	}
 
-	fn schedule_systems(&self, interests: impl IntoIterator<Item = (Entity, TypeId)>) -> Vec<(Entity, Rc<RefCell<System>>)> {
-		let systems_interests = self.systems_interests.borrow();
+	fn schedule_systems(&self, interests: impl IntoIterator<Item = (Entity, TypeId)>) -> Vec<(Entity, Rc<System>)> {
+		let systems_interests = self.systems_interests.try_borrow().expect("trying to borrow systems_interests to schedule");
 
 		let mut v = vec![];
 		for (entity, type_id) in interests.into_iter() {
 			if let Some(systems) = systems_interests.get(&Interest::Entity(entity)) {
-				for system_rc in systems.iter() {
-					let mut system = system_rc.borrow_mut();
-					if !system.scheduled && system.query(self, entity) {
-						v.push((entity, Rc::clone(&system_rc)));
-						system.scheduled = true;
+				for system in systems.iter() {
+					if !system.scheduled.get() && system.query(self, entity) {
+						v.push((entity, Rc::clone(&system)));
+						system.scheduled.set(true);
 					}
 				}
 			}
 
 			if let Some(systems) = systems_interests.get(&Interest::Component(type_id)) {
-				for system_rc in systems.iter() {
-					let mut system = system_rc.borrow_mut();
-					if !system.scheduled && system.query(self, entity) {
-						v.push((entity, Rc::clone(&system_rc)));
-						system.scheduled = true;
+				for system in systems.iter() {
+					if !system.scheduled.get() && system.query(self, entity) {
+						v.push((entity, Rc::clone(&system)));
+						system.scheduled.set(true);
 					}
 				}
 			}
@@ -208,10 +213,9 @@ impl World {
 		v
 	}
 
-	fn run_systems(&self, v: Vec<(Entity, Rc<RefCell<System>>)>) {
+	fn run_systems(&self, v: Vec<(Entity, Rc<System>)>) {
 		for (entity, system) in v {
-			let mut system = system.borrow_mut();
-			system.scheduled = false;
+			system.scheduled.set(false);
 			system.f(entity);
 		}
 	}

@@ -93,6 +93,7 @@ impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 }
 
 pub struct StorageGuard<'a, Component: 'static, Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>>(pub &'a World, pub Option<Inner>);
+unsafe impl<'a, Component: 'static, Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>> owning_ref::StableAddress for StorageGuard<'a, Component, Inner> {}
 
 impl<'a, Component, Inner> std::ops::Deref for StorageGuard<'a, Component, Inner> where
 	Component: 'static,
@@ -124,10 +125,10 @@ impl<'a, Component, Inner> Drop for StorageGuard<'a, Component, Inner> where
 			let mut storages = world.storages.borrow_mut();
 			let mut storage = storages.get_mut(&TypeId::of::<SimpleStorage<Component>>()).unwrap().borrow_mut();
 			let storage = storage.as_any_mut().downcast_mut::<SimpleStorage<Component>>().unwrap();
-			storage.added.iter().chain(storage.modified.iter()).chain(storage.removed.keys()).copied().collect::<HashSet<_>>()
+			storage.added.iter().chain(storage.modified.iter()).chain(storage.removed.keys()).map(|&entity| (entity, TypeId::of::<Component>())).collect::<HashSet<_>>()
 		};
 
-		let systems = world.schedule_systems(set.into_iter().map(|entity| (entity, TypeId::of::<Component>())));
+		let systems = world.schedule_systems(set);
 
 		{
 			let mut storages = world.storages.borrow_mut();
