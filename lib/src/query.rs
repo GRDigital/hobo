@@ -57,7 +57,7 @@ impl<T: 'static> BasicQuery for T {
 	}
 
 	fn removed(world: &World, entity: Entity) -> bool {
-		world.storage::<Self>().removed.contains_key(&entity)
+		world.storage::<Self>().removed.contains(&entity)
 	}
 }
 

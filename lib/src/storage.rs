@@ -4,6 +4,7 @@ pub trait DynStorage: as_any::AsAny {
 	fn has(&self, entity: Entity) -> bool;
 	fn remove(&mut self, entity: Entity);
 	fn flush(&mut self);
+	fn flush_removed(&mut self);
 }
 
 pub trait Storage<Component: 'static>: DynStorage {
@@ -20,14 +21,15 @@ pub trait Storage<Component: 'static>: DynStorage {
 
 pub struct SimpleStorage<Component: 'static> {
 	pub data: HashMap<Entity, Component>,
+	pub data_removed: HashMap<Entity, Component>,
 	pub added: HashSet<Entity>,
 	pub modified: HashSet<Entity>,
-	pub removed: HashMap<Entity, Component>,
+	pub removed: HashSet<Entity>,
 }
 
 impl<Component> Default for SimpleStorage<Component> {
 	fn default() -> Self {
-		Self { data: Default::default(), added: Default::default(), removed: Default::default(), modified: Default::default() }
+		Self { data: Default::default(), data_removed: Default::default(), added: Default::default(), removed: Default::default(), modified: Default::default() }
 	}
 }
 
@@ -37,8 +39,9 @@ impl<Component: 'static> DynStorage for SimpleStorage<Component> {
 	}
 
 	fn remove(&mut self, entity: Entity) {
-		if let Some(x) = self.data.remove(&entity) {
-			self.removed.insert(entity, x);
+		if let Some(cmp) = self.data.remove(&entity) {
+			self.data_removed.insert(entity, cmp);
+			self.removed.insert(entity);
 		}
 	}
 
@@ -46,6 +49,10 @@ impl<Component: 'static> DynStorage for SimpleStorage<Component> {
 		std::mem::take(&mut self.added);
 		std::mem::take(&mut self.modified);
 		std::mem::take(&mut self.removed);
+	}
+
+	fn flush_removed(&mut self) {
+		self.data_removed.clear();
 	}
 }
 
@@ -65,21 +72,22 @@ impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 		self.data.get(&entity)
 	}
 
-	fn get_removed(&self, entity: Entity) -> Option<&Component> {
-		self.removed.get(&entity)
-	}
-
 	fn get_mut(&mut self, entity: Entity) -> Option<&mut Component> {
 		self.modified.insert(entity);
 		self.data.get_mut(&entity)
 	}
 
+	fn get_removed(&self, entity: Entity) -> Option<&Component> {
+		self.data_removed.get(&entity)
+	}
+
 	fn get_removed_mut(&mut self, entity: Entity) -> Option<&mut Component> {
-		self.removed.get_mut(&entity)
+		self.modified.insert(entity);
+		self.data_removed.get_mut(&entity)
 	}
 
 	fn take_removed(&mut self, entity: Entity) -> Option<Component> {
-		self.removed.remove(&entity)
+		self.data_removed.remove(&entity)
 	}
 
 	fn get_mut_or(&mut self, entity: Entity, f: impl FnOnce() -> Component) -> &mut Component {
@@ -123,16 +131,16 @@ impl<'a, Component, Inner> Drop for StorageGuard<'a, Component, Inner> where
 
 		let set = {
 			let mut storages = world.storages.borrow_mut();
-			let mut storage = storages.get_mut(&TypeId::of::<SimpleStorage<Component>>()).unwrap().borrow_mut();
+			let mut storage = storages.get_mut(&TypeId::of::<Component>()).unwrap().borrow_mut();
 			let storage = storage.as_any_mut().downcast_mut::<SimpleStorage<Component>>().unwrap();
-			storage.added.iter().chain(storage.modified.iter()).chain(storage.removed.keys()).map(|&entity| (entity, TypeId::of::<Component>())).collect::<HashSet<_>>()
+			storage.added.iter().chain(storage.modified.iter()).chain(storage.removed.iter()).map(|&entity| (entity, TypeId::of::<Component>())).collect::<HashSet<_>>()
 		};
 
 		let systems = world.schedule_systems(set);
 
 		{
 			let mut storages = world.storages.borrow_mut();
-			let mut storage = storages.get_mut(&TypeId::of::<SimpleStorage<Component>>()).unwrap().borrow_mut();
+			let mut storage = storages.get_mut(&TypeId::of::<Component>()).unwrap().borrow_mut();
 			storage.flush();
 		}
 

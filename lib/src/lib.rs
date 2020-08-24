@@ -103,7 +103,7 @@ pub static WORLD: Lazy<World> = Lazy::new(|| {
 impl World {
 	fn assure_storage<Component: 'static>(&self) {
 		self.storages.try_borrow_mut().expect("trying to borrow_mut storages to assure that one exists")
-			.entry(TypeId::of::<SimpleStorage<Component>>())
+			.entry(TypeId::of::<Component>())
 			.or_insert_with(|| Rc::new(RefCell::new(Box::new(SimpleStorage::<Component>::default()))));
 	}
 
@@ -112,7 +112,7 @@ impl World {
 
 		let storage_cell = OwningRefMut::new(OwningHandle::new_mut(
 			self.storages.try_borrow().expect("trying to borrow storages to get a mut storage")
-				.get(&TypeId::of::<SimpleStorage<Component>>()).unwrap().clone()
+				.get(&TypeId::of::<Component>()).unwrap().clone()
 		));
 		let storage = storage_cell.map_mut(|x| x.as_any_mut().downcast_mut::<SimpleStorage<Component>>().unwrap());
 		StorageGuard(self, Some(storage))
@@ -123,7 +123,7 @@ impl World {
 
 		let storage_cell = OwningRef::new(OwningHandle::new(
 			self.storages.try_borrow().expect("trying to borrow storages to get a storage")
-				.get(&TypeId::of::<SimpleStorage<Component>>()).unwrap().clone()
+				.get(&TypeId::of::<Component>()).unwrap().clone()
 		));
 		storage_cell.map(|x| x.as_any().downcast_ref::<SimpleStorage<Component>>().unwrap())
 	}
@@ -303,6 +303,8 @@ impl Element {
 		WORLD.storage::<web_sys::Element>().get(self.entity).expect("missing web_sys::Element").set_attribute(&key.into(), &value.into()).expect("can't set attribute");
 	}
 	pub fn attr<'a>(self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) -> Self { self.set_attr(key, value); self }
+	pub fn set_bool_attr<'a>(self, key: impl Into<Cow<'a, str>>, value: bool) { if value { self.set_attr(key, "") } else { self.remove_attr(key) } }
+	pub fn bool_attr<'a>(self, key: impl Into<Cow<'a, str>>, value: bool) -> Self { self.set_bool_attr(key, value); self }
 	pub fn remove_attr<'a>(self, key: impl Into<Cow<'a, str>>) {
 		if WORLD.is_dead(self.entity) { return; }
 		WORLD.storage::<web_sys::Element>().get(self.entity).expect("missing web_sys::Element").remove_attribute(&key.into()).expect("can't remove attribute");
@@ -326,6 +328,14 @@ impl Element {
 		let classes = storage.get_mut_or(self.entity, Classes::default);
 		classes.type_tag = Some(TypeId::of::<T>());
 		self
+	}
+
+	pub fn replace_with(&mut self, other: Self) {
+		if let (Some(this), Some(other)) = (WORLD.storage::<web_sys::Element>().get(self.entity()), WORLD.storage::<web_sys::Node>().get(other.entity())) {
+			this.replace_with_with_node_1(other).unwrap();
+		}
+		WORLD.remove_entity(self.entity());
+		*self = other;
 	}
 }
 
