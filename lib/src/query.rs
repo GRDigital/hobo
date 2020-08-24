@@ -1,4 +1,5 @@
 use super::*;
+use sugars::*;
 
 pub trait BasicQuery: 'static {
 	fn exists(world: &World, entity: Entity) -> bool;
@@ -7,10 +8,14 @@ pub trait BasicQuery: 'static {
 	fn removed(world: &World, entity: Entity) -> bool;
 }
 
-pub trait Query {
+pub trait Query: 'static {
+	fn components() -> HashSet<TypeId>;
+	fn interests() -> Vec<crate::Interest> {
+		Self::components().into_iter().map(crate::Interest::Component).collect()
+	}
 	fn query(world: &World, entity: Entity) -> bool;
 	fn run<F: Fn(Entity) + 'static>(f: F) -> System {
-		System { f: Box::new(f), query: Self::query }
+		System { f: Box::new(f), query: Self::query, scheduled: false, interests: Self::interests }
 	}
 }
 
@@ -29,6 +34,12 @@ pub struct Or<Left: Query, Right: Query>(PhantomData<Left>, PhantomData<Right>);
 impl<Left: Query, Right: Query> Query for Or<Left, Right> {
 	fn query(world: &World, entity: Entity) -> bool {
 		Left::query(world, entity) || Right::query(world, entity)
+	}
+
+	fn components() -> HashSet<TypeId> {
+		let mut acc = Left::components();
+		acc.extend(Right::components());
+		acc
 	}
 }
 
@@ -59,12 +70,25 @@ macro_rules! tuple_query {
 					$first::query(world, entity)
 					$(&& $id::query(world, entity))*
 				}
+
+				fn components() -> HashSet<TypeId> {
+					let mut acc = $first::components();
+					$(acc.extend($id::components());)*
+					acc
+				}
 			}
 
 			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Present<($first, $($id),*)> {
 				fn query(world: &World, entity: Entity) -> bool {
 					$first::exists(world, entity)
 					$(&& $id::exists(world, entity))*
+				}
+
+				fn components() -> HashSet<TypeId> {
+					hset![
+						TypeId::of::<$first>(),
+						$(TypeId::of::<$id>()),*
+					]
 				}
 			}
 
@@ -74,12 +98,26 @@ macro_rules! tuple_query {
 					$first::added(world, entity)
 					$(|| $id::added(world, entity))*
 				}
+
+				fn components() -> HashSet<TypeId> {
+					hset![
+						TypeId::of::<$first>(),
+						$(TypeId::of::<$id>()),*
+					]
+				}
 			}
 
 			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Modified<($first, $($id),*)> {
 				fn query(world: &World, entity: Entity) -> bool {
 					$first::modified(world, entity)
 					$(|| $id::modified(world, entity))*
+				}
+
+				fn components() -> HashSet<TypeId> {
+					hset![
+						TypeId::of::<$first>(),
+						$(TypeId::of::<$id>()),*
+					]
 				}
 			}
 
@@ -104,6 +142,13 @@ macro_rules! tuple_query {
 					)*
 
 					(present != total) && ((present | missing) == total)
+				}
+
+				fn components() -> HashSet<TypeId> {
+					hset![
+						TypeId::of::<$first>(),
+						$(TypeId::of::<$id>()),*
+					]
 				}
 			}
 		}

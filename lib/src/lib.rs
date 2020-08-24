@@ -29,8 +29,16 @@ fn dom() -> web_sys::Document { web_sys::window().expect("no window").document()
 pub struct Entity(u64);
 
 pub struct System {
-	f: Box<dyn Fn(Entity) + 'static>,
+	f: Box<dyn FnMut(Entity) + 'static>,
 	query: fn(&World, Entity) -> bool,
+	interests: fn() -> Vec<Interest>,
+	scheduled: bool,
+}
+
+impl System {
+	pub fn f(&mut self, entity: Entity) { (self.f)(entity) }
+	pub fn interests(&self) -> Vec<Interest> { (self.interests)() }
+	pub fn query(&self, world: &World, entity: Entity) -> bool { (self.query)(world, entity) }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -46,8 +54,10 @@ pub struct World {
 	pub next_entity_id: Cell<u64>,
 	pub storages: RefCell<HashMap<TypeId, Rc<RefCell<Box<dyn DynStorage>>>>>,
 	pub resources: RefCell<HashMap<TypeId, RefCell<Box<dyn Any>>>>,
-	pub systems_interests: RefCell<HashMap<Interest, Vec<Rc<System>>>>,
 	pub dead_entities: RefCell<HashSet<Entity>>,
+
+	// TODO: should keep weak refs and have a separate map with strong refs so systems can be deregistered
+	pub systems_interests: RefCell<HashMap<Interest, Vec<Rc<RefCell<System>>>>>,
 }
 
 unsafe impl Send for World {}
@@ -56,6 +66,37 @@ unsafe impl Sync for World {}
 pub static WORLD: Lazy<World> = Lazy::new(|| {
 	let world = World::default();
 	world.register_resource(crate::style_storage::StyleStorage::default());
+
+	let sys = <Or<Added<(Classes,)>, Modified<(Classes,)>>>::run(move |entity| {
+		if let Some(element) = WORLD.storage::<web_sys::Element>().get(entity) {
+			use std::fmt::Write;
+
+			let storage = WORLD.storage::<Classes>();
+			let classes = storage.get(entity).unwrap();
+			let mut res = format!("e{}", entity.0);
+
+			if let Some(id) = &classes.type_tag {
+				use std::hash::{Hash, Hasher};
+
+				let mut hasher = std::collections::hash_map::DefaultHasher::new();
+				id.hash(&mut hasher);
+				let id = hasher.finish();
+				write!(&mut res, " t{}", id).unwrap();
+			}
+
+			let mut style_storage = WORLD.resource_mut::<crate::style_storage::StyleStorage>().unwrap();
+			for style in classes.styles.values() {
+				write!(&mut res, " {}", style_storage.fetch(style.clone())).unwrap();
+			}
+
+			element.set_attribute(web_str::class(), &res).expect("can't set class attribute");
+		}
+	});
+
+	world.new_system(sys.interests(), sys);
+
+	create::register_systems(&world);
+
 	world
 });
 
@@ -94,6 +135,7 @@ impl World {
 		let resources = OwningRef::new(self.resources.borrow());
 		resources.get(&TypeId::of::<T>())?;
 		let resource_cell = OwningRefMut::new(OwningHandle::new_mut(resources.map(|x| x.get(&TypeId::of::<T>()).unwrap())));
+		// TODO: resource guard & resource watching
 		Some(resource_cell.map_mut(|x| x.downcast_mut::<T>().unwrap()))
 	}
 
@@ -103,8 +145,8 @@ impl World {
 		entity
 	}
 
-	pub fn new_system(&self, sys: System, interests: impl IntoIterator<Item = Interest>) {
-		let sys = Rc::new(sys);
+	pub fn new_system(&self, interests: impl IntoIterator<Item = Interest>, sys: System) {
+		let sys = Rc::new(RefCell::new(sys));
 		for interest in interests.into_iter() {
 			let mut systems_interests = self.systems_interests.borrow_mut();
 			systems_interests.entry(interest).or_insert_with(Vec::new).push(Rc::clone(&sys));
@@ -113,11 +155,17 @@ impl World {
 
 	pub fn remove_entity(&self, entity: Entity) {
 		self.dead_entities.borrow_mut().insert(entity);
-		for storage in self.storages.borrow().values() {
-			storage.borrow_mut().remove(entity);
+
+		let mut set: HashSet<TypeId> = HashSet::new();
+
+		for (&component_id, storage) in self.storages.borrow().iter() {
+			if storage.borrow().has(entity) {
+				set.insert(component_id);
+				storage.borrow_mut().remove(entity);
+			}
 		}
 
-		let systems = self.schedule_systems(vec![entity]);
+		let systems = self.schedule_systems(set.into_iter().map(|component_id| (entity, component_id)));
 
 		for storage in self.storages.borrow().values() {
 			storage.borrow_mut().flush();
@@ -125,30 +173,34 @@ impl World {
 
 		self.run_systems(systems);
 
-		self.systems_interests.borrow_mut().remove(&entity);
+		self.systems_interests.borrow_mut().remove(&Interest::Entity(entity));
 	}
 
 	pub fn is_dead(&self, entity: Entity) -> bool {
 		self.dead_entities.borrow().contains(&entity)
 	}
 
-	fn schedule_systems(&self, interests: impl IntoIterator<Item = (Entity, TypeId)>) -> Vec<(Entity, Rc<System>)> {
+	fn schedule_systems(&self, interests: impl IntoIterator<Item = (Entity, TypeId)>) -> Vec<(Entity, Rc<RefCell<System>>)> {
 		let systems_interests = self.systems_interests.borrow();
 
 		let mut v = vec![];
 		for (entity, type_id) in interests.into_iter() {
 			if let Some(systems) = systems_interests.get(&Interest::Entity(entity)) {
-				for system in systems.iter() {
-					if (system.query)(self, entity) {
-						v.push((entity, Rc::clone(&system)));
+				for system_rc in systems.iter() {
+					let mut system = system_rc.borrow_mut();
+					if !system.scheduled && system.query(self, entity) {
+						v.push((entity, Rc::clone(&system_rc)));
+						system.scheduled = true;
 					}
 				}
 			}
 
 			if let Some(systems) = systems_interests.get(&Interest::Component(type_id)) {
-				for system in systems.iter() {
-					if (system.query)(self, entity) {
-						v.push((entity, Rc::clone(&system)));
+				for system_rc in systems.iter() {
+					let mut system = system_rc.borrow_mut();
+					if !system.scheduled && system.query(self, entity) {
+						v.push((entity, Rc::clone(&system_rc)));
+						system.scheduled = true;
 					}
 				}
 			}
@@ -156,9 +208,11 @@ impl World {
 		v
 	}
 
-	fn run_systems(&self, v: Vec<(Entity, Rc<System>)>) {
+	fn run_systems(&self, v: Vec<(Entity, Rc<RefCell<System>>)>) {
 		for (entity, system) in v {
-			(system.f)(entity);
+			let mut system = system.borrow_mut();
+			system.scheduled = false;
+			system.f(entity);
 		}
 	}
 }
@@ -236,8 +290,7 @@ impl Element {
 	pub fn component<T: 'static>(self, component: T) -> Self { self.add_component(component); self }
 
 	pub fn add_system(self, system: System) {
-		// TODO:
-		// WORLD.new_system(system, vec![self.entity]);
+		WORLD.new_system(vec![Interest::Entity(self.entity)], system);
 	}
 	pub fn system(self, system: System) -> Self { self.add_system(system); self }
 
@@ -275,36 +328,6 @@ impl Element {
 pub fn fetch_classname<'a>(style: impl Into<Cow<'a, css::Style>>) -> String {
 	let mut style_storage = WORLD.resource_mut::<crate::style_storage::StyleStorage>().unwrap();
 	style_storage.fetch(style.into().into_owned())
-}
-
-pub fn default_systems(entity: Entity) {
-	let sys = <Or<Added<(Classes,)>, Modified<(Classes,)>>>::run(move |entity| {
-		if let Some(element) = WORLD.storage::<web_sys::Element>().get(entity) {
-			use std::fmt::Write;
-
-			let storage = WORLD.storage::<Classes>();
-			let classes = storage.get(entity).unwrap();
-			let mut res = format!("e{}", entity.0);
-
-			if let Some(id) = &classes.type_tag {
-				use std::hash::{Hash, Hasher};
-
-				let mut hasher = std::collections::hash_map::DefaultHasher::new();
-				id.hash(&mut hasher);
-				let id = hasher.finish();
-				write!(&mut res, " t{}", id).unwrap();
-			}
-
-			let mut style_storage = WORLD.resource_mut::<crate::style_storage::StyleStorage>().unwrap();
-			for style in classes.styles.values() {
-				write!(&mut res, " {}", style_storage.fetch(style.clone())).unwrap();
-			}
-
-			element.set_attribute(web_str::class(), &res).expect("can't set class attribute");
-		}
-	});
-	// TODO:
-	// WORLD.new_system(sys, vec![entity]);
 }
 
 #[extend::ext(pub, name = TypeClassString)]

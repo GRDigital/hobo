@@ -127,7 +127,7 @@ impl<'a, Component, Inner> Drop for StorageGuard<'a, Component, Inner> where
 			storage.added.iter().chain(storage.modified.iter()).chain(storage.removed.keys()).copied().collect::<HashSet<_>>()
 		};
 
-		let systems = world.schedule_systems(set);
+		let systems = world.schedule_systems(set.into_iter().map(|entity| (entity, TypeId::of::<Component>())));
 
 		{
 			let mut storages = world.storages.borrow_mut();
