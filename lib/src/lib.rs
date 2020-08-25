@@ -84,7 +84,7 @@ pub static WORLD: Lazy<World> = Lazy::new(|| {
 				write!(&mut res, " t{}", id).unwrap();
 			}
 
-			let mut style_storage = WORLD.resource_mut::<crate::style_storage::StyleStorage>().unwrap();
+			let mut style_storage = WORLD.resource_mut::<crate::style_storage::StyleStorage>();
 			for style in classes.styles.values() {
 				write!(&mut res, " {}", style_storage.fetch(style.clone())).unwrap();
 			}
@@ -137,12 +137,20 @@ impl World {
 		self.storage_mut::<T>().add(Entity(0), resource);
 	}
 
-	pub fn resource<T: 'static>(&self) -> Option<OwningRef<StorageRef<T>, T>> {
+	pub fn resource<T: 'static>(&self) -> OwningRef<StorageRef<T>, T> {
+		OwningRef::new(self.storage::<T>()).map(|x| x.get(Entity(0)).unwrap())
+	}
+
+	pub fn resource_mut<T: 'static>(&self) -> OwningRefMut<StorageMutRef<T>, T> {
+		OwningRefMut::new(self.storage_mut::<T>()).map_mut(|x| x.get_mut(Entity(0)).unwrap())
+	}
+
+	pub fn try_resource<T: 'static>(&self) -> Option<OwningRef<StorageRef<T>, T>> {
 		if !self.storage::<T>().has(Entity(0)) { return None; }
 		Some(OwningRef::new(self.storage::<T>()).map(|x| x.get(Entity(0)).unwrap()))
 	}
 
-	pub fn resource_mut<T: 'static>(&self) -> Option<OwningRefMut<StorageMutRef<T>, T>> {
+	pub fn try_resource_mut<T: 'static>(&self) -> Option<OwningRefMut<StorageMutRef<T>, T>> {
 		if !self.storage::<T>().has(Entity(0)) { return None; }
 		Some(OwningRefMut::new(self.storage_mut::<T>()).map_mut(|x| x.get_mut(Entity(0)).unwrap()))
 	}
@@ -351,8 +359,7 @@ impl Element {
 }
 
 pub fn fetch_classname<'a>(style: impl Into<Cow<'a, css::Style>>) -> String {
-	let mut style_storage = WORLD.resource_mut::<crate::style_storage::StyleStorage>().unwrap();
-	style_storage.fetch(style.into().into_owned())
+	crate::style_storage::StyleStorage::resource_mut().fetch(style.into().into_owned())
 }
 
 #[extend::ext(pub, name = TypeClassString)]
@@ -384,7 +391,9 @@ pub trait Component: 'static {
 	fn storage<'a>() -> StorageRef<'a, Self> where Self: Sized { WORLD.storage::<Self>() }
 	fn storage_mut<'a>() -> StorageMutRef<'a, Self> where Self: Sized { WORLD.storage_mut::<Self>() }
 	fn register_resource(self) where Self: Sized { World::register_resource(&WORLD, self) }
-	fn resource<'a>() -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized { WORLD.resource::<Self>() }
-	fn resource_mut<'a>() -> Option<OwningRefMut<StorageMutRef<'a, Self>, Self>> where Self: Sized { WORLD.resource_mut::<Self>() }
+	fn resource<'a>() -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized { WORLD.resource::<Self>() }
+	fn resource_mut<'a>() -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized { WORLD.resource_mut::<Self>() }
+	fn try_resource<'a>() -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized { WORLD.try_resource::<Self>() }
+	fn try_resource_mut<'a>() -> Option<OwningRefMut<StorageMutRef<'a, Self>, Self>> where Self: Sized { WORLD.try_resource_mut::<Self>() }
 }
 impl<T: 'static + Sized> Component for T {}
