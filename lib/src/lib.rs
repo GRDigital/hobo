@@ -258,6 +258,12 @@ impl Parent {
 	}
 }
 
+impl std::ops::Deref for Parent {
+	type Target = Entity;
+
+	fn deref(&self) -> &Self::Target { &self.0 }
+}
+
 #[derive(Default)]
 pub struct Classes {
 	type_tag: Option<TypeId>,
@@ -272,6 +278,7 @@ pub struct Element {
 impl Element {
 	pub fn entity(&self) -> Entity { self.entity }
 	pub fn remove(self) { WORLD.remove_entity(self.entity) }
+	pub fn new(entity: Entity) -> Self { Self { entity } }
 
 	pub fn add_child(self, child: Element) {
 		if WORLD.is_dead(self.entity) || WORLD.is_dead(child.entity) { return; }
