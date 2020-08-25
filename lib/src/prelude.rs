@@ -11,6 +11,7 @@ pub use crate::{
 	storage::{Storage as _, DynStorage as _},
 	query::*,
 	TypeClassString as _,
+	Component as _,
 };
 pub use crate::css::{self, AppendProperty, F32, F32Ext as _};
 pub use wasm_bindgen::prelude::*;

@@ -1,4 +1,7 @@
-use super::*;
+// use super::*;
+use crate::{Entity, World};
+use std::collections::{HashMap, HashSet};
+use std::any::TypeId;
 
 pub trait DynStorage: as_any::AsAny {
 	fn has(&self, entity: Entity) -> bool;
@@ -8,15 +11,15 @@ pub trait DynStorage: as_any::AsAny {
 }
 
 pub trait Storage<Component: 'static>: DynStorage {
-	type Item;
-
-	fn get(&self, entity: Entity) -> Option<&Self::Item>;
-	fn get_mut(&mut self, entity: Entity) -> Option<&mut Self::Item>;
-	fn get_removed(&self, entity: Entity) -> Option<&Self::Item>;
-	fn get_removed_mut(&mut self, entity: Entity) -> Option<&mut Self::Item>;
-	fn take_removed(&mut self, entity: Entity) -> Option<Self::Item>;
-	fn get_mut_or(&mut self, entity: Entity, f: impl FnOnce() -> Self::Item) -> &mut Self::Item;
+	fn get(&self, entity: Entity) -> Option<&Component>;
+	fn get_mut(&mut self, entity: Entity) -> Option<&mut Component>;
+	fn get_removed(&self, entity: Entity) -> Option<&Component>;
+	fn get_removed_mut(&mut self, entity: Entity) -> Option<&mut Component>;
+	fn take_removed(&mut self, entity: Entity) -> Option<Component>;
+	fn get_mut_or(&mut self, entity: Entity, f: impl FnOnce() -> Component) -> &mut Component;
 	fn add(&mut self, entity: Entity, component: Component);
+
+	fn get_mut_or_default(&mut self, entity: Entity) -> &mut Component where Component: Default { self.get_mut_or(entity, Component::default) }
 }
 
 pub struct SimpleStorage<Component: 'static> {
@@ -57,8 +60,6 @@ impl<Component: 'static> DynStorage for SimpleStorage<Component> {
 }
 
 impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
-	type Item = Component;
-
 	fn add(&mut self, entity: Entity, component: Component) {
 		if self.has(entity) {
 			self.modified.insert(entity);

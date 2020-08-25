@@ -57,17 +57,16 @@ macro_rules! create {
 			let sys = <(Removed<(web_sys::Element,)>,)>::run(move |entity| {
 				WORLD.storage_mut::<web_sys::Element>().take_removed(entity).unwrap().remove();
 				WORLD.storage_mut::<web_sys::Node>().remove(entity);
-				WORLD.storage_mut::<web_sys::Element>().remove(entity);
 				WORLD.storage_mut::<web_sys::EventTarget>().remove(entity);
 				WORLD.storage_mut::<web_sys::HtmlElement>().remove(entity);
 				WORLD.storage_mut::<web_sys::SvgElement>().remove(entity);
-				// TODO: somehow remove more specific element cmps
 				WORLD.storage_mut::<Vec<crate::events::EventHandler>>().remove(entity);
-				if let Some(children) = WORLD.storage::<Children>().get(entity) {
-					for &child in &children.0 {
-						WORLD.storage_mut::<web_sys::Element>().remove(child);
-					}
-				}
+				// TODO:
+				// new elements should register all html element-related components' TypeId's and put them in a component
+				// then, when Element is removed, all these TypeId's recovered and removed via a dynamic_storage of some sort
+				// e.g. for a div in a DomTypes component, it would store TypeId::of::<web_sys::HtmlDivElement>
+				// as well as Node, Element, EventTarget, HtmlElement
+				// this way, one can reuse a stateful entity by just adding back a html component
 			});
 			world.new_system(sys.interests(), sys);
 		}

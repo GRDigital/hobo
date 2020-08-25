@@ -17,7 +17,7 @@ use std::collections::{HashMap, HashSet};
 use std::any::{Any, TypeId};
 use std::rc::Rc;
 use once_cell::sync::Lazy;
-use std::cell::{RefCell, Cell};
+use std::cell::{RefCell, Cell, Ref, RefMut};
 use std::marker::PhantomData;
 use storage::*;
 use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
@@ -65,7 +65,7 @@ unsafe impl Sync for World {}
 
 pub static WORLD: Lazy<World> = Lazy::new(|| {
 	let world = World::default();
-	world.register_resource(crate::style_storage::StyleStorage::default());
+	World::register_resource(&world, crate::style_storage::StyleStorage::default());
 
 	let sys = <Or<Added<(Classes,)>, Modified<(Classes,)>>>::run(move |entity| {
 		if let Some(element) = WORLD.storage::<web_sys::Element>().get(entity) {
@@ -100,6 +100,9 @@ pub static WORLD: Lazy<World> = Lazy::new(|| {
 	world
 });
 
+type StorageRef<'a, Component> = OwningRef<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, Ref<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;
+type StorageMutRef<'a, Component> = StorageGuard<'a, Component, OwningRefMut<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, RefMut<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>>;
+
 impl World {
 	fn assure_storage<Component: 'static>(&self) {
 		self.storages.try_borrow_mut().expect("trying to borrow_mut storages to assure that one exists")
@@ -107,7 +110,8 @@ impl World {
 			.or_insert_with(|| Rc::new(RefCell::new(Box::new(SimpleStorage::<Component>::default()))));
 	}
 
-	pub fn storage_mut<Component: 'static>(&self) -> StorageGuard<'_, Component, impl std::ops::DerefMut<Target = SimpleStorage<Component>> + owning_ref::StableAddress + '_> {
+	// pub fn storage_mut<Component: 'static>(&self) -> StorageGuard<'_, Component, impl std::ops::DerefMut<Target = SimpleStorage<Component>> + owning_ref::StableAddress + '_> {
+	pub fn storage_mut<Component: 'static>(&self) -> StorageMutRef<Component> {
 		self.assure_storage::<Component>();
 
 		let storage_cell = OwningRefMut::new(OwningHandle::new_mut(
@@ -118,7 +122,8 @@ impl World {
 		StorageGuard(self, Some(storage))
 	}
 
-	pub fn storage<Component: 'static>(&self) -> impl std::ops::Deref<Target = SimpleStorage<Component>> + owning_ref::StableAddress + '_ {
+	// pub fn storage<Component: 'static>(&self) -> impl std::ops::Deref<Target = SimpleStorage<Component>> + owning_ref::StableAddress + '_ {
+	pub fn storage<Component: 'static>(&self) -> StorageRef<Component> {
 		self.assure_storage::<Component>();
 
 		let storage_cell = OwningRef::new(OwningHandle::new(
@@ -132,12 +137,12 @@ impl World {
 		self.storage_mut::<T>().add(Entity(0), resource);
 	}
 
-	pub fn resource<T: 'static>(&self) -> Option<impl std::ops::Deref<Target = T> + owning_ref::StableAddress + '_> {
+	pub fn resource<T: 'static>(&self) -> Option<OwningRef<StorageRef<T>, T>> {
 		if !self.storage::<T>().has(Entity(0)) { return None; }
 		Some(OwningRef::new(self.storage::<T>()).map(|x| x.get(Entity(0)).unwrap()))
 	}
 
-	pub fn resource_mut<T: 'static>(&self) -> Option<impl std::ops::DerefMut<Target = T> + owning_ref::StableAddress + '_> {
+	pub fn resource_mut<T: 'static>(&self) -> Option<OwningRefMut<StorageMutRef<T>, T>> {
 		if !self.storage::<T>().has(Entity(0)) { return None; }
 		Some(OwningRefMut::new(self.storage_mut::<T>()).map_mut(|x| x.get_mut(Entity(0)).unwrap()))
 	}
@@ -162,6 +167,12 @@ impl World {
 
 	pub fn remove_entity(&self, entity: Entity) {
 		self.dead_entities.try_borrow_mut().expect("trying to borrow_mut dead_entities to remove one").insert(entity);
+
+		if let Some(children) = Children::get(entity).map(|x| x.0.clone()) {
+			for child in children {
+				self.remove_entity(child);
+			}
+		}
 
 		let mut set: HashSet<TypeId> = HashSet::new();
 
@@ -256,8 +267,8 @@ impl Element {
 
 	pub fn add_child(self, child: Element) {
 		if WORLD.is_dead(self.entity) || WORLD.is_dead(child.entity) { return; }
-		WORLD.storage_mut::<Children>().get_mut_or(self.entity, Children::default).0.push(child.entity);
-		WORLD.storage_mut::<Parent>().get_mut_or(child.entity, Parent::default).0 = self.entity;
+		WORLD.storage_mut::<Children>().get_mut_or_default(self.entity).0.push(child.entity);
+		WORLD.storage_mut::<Parent>().get_mut_or_default(child.entity).0 = self.entity;
 
 		let storage = WORLD.storage::<web_sys::Node>();
 		if let (Some(parent_node), Some(child_node)) = (storage.get(self.entity), storage.get(child.entity)) {
@@ -269,7 +280,7 @@ impl Element {
 	pub fn set_class_tagged<'a, Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<Cow<'a, css::Style>>) {
 		if WORLD.is_dead(self.entity) { return; }
 		let mut storage = WORLD.storage_mut::<Classes>();
-		let classes = storage.get_mut_or(self.entity, Classes::default);
+		let classes = storage.get_mut_or_default(self.entity);
 
 		// tested and different types with same byte-level representation hash to the same thing (not surprising)
 		// i.e. the type is not taken into account when hashing so I have to do it manually
@@ -325,14 +336,14 @@ impl Element {
 	pub fn mark<T: 'static>(self) -> Self {
 		if WORLD.is_dead(self.entity) { return self; }
 		let mut storage = WORLD.storage_mut::<Classes>();
-		let classes = storage.get_mut_or(self.entity, Classes::default);
+		let classes = storage.get_mut_or_default(self.entity);
 		classes.type_tag = Some(TypeId::of::<T>());
 		self
 	}
 
 	pub fn replace_with(&mut self, other: Self) {
-		if let (Some(this), Some(other)) = (WORLD.storage::<web_sys::Element>().get(self.entity()), WORLD.storage::<web_sys::Node>().get(other.entity())) {
-			this.replace_with_with_node_1(other).unwrap();
+		if let (Some(this), Some(other)) = (web_sys::Element::get(self.entity()), web_sys::Node::get(other.entity())) {
+			this.replace_with_with_node_1(&other).unwrap();
 		}
 		WORLD.remove_entity(self.entity());
 		*self = other;
@@ -354,3 +365,26 @@ impl<T: 'static> T {
 		format!("t{}", id)
 	}
 }
+
+pub trait Component: 'static {
+	fn get<'a>(entity: Entity) -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized {
+		let storage = Self::storage();
+		if !storage.has(entity) { return None; }
+		Some(OwningRef::new(storage).map(|x| x.get(entity).unwrap()))
+	}
+	fn get_mut<'a>(entity: Entity) -> Option<OwningRefMut<StorageMutRef<'a, Self>, Self>> where Self: Sized {
+		let storage = Self::storage_mut();
+		if !storage.has(entity) { return None; }
+		Some(OwningRefMut::new(storage).map_mut(|x| x.get_mut(entity).unwrap()))
+	}
+	fn get_mut_or<'a>(entity: Entity, f: impl FnOnce() -> Self) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized {
+		OwningRefMut::new(Self::storage_mut()).map_mut(move |x| x.get_mut_or(entity, f))
+	}
+	fn get_mut_or_default<'a>(entity: Entity) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Default + Sized { Self::get_mut_or(entity, Self::default) }
+	fn storage<'a>() -> StorageRef<'a, Self> where Self: Sized { WORLD.storage::<Self>() }
+	fn storage_mut<'a>() -> StorageMutRef<'a, Self> where Self: Sized { WORLD.storage_mut::<Self>() }
+	fn register_resource(self) where Self: Sized { World::register_resource(&WORLD, self) }
+	fn resource<'a>() -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized { WORLD.resource::<Self>() }
+	fn resource_mut<'a>() -> Option<OwningRefMut<StorageMutRef<'a, Self>, Self>> where Self: Sized { WORLD.resource_mut::<Self>() }
+}
+impl<T: 'static + Sized> Component for T {}
