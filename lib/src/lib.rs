@@ -291,6 +291,12 @@ impl Element {
 		}
 	}
 	pub fn child(self, child: Element) -> Self { self.add_child(child); self }
+	pub fn children(self, children: impl IntoIterator<Item = Element>) -> Self {
+		for c in children.into_iter() {
+			self.add_child(c);
+		}
+		self
+	}
 
 	pub fn set_class_tagged<'a, Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<Cow<'a, css::Style>>) {
 		if WORLD.is_dead(self.entity) { return; }
@@ -363,6 +369,8 @@ impl Element {
 		WORLD.remove_entity(self.entity());
 		*self = other;
 	}
+
+	pub fn with(self, f: impl FnOnce(Self)) -> Self { f(self); self }
 }
 
 pub fn fetch_classname<'a>(style: impl Into<Cow<'a, css::Style>>) -> String {
