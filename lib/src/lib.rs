@@ -193,10 +193,13 @@ impl World {
 			}
 		}
 
-		let systems = self.schedule_systems(set.into_iter().map(|component_id| (entity, component_id)));
+		let systems = self.schedule_systems(set.iter().map(|&component_id| (entity, component_id)));
 
-		for storage in self.storages.try_borrow().expect("trying to borrow storages to flush one after removing an entity").values() {
-			storage.try_borrow_mut().expect("trying to borrow_mut a storage to flush after removing an entity").flush();
+		{
+			let storages = self.storages.try_borrow().expect("trying to borrow storages to flush one after removing an entity");
+			for component_id in set {
+				storages[&component_id].try_borrow_mut().expect("trying to borrow_mut a storage to flush after removing an entity").flush();
+			}
 		}
 
 		self.run_systems(systems);
