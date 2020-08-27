@@ -6,7 +6,7 @@ mod tests;
 
 use slotmap::DenseSlotMap;
 use std::{
-	cell::RefCell,
+	cell::{RefCell, RefMut, Ref},
 	ops::{Deref, DerefMut},
 	rc::{Rc, Weak},
 };
@@ -70,7 +70,7 @@ impl<T> Clone for State<T> {
 	fn clone(&self) -> Self { Self { data: Rc::clone(&self.data), meta: Rc::clone(&self.meta) } }
 }
 
-struct StateGuard<'a, T, Inner: DerefMut<Target = T> + 'a> {
+pub struct StateGuard<'a, T, Inner: DerefMut<Target = T> + 'a> {
 	state: &'a State<T>,
 	data: Option<Inner>,
 }
@@ -101,14 +101,14 @@ impl<T: 'static> State<T> {
 		}
 	}
 
-	pub fn update(&self) -> impl DerefMut<Target = T> + '_ {
+	pub fn update(&self) -> StateGuard<T, OwningRefMut<RefMut<T>, T>> {
 		StateGuard {
 			state: self,
 			data: Some(OwningRefMut::new(self.data.borrow_mut())),
 		}
 	}
 
-	pub fn view(&self) -> impl Deref<Target = T> + '_ { self.data.borrow() }
+	pub fn view(&self) -> Ref<T> { self.data.borrow() }
 
 	pub fn subscribe_key(&self, f: impl FnMut() + 'static) -> SubscriptionKey {
 		self.meta.borrow_mut().subscribers.insert(Rc::new(RefCell::new(f)))
