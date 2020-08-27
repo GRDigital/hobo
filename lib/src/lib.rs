@@ -371,6 +371,14 @@ impl Element {
 		if let (Some(this), Some(other)) = (web_sys::Element::get(self.entity()), web_sys::Node::get(other.entity())) {
 			this.replace_with_with_node_1(&other).unwrap();
 		}
+
+		// Fix up reference in parent
+		if let Some(parent) = Parent::get(self.entity()) {
+			let mut children = Children::get_mut(parent.0).expect("Parent without Children");
+			let position = children.0.iter().position(|&x| x == self.entity()).expect("entity claims to be a child while missing in parent");
+			children.0[position] = other.entity();
+		}
+
 		WORLD.remove_entity(self.entity());
 		*self = other;
 	}
