@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::{Property, append_property::AppendProperty};
 
 #[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone)]
 pub enum Filter {
@@ -43,6 +44,10 @@ pub enum FilterFunction {
 	Saturate(F32),
 	Sepia(F32),
 	Url(String),
+}
+
+impl AppendProperty for FilterFunction {
+	fn append_property(self, props: &mut Vec<Property>) { Filter::Some(vec![self]).append_property(props) }
 }
 
 impl std::fmt::Display for FilterFunction {
