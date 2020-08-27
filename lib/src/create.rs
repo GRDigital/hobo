@@ -4,8 +4,7 @@
 //!
 //! all of these functions return the most fitting web_sys element types
 
-use crate::{dom, prelude::*, World, Entity, Children, query::*, storage::{Storage, DynStorage}, Element, Interest};
-use std::any::TypeId;
+use crate::{dom, prelude::*, World, Entity, storage::{Storage, DynStorage}, Element};
 
 #[cfg(test)] use wasm_bindgen_test::*;
 #[cfg(test)] wasm_bindgen_test_configure!(run_in_browser);

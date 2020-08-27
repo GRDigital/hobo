@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use std::{cell::RefCell, collections::HashMap};
+use std::collections::HashMap;
 pub use sugars::hash;
 
 #[derive(Default)]

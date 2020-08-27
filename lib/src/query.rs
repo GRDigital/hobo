@@ -71,6 +71,7 @@ macro_rules! tuple_query {
 					$(&& $id::query(world, entity))*
 				}
 
+				#[allow(unused_mut)]
 				fn components() -> HashSet<TypeId> {
 					let mut acc = $first::components();
 					$(acc.extend($id::components());)*
@@ -122,6 +123,7 @@ macro_rules! tuple_query {
 			}
 
 			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Removed<($first, $($id),*)> {
+				#[allow(unused_mut)]
 				fn query(world: &World, entity: Entity) -> bool {
 					// total - bitmask with 1s for every component queried
 					// present - bitmask with 1s for every queried component that exists

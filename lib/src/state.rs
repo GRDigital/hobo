@@ -6,11 +6,11 @@ mod tests;
 
 use slotmap::DenseSlotMap;
 use std::{
-	cell::{RefCell, RefMut, Ref},
+	cell::RefCell,
 	ops::{Deref, DerefMut},
 	rc::{Rc, Weak},
 };
-use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
+use owning_ref::OwningRefMut;
 
 slotmap::new_key_type! {pub struct SubscriptionKey;}
 static MAX_NESTED_UPDATES: usize = 100;

@@ -14,7 +14,7 @@ pub use web_sys;
 pub use paste;
 use crate::prelude::*;
 use std::collections::{HashMap, HashSet};
-use std::any::{Any, TypeId};
+use std::any::TypeId;
 use std::rc::Rc;
 use once_cell::sync::Lazy;
 use std::cell::{RefCell, Cell, Ref, RefMut};
@@ -48,12 +48,14 @@ pub enum Interest {
 	Component(TypeId),
 }
 
+type StorageRc = Rc<RefCell<Box<dyn DynStorage>>>;
+
 // Entity(0) is for holding resources
 #[derive(SmartDefault)]
 pub struct World {
 	#[default(Cell::new(1))]
 	pub next_entity_id: Cell<u64>,
-	pub storages: RefCell<HashMap<TypeId, Rc<RefCell<Box<dyn DynStorage>>>>>,
+	pub storages: RefCell<HashMap<TypeId, StorageRc>>,
 	pub dead_entities: RefCell<HashSet<Entity>>,
 
 	// TODO: should keep weak refs and have a separate map with strong refs so systems can be deregistered

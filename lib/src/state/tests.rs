@@ -1,7 +1,6 @@
-use super::*;
-
 #[test]
 fn state_update() {
+	use super::*;
 	use crate::enclose as e;
 
 	let state = State::new(5);
@@ -13,6 +12,7 @@ fn state_update() {
 
 #[test]
 fn nested_state_update() {
+	use super::*;
 	use crate::enclose as e;
 
 	let state = State::new(5);
@@ -28,6 +28,7 @@ fn nested_state_update() {
 
 #[test]
 fn nested_unsubscribe() {
+	use super::*;
 	use crate::enclose as e;
 
 	let state = State::new(5);
@@ -43,6 +44,7 @@ fn nested_unsubscribe() {
 
 #[test]
 fn sub_drop() {
+	use super::*;
 	use crate::enclose as e;
 
 	let state = State::new(5);
