@@ -285,17 +285,18 @@ impl Element {
 	pub fn remove(self) { WORLD.remove_entity(self.entity) }
 	pub fn new(entity: Entity) -> Self { Self { entity } }
 
-	pub fn add_child(self, child: Element) {
-		if WORLD.is_dead(self.entity) || WORLD.is_dead(child.entity) { return; }
-		WORLD.storage_mut::<Children>().get_mut_or_default(self.entity).0.push(child.entity);
-		WORLD.storage_mut::<Parent>().get_mut_or_default(child.entity).0 = self.entity;
+	pub fn add_child(self, child: impl Into<Element>) {
+		let child = child.into().entity();
+		if WORLD.is_dead(self.entity) || WORLD.is_dead(child) { return; }
+		WORLD.storage_mut::<Children>().get_mut_or_default(self.entity).0.push(child);
+		WORLD.storage_mut::<Parent>().get_mut_or_default(child).0 = self.entity;
 
 		let storage = WORLD.storage::<web_sys::Node>();
-		if let (Some(parent_node), Some(child_node)) = (storage.get(self.entity), storage.get(child.entity)) {
+		if let (Some(parent_node), Some(child_node)) = (storage.get(self.entity), storage.get(child)) {
 			parent_node.append_child(child_node).expect("can't append child");
 		}
 	}
-	pub fn child(self, child: Element) -> Self { self.add_child(child); self }
+	pub fn child(self, child: impl Into<Element>) -> Self { self.add_child(child); self }
 	pub fn children(self, children: impl IntoIterator<Item = Element>) -> Self {
 		for c in children.into_iter() {
 			self.add_child(c);
