@@ -42,6 +42,7 @@ impl<Component: 'static> DynStorage for SimpleStorage<Component> {
 	}
 
 	fn remove(&mut self, entity: Entity) {
+		// log::info!("removing {:?}", std::any::type_name::<Component>());
 		if let Some(cmp) = self.data.remove(&entity) {
 			self.data_removed.insert(entity, cmp);
 			self.removed.insert(entity);
@@ -62,6 +63,7 @@ impl<Component: 'static> DynStorage for SimpleStorage<Component> {
 impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 	fn add(&mut self, entity: Entity, component: Component) {
 		if self.has(entity) {
+			// log::info!("overwriting {:?}", std::any::type_name::<Component>());
 			self.modified.insert(entity);
 		} else {
 			self.added.insert(entity);
@@ -146,5 +148,7 @@ impl<'a, Component, Inner> Drop for StorageGuard<'a, Component, Inner> where
 		}
 
 		world.run_systems(systems);
+
+		world.storages.borrow_mut().get_mut(&TypeId::of::<Component>()).unwrap().borrow_mut().flush_removed();
 	}
 }

@@ -50,6 +50,7 @@ impl StateMeta {
 pub struct Subscription(Weak<RefCell<StateMeta>>, SubscriptionKey);
 impl Drop for Subscription {
 	fn drop(&mut self) {
+		// log::info!("DROPPING STATE SUBSCRIPTION");
 		let meta = if let Some(x) = self.0.upgrade() { x } else { return; };
 		meta.borrow_mut().subscribers.remove(self.1);
 	}

@@ -135,9 +135,7 @@ impl World {
 		storage_cell.map(|x| x.as_any().downcast_ref::<SimpleStorage<Component>>().unwrap())
 	}
 
-	pub fn register_resource<T: 'static>(&self, resource: T) {
-		self.storage_mut::<T>().add(Entity(0), resource);
-	}
+	pub fn register_resource<T: 'static>(&self, resource: T) { self.storage_mut::<T>().add(Entity(0), resource); }
 
 	pub fn resource<T: 'static>(&self) -> OwningRef<StorageRef<T>, T> {
 		OwningRef::new(self.storage::<T>()).map(|x| x.get(Entity(0)).unwrap())
@@ -197,12 +195,19 @@ impl World {
 
 		{
 			let storages = self.storages.try_borrow().expect("trying to borrow storages to flush one after removing an entity");
-			for component_id in set {
-				storages[&component_id].try_borrow_mut().expect("trying to borrow_mut a storage to flush after removing an entity").flush();
+			for component_id in &set {
+				storages[component_id].try_borrow_mut().expect("trying to borrow_mut a storage to flush after removing an entity").flush();
 			}
 		}
 
 		self.run_systems(systems);
+
+		{
+			let storages = self.storages.try_borrow().expect("trying to borrow storages to flush removed one after removing an entity");
+			for component_id in &set {
+				storages[component_id].try_borrow_mut().expect("trying to borrow_mut a storage to flush removed after removing an entity").flush_removed();
+			}
+		}
 
 		self.systems_interests.try_borrow_mut().expect("trying to borrow systems_interests to get rid of an entity interest").remove(&Interest::Entity(entity));
 	}
@@ -297,12 +302,12 @@ impl Element {
 		}
 	}
 	pub fn child(self, child: impl Into<Element>) -> Self { self.add_child(child); self }
-	pub fn children(self, children: impl IntoIterator<Item = Element>) -> Self {
-		for c in children.into_iter() {
-			self.add_child(c);
+	pub fn add_children(self, children: impl IntoIterator<Item = Element>) {
+		for child in children.into_iter() {
+			self.add_child(child);
 		}
-		self
 	}
+	pub fn children(self, children: impl IntoIterator<Item = Element>) -> Self { self.add_children(children); self }
 
 	pub fn set_class_tagged<'a, Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<Cow<'a, css::Style>>) {
 		if WORLD.is_dead(self.entity) { return; }

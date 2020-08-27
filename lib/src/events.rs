@@ -1,6 +1,6 @@
 //! everything that has to do with HTML event handling
 
-use crate::{prelude::*, Element, storage::Storage, Entity};
+use crate::{prelude::*, Element, storage::Storage};
 
 pub enum EventHandler {
 	MouseEvent(Closure<dyn FnMut(web_sys::MouseEvent) + 'static>),
@@ -92,16 +92,16 @@ macro_rules! generate_events {
 	($($event_kind:ident, $name:ident, $f:ident);+$(;)*) => {paste::item!{
 		impl Element {
 			$(
-				pub fn [<add_ $f>](self, mut f: impl FnMut(Entity, web_sys::$event_kind) + 'static) {
+				pub fn [<add_ $f>](self, mut f: impl FnMut(web_sys::$event_kind) + 'static) {
 					if WORLD.is_dead(self.entity) { return; }
 					if let Some(target) = WORLD.storage::<web_sys::EventTarget>().get(self.entity) {
-						let handler = Closure::wrap(Box::new(move |e| f(self.entity, e)) as Box<dyn FnMut(web_sys::$event_kind) + 'static>);
+						let handler = Closure::wrap(Box::new(move |e| f(e)) as Box<dyn FnMut(web_sys::$event_kind) + 'static>);
 						target.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).expect("can't add event listener");
 						WORLD.storage_mut::<Vec<EventHandler>>().get_mut_or(self.entity, Vec::new).push(EventHandler::$event_kind(handler));
 					}
 				}
 
-				pub fn $f(self, f: impl FnMut(Entity, web_sys::$event_kind) + 'static) -> Self { self.[<add_ $f>](f); self }
+				pub fn $f(self, f: impl FnMut(web_sys::$event_kind) + 'static) -> Self { self.[<add_ $f>](f); self }
 			)+
 		}
 	}};
