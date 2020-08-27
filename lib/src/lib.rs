@@ -368,6 +368,9 @@ impl Element {
 		self
 	}
 
+	// TODO: this should steal components from other and delete it
+	// instead of deleting self
+	// this would cause a lot less issue with invalidating stuff
 	pub fn replace_with(&mut self, other: Self) {
 		if let (Some(this), Some(other)) = (web_sys::Element::get(self.entity()), web_sys::Node::get(other.entity())) {
 			this.replace_with_with_node_1(&other).unwrap();
