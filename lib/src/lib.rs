@@ -176,7 +176,7 @@ impl World {
 	pub fn remove_entity(&self, entity: Entity) {
 		self.dead_entities.try_borrow_mut().expect("trying to borrow_mut dead_entities to remove one").insert(entity);
 
-		if let Some(children) = Children::get(entity).map(|x| x.0.clone()) {
+		if let Some(children) = Children::try_get(entity).map(|x| x.0.clone()) {
 			for child in children {
 				self.remove_entity(child);
 			}
@@ -376,14 +376,15 @@ impl Element {
 	// TODO: this should steal components from other and delete it
 	// instead of deleting self
 	// this would cause a lot less issue with invalidating stuff
+	// !!!!!! NOT TRUE - any handler that was created with the new entity will be busted, so this is fine
 	pub fn replace_with(&mut self, other: Self) {
-		if let (Some(this), Some(other)) = (web_sys::Element::get(self.entity()), web_sys::Node::get(other.entity())) {
+		if let (Some(this), Some(other)) = (web_sys::Element::try_get(self.entity()), web_sys::Node::try_get(other.entity())) {
 			this.replace_with_with_node_1(&other).unwrap();
 		}
 
 		// Fix up reference in parent
-		if let Some(parent) = Parent::get(self.entity()) {
-			let mut children = Children::get_mut(parent.0).expect("Parent without Children");
+		if let Some(parent) = Parent::try_get(self.entity()) {
+			let mut children = Children::try_get_mut(parent.0).expect("Parent without Children");
 			let position = children.0.iter().position(|&x| x == self.entity()).expect("entity claims to be a child while missing in parent");
 			children.0[position] = other.entity();
 		}
@@ -411,15 +412,21 @@ impl<T: 'static> T {
 }
 
 pub trait Component: 'static {
-	fn get<'a>(entity: Entity) -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized {
+	fn try_get<'a>(entity: Entity) -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized {
 		let storage = Self::storage();
 		if !storage.has(entity) { return None; }
 		Some(OwningRef::new(storage).map(|x| x.get(entity).unwrap()))
 	}
-	fn get_mut<'a>(entity: Entity) -> Option<OwningRefMut<StorageMutRef<'a, Self>, Self>> where Self: Sized {
+	fn try_get_mut<'a>(entity: Entity) -> Option<OwningRefMut<StorageMutRef<'a, Self>, Self>> where Self: Sized {
 		let storage = Self::storage_mut();
 		if !storage.has(entity) { return None; }
 		Some(OwningRefMut::new(storage).map_mut(|x| x.get_mut(entity).unwrap()))
+	}
+	fn get<'a>(entity: Entity) -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized {
+		OwningRef::new(Self::storage()).map(|x| x.get(entity).unwrap())
+	}
+	fn get_mut<'a>(entity: Entity) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized {
+		OwningRefMut::new(Self::storage_mut()).map_mut(|x| x.get_mut(entity).unwrap())
 	}
 	fn get_mut_or<'a>(entity: Entity, f: impl FnOnce() -> Self) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized {
 		OwningRefMut::new(Self::storage_mut()).map_mut(move |x| x.get_mut_or(entity, f))
