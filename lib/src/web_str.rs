@@ -71,6 +71,7 @@ intern_strings! {
 	text;
 	_blank;
 	viewBox; d; cx; cy; r;
+	file;
 
 	// events
 	click; contextmenu; dblclick; mousedown; mouseenter;
