@@ -57,3 +57,11 @@ macro_rules! size {
 		$crate::height!($($tt)+),
 	]}
 }
+
+#[macro_export]
+macro_rules! gap {
+	($($tt:tt)+) => {vec![
+		$crate::row_gap!($($tt)+),
+		$crate::column_gap!($($tt)+),
+	]}
+}
