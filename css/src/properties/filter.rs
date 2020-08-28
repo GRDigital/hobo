@@ -63,7 +63,7 @@ impl std::fmt::Display for FilterFunction {
 			Self::Opacity(x)                                  => write!(f, "opacity({})", x),
 			Self::Saturate(x)                                 => write!(f, "saturate({})", x),
 			Self::Sepia(x)                                    => write!(f, "sepia({})", x),
-			Self::Url(x)                                      => write!(f, "url({})", x),
+			Self::Url(x)                                      => write!(f, r#"url("{}")"#, x),
 		}
 	}
 }
