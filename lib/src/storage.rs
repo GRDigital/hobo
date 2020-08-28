@@ -88,7 +88,6 @@ impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 	}
 
 	fn get_removed_mut(&mut self, entity: Entity) -> Option<&mut Component> {
-		self.modified.insert(entity);
 		self.data_removed.get_mut(&entity)
 	}
 
