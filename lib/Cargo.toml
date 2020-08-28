@@ -427,7 +427,7 @@ features = [
 	"HtmlHeadingElement",
 	"HtmlHrElement",
 	"HtmlHtmlElement",
-	"HtmlHyperlinkElementUtils",
+	# "HtmlHyperlinkElementUtils",
 	"HtmlIFrameElement",
 	"HtmlImageElement",
 	"HtmlInputElement",
