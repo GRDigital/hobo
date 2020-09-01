@@ -13,9 +13,9 @@ css_macros::easy_enum! {font-stretch normal ultra-condensed extra-condensed cond
 css_macros::easy_enum! {list-style-type disc armenian circle cjk decimal decimal-leading-zero georgian hebrew hiragana hiragana-iroha katakana katakana-iroha lower-alpha lower-greek lower-latin lower-roman none square upper-alpha upper-greek upper-latin upper-roman}
 css_macros::easy_enum! {list-style-position inside outside}
 css_macros::easy_enum! {list-style-image none [string]}
-css_macros::easy_enum! {break-after auto avoid-page page left right avoid-column column}
-css_macros::easy_enum! {break-before auto avoid-page page left right avoid-column column}
-css_macros::easy_enum! {break-inside auto avoid avoid-page avoid-column}
+css_macros::easy_enum! {break-after auto avoid always all avoid-page page left right recto verso avoid-column column avoid-region region}
+css_macros::easy_enum! {break-before auto avoid always all avoid-page page left right recto verso avoid-column column avoid-region region}
+css_macros::easy_enum! {break-inside auto avoid avoid-page avoid-column avoid-region}
 css_macros::easy_enum! {font-variant normal small-caps}
 css_macros::easy_enum! {word-break normal break-all keep-all}
 css_macros::easy_enum! {word-wrap normal break-word}
