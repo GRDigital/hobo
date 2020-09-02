@@ -1,10 +1,15 @@
 use crate::prelude::*;
 use std::collections::HashMap;
 pub use sugars::hash;
+use std::cell::RefCell;
 
 #[derive(Default)]
 pub struct StyleStorage {
 	map: HashMap<css::Style, u64>,
+}
+
+thread_local! {
+	pub static STYLE_STORAGE: RefCell<StyleStorage> = RefCell::default();
 }
 
 // replace the ClassPlaceholder with actual element class

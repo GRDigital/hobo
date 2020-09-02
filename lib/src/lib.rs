@@ -23,6 +23,7 @@ use storage::*;
 use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
 use std::borrow::Cow;
 use smart_default::SmartDefault;
+use style_storage::STYLE_STORAGE;
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
 
@@ -67,7 +68,6 @@ unsafe impl Sync for World {}
 
 pub static WORLD: Lazy<World> = Lazy::new(|| {
 	let world = World::default();
-	World::register_resource(&world, crate::style_storage::StyleStorage::default());
 
 	let sys = <Or<Added<(Classes,)>, Modified<(Classes,)>>>::run(move |entity| {
 		if let Some(element) = WORLD.storage::<web_sys::Element>().get(entity) {
@@ -86,10 +86,12 @@ pub static WORLD: Lazy<World> = Lazy::new(|| {
 				write!(&mut res, " t{}", id).unwrap();
 			}
 
-			let mut style_storage = WORLD.resource_mut::<crate::style_storage::StyleStorage>();
-			for style in classes.styles.values() {
-				write!(&mut res, " {}", style_storage.fetch(style.clone())).unwrap();
-			}
+			STYLE_STORAGE.with(|x| {
+				let mut style_storage = x.borrow_mut();
+				for style in classes.styles.values() {
+					write!(&mut res, " {}", style_storage.fetch(style.clone())).unwrap();
+				}
+			});
 
 			element.set_attribute(web_str::class(), &res).expect("can't set class attribute");
 		}
@@ -397,7 +399,7 @@ impl Element {
 }
 
 pub fn fetch_classname<'a>(style: impl Into<Cow<'a, css::Style>>) -> String {
-	crate::style_storage::StyleStorage::resource_mut().fetch(style.into().into_owned())
+	STYLE_STORAGE.with(|x| x.borrow_mut().fetch(style.into().into_owned()))
 }
 
 #[extend::ext(pub, name = TypeClassString)]
