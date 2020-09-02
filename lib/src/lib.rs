@@ -311,7 +311,7 @@ impl Element {
 	}
 	pub fn children(self, children: impl IntoIterator<Item = Element>) -> Self { self.add_children(children); self }
 
-	pub fn set_class_tagged<'a, Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<Cow<'a, css::Style>>) {
+	pub fn set_class_tagged<'a, Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<css::Style>) {
 		if WORLD.is_dead(self.entity) { return; }
 		let mut storage = WORLD.storage_mut::<Classes>();
 		let classes = storage.get_mut_or_default(self.entity);
@@ -326,14 +326,14 @@ impl Element {
 			hasher.finish()
 		};
 
-		classes.styles.insert(tag_hash, style.into().into_owned());
+		classes.styles.insert(tag_hash, style.into());
 	}
-	pub fn set_class<'a>(self, style: impl Into<Cow<'a, css::Style>>) { self.set_class_tagged(0u64, style); }
-	pub fn add_class<'a>(self, style: impl Into<Cow<'a, css::Style>>) {
+	pub fn set_class(self, style: impl Into<css::Style>) { self.set_class_tagged(0u64, style); }
+	pub fn add_class(self, style: impl Into<css::Style>) {
 		let id = WORLD.storage::<Classes>().get(self.entity).map(|x| x.styles.len() as u64).unwrap_or(0);
 		self.set_class_tagged(id, style);
 	}
-	pub fn class<'a>(self, style: impl Into<Cow<'a, css::Style>>) -> Self { self.add_class(style); self }
+	pub fn class(self, style: impl Into<css::Style>) -> Self { self.add_class(style); self }
 
 	pub fn add_component<T: 'static>(self, component: T) { WORLD.storage_mut::<T>().add(self.entity, component); }
 	pub fn component<T: 'static>(self, component: T) -> Self { self.add_component(component); self }
@@ -398,8 +398,8 @@ impl Element {
 	pub fn with(self, f: impl FnOnce(Self)) -> Self { f(self); self }
 }
 
-pub fn fetch_classname<'a>(style: impl Into<Cow<'a, css::Style>>) -> String {
-	STYLE_STORAGE.with(|x| x.borrow_mut().fetch(style.into().into_owned()))
+pub fn fetch_classname(style: impl Into<css::Style>) -> String {
+	STYLE_STORAGE.with(|x| x.borrow_mut().fetch(style.into()))
 }
 
 #[extend::ext(pub, name = TypeClassString)]
