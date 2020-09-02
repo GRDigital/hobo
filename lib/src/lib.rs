@@ -252,10 +252,10 @@ impl World {
 	}
 }
 
-#[derive(Default)]
+#[derive(Default, shrinkwraprs::Shrinkwrap)]
 pub struct Parent(Entity);
 
-#[derive(Default)]
+#[derive(Default, shrinkwraprs::Shrinkwrap)]
 pub struct Children(Vec<Entity>);
 
 impl Parent {
@@ -268,12 +268,6 @@ impl Parent {
 			Vec::new()
 		}
 	}
-}
-
-impl std::ops::Deref for Parent {
-	type Target = Entity;
-
-	fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 #[derive(Default)]
@@ -311,7 +305,7 @@ impl Element {
 	}
 	pub fn children(self, children: impl IntoIterator<Item = Element>) -> Self { self.add_children(children); self }
 
-	pub fn set_class_tagged<'a, Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<css::Style>) {
+	pub fn set_class_tagged<Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<css::Style>) {
 		if WORLD.is_dead(self.entity) { return; }
 		let mut storage = WORLD.storage_mut::<Classes>();
 		let classes = storage.get_mut_or_default(self.entity);
