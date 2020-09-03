@@ -1,7 +1,5 @@
-use crate::prelude::*;
-
-css_macros::easy_enum! {position static absolute fixed relative sticky}
-css_macros::easy_enum! {z-index auto [number]}
+crate::macros::easy_enum! {position static absolute fixed relative sticky}
+crate::macros::easy_enum! {z-index auto [number]}
 
 #[macro_export] macro_rules! top { ($($tt:tt)+) => {$crate::__dimension!(Top, $($tt)+)} }
 #[macro_export] macro_rules! right { ($($tt:tt)+) => {$crate::__dimension!(Right, $($tt)+)} }

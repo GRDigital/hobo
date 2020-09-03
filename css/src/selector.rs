@@ -248,7 +248,7 @@ impl std::fmt::Display for Selector {
 /// ```
 #[test]
 fn test_new_selector() {
-	crate::css_macros::selector!(
+	crate::crate::macros::selector!(
 		.& >> div:nth_child(2, 1),
 		.& >> *,
 		div + * >> span > .&,

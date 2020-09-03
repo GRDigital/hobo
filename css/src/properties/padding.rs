@@ -1,6 +1,4 @@
-use crate::prelude::*;
-
-css_macros::unit_value_macro! {padding_left PaddingLeft}
-css_macros::unit_value_macro! {padding_right PaddingRight}
-css_macros::unit_value_macro! {padding_top PaddingTop}
-css_macros::unit_value_macro! {padding_bottom PaddingBottom}
+crate::macros::unit_value_macro! {padding_left PaddingLeft}
+crate::macros::unit_value_macro! {padding_right PaddingRight}
+crate::macros::unit_value_macro! {padding_top PaddingTop}
+crate::macros::unit_value_macro! {padding_bottom PaddingBottom}

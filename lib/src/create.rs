@@ -85,7 +85,7 @@ macro_rules! create {
 
 				#[test]
 				fn [<$html_name _has_selector>]() {
-					crate::css::css_macros::selector!($html_name);
+					crate::css::macros::selector!($html_name);
 				}
 			)*
 

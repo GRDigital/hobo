@@ -1,14 +1,14 @@
 use crate::prelude::*;
 
-css_macros::easy_enum! {border-collapse separate collapse}
-css_macros::easy_enum! {box-decoration-break slice clone}
-css_macros::easy_enum! {outline-width medium thin thick [unit]}
-css_macros::easy_enum! {outline-style none hidden dotted dashed solid double groove ridge inset outset}
-css_macros::easy_enum! {border-image-slice fill [raw]} // TODO:
-css_macros::easy_enum! {border-image-width auto [raw]} // TODO:
-css_macros::easy_enum! {border-image-outset [raw]} // TODO:
-css_macros::easy_enum! {border-image-repeat stretch repeat round space}
-css_macros::easy_color! {outline-color}
+crate::macros::easy_enum! {border-collapse separate collapse}
+crate::macros::easy_enum! {box-decoration-break slice clone}
+crate::macros::easy_enum! {outline-width medium thin thick [unit]}
+crate::macros::easy_enum! {outline-style none hidden dotted dashed solid double groove ridge inset outset}
+crate::macros::easy_enum! {border-image-slice fill [raw]} // TODO:
+crate::macros::easy_enum! {border-image-width auto [raw]} // TODO:
+crate::macros::easy_enum! {border-image-outset [raw]} // TODO:
+crate::macros::easy_enum! {border-image-repeat stretch repeat round space}
+crate::macros::easy_color! {outline-color}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum BorderImageSource {
@@ -58,7 +58,7 @@ pub enum BorderStyle {
 	#[strum(to_string = "unset")] Unset,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum BorderWidth {
 	Medium,
 	Thin,
@@ -84,7 +84,7 @@ impl std::fmt::Display for BorderWidth {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Default)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Default)]
 pub struct BoxShadowEffect {
 	pub inset: bool,
 	pub offset_x: Unit,
@@ -189,10 +189,10 @@ macro_rules! __border_style {
 	]
 }}
 
-css_macros::easy_color! {border_left_color}
-css_macros::easy_color! {border_right_color}
-css_macros::easy_color! {border_top_color}
-css_macros::easy_color! {border_bottom_color}
+crate::macros::easy_color! {border_left_color}
+crate::macros::easy_color! {border_right_color}
+crate::macros::easy_color! {border_top_color}
+crate::macros::easy_color! {border_bottom_color}
 #[macro_export] macro_rules! border_color {($($tt:tt)+) => {
 	vec![
 		$crate::border_left_color!($($tt)+),
@@ -202,10 +202,10 @@ css_macros::easy_color! {border_bottom_color}
 	]
 }}
 
-css_macros::unit_value_macro! {border_top_left_radius BorderTopLeftRadius}
-css_macros::unit_value_macro! {border_top_right_radius BorderTopRightRadius}
-css_macros::unit_value_macro! {border_bottom_left_radius BorderBottomLeftRadius}
-css_macros::unit_value_macro! {border_bottom_right_radius BorderBottomRightRadius}
+crate::macros::unit_value_macro! {border_top_left_radius BorderTopLeftRadius}
+crate::macros::unit_value_macro! {border_top_right_radius BorderTopRightRadius}
+crate::macros::unit_value_macro! {border_bottom_left_radius BorderBottomLeftRadius}
+crate::macros::unit_value_macro! {border_bottom_right_radius BorderBottomRightRadius}
 #[macro_export] macro_rules! border_radius {($($tt:tt)+) => {
 	vec![
 		$crate::border_top_left_radius!($($tt)+),

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Dimension {
 	Auto,
 	Initial,
@@ -9,7 +9,7 @@ pub enum Dimension {
 	Some(Unit),
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum DimensionExtremity {
 	Initial,
 	Inherit,

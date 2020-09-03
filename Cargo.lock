@@ -120,6 +120,7 @@ version = "0.1.10"
 dependencies = [
  "extend",
  "hobo_css_macros",
+ "num-traits",
  "ordered-float",
  "paste",
  "smart-default",
