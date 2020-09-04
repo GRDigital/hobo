@@ -12,7 +12,6 @@ pub mod append_property;
 #[doc(hidden)]
 pub use paste;
 pub use properties::*;
-use std::borrow::Cow;
 pub use units::Unit;
 pub use hobo_css_macros as macros;
 pub use color::Color;
@@ -72,18 +71,6 @@ impl std::fmt::Display for Style {
 
 impl Style {
 	pub fn append(&mut self, other: &mut Style) { self.0.append(&mut other.0); }
-}
-
-impl<'a> From<&'a Style> for Cow<'a, Style> {
-	fn from(x: &'a Style) -> Cow<'a, Style> {
-		Cow::Borrowed(x)
-	}
-}
-
-impl<'a> From<Style> for Cow<'a, Style> {
-	fn from(x: Style) -> Cow<'a, Style> {
-		Cow::Owned(x)
-	}
 }
 
 #[macro_export]

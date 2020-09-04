@@ -156,12 +156,17 @@ impl World {
 	// TODO: add check systems in entity components
 	pub fn remove_entity(&self, entity: impl Into<Entity>) {
 		let entity = entity.into();
-		self.dead_entities.try_borrow_mut().expect("remove_entity dead_entities.try_borrow_mut").insert(entity);
+		if WORLD.is_dead(entity) { log::warn!("remove entity already dead {:?}", entity); return; }
 
 		if let Some(children) = Children::try_get(entity).map(|x| x.0.clone()) {
-			for child in children {
-				self.remove_entity(child);
-			}
+			for child in children { self.remove_entity(child); }
+		}
+
+		self.dead_entities.try_borrow_mut().expect("remove_entity dead_entities.try_borrow_mut").insert(entity);
+
+		if let Some(parent) = Parent::try_get(entity).map(|x| x.0) {
+			let mut children = Children::get_mut(parent);
+			if let Some(child_pos) = children.0.iter().position(|&x| x == entity) { children.0.remove(child_pos); }
 		}
 
 		let mut set: HashSet<TypeId> = HashSet::new();
@@ -223,10 +228,10 @@ impl World {
 	}
 }
 
-#[derive(Default, shrinkwraprs::Shrinkwrap)]
+#[derive(Default, Debug, shrinkwraprs::Shrinkwrap)]
 pub struct Parent(Entity);
 
-#[derive(Default, shrinkwraprs::Shrinkwrap)]
+#[derive(Default, Debug, shrinkwraprs::Shrinkwrap)]
 pub struct Children(Vec<Entity>);
 
 impl Parent {
@@ -254,88 +259,78 @@ pub struct Element {
 
 impl Element {
 	pub fn entity(&self) -> Entity { self.entity }
-	pub fn remove(self) {
-		if WORLD.is_dead(self.entity) { log::warn!("remove entity already dead {:?}", self); return; }
-		WORLD.remove_entity(self.entity)
-	}
+	pub fn remove(self) { WORLD.remove_entity(self.entity) }
 	// pub fn new(entity: Entity) -> Self { Self { entity } }
 
 	pub fn add_child(self, child: impl Into<Element>) {
 		let child = child.into().entity();
 		if WORLD.is_dead(self.entity) { log::warn!("add_child parent dead {:?}", self.entity); return; }
 		if WORLD.is_dead(child) { log::warn!("add_child child dead {:?}", child); return; }
-		WORLD.storage_mut::<Children>().get_mut_or_default(self.entity).0.push(child);
-		WORLD.storage_mut::<Parent>().get_mut_or_default(child).0 = self.entity;
+		Children::get_mut_or_default(self.entity).0.push(child);
+		Parent::get_mut_or_default(child).0 = self.entity;
 
-		let storage = WORLD.storage::<web_sys::Node>();
-		if let (Some(parent_node), Some(child_node)) = (storage.get(self.entity), storage.get(child)) {
-			parent_node.append_child(child_node).expect("can't append child");
+		if let (Some(parent_node), Some(child_node)) = (web_sys::Node::try_get(self.entity), web_sys::Node::try_get(child)) {
+			parent_node.append_child(&child_node).expect("can't append child");
 		}
 	}
 	pub fn child(self, child: impl Into<Element>) -> Self { self.add_child(child); self }
-	pub fn add_children(self, children: impl IntoIterator<Item = Element>) {
-		for child in children.into_iter() {
-			self.add_child(child);
-		}
-	}
+	pub fn add_children(self, children: impl IntoIterator<Item = Element>) { for child in children.into_iter() { self.add_child(child); } }
 	pub fn children(self, children: impl IntoIterator<Item = Element>) -> Self { self.add_children(children); self }
 
 	pub fn set_class_tagged<Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<css::Style>) {
 		if WORLD.is_dead(self.entity) { log::warn!("set_class_tagged dead {:?}", self.entity); return; }
-		let mut storage = WORLD.storage_mut::<Classes>();
-		let classes = storage.get_mut_or_default(self.entity);
 
 		// tested and different types with same byte-level representation hash to the same thing (not surprising)
 		// i.e. the type is not taken into account when hashing so I have to do it manually
 		let tag_hash = {
 			use std::hash::{Hash, Hasher};
 			let mut hasher = std::collections::hash_map::DefaultHasher::new();
-			std::any::TypeId::of::<Tag>().hash(&mut hasher);
+			TypeId::of::<Tag>().hash(&mut hasher);
 			tag.hash(&mut hasher);
 			hasher.finish()
 		};
 
-		classes.styles.insert(tag_hash, style.into());
+		Classes::get_mut_or_default(self.entity).styles.insert(tag_hash, style.into());
 	}
 	pub fn set_class(self, style: impl Into<css::Style>) { self.set_class_tagged(0u64, style); }
 	pub fn add_class(self, style: impl Into<css::Style>) {
-		let id = WORLD.storage::<Classes>().get(self.entity).map(|x| x.styles.len() as u64).unwrap_or(0);
+		let id = Classes::try_get(self.entity).map(|x| x.styles.len() as u64).unwrap_or(0);
 		self.set_class_tagged(id, style);
 	}
 	pub fn class(self, style: impl Into<css::Style>) -> Self { self.add_class(style); self }
 
-	pub fn add_component<T: 'static>(self, component: T) { WORLD.storage_mut::<T>().add(self.entity, component); }
+	pub fn add_component<T: 'static>(self, component: T) { T::storage_mut().add(self.entity, component); }
 	pub fn component<T: 'static>(self, component: T) -> Self { self.add_component(component); self }
 
 	pub fn set_attr<'a>(self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) {
 		if WORLD.is_dead(self.entity) { log::warn!("set_attr dead {:?}", self.entity); return; }
-		WORLD.storage::<web_sys::Element>().get(self.entity).expect("missing web_sys::Element").set_attribute(&key.into(), &value.into()).expect("can't set attribute");
+		web_sys::Element::get(self.entity).set_attribute(&key.into(), &value.into()).expect("can't set attribute");
 	}
 	pub fn attr<'a>(self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) -> Self { self.set_attr(key, value); self }
 	pub fn set_bool_attr<'a>(self, key: impl Into<Cow<'a, str>>, value: bool) { if value { self.set_attr(key, "") } else { self.remove_attr(key) } }
 	pub fn bool_attr<'a>(self, key: impl Into<Cow<'a, str>>, value: bool) -> Self { self.set_bool_attr(key, value); self }
 	pub fn remove_attr<'a>(self, key: impl Into<Cow<'a, str>>) {
-		if WORLD.is_dead(self.entity) { return; }
-		WORLD.storage::<web_sys::Element>().get(self.entity).expect("missing web_sys::Element").remove_attribute(&key.into()).expect("can't remove attribute");
+		if WORLD.is_dead(self.entity) { log::warn!("remove_attr dead {:?}", self.entity); return; }
+		web_sys::Element::get(self.entity).remove_attribute(&key.into()).expect("can't remove attribute");
 	}
 
 	pub fn set_text<'a>(self, text: impl Into<std::borrow::Cow<'a, str>>) {
 		if WORLD.is_dead(self.entity) { log::warn!("set_text dead entity {:?}", self.entity); return; }
-		if let Some(x) = WORLD.storage::<web_sys::HtmlElement>().get(self.entity) {
-			x.set_inner_text(&text.into());
-		}
+		web_sys::HtmlElement::get(self.entity).set_inner_text(&text.into());
 	}
 	pub fn text<'a>(self, x: impl Into<std::borrow::Cow<'a, str>>) -> Self { self.set_text(x); self }
 
-	pub fn set_style<'a>(self, style: impl Into<Cow<'a, [css::Property]>>) { self.set_attr(web_str::style(), style.into().iter().map(std::string::ToString::to_string).collect::<String>()); }
-	pub fn style<'a>(self, style: impl Into<Cow<'a, [css::Property]>>) -> Self { self.set_style(style); self }
+	pub fn set_style(self, style: impl AppendProperty) {
+		let mut props = Vec::new();
+		style.append_property(&mut props);
+		self.set_attr(web_str::style(), props.into_iter().map(|x| std::string::ToString::to_string(&x)).collect::<String>());
+	}
+	pub fn style(self, style: impl AppendProperty) -> Self { self.set_style(style); self }
 	pub fn remove_style(self) { self.remove_attr(web_str::style()); }
 
 	pub fn mark<T: 'static>(self) -> Self {
 		if WORLD.is_dead(self.entity) { log::warn!("mark dead {:?}", self.entity); return self; }
-		let mut storage = WORLD.storage_mut::<Classes>();
-		let classes = storage.get_mut_or_default(self.entity);
-		classes.type_tag = Some(TypeId::of::<T>());
+		Classes::get_mut_or_default(self.entity).type_tag = Some(TypeId::of::<T>());
 		self
 	}
 
@@ -345,19 +340,19 @@ impl Element {
 	// !!!!!! NOT TRUE - any handler that was created with the new entity will be busted, so this is fine
 	pub fn replace_with(&mut self, other: Self) {
 		if WORLD.is_dead(self.entity) { log::warn!("replace_with dead {:?}", self.entity); return; }
-		if let (Some(this), Some(other)) = (web_sys::Element::try_get(self.entity()), web_sys::Node::try_get(other.entity())) {
+		if let (Some(this), Some(other)) = (web_sys::Element::try_get(*self), web_sys::Node::try_get(other)) {
 			this.replace_with_with_node_1(&other).unwrap();
 		}
 
 		// Fix up reference in parent
-		if let Some(parent) = Parent::try_get(self.entity()) {
+		if let Some(parent) = Parent::try_get(*self) {
 			if WORLD.is_dead(parent.0) { log::warn!("replace_with parent dead {:?}", parent.0); return; }
-			let mut children = Children::try_get_mut(parent.0).expect("Parent without Children");
+			let mut children = Children::get_mut(parent.0);
 			let position = children.0.iter().position(|&x| x == self.entity()).expect("entity claims to be a child while missing in parent");
 			children.0[position] = other.entity();
 		}
 
-		WORLD.remove_entity(self.entity());
+		WORLD.remove_entity(*self);
 		*self = other;
 	}
 
@@ -397,20 +392,16 @@ pub trait Component: 'static {
 		Some(OwningRefMut::new(storage).map_mut(|x| x.get_mut(entity).unwrap()))
 	}
 	fn get<'a>(entity: impl Into<Entity>) -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized {
-		let entity = entity.into();
-		OwningRef::new(Self::storage()).map(|x| x.get(entity).unwrap())
+		OwningRef::new(Self::storage()).map(|x| x.get(entity.into()).unwrap())
 	}
 	fn get_mut<'a>(entity: impl Into<Entity>) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized {
-		let entity = entity.into();
-		OwningRefMut::new(Self::storage_mut()).map_mut(|x| x.get_mut(entity).unwrap())
+		OwningRefMut::new(Self::storage_mut()).map_mut(|x| x.get_mut(entity.into()).unwrap())
 	}
 	fn get_mut_or<'a>(entity: impl Into<Entity>, f: impl FnOnce() -> Self) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized {
-		let entity = entity.into();
-		OwningRefMut::new(Self::storage_mut()).map_mut(move |x| x.get_mut_or(entity, f))
+		OwningRefMut::new(Self::storage_mut()).map_mut(move |x| x.get_mut_or(entity.into(), f))
 	}
 	fn get_mut_or_default<'a>(entity: impl Into<Entity>) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Default + Sized {
-		let entity = entity.into();
-		Self::get_mut_or(entity, Self::default)
+		Self::get_mut_or(entity.into(), Self::default)
 	}
 	fn storage<'a>() -> StorageRef<'a, Self> where Self: Sized { WORLD.storage::<Self>() }
 	fn storage_mut<'a>() -> StorageMutRef<'a, Self> where Self: Sized { WORLD.storage_mut::<Self>() }
