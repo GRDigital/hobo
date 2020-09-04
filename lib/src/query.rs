@@ -10,12 +10,9 @@ pub trait BasicQuery: 'static {
 
 pub trait Query: 'static {
 	fn components() -> HashSet<TypeId>;
-	fn interests() -> Vec<crate::Interest> {
-		Self::components().into_iter().map(crate::Interest::Component).collect()
-	}
 	fn query(world: &World, entity: Entity) -> bool;
 	fn run<F: FnMut(Entity) + 'static>(f: F) -> System {
-		System { f: RefCell::new(Box::new(f)), query: Self::query, scheduled: Cell::new(false), interests: Self::interests }
+		System { f: RefCell::new(Box::new(f)), query: Self::query, scheduled: Cell::new(false), interests: Self::components }
 	}
 }
 

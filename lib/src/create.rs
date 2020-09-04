@@ -67,7 +67,7 @@ macro_rules! create {
 				// as well as Node, Element, EventTarget, HtmlElement
 				// this way, one can reuse a stateful entity by just adding back a html component
 			});
-			world.new_system(sys.interests(), sys);
+			world.new_system(sys);
 		}
 
 		pub mod components {
