@@ -22,13 +22,19 @@ use std::marker::PhantomData;
 use storage::*;
 use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
 use std::borrow::Cow;
-use smart_default::SmartDefault;
 use style_storage::STYLE_STORAGE;
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Entity(pub u64);
+pub struct Entity {
+	id: u32,
+	generation: u32
+}
+
+impl Entity {
+	fn root() -> Self { Self { id: 0, generation: 0 } }
+}
 
 pub struct System {
 	f: RefCell<Box<dyn FnMut(Entity) + 'static>>,
@@ -45,13 +51,24 @@ impl System {
 
 type StorageRc = Rc<RefCell<Box<dyn DynStorage>>>;
 
+#[derive(Debug)]
+struct Entities {
+	free_ids: Vec<u32>,
+	generations: Vec<u32>,
+}
+
+impl Default for Entities {
+	fn default() -> Self { Self {
+		free_ids: Default::default(),
+		generations: vec![0],
+	} }
+}
+
 // Entity(0) is for holding resources
-#[derive(SmartDefault)]
+#[derive(Default)]
 pub struct World {
-	#[default(Cell::new(1))]
-	pub next_entity_id: Cell<u64>,
 	pub storages: RefCell<HashMap<TypeId, StorageRc>>,
-	pub dead_entities: RefCell<HashSet<Entity>>,
+	entities: RefCell<Entities>,
 
 	// TODO: should keep weak refs and have a separate map with strong refs so systems can be deregistered
 	pub systems_interests: RefCell<HashMap<TypeId, Vec<Rc<System>>>>,
@@ -69,7 +86,7 @@ pub static WORLD: Lazy<World> = Lazy::new(|| {
 
 			let storage = WORLD.storage::<Classes>();
 			let classes = storage.get(entity).unwrap();
-			let mut res = format!("e{}", entity.0);
+			let mut res = format!("e{}g{}", entity.id, entity.generation);
 
 			if let Some(id) = &classes.type_tag {
 				use std::hash::{Hash, Hasher};
@@ -119,30 +136,35 @@ impl World {
 			.map(|x| x.as_any().downcast_ref::<SimpleStorage<Component>>().unwrap())
 	}
 
-	pub fn register_resource<T: 'static>(&self, resource: T) { self.storage_mut::<T>().add(Entity(0), resource); }
+	pub fn register_resource<T: 'static>(&self, resource: T) { self.storage_mut::<T>().add(Entity::root(), resource); }
 
 	pub fn resource<T: 'static>(&self) -> OwningRef<StorageRef<T>, T> {
-		OwningRef::new(self.storage::<T>()).map(|x| x.get(Entity(0)).unwrap())
+		OwningRef::new(self.storage::<T>()).map(|x| x.get(Entity::root()).unwrap())
 	}
 
 	pub fn resource_mut<T: 'static>(&self) -> OwningRefMut<StorageMutRef<T>, T> {
-		OwningRefMut::new(self.storage_mut::<T>()).map_mut(|x| x.get_mut(Entity(0)).unwrap())
+		OwningRefMut::new(self.storage_mut::<T>()).map_mut(|x| x.get_mut(Entity::root()).unwrap())
 	}
 
 	pub fn try_resource<T: 'static>(&self) -> Option<OwningRef<StorageRef<T>, T>> {
-		if !self.storage::<T>().has(Entity(0)) { return None; }
-		Some(OwningRef::new(self.storage::<T>()).map(|x| x.get(Entity(0)).unwrap()))
+		if !self.storage::<T>().has(Entity::root()) { return None; }
+		Some(OwningRef::new(self.storage::<T>()).map(|x| x.get(Entity::root()).unwrap()))
 	}
 
 	pub fn try_resource_mut<T: 'static>(&self) -> Option<OwningRefMut<StorageMutRef<T>, T>> {
-		if !self.storage::<T>().has(Entity(0)) { return None; }
-		Some(OwningRefMut::new(self.storage_mut::<T>()).map_mut(|x| x.get_mut(Entity(0)).unwrap()))
+		if !self.storage::<T>().has(Entity::root()) { return None; }
+		Some(OwningRefMut::new(self.storage_mut::<T>()).map_mut(|x| x.get_mut(Entity::root()).unwrap()))
 	}
 
 	pub fn new_entity(&self) -> Entity {
-		let entity = Entity(self.next_entity_id.get());
-		self.next_entity_id.set(self.next_entity_id.get() + 1);
-		entity
+		let mut entities = self.entities.try_borrow_mut().expect("new_entity entities.try_borrow_mut");
+		if let Some(id) = entities.free_ids.pop() {
+			Entity { id, generation: entities.generations[id as usize] }
+		} else {
+			let id = entities.generations.len() as u32;
+			entities.generations.push(0);
+			Entity { id, generation: 0 }
+		}
 	}
 
 	pub fn new_system(&self, sys: System) {
@@ -162,7 +184,11 @@ impl World {
 			for child in children { self.remove_entity(child); }
 		}
 
-		self.dead_entities.try_borrow_mut().expect("remove_entity dead_entities.try_borrow_mut").insert(entity);
+		{
+			let mut entities = self.entities.try_borrow_mut().expect("remove_entity entities.try_borrow_mut");
+			entities.free_ids.push(entity.id);
+			entities.generations[entity.id as usize] += 1;
+		}
 
 		if let Some(parent) = Parent::try_get(entity).map(|x| x.0) {
 			let mut children = Children::get_mut(parent);
@@ -198,7 +224,8 @@ impl World {
 	}
 
 	pub fn is_dead(&self, entity: impl Into<Entity>) -> bool {
-		self.dead_entities.borrow().contains(&entity.into())
+		let entity = entity.into();
+		self.entities.try_borrow().expect("is_dead entities.try_borrow").generations[entity.id as usize] != entity.generation
 	}
 
 	fn schedule_systems(&self, entities: impl IntoIterator<Item = Entity> + Clone, components: impl IntoIterator<Item = TypeId>) -> Vec<(Entity, Rc<System>)> {
@@ -260,7 +287,6 @@ pub struct Element {
 impl Element {
 	pub fn entity(&self) -> Entity { self.entity }
 	pub fn remove(self) { WORLD.remove_entity(self.entity) }
-	// pub fn new(entity: Entity) -> Self { Self { entity } }
 
 	pub fn add_child(self, child: impl Into<Element>) {
 		let child = child.into().entity();
