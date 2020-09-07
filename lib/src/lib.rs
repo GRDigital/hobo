@@ -349,7 +349,7 @@ impl Element {
 	pub fn set_style(self, style: impl AppendProperty) {
 		let mut props = Vec::new();
 		style.append_property(&mut props);
-		self.set_attr(web_str::style(), props.into_iter().map(|x| std::string::ToString::to_string(&x)).collect::<String>());
+		self.set_attr(web_str::style(), props.iter().map(std::string::ToString::to_string).collect::<String>());
 	}
 	pub fn style(self, style: impl AppendProperty) -> Self { self.set_style(style); self }
 	pub fn remove_style(self) { self.remove_attr(web_str::style()); }
@@ -426,9 +426,7 @@ pub trait Component: 'static {
 	fn get_mut_or<'a>(entity: impl Into<Entity>, f: impl FnOnce() -> Self) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized {
 		OwningRefMut::new(Self::storage_mut()).map_mut(move |x| x.get_mut_or(entity.into(), f))
 	}
-	fn get_mut_or_default<'a>(entity: impl Into<Entity>) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Default + Sized {
-		Self::get_mut_or(entity.into(), Self::default)
-	}
+	fn get_mut_or_default<'a>(entity: impl Into<Entity>) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Default + Sized { Self::get_mut_or(entity.into(), Self::default) }
 	fn storage<'a>() -> StorageRef<'a, Self> where Self: Sized { WORLD.storage::<Self>() }
 	fn storage_mut<'a>() -> StorageMutRef<'a, Self> where Self: Sized { WORLD.storage_mut::<Self>() }
 
