@@ -29,7 +29,19 @@ pub enum PseudoClass {
 	only_child,
 	read_only,
 	valid,
-	// etc
+	empty,
+	default,
+	defined,
+	first,
+	first_of_type,
+	focus_within,
+	last_of_type,
+	link,
+	optional,
+	read_write,
+	required,
+	visited,
+	target,
 }
 
 #[rustfmt::skip]
@@ -53,6 +65,19 @@ impl std::fmt::Display for PseudoClass {
 			Self::only_child                => ":only-child".fmt(f),
 			Self::read_only                 => ":read-only".fmt(f),
 			Self::valid                     => ":valid".fmt(f),
+			Self::empty                     => ":empty".fmt(f),
+			Self::default                   => ":default".fmt(f),
+			Self::defined                   => ":defined".fmt(f),
+			Self::first                     => ":first".fmt(f),
+			Self::first_of_type             => ":first-of-type".fmt(f),
+			Self::focus_within              => ":focus-within".fmt(f),
+			Self::last_of_type              => ":last-of-type".fmt(f),
+			Self::link                      => ":link".fmt(f),
+			Self::optional                  => ":optional".fmt(f),
+			Self::read_write                => ":read-write".fmt(f),
+			Self::required                  => ":required".fmt(f),
+			Self::visited                   => ":visited".fmt(f),
+			Self::target                    => ":target".fmt(f),
 		}
 	}
 }
