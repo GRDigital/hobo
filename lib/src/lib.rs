@@ -277,7 +277,9 @@ impl Parent {
 impl Children {
 	pub fn clear(entity: impl Into<Entity>) {
 		if let Some(mut children) = Children::try_get_mut(entity.into()) {
-			for child in children.drain(..) {
+			let to_remove = children.drain(..).collect::<Vec<_>>();
+			drop(children);
+			for child in to_remove {
 				WORLD.remove_entity(child);
 			}
 		}
