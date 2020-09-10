@@ -274,6 +274,16 @@ impl Parent {
 	}
 }
 
+impl Children {
+	pub fn clear(entity: impl Into<Entity>) {
+		if let Some(mut children) = Children::try_get_mut(entity.into()) {
+			for child in children.drain(..) {
+				WORLD.remove_entity(child);
+			}
+		}
+	}
+}
+
 #[derive(Default)]
 pub struct Classes {
 	type_tag: Option<TypeId>,
@@ -303,17 +313,6 @@ impl Element {
 	pub fn child(self, child: impl Into<Element>) -> Self { self.add_child(child); self }
 	pub fn add_children(self, children: impl IntoIterator<Item = Element>) { for child in children.into_iter() { self.add_child(child); } }
 	pub fn children(self, children: impl IntoIterator<Item = Element>) -> Self { self.add_children(children); self }
-
-	pub fn clear_all_children(self) {
-		if let Some(web_ele) = web_sys::Node::try_get(self.entity) {
-			let children = web_ele.child_nodes();
-			for i in 0..children.length() {
-				if let Some(child) = children.item(i) {
-					web_ele.remove_child(&child).expect("can't remove child");
-				}
-			};
-		}
-	}
 
 	pub fn set_class_tagged<Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<css::Style>) {
 		if WORLD.is_dead(self.entity) { log::warn!("set_class_tagged dead {:?}", self.entity); return; }
