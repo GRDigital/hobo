@@ -259,7 +259,8 @@ impl World {
 pub struct Parent(Entity);
 
 #[derive(Default, Debug, shrinkwraprs::Shrinkwrap)]
-pub struct Children(Vec<Entity>);
+#[shrinkwrap(mutable)]
+pub struct Children(pub Vec<Entity>);
 
 impl Parent {
 	pub fn ancestors(entity: impl Into<Entity>) -> Vec<Entity> {
