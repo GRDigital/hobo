@@ -4,6 +4,8 @@ mod selector;
 mod easy_enum;
 
 use prelude::*;
+use derive_utils::quick_derive as enum_derive;
+use quote::ToTokens;
 
 #[derive(Debug, Clone)]
 struct HyphenatedName(String);
@@ -86,4 +88,20 @@ pub fn media_selector(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 		use #crate_name::media::{MediaQuery, MediaSelector, MediaType, Orientation::*, Scan::*, Nottable, MediaFeature};
 		MediaSelector(vec![#(#input),*])
 	}}).into()
+}
+
+#[proc_macro_derive(AppendProperty)]
+pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	let input = syn::parse_macro_input!(input as syn::DeriveInput);
+
+	match &input.data {
+		syn::Data::Enum(_) => enum_derive! {
+			input.to_token_stream(),
+			::hobo::css::AppendProperty,
+			trait AppendProperty {
+				fn append_property(self, decls: &mut Vec<::hobo::css::Property>);
+			}
+		},
+		_ => unimplemented!(),
+	}
 }

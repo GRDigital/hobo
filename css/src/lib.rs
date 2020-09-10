@@ -17,6 +17,7 @@ pub use hobo_css_macros as macros;
 pub use color::Color;
 pub use units::F32;
 pub use append_property::AppendProperty;
+pub use macros::AppendProperty;
 
 #[extend::ext(pub)]
 impl F32 {
