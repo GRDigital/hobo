@@ -1,5 +1,5 @@
 // use super::*;
-use crate::{Entity, World};
+use crate::{Entity, World, AsEntity};
 use std::collections::{HashMap, HashSet};
 use std::any::TypeId;
 
@@ -11,17 +11,17 @@ pub trait DynStorage: as_any::AsAny {
 }
 
 pub trait Storage<Component: 'static>: DynStorage {
-	fn has(&self, entity: impl Into<Entity>) -> bool { self.dyn_has(entity.into()) }
-	fn remove(&mut self, entity: impl Into<Entity>) { self.dyn_remove(entity.into()) }
-	fn get(&self, entity: impl Into<Entity>) -> Option<&Component>;
-	fn get_mut(&mut self, entity: impl Into<Entity>) -> Option<&mut Component>;
-	fn get_removed(&self, entity: impl Into<Entity>) -> Option<&Component>;
-	fn get_removed_mut(&mut self, entity: impl Into<Entity>) -> Option<&mut Component>;
-	fn take_removed(&mut self, entity: impl Into<Entity>) -> Option<Component>;
-	fn get_mut_or(&mut self, entity: impl Into<Entity>, f: impl FnOnce() -> Component) -> &mut Component;
-	fn add(&mut self, entity: impl Into<Entity>, component: Component);
+	fn has(&self, entity: &impl AsEntity) -> bool { self.dyn_has(entity.as_entity()) }
+	fn remove(&mut self, entity: &impl AsEntity) { self.dyn_remove(entity.as_entity()) }
+	fn get(&self, entity: &impl AsEntity) -> Option<&Component>;
+	fn get_mut(&mut self, entity: &impl AsEntity) -> Option<&mut Component>;
+	fn get_removed(&self, entity: &impl AsEntity) -> Option<&Component>;
+	fn get_removed_mut(&mut self, entity: &impl AsEntity) -> Option<&mut Component>;
+	fn take_removed(&mut self, entity: &impl AsEntity) -> Option<Component>;
+	fn get_mut_or(&mut self, entity: &impl AsEntity, f: impl FnOnce() -> Component) -> &mut Component;
+	fn add(&mut self, entity: &impl AsEntity, component: Component);
 
-	fn get_mut_or_default(&mut self, entity: impl Into<Entity>) -> &mut Component where Component: Default { self.get_mut_or(entity, Component::default) }
+	fn get_mut_or_default(&mut self, entity: &impl AsEntity) -> &mut Component where Component: Default { self.get_mut_or(entity, Component::default) }
 }
 
 pub struct SimpleStorage<Component: 'static> {
@@ -63,9 +63,9 @@ impl<Component: 'static> DynStorage for SimpleStorage<Component> {
 }
 
 impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
-	fn add(&mut self, entity: impl Into<Entity>, component: Component) {
-		let entity = entity.into();
-		if self.has(entity) {
+	fn add(&mut self, entity: &impl AsEntity, component: Component) {
+		let entity = entity.as_entity();
+		if self.has(&entity) {
 			// log::info!("overwriting {:?}", std::any::type_name::<Component>());
 			self.modified.insert(entity);
 		} else {
@@ -74,13 +74,12 @@ impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 		self.data.insert(entity, component);
 	}
 
-	fn get(&self, entity: impl Into<Entity>) -> Option<&Component> {
-		let entity = entity.into();
-		self.data.get(&entity)
+	fn get(&self, entity: &impl AsEntity) -> Option<&Component> {
+		self.data.get(&entity.as_entity())
 	}
 
-	fn get_mut(&mut self, entity: impl Into<Entity>) -> Option<&mut Component> {
-		let entity = entity.into();
+	fn get_mut(&mut self, entity: &impl AsEntity) -> Option<&mut Component> {
+		let entity = entity.as_entity();
 		let cmp = self.data.get_mut(&entity);
 		if cmp.is_some() {
 			self.modified.insert(entity);
@@ -88,27 +87,24 @@ impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 		cmp
 	}
 
-	fn get_removed(&self, entity: impl Into<Entity>) -> Option<&Component> {
-		let entity = entity.into();
-		self.data_removed.get(&entity)
+	fn get_removed(&self, entity: &impl AsEntity) -> Option<&Component> {
+		self.data_removed.get(&entity.as_entity())
 	}
 
-	fn get_removed_mut(&mut self, entity: impl Into<Entity>) -> Option<&mut Component> {
-		let entity = entity.into();
-		self.data_removed.get_mut(&entity)
+	fn get_removed_mut(&mut self, entity: &impl AsEntity) -> Option<&mut Component> {
+		self.data_removed.get_mut(&entity.as_entity())
 	}
 
-	fn take_removed(&mut self, entity: impl Into<Entity>) -> Option<Component> {
-		let entity = entity.into();
-		self.data_removed.remove(&entity)
+	fn take_removed(&mut self, entity: &impl AsEntity) -> Option<Component> {
+		self.data_removed.remove(&entity.as_entity())
 	}
 
-	fn get_mut_or(&mut self, entity: impl Into<Entity>, f: impl FnOnce() -> Component) -> &mut Component {
-		let entity = entity.into();
-		if self.has(entity) {
+	fn get_mut_or(&mut self, entity: &impl AsEntity, f: impl FnOnce() -> Component) -> &mut Component {
+		let entity = entity.as_entity();
+		if self.has(&entity) {
 			self.modified.insert(entity);
 		} else {
-			self.add(entity, f());
+			self.add(&entity, f());
 		}
 		self.data.get_mut(&entity).unwrap()
 	}

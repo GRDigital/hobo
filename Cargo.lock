@@ -131,6 +131,7 @@ dependencies = [
 name = "hobo_css_macros"
 version = "0.1.10"
 dependencies = [
+ "derive_utils",
  "heck",
  "itertools 0.9.0",
  "proc-macro-crate",
@@ -147,6 +148,7 @@ name = "hobo_derive"
 version = "0.1.10"
 dependencies = [
  "derive_utils",
+ "proc-macro-crate",
  "proc-macro-error",
  "proc-macro2",
  "proc-quote",

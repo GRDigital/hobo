@@ -42,7 +42,7 @@ impl<Left: Query, Right: Query> Query for Or<Left, Right> {
 
 impl<T: 'static> BasicQuery for T {
 	fn exists(world: &World, entity: Entity) -> bool {
-		world.storage::<Self>().has(entity)
+		world.storage::<Self>().has(&entity)
 	}
 
 	fn added(world: &World, entity: Entity) -> bool {

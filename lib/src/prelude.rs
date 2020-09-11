@@ -8,10 +8,14 @@ pub use crate::{
 	World as _,
 	Entity,
 	Element,
+	SomeElement,
+	AsEntity,
 	storage::{Storage as _, DynStorage as _},
 	query::*,
 	TypeClassString as _,
 	Component as _,
+	events::impls::*,
+	create::StringValue as _,
 };
 pub use crate::css::{self, AppendProperty, F32, F32Ext as _};
 pub use wasm_bindgen::prelude::*;

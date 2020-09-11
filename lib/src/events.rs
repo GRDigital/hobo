@@ -1,6 +1,6 @@
 //! everything that has to do with HTML event handling
 
-use crate::{prelude::*, Element, storage::Storage};
+use crate::{prelude::*, Element, AsEntity, storage::Storage};
 
 pub enum EventHandler {
 	MouseEvent(Closure<dyn FnMut(web_sys::MouseEvent) + 'static>),
@@ -90,20 +90,25 @@ pub enum EventHandler {
 
 macro_rules! generate_events {
 	($($event_kind:ident, $name:ident, $f:ident);+$(;)*) => {paste::item!{
-		impl Element {
-			$(
-				pub fn [<add_ $f>](self, mut f: impl FnMut(web_sys::$event_kind) + 'static) {
-					if WORLD.is_dead(self.entity) { return; }
-					if let Some(target) = WORLD.storage::<web_sys::EventTarget>().get(self.entity) {
+		$(
+			pub trait [<$name:camel>]: AsEntity {
+				fn [<add_ $f>](&self, mut f: impl FnMut(web_sys::$event_kind) + 'static) {
+					let entity = self.as_entity();
+					if WORLD.is_dead(&entity) { log::warn!("callback handler entity dead {:?}", entity); return; }
+					if let Some(target) = web_sys::EventTarget::try_get(&entity) {
 						let handler = Closure::wrap(Box::new(move |e| f(e)) as Box<dyn FnMut(web_sys::$event_kind) + 'static>);
 						target.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).expect("can't add event listener");
-						WORLD.storage_mut::<Vec<EventHandler>>().get_mut_or(self.entity, Vec::new).push(EventHandler::$event_kind(handler));
+						<Vec<EventHandler>>::get_mut_or_default(&entity).push(EventHandler::$event_kind(handler));
 					}
 				}
 
-				pub fn $f(self, f: impl FnMut(web_sys::$event_kind) + 'static) -> Self { self.[<add_ $f>](f); self }
-			)+
-		}
+				fn $f(self, f: impl FnMut(web_sys::$event_kind) + 'static) -> Self where Self: Sized { self.[<add_ $f>](f); self }
+			}
+
+			impl<T: Element> [<$name:camel>] for T {}
+		)+
+
+		pub mod impls {$(pub use super::[<$name:camel>] as _;)+}
 	}};
 }
 
