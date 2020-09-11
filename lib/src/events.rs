@@ -7,6 +7,7 @@ pub enum EventHandler {
 	KeyboardEvent(Closure<dyn FnMut(web_sys::KeyboardEvent) + 'static>),
 	Event(Closure<dyn FnMut(web_sys::Event) + 'static>),
 	FocusEvent(Closure<dyn FnMut(web_sys::FocusEvent) + 'static>),
+	TouchEvent(Closure<dyn FnMut(web_sys::TouchEvent) + 'static>),
 
 	// AnimationEvent
 	// AnimationPlaybackEvent
@@ -73,7 +74,6 @@ pub enum EventHandler {
 	// TcpSocketEvent
 	// CompositionEvent
 	// TimeEvent
-	// TouchEvent
 	// TrackEvent
 	// TransitionEvent
 	// UiEvent
@@ -124,4 +124,8 @@ generate_events! {
 	Event,         scroll,      on_scroll;
 	FocusEvent,    blur,        on_blur;
 	FocusEvent,    focus,       on_focus;
+	TouchEvent,    touchstart,  on_touch_start;
+	TouchEvent,    touchend,    on_touch_end;
+	TouchEvent,    touchmove,   on_touch_move;
+	TouchEvent,    touchcancel, on_touch_cancel;
 }

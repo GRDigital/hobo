@@ -78,4 +78,5 @@ intern_strings! {
 	click; contextmenu; dblclick; mousedown; mouseenter;
 	mouseleave; mousemove; mouseover; mouseout; mouseup;
 	change; keydown; keyup; scroll; resize; blur; focus;
+	touchstart; touchend; touchmove; touchcancel;
 }
