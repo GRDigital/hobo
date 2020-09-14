@@ -9,24 +9,26 @@ use crate::{dom, prelude::*, World, Entity, storage::{Storage, DynStorage}, Elem
 #[cfg(test)] use wasm_bindgen_test::*;
 #[cfg(test)] wasm_bindgen_test_configure!(run_in_browser);
 
-pub fn html_element<T: AsEntity>(world: &'static World, entity: T, element: &impl AsRef<web_sys::HtmlElement>) -> T {
+pub fn html_element<T: AsEntity>(world: &'static World, entity_like: T, element: &impl AsRef<web_sys::HtmlElement>) -> T {
+	let entity = entity_like.as_entity();
 	let element = element.as_ref().clone();
-	world.storage_mut::<web_sys::Node>().add(&entity, (element.as_ref() as &web_sys::Node).clone());
-	world.storage_mut::<web_sys::Element>().add(&entity, (element.as_ref() as &web_sys::Element).clone());
-	world.storage_mut::<web_sys::EventTarget>().add(&entity, (element.as_ref() as &web_sys::EventTarget).clone());
-	world.storage_mut::<web_sys::HtmlElement>().add(&entity, element);
+	world.storage_mut::<web_sys::Node>().add(entity, (element.as_ref() as &web_sys::Node).clone());
+	world.storage_mut::<web_sys::Element>().add(entity, (element.as_ref() as &web_sys::Element).clone());
+	world.storage_mut::<web_sys::EventTarget>().add(entity, (element.as_ref() as &web_sys::EventTarget).clone());
+	world.storage_mut::<web_sys::HtmlElement>().add(entity, element);
 
-	entity
+	entity_like
 }
 
-pub fn svg_element<T: AsEntity>(world: &'static World, entity: T, element: &impl AsRef<web_sys::SvgElement>) -> T {
+pub fn svg_element<T: AsEntity>(world: &'static World, entity_like: T, element: &impl AsRef<web_sys::SvgElement>) -> T {
+	let entity = entity_like.as_entity();
 	let element = element.as_ref().clone();
-	world.storage_mut::<web_sys::Node>().add(&entity, (element.as_ref() as &web_sys::Node).clone());
-	world.storage_mut::<web_sys::Element>().add(&entity, (element.as_ref() as &web_sys::Element).clone());
-	world.storage_mut::<web_sys::EventTarget>().add(&entity, (element.as_ref() as &web_sys::EventTarget).clone());
-	world.storage_mut::<web_sys::SvgElement>().add(&entity, element);
+	world.storage_mut::<web_sys::Node>().add(entity, (element.as_ref() as &web_sys::Node).clone());
+	world.storage_mut::<web_sys::Element>().add(entity, (element.as_ref() as &web_sys::Element).clone());
+	world.storage_mut::<web_sys::EventTarget>().add(entity, (element.as_ref() as &web_sys::EventTarget).clone());
+	world.storage_mut::<web_sys::SvgElement>().add(entity, element);
 
-	entity
+	entity_like
 }
 
 macro_rules! create {
@@ -54,12 +56,12 @@ macro_rules! create {
 
 		pub fn register_systems(world: &World) {
 			let sys = <(Removed<(web_sys::Element,)>,)>::run(move |entity| {
-				WORLD.storage_mut::<web_sys::Element>().take_removed(&entity).unwrap().remove();
-				WORLD.storage_mut::<web_sys::Node>().remove(&entity);
-				WORLD.storage_mut::<web_sys::EventTarget>().remove(&entity);
-				WORLD.storage_mut::<web_sys::HtmlElement>().remove(&entity);
-				WORLD.storage_mut::<web_sys::SvgElement>().remove(&entity);
-				WORLD.storage_mut::<Vec<crate::events::EventHandler>>().remove(&entity);
+				WORLD.storage_mut::<web_sys::Element>().take_removed(entity).unwrap().remove();
+				WORLD.storage_mut::<web_sys::Node>().remove(entity);
+				WORLD.storage_mut::<web_sys::EventTarget>().remove(entity);
+				WORLD.storage_mut::<web_sys::HtmlElement>().remove(entity);
+				WORLD.storage_mut::<web_sys::SvgElement>().remove(entity);
+				WORLD.storage_mut::<Vec<crate::events::EventHandler>>().remove(entity);
 				// TODO:
 				// new elements should register all html element-related components' TypeId's and put them in a component
 				// then, when Element is removed, all these TypeId's recovered and removed via a dynamic_storage of some sort
@@ -83,7 +85,7 @@ macro_rules! create {
 					let entity = WORLD.new_entity();
 					let element = super::$html_name();
 					html_element(&WORLD, entity, &element);
-					web_sys::$html_t::storage_mut().add(&entity, element);
+					web_sys::$html_t::storage_mut().add(entity, element);
 
 					[<$html_name:camel>](entity)
 				}
@@ -104,7 +106,7 @@ macro_rules! create {
 					let entity = WORLD.new_entity();
 					let element = super::$svg_name();
 					svg_element(&WORLD, entity, &element);
-					web_sys::$svg_t::storage_mut().add(&entity, element);
+					web_sys::$svg_t::storage_mut().add(entity, element);
 
 					[<$svg_name:camel>](entity)
 				}
