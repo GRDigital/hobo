@@ -338,6 +338,7 @@ pub trait Element: AsEntity + Sized {
 		self.set_class_tagged(id, style);
 	}
 	fn class(self, style: impl Into<css::Style>) -> Self { self.add_class(style); self }
+	fn class_tagged<Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<css::Style>) -> Self { self.set_class_tagged(tag, style); self }
 
 	fn add_component<T: 'static>(&self, component: T) { T::storage_mut().add(self, component); }
 	fn component<T: 'static>(self, component: T) -> Self { self.add_component(component); self }
