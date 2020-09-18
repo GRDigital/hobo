@@ -5,111 +5,124 @@
 //! all of these functions return the most fitting web_sys element types
 
 use crate::{dom, prelude::*, World, Entity, storage::{Storage, DynStorage}, Element, Component, AsEntity};
+use std::collections::HashSet;
+use std::any::TypeId;
+use sugars::*;
 
 #[cfg(test)] use wasm_bindgen_test::*;
 #[cfg(test)] wasm_bindgen_test_configure!(run_in_browser);
 
-pub fn html_element<T: AsEntity>(world: &'static World, entity_like: T, element: &impl AsRef<web_sys::HtmlElement>) -> T {
-	let entity = entity_like.as_entity();
-	let element = element.as_ref().clone();
+pub fn dom_element<T, E>(world: &'static World, entity: T, element: &E) where
+	T: AsEntity,
+	E: AsRef<web_sys::Node> + AsRef<web_sys::Element> + AsRef<web_sys::EventTarget>
+{
+	let entity = entity.as_entity();
 	world.storage_mut::<web_sys::Node>().add(entity, (element.as_ref() as &web_sys::Node).clone());
 	world.storage_mut::<web_sys::Element>().add(entity, (element.as_ref() as &web_sys::Element).clone());
 	world.storage_mut::<web_sys::EventTarget>().add(entity, (element.as_ref() as &web_sys::EventTarget).clone());
-	world.storage_mut::<web_sys::HtmlElement>().add(entity, element);
-
-	entity_like
 }
 
-pub fn svg_element<T: AsEntity>(world: &'static World, entity_like: T, element: &impl AsRef<web_sys::SvgElement>) -> T {
-	let entity = entity_like.as_entity();
-	let element = element.as_ref().clone();
-	world.storage_mut::<web_sys::Node>().add(entity, (element.as_ref() as &web_sys::Node).clone());
-	world.storage_mut::<web_sys::Element>().add(entity, (element.as_ref() as &web_sys::Element).clone());
-	world.storage_mut::<web_sys::EventTarget>().add(entity, (element.as_ref() as &web_sys::EventTarget).clone());
-	world.storage_mut::<web_sys::SvgElement>().add(entity, element);
+struct DomTypes(HashSet<TypeId>);
 
-	entity_like
+pub fn register_systems(world: &World) {
+	world.new_system(<(Removed<(web_sys::Element,)>,)>::run(move |entity| {
+		// log::info!("element remove start {:?}", entity);
+		WORLD.storage_mut::<web_sys::Element>().take_removed(entity).unwrap().remove();
+		WORLD.storage_mut::<web_sys::Node>().remove(entity);
+		WORLD.storage_mut::<web_sys::EventTarget>().remove(entity);
+		// TODO: use anotehr system
+		if let Some(dom_types) = DomTypes::try_get_mut(entity).map(|x| x.0.clone()) {
+			for t in dom_types {
+				WORLD.storages.borrow_mut()[&t].borrow_mut().dyn_remove(entity);
+			}
+		}
+		DomTypes::storage_mut().remove(entity);
+		WORLD.storage_mut::<Vec<crate::events::EventHandler>>().remove(entity);
+		// log::info!("element remove end {:?}", entity);
+	}));
+	// world.new_system(<(Removed<(DomTypes,)>,)>::run(move |entity| {
+	//     log::info!("domtypes remove start {:?}", entity);
+	//     for t in DomTypes::storage_mut().take_removed(entity).unwrap().0 {
+	//         WORLD.storages.borrow_mut()[&t].borrow_mut().dyn_remove(entity);
+	//     }
+	//     log::info!("domtypes remove end {:?}", entity);
+	// }));
+}
+
+pub fn html_element<T: AsRef<web_sys::HtmlElement> + Component + Clone>(element: &T) -> Entity {
+	let entity = WORLD.new_entity();
+	let html_element = element.as_ref().clone();
+	dom_element(&WORLD, entity, &html_element);
+	web_sys::HtmlElement::storage_mut().add(entity, html_element);
+
+	if TypeId::of::<web_sys::HtmlElement>() == TypeId::of::<T>() {
+		DomTypes::storage_mut().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>()]));
+	} else {
+		T::storage_mut().add(entity, element.clone());
+		DomTypes::storage_mut().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>(), TypeId::of::<T>()]));
+	}
+
+	entity
+}
+
+pub fn svg_element<T: AsRef<web_sys::SvgElement> + Component + Clone>(element: &T) -> Entity {
+	let entity = WORLD.new_entity();
+	let svg_element = element.as_ref().clone();
+	dom_element(&WORLD, entity, &svg_element);
+	web_sys::SvgElement::storage_mut().add(entity, svg_element);
+
+	if TypeId::of::<web_sys::SvgElement>() == TypeId::of::<T>() {
+		DomTypes::storage_mut().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>()]));
+	} else {
+		T::storage_mut().add(entity, element.clone());
+		DomTypes::storage_mut().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>(), TypeId::of::<T>()]));
+	}
+
+	entity
 }
 
 macro_rules! create {
 	(
-		HTML => [
-			$($html_name:ident, $html_t:ident),*$(,)?
-		],
-		SVG => [
-			$($svg_name:ident, $svg_t:ident),*$(,)?
-		],
+		HTML => [$($html_name:ident, $html_t:ident),*$(,)?],
+		SVG => [$($svg_name:ident, $svg_t:ident),*$(,)?],
 	) => {paste::item! {
 		$(
 			pub fn $html_name() -> web_sys::$html_t { wasm_bindgen::JsCast::unchecked_into(dom().create_element(crate::web_str::$html_name()).expect("can't create element")) }
 
 			#[cfg(test)]
 			#[wasm_bindgen_test]
-			fn [<can_create_$html_name>]() {
-				components::$html_name();
-			}
+			fn [<can_create_$html_name>]() { components::$html_name(); }
 		)*
 
 		$(
 			pub fn $svg_name() -> web_sys::$svg_t { wasm_bindgen::JsCast::unchecked_into(dom().create_element_ns(Some(wasm_bindgen::intern("http://www.w3.org/2000/svg")), crate::web_str::$svg_name()).expect("can't create svg element")) }
-		)*
 
-		pub fn register_systems(world: &World) {
-			let sys = <(Removed<(web_sys::Element,)>,)>::run(move |entity| {
-				WORLD.storage_mut::<web_sys::Element>().take_removed(entity).unwrap().remove();
-				WORLD.storage_mut::<web_sys::Node>().remove(entity);
-				WORLD.storage_mut::<web_sys::EventTarget>().remove(entity);
-				WORLD.storage_mut::<web_sys::HtmlElement>().remove(entity);
-				WORLD.storage_mut::<web_sys::SvgElement>().remove(entity);
-				WORLD.storage_mut::<Vec<crate::events::EventHandler>>().remove(entity);
-				// TODO:
-				// new elements should register all html element-related components' TypeId's and put them in a component
-				// then, when Element is removed, all these TypeId's recovered and removed via a dynamic_storage of some sort
-				// e.g. for a div in a DomTypes component, it would store TypeId::of::<web_sys::HtmlDivElement>
-				// as well as Node, Element, EventTarget, HtmlElement
-				// this way, one can reuse a stateful entity by just adding back a html component
-			});
-			world.new_system(sys);
-		}
+			#[cfg(test)]
+			#[wasm_bindgen_test]
+			fn [<can_create_$svg_name>]() { components::$svg_name(); }
+		)*
 
 		pub mod components {
 			use super::*;
 
 			$(
-				#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+				#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Element)]
 				pub struct [<$html_name:camel>](pub crate::Entity);
-				impl crate::AsEntity for [<$html_name:camel>] { fn as_entity(&self) -> crate::Entity { self.0 } }
-				impl crate::Element for [<$html_name:camel>] { }
 
-				pub fn $html_name() -> [<$html_name:camel>] {
-					let entity = WORLD.new_entity();
-					let element = super::$html_name();
-					html_element(&WORLD, entity, &element);
-					web_sys::$html_t::storage_mut().add(entity, element);
-
-					[<$html_name:camel>](entity)
-				}
+				pub fn $html_name() -> [<$html_name:camel>] { [<$html_name:camel>](html_element(&super::$html_name())) }
 
 				#[test]
-				fn [<$html_name _has_selector>]() {
-					crate::css::macros::selector!($html_name);
-				}
+				fn [<$html_name _has_selector>]() { crate::css::macros::selector!($html_name); }
 			)*
 
 			$(
-				#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+				#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Element)]
 				pub struct [<$svg_name:camel>](pub crate::Entity);
-				impl crate::AsEntity for [<$svg_name:camel>] { fn as_entity(&self) -> crate::Entity { self.0 } }
-				impl crate::Element for [<$svg_name:camel>] { }
 
-				pub fn $svg_name() -> [<$svg_name:camel>] {
-					let entity = WORLD.new_entity();
-					let element = super::$svg_name();
-					svg_element(&WORLD, entity, &element);
-					web_sys::$svg_t::storage_mut().add(entity, element);
+				pub fn $svg_name() -> [<$svg_name:camel>] { [<$svg_name:camel>](svg_element(&super::$svg_name())) }
 
-					[<$svg_name:camel>](entity)
-				}
+				#[test]
+				fn [<$svg_name _has_selector>]() { crate::css::macros::selector!($svg_name); }
 			)*
 		}
 

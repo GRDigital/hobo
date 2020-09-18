@@ -58,6 +58,46 @@ impl<T: 'static> BasicQuery for T {
 	}
 }
 
+// impl<T: BasicQuery> Query for Present<T> {
+//     fn query(world: &World, entity: Entity) -> bool {
+//         T::exists(world, entity)
+//     }
+
+//     fn components() -> HashSet<TypeId> {
+//         hset![TypeId::of::<T>]
+//     }
+// }
+
+// impl<T: BasicQuery> Query for Added<T> {
+//     fn query(world: &World, entity: Entity) -> bool {
+//         T::added(world, entity)
+//     }
+
+//     fn components() -> HashSet<TypeId> {
+//         hset![TypeId::of::<T>()]
+//     }
+// }
+
+// impl<T: BasicQuery> Query for Modified<T> {
+//     fn query(world: &World, entity: Entity) -> bool {
+//         T::modified(world, entity)
+//     }
+
+//     fn components() -> HashSet<TypeId> {
+//         hset![TypeId::of::<T>()]
+//     }
+// }
+
+// impl<T: BasicQuery> Query for Removed<T> {
+//     fn query(world: &World, entity: Entity) -> bool {
+//         T::removed(world, entity)
+//     }
+
+//     fn components() -> HashSet<TypeId> {
+//         hset![TypeId::of::<T>()]
+//     }
+// }
+
 macro_rules! tuple_query {
 	() => {};
 	($first:ident $($id:ident)*) => {
