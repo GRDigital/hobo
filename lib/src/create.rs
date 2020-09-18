@@ -26,27 +26,21 @@ struct DomTypes(HashSet<TypeId>);
 
 pub fn register_systems(world: &World) {
 	world.new_system(<(Removed<(web_sys::Element,)>,)>::run(move |entity| {
-		// log::info!("element remove start {:?}", entity);
+		log::info!("element remove start {:?}", entity);
 		WORLD.storage_mut::<web_sys::Element>().take_removed(entity).unwrap().remove();
 		WORLD.storage_mut::<web_sys::Node>().remove(entity);
 		WORLD.storage_mut::<web_sys::EventTarget>().remove(entity);
-		// TODO: use anotehr system
-		if let Some(dom_types) = DomTypes::try_get_mut(entity).map(|x| x.0.clone()) {
-			for t in dom_types {
-				WORLD.storages.borrow_mut()[&t].borrow_mut().dyn_remove(entity);
-			}
-		}
 		DomTypes::storage_mut().remove(entity);
 		WORLD.storage_mut::<Vec<crate::events::EventHandler>>().remove(entity);
-		// log::info!("element remove end {:?}", entity);
+		log::info!("element remove end {:?}", entity);
 	}));
-	// world.new_system(<(Removed<(DomTypes,)>,)>::run(move |entity| {
-	//     log::info!("domtypes remove start {:?}", entity);
-	//     for t in DomTypes::storage_mut().take_removed(entity).unwrap().0 {
-	//         WORLD.storages.borrow_mut()[&t].borrow_mut().dyn_remove(entity);
-	//     }
-	//     log::info!("domtypes remove end {:?}", entity);
-	// }));
+	world.new_system(<(Removed<(DomTypes,)>,)>::run(move |entity| {
+		log::info!("domtypes remove start {:?}", entity);
+		for t in DomTypes::storage_mut().take_removed(entity).unwrap().0 {
+			WORLD.storages.borrow_mut()[&t].borrow_mut().dyn_remove(entity);
+		}
+		log::info!("domtypes remove end {:?}", entity);
+	}));
 }
 
 pub fn html_element<T: AsRef<web_sys::HtmlElement> + Component + Clone>(element: &T) -> Entity {

@@ -48,7 +48,6 @@ pub struct System {
 	f: RefCell<Box<dyn FnMut(Entity) + 'static>>,
 	query: fn(&World, Entity) -> bool,
 	interests: fn() -> HashSet<TypeId>,
-	scheduled: Cell<bool>,
 }
 
 impl System {
@@ -246,9 +245,8 @@ impl World {
 			if let Some(systems) = systems_interests.get(&type_id) {
 				for entity in entities.clone().into_iter() {
 					for system in systems.iter() {
-						if !system.scheduled.get() && system.query(self, entity) {
+						if system.query(self, entity) {
 							v.push((entity, Rc::clone(&system)));
-							system.scheduled.set(true);
 						}
 					}
 				}
@@ -259,7 +257,6 @@ impl World {
 
 	fn run_systems(&self, v: Vec<(Entity, Rc<System>)>) {
 		for (entity, system) in v {
-			system.scheduled.set(false);
 			system.f(entity);
 		}
 	}

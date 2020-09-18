@@ -12,7 +12,7 @@ pub trait Query: 'static {
 	fn components() -> HashSet<TypeId>;
 	fn query(world: &World, entity: Entity) -> bool;
 	fn run<F: FnMut(Entity) + 'static>(f: F) -> System {
-		System { f: RefCell::new(Box::new(f)), query: Self::query, scheduled: Cell::new(false), interests: Self::components }
+		System { f: RefCell::new(Box::new(f)), query: Self::query, interests: Self::components }
 	}
 }
 

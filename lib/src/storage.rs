@@ -139,23 +139,29 @@ impl<'a, Component, Inner> Drop for StorageGuard<'a, Component, Inner> where
 		let StorageGuard(world, inner) = self;
 		drop(inner.take());
 
+		log::info!("{}, {}, {:?}", file!(), line!(), std::any::type_name::<Component>());
 		let set = {
 			let mut storages = world.storages.borrow_mut();
 			let mut storage = storages.get_mut(&TypeId::of::<Component>()).unwrap().borrow_mut();
 			let storage = storage.as_any_mut().downcast_mut::<SimpleStorage<Component>>().unwrap();
 			storage.added.iter().chain(storage.modified.iter()).chain(storage.removed.iter()).cloned().collect::<HashSet<_>>()
 		};
+		log::info!("{}, {}, {:?}", file!(), line!(), std::any::type_name::<Component>());
 
 		let systems = world.schedule_systems(set, std::iter::once(TypeId::of::<Component>()));
 
+		log::info!("{}, {}, {:?}", file!(), line!(), std::any::type_name::<Component>());
 		{
 			let mut storages = world.storages.borrow_mut();
 			let mut storage = storages.get_mut(&TypeId::of::<Component>()).unwrap().borrow_mut();
 			storage.flush();
 		}
+		log::info!("{}, {}, {:?}", file!(), line!(), std::any::type_name::<Component>());
 
 		world.run_systems(systems);
 
+		log::info!("{}, {}, {:?}", file!(), line!(), std::any::type_name::<Component>());
 		world.storages.borrow_mut().get_mut(&TypeId::of::<Component>()).unwrap().borrow_mut().flush_removed();
+		log::info!("{}, {}, {:?}", file!(), line!(), std::any::type_name::<Component>());
 	}
 }
