@@ -45,13 +45,13 @@ impl AsEntity for Entity {
 }
 
 pub struct System {
-	f: RefCell<Box<dyn FnMut(Entity) + 'static>>,
+	f: Box<dyn Fn(Entity) + 'static>,
 	query: fn(&World, Entity) -> bool,
 	interests: fn() -> HashSet<TypeId>,
 }
 
 impl System {
-	pub fn f(&self, entity: Entity) { (self.f.borrow_mut())(entity) }
+	pub fn f(&self, entity: Entity) { (self.f)(entity) }
 	pub fn interests(&self) -> HashSet<TypeId> { (self.interests)() }
 	pub fn query(&self, world: &World, entity: Entity) -> bool { (self.query)(world, entity) }
 }
@@ -79,6 +79,7 @@ pub struct World {
 
 	// TODO: should keep weak refs and have a separate map with strong refs so systems can be deregistered
 	systems_interests: RefCell<HashMap<TypeId, Vec<Rc<System>>>>,
+	system_update_lock: Cell<bool>,
 }
 
 unsafe impl Send for World {}
@@ -213,23 +214,7 @@ impl World {
 			}
 		}
 
-		let systems = self.schedule_systems(std::iter::once(entity), set.iter().copied());
-
-		{
-			let storages = self.storages.try_borrow().expect("remove_entity storages.try_borrow .. flush");
-			for component_id in &set {
-				storages[component_id].try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. flush").flush();
-			}
-		}
-
-		self.run_systems(systems);
-
-		{
-			let storages = self.storages.try_borrow().expect("remove_entity storages try_borrow .. flush_removed");
-			for component_id in &set {
-				storages[component_id].try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. flush_removed").flush_removed();
-			}
-		}
+		self.run_systems(std::iter::once(entity), set);
 	}
 
 	pub fn is_dead(&self, entity: impl AsEntity) -> bool {
@@ -237,27 +222,38 @@ impl World {
 		self.entities.try_borrow().expect("is_dead entities.try_borrow").generations[entity.id as usize] != entity.generation
 	}
 
-	fn schedule_systems(&self, entities: impl IntoIterator<Item = Entity> + Clone, components: impl IntoIterator<Item = TypeId>) -> Vec<(Entity, Rc<System>)> {
-		let systems_interests = self.systems_interests.try_borrow().expect("schedule_systems systems_interests.try_borrow");
+	fn run_systems(&self, entities: impl IntoIterator<Item = Entity> + Clone, components: impl IntoIterator<Item = TypeId> + Clone) {
+		let topmost_update = if self.system_update_lock.get() { false } else { self.system_update_lock.set(true); true };
 
-		let mut v = vec![];
-		for type_id in components.into_iter() {
-			if let Some(systems) = systems_interests.get(&type_id) {
-				for entity in entities.clone().into_iter() {
-					for system in systems.iter() {
-						if system.query(self, entity) {
+		let to_run = {
+			let mut v = Vec::new();
+			let systems_interests = self.systems_interests.try_borrow().expect("schedule_systems systems_interests.try_borrow");
+			for type_id in components.clone().into_iter() {
+				if let Some(systems) = systems_interests.get(&type_id) {
+					for entity in entities.clone().into_iter() {
+						for system in systems.iter() {
 							v.push((entity, Rc::clone(&system)));
 						}
 					}
 				}
 			}
-		}
-		v
-	}
+			v
+		};
 
-	fn run_systems(&self, v: Vec<(Entity, Rc<System>)>) {
-		for (entity, system) in v {
-			system.f(entity);
+		for (entity, system) in to_run {
+			if system.query(self, entity) {
+				system.f(entity);
+			}
+		}
+
+		if topmost_update {
+			let storages = self.storages.try_borrow().expect("remove_entity storages.try_borrow .. flush");
+			for component_id in components.into_iter() {
+				let mut storage = storages[&component_id].try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. flush_removed");
+				storage.flush();
+				storage.flush_removed();
+			}
+			self.system_update_lock.set(false);
 		}
 	}
 }

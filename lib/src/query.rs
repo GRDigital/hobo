@@ -11,8 +11,8 @@ pub trait BasicQuery: 'static {
 pub trait Query: 'static {
 	fn components() -> HashSet<TypeId>;
 	fn query(world: &World, entity: Entity) -> bool;
-	fn run<F: FnMut(Entity) + 'static>(f: F) -> System {
-		System { f: RefCell::new(Box::new(f)), query: Self::query, interests: Self::components }
+	fn run<F: Fn(Entity) + 'static>(f: F) -> System {
+		System { f: Box::new(f), query: Self::query, interests: Self::components }
 	}
 }
 
