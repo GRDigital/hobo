@@ -402,9 +402,13 @@ pub trait Element: AsEntity + Sized {
 }
 
 impl<T: AsEntity> AsEntity for &T {
-	fn as_entity(&self) -> Entity { (*self).as_entity() }
+	fn as_entity(&self) -> Entity { T::as_entity(*self) }
+}
+impl<T: AsEntity> AsEntity for &mut T {
+	fn as_entity(&self) -> Entity { T::as_entity(*self) }
 }
 impl<T: Element> Element for &T { }
+impl<T: Element> Element for &mut T { }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Element)]
 pub struct SomeElement(Entity);
