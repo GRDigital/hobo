@@ -158,6 +158,17 @@ impl StringValue for components::Textarea {
 	fn set_value(&self, x: &str) { <web_sys::HtmlTextAreaElement as Component>::get(self).set_value(x) }
 }
 
+impl components::Select {
+	pub fn selected_index(&self) -> i32 {
+		<web_sys::HtmlSelectElement as Component>::get(self).selected_index()
+	}
+}
+// impl AsRef<web_sys::HtmlSelectElement> for components::Select {
+//     fn as_ref(&self) -> &web_sys::HtmlSelectElement {
+//         <web_sys::HtmlSelectElement as Component>::get(self)
+//     }
+// }
+
 // TODO: sort out SVG*HTML name collisions
 #[rustfmt::skip]
 create![
