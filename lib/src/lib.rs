@@ -275,6 +275,11 @@ impl Parent {
 			Vec::new()
 		}
 	}
+
+	pub fn ancestor_with_cmp<T: Component>(entity: Entity) -> Entity {
+		let parent = Parent::get(entity).0;
+		if T::storage().has(parent) { parent } else { Parent::ancestor_with_cmp::<T>(parent) }
+	}
 }
 
 impl Children {
