@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::{Property, append_property::AppendProperty};
 
 crate::macros::easy_enum! {border-collapse separate collapse}
 crate::macros::easy_enum! {box-decoration-break slice clone}
@@ -99,6 +100,10 @@ impl std::fmt::Display for BoxShadowEffect {
 		if self.inset { "inset ".fmt(f)? }
 		write!(f, "{} {} {} {} {}", self.offset_x, self.offset_y, self.blur_radius, self.spread_radius, self.color)
 	}
+}
+
+impl AppendProperty for BoxShadowEffect {
+	fn append_property(self, props: &mut Vec<Property>) { BoxShadow::Some(vec![self]).append_property(props) }
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
