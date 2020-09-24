@@ -70,7 +70,7 @@ intern_strings! {
 	password;
 	text;
 	_blank;
-	viewBox; d; cx; cy; r;
+	viewBox; d; cx; cy; r; x; y;
 	file;
 	loading; lazy;
 
