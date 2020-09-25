@@ -74,6 +74,15 @@ impl Style {
 	pub fn append(&mut self, other: &mut Style) { self.0.append(&mut other.0); }
 }
 
+impl std::ops::Add for Style {
+	type Output = Self;
+
+	fn add(mut self, mut rhs: Self) -> Self {
+		self.0.append(&mut rhs.0);
+		self
+	}
+}
+
 #[macro_export]
 macro_rules! properties {
 	($($e:expr),*$(,)?) => {{
