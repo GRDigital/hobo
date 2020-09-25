@@ -30,7 +30,7 @@ pub fn register_systems(world: &World) {
 		WORLD.storage_mut::<web_sys::Node>().remove(entity);
 		WORLD.storage_mut::<web_sys::EventTarget>().remove(entity);
 		DomTypes::storage_mut().remove(entity);
-		WORLD.storage_mut::<Vec<crate::events::EventHandler>>().remove(entity);
+		WORLD.storage_mut::<Vec<crate::dom_events::EventHandler>>().remove(entity);
 	}));
 	world.new_system(<(Removed<(DomTypes,)>,)>::run(move |entity| {
 		for t in DomTypes::storage_mut().take_removed(entity).unwrap().0 {

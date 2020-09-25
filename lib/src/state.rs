@@ -2,7 +2,7 @@
 
 //! pub/sub event-based state management
 
-mod tests;
+// mod tests;
 
 use slotmap::DenseSlotMap;
 use std::{

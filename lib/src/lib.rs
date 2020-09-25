@@ -6,7 +6,8 @@ mod query;
 mod storage;
 pub mod state;
 pub mod create;
-mod events;
+mod dom_events;
+pub mod events;
 
 pub use hobo_css as css;
 pub use hobo_derive::*;

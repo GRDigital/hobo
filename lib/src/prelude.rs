@@ -14,7 +14,7 @@ pub use crate::{
 	query::*,
 	TypeClassString as _,
 	Component as _,
-	events::impls::*,
+	dom_events::impls::*,
 	create::StringValue as _,
 };
 pub use crate::css::{self, AppendProperty, F32, F32Ext as _};
