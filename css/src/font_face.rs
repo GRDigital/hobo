@@ -1,4 +1,5 @@
 use crate::prelude::*;
+pub use crate::__unicode_range as unicode_range;
 
 // TODO: replace @font-face selector with regular rust struct
 
@@ -126,7 +127,23 @@ pub struct FontFace {
 	// font_variant:
 	// font-feature-settings
 	// font-variation-settings:
-	pub unicode_range: Vec<(u32, Option<u32>)>,
+	pub unicode_range: Vec<UnicodeRange>,
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Default)]
+pub struct UnicodeRange(u32, Option<u32>);
+
+impl From<u32> for UnicodeRange {
+	fn from(x: u32) -> Self { Self(x, None) }
+}
+
+impl From<std::ops::Range<u32>> for UnicodeRange {
+	fn from(x: std::ops::Range<u32>) -> Self { Self(x.start, Some(x.end)) }
+}
+
+#[macro_export]
+macro_rules! __unicode_range {
+	($($expr:expr),*) => {vec![$(UnicodeRange::from($expr)),*]}
 }
 
 impl std::fmt::Display for FontFace {
@@ -144,12 +161,12 @@ impl std::fmt::Display for FontFace {
 			write!(f, "font-stretch:{} {};", &self.stretch.0, &if let Some(x) = self.stretch.1 { x } else { self.stretch.0 })?;
 			write!(f, "font-style:{};", &self.style)?;
 			write!(f, "font-weight:{} {};", &self.weight.0, &if let Some(x) = self.weight.1 { x } else { self.weight.0 })?;
-			if let Some(((min, max), rest)) = self.unicode_range.split_first() {
+			if let Some((UnicodeRange(min, max), rest)) = self.unicode_range.split_first() {
 				write!(f, "unicode-range:U+{:X}", min)?;
 				if let Some(max) = max {
 					write!(f, "-{:X}", max)?;
 				}
-				for (min, max) in rest {
+				for UnicodeRange(min, max) in rest {
 					write!(f, ",U+{:X}", min)?;
 					if let Some(max) = max {
 						write!(f, "-{:X}", max)?;
