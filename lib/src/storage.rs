@@ -145,6 +145,16 @@ impl<'a, Component, Inner> Drop for StorageGuard<'a, Component, Inner> where
 			let mut storages = world.storages.borrow_mut();
 			let mut storage = storages.get_mut(&TypeId::of::<Component>()).unwrap().borrow_mut();
 			let storage = storage.as_any_mut().downcast_mut::<SimpleStorage<Component>>().unwrap();
+
+			let mut component_ownership = world.component_ownership.borrow_mut();
+			for &added in &storage.added {
+				component_ownership.entry(added).or_default().insert(std::any::TypeId::of::<Component>());
+			}
+			for removed in &storage.removed {
+				if let Some(components) = component_ownership.get_mut(removed) {
+					components.remove(&std::any::TypeId::of::<Component>());
+				}
+			}
 			storage.added.iter().chain(storage.modified.iter()).chain(storage.removed.iter()).cloned().collect::<HashSet<_>>()
 		};
 

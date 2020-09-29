@@ -76,6 +76,7 @@ impl Default for Entities {
 #[derive(Default)]
 pub struct World {
 	storages: RefCell<HashMap<TypeId, StorageRc>>,
+	component_ownership: RefCell<HashMap<Entity, HashSet<TypeId>>>,
 	entities: RefCell<Entities>,
 
 	// TODO: should keep weak refs and have a separate map with strong refs so systems can be deregistered
@@ -127,7 +128,7 @@ type StorageMutRef<'a, Component> = StorageGuard<'a, Component, OwningRefMut<Own
 
 impl World {
 	fn dyn_storage<Component: 'static>(&self) -> Rc<RefCell<Box<dyn DynStorage>>> {
-		Rc::clone(self.storages.try_borrow_mut().expect("dyn_storage -> storages.try_borrow_mut")
+		Rc::clone(self.storages.try_borrow_mut().unwrap_or_else(|e| panic!("{}: {} dyn_storage -> storages.try_borrow_mut", e, std::any::type_name::<Component>()))
 			.entry(TypeId::of::<Component>())
 			.or_insert_with(|| Rc::new(RefCell::new(Box::new(SimpleStorage::<Component>::default())))))
 	}
@@ -206,12 +207,14 @@ impl World {
 			if let Some(child_pos) = children.0.iter().position(|&x| x == entity) { children.0.remove(child_pos); }
 		}
 
+		// TODO: just take component_ids
 		let mut set: HashSet<TypeId> = HashSet::new();
 
-		for (&component_id, storage) in self.storages.try_borrow().expect("remove_entity storages.try_borrow .. remove").iter() {
-			if storage.try_borrow().expect("remove_entity storages -> storage.try_borrow .. remove").dyn_has(entity) {
+		if let Some(component_ids) = self.component_ownership.borrow_mut().remove(&entity) {
+			let storages = self.storages.try_borrow().expect("remove_entity storages.try_borrow .. remove");
+			for component_id in component_ids {
 				set.insert(component_id);
-				storage.try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. remove").dyn_remove(entity);
+				storages[&component_id].try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. remove").dyn_remove(entity);
 			}
 		}
 
