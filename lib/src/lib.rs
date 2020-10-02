@@ -262,7 +262,7 @@ impl World {
 	}
 }
 
-#[derive(Default, Debug, shrinkwraprs::Shrinkwrap, Clone, Copy, PartialEq, Eq)]
+#[derive(Default, Debug, shrinkwraprs::Shrinkwrap, Clone, Copy, PartialEq, Eq, AsEntity)]
 pub struct Parent(Entity);
 
 #[derive(Default, Debug, shrinkwraprs::Shrinkwrap)]
