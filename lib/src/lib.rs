@@ -420,7 +420,7 @@ impl<T: Element> Element for &T { }
 impl<T: Element> Element for &mut T { }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Element)]
-pub struct SomeElement(Entity);
+pub struct SomeElement(pub Entity);
 
 pub fn fetch_classname(style: impl Into<css::Style>) -> String {
 	STYLE_STORAGE.with(|x| x.borrow_mut().fetch(style.into()))
