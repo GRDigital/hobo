@@ -6,9 +6,11 @@ use std::cell::RefCell;
 
 slotmap::new_key_type! {pub struct SubKey;}
 
+type SubFn = Box<dyn FnMut(&dyn Any)>;
+
 #[derive(Default)]
 pub struct Events {
-	subscribers: RefCell<DenseSlotMap<SubKey, Box<dyn FnMut(&dyn Any)>>>,
+	subscribers: RefCell<DenseSlotMap<SubKey, SubFn>>,
 }
 
 // This is only permissible because JS/WASM is single-threaded

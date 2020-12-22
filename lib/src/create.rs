@@ -4,7 +4,7 @@
 //!
 //! all of these functions return the most fitting web_sys element types
 
-use crate::{dom, prelude::*, World, Entity, storage::{Storage, DynStorage}, Element, Component, AsEntity};
+use crate::{dom, prelude::*, World, Entity, storage::Storage, Element, Component, AsEntity};
 use std::collections::HashSet;
 use std::any::TypeId;
 use sugars::*;

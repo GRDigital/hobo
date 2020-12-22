@@ -2,7 +2,7 @@ use derive_utils::quick_derive as enum_derive;
 use proc_macro2::{TokenStream, Span};
 use proc_quote::quote;
 use quote::ToTokens;
-use proc_macro_error::proc_macro_error;
+// use proc_macro_error::proc_macro_error;
 
 fn crate_name() -> TokenStream {
 	let into_ident = |x: String| syn::Ident::new(&x, Span::call_site());
@@ -80,20 +80,20 @@ pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 	}).into()
 }
 
-fn extract_element_type(data: &syn::Data) -> syn::Type {
-	match data {
-		syn::Data::Struct(syn::DataStruct { fields: syn::Fields::Named(syn::FieldsNamed { named, .. }), .. }) => {
-			let mut res = None;
-			for field in named.iter() {
-				if let Some(ident) = &field.ident {
-					if ident == "element" {
-						res = Some(&field.ty);
-						break;
-					}
-				}
-			}
-			if let Some(x) = res { x.clone() } else { panic!("element not found") }
-		},
-		_ => unimplemented!(),
-	}
-}
+// fn extract_element_type(data: &syn::Data) -> syn::Type {
+//     match data {
+//         syn::Data::Struct(syn::DataStruct { fields: syn::Fields::Named(syn::FieldsNamed { named, .. }), .. }) => {
+//             let mut res = None;
+//             for field in named.iter() {
+//                 if let Some(ident) = &field.ident {
+//                     if ident == "element" {
+//                         res = Some(&field.ty);
+//                         break;
+//                     }
+//                 }
+//             }
+//             if let Some(x) = res { x.clone() } else { panic!("element not found") }
+//         },
+//         _ => unimplemented!(),
+//     }
+// }
