@@ -383,9 +383,12 @@ dependencies = [
 
 [[package]]
 name = "slotmap"
-version = "0.4.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c46a3482db8f247956e464d783693ece164ca056e6e67563ee5505bdb86452cd"
+checksum = "b3059d4bc9651b8515c4ab661829cc08ec3b79051bd7fbc234ac0d957eb9696b"
+dependencies = [
+ "version_check",
+]
 
 [[package]]
 name = "smart-default"
@@ -439,9 +442,9 @@ checksum = "3405d972f8a643dfb7a571a51bd9f700c9ebb9d57543d3207a7db90bce8f0a76"
 
 [[package]]
 name = "syn"
-version = "1.0.56"
+version = "1.0.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9802ddde94170d186eeee5005b798d9c159fa970403f1be19976d0cfb939b72"
+checksum = "4211ce9909eb971f111059df92c45640aad50a619cf55cd76476be803c4c68e6"
 dependencies = [
  "proc-macro2",
  "quote",
