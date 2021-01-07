@@ -349,7 +349,9 @@ pub trait Element: AsEntity + Sized {
 
 	fn set_attr<'a>(&self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) {
 		if WORLD.is_dead(self) { log::warn!("set_attr dead {:?}", self.as_entity()); return; }
-		web_sys::Element::get(self).set_attribute(&key.into(), &value.into()).expect("can't set attribute");
+		// TODO: HACK! shoudl fix analytics-platform inspector not to try to set invalid shit
+		// web_sys::Element::get(self).set_attribute(&key.into(), &value.into()).expect("can't set attribute");
+		let _ = web_sys::Element::get(self).set_attribute(&key.into(), &value.into()).ok();
 	}
 	fn attr<'a>(self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) -> Self { self.set_attr(key, value); self }
 	fn set_bool_attr<'a>(&self, key: impl Into<Cow<'a, str>>, value: bool) { if value { self.set_attr(key, "") } else { self.remove_attr(key) } }
