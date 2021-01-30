@@ -10,7 +10,7 @@ readme = "../README.md"
 
 [dependencies]
 hobo_css = "=0.1.10"
-extend = "0.1"
+extend = "1"
 hobo_derive = "=0.1.10"
 paste = "1"
 roxmltree = "0.13"
