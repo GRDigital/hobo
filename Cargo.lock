@@ -63,9 +63,9 @@ checksum = "cd56b59865bce947ac5958779cfa508f6c3b9497cc762b7e24a12d11ccde2c4f"
 
 [[package]]
 name = "extend"
-version = "0.1.2"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f47da3a72ec598d9c8937a7ebca8962a5c7a1f28444e38c2b33c771ba3f55f05"
+checksum = "d99dd1181a2c917d2e4c46c2a5962716dea6edbb9aef4df1236bfb7f89d0d73e"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
