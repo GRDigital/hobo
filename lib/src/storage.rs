@@ -1,5 +1,5 @@
 // use super::*;
-use crate::{Entity, World, AsEntity};
+use crate::{Entity, World, AsEntity, prelude::default};
 use std::collections::{HashMap, HashSet};
 use std::any::TypeId;
 
@@ -34,7 +34,7 @@ pub struct SimpleStorage<Component: 'static> {
 
 impl<Component> Default for SimpleStorage<Component> {
 	fn default() -> Self {
-		Self { data: Default::default(), data_removed: Default::default(), added: Default::default(), removed: Default::default(), modified: Default::default() }
+		Self { data: default(), data_removed: default(), added: default(), removed: default(), modified: default() }
 	}
 }
 

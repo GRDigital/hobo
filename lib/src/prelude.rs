@@ -20,3 +20,6 @@ pub use crate::{
 pub use crate::css::{self, AppendProperty, F32, F32Ext as _};
 pub use wasm_bindgen::prelude::*;
 pub use web_sys;
+
+#[must_use]
+pub fn default<T: Default>() -> T { T::default() }

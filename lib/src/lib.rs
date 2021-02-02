@@ -67,7 +67,7 @@ struct Entities {
 
 impl Default for Entities {
 	fn default() -> Self { Self {
-		free_ids: Default::default(),
+		free_ids: default(),
 		// Entity(0, 0) is a fake entity for holding resources
 		generations: vec![0],
 	} }
