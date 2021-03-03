@@ -9,7 +9,7 @@ authors = ["GR Digital <contact@grdigital.co.uk>"]
 readme = "../README.md"
 
 [dependencies]
-extend = "0.3"
+extend = "1"
 hobo_css_macros = "=0.1.10"
 num-traits = "0.2"
 ordered-float = { version = "2", default-features = false }

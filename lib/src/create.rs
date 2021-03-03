@@ -163,6 +163,16 @@ impl components::Select {
 		<web_sys::HtmlSelectElement as Component>::get(self).selected_index()
 	}
 }
+
+impl components::Input {
+	pub async fn file_data(&self, id: u32) -> Option<Vec<u8>> {
+		let file = web_sys::HtmlInputElement::get(self).files()?.get(id)?;
+		let arr_buffer: js_sys::ArrayBuffer = wasm_bindgen_futures::JsFuture::from(file.array_buffer()).await.ok()?.dyn_into().ok()?;
+		let vec = js_sys::Uint8Array::new(&arr_buffer).to_vec();
+		Some(vec)
+	}
+}
+
 // impl AsRef<web_sys::HtmlSelectElement> for components::Select {
 //     fn as_ref(&self) -> &web_sys::HtmlSelectElement {
 //         <web_sys::HtmlSelectElement as Component>::get(self)
