@@ -5,11 +5,9 @@ use quote::ToTokens;
 // use proc_macro_error::proc_macro_error;
 
 fn crate_name() -> TokenStream {
-	let into_ident = |x: String| syn::Ident::new(&x, Span::call_site());
-	let hobo = proc_macro_crate::crate_name("hobo").ok().map(into_ident);
-	match hobo {
-		Some(hobo) => quote! { #hobo },
-		None => quote! { crate },
+	match proc_macro_crate::crate_name("hobo").unwrap() {
+		proc_macro_crate::FoundCrate::Itself => quote! { crate },
+		proc_macro_crate::FoundCrate::Name(x) => { let hobo = syn::Ident::new(&x, Span::call_site()); quote! { #hobo } },
 	}
 }
 
