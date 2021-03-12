@@ -24,6 +24,9 @@ pub struct StateMeta {
 }
 
 impl StateMeta {
+	// if there is an update going on, dirty flag is reset to true, which forces the topmost trigger_update to run again
+	// it will run in a loop until subscribers no longer set the dirty flag
+	// useful if e.g. there's a scattered chain of state transformations predicated on state already being in a particular configuration
 	fn trigger_update(this: &Rc<RefCell<Self>>) {
 		this.borrow_mut().dirty = true;
 		if this.borrow().update_ongoing { return; }
@@ -111,6 +114,8 @@ impl<T: 'static> State<T> {
 
 	pub fn view(&self) -> Ref<T> { self.data.borrow() }
 
+	// the difference between this and subscribe is that subscribe will automatically unsubscribe on drop via Weak to StateMeta
+	// thus subscribe_key should almost never be called
 	pub fn subscribe_key(&self, f: impl FnMut() + 'static) -> SubscriptionKey {
 		self.meta.borrow_mut().subscribers.insert(Rc::new(RefCell::new(f)))
 	}
