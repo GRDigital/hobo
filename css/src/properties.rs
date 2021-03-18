@@ -349,7 +349,7 @@ generate_properties! {
 
 crate::macros::easy_enum! {box-sizing content-box border-box}
 crate::macros::easy_enum! {visibility visible hidden collapse}
-crate::macros::easy_enum! {display block none inline inline-block flex inline-flex grid}
+crate::macros::easy_enum! {display block none inline inline-block flex inline-flex grid inline-grid flow-root contents table table-row list-item}
 crate::macros::easy_enum! {user-select auto none text all}
 crate::macros::easy_enum! {scroll-behavior auto smooth}
 crate::macros::easy_enum! {pointer-events auto none}
