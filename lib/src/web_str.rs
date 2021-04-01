@@ -69,7 +69,7 @@ intern_strings! {
 	id;
 	password;
 	text;
-	_blank;
+	_blank; rel; noopener;
 	viewBox; d; cx; cy; r; x; y;
 	file;
 	loading; lazy;
