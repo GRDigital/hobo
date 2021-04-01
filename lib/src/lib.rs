@@ -39,6 +39,12 @@ impl Entity {
 
 pub trait AsEntity {
 	fn as_entity(&self) -> Entity;
+	#[inline] fn try_get_component<'a, C: Component>(&self) -> Option<OwningRef<StorageRef<'a, C>, C>> where Self: Sized { C::try_get(self) }
+	#[inline] fn try_get_component_mut<'a, C: Component>(&self) -> Option<OwningRefMut<StorageMutRef<'a, C>, C>> where Self: Sized { C::try_get_mut(self) }
+	#[inline] fn get_component<'a, C: Component>(&self) -> OwningRef<StorageRef<'a, C>, C> where Self: Sized { C::get(self) }
+	#[inline] fn get_component_mut<'a, C: Component>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized { C::get_mut(self) }
+	#[inline] fn get_component_mut_or<'a, C: Component>(&self, f: impl FnOnce() -> C) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized { C::get_mut_or(self, f) }
+	#[inline] fn get_component_mut_or_default<'a, C: Component + Default>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized { C::get_mut_or_default(self) }
 }
 
 impl AsEntity for Entity {
@@ -84,6 +90,7 @@ pub struct World {
 	system_update_lock: Cell<bool>,
 }
 
+// only safe until threading becomes a thing
 unsafe impl Send for World {}
 unsafe impl Sync for World {}
 
@@ -165,7 +172,7 @@ impl World {
 		Some(OwningRefMut::new(self.storage_mut()).map_mut(|x| x.get_mut(Entity::root()).unwrap()))
 	}
 
-	// if there's a removed entity, take taht one
+	// if there's a removed entity, take that one
 	// otherwise the next id would be the one with unassigned generation,
 	// i.e. index of last generation + 1
 	pub fn new_entity(&self) -> Entity {
@@ -181,7 +188,7 @@ impl World {
 
 	pub fn new_system(&self, sys: System) {
 		let sys = Rc::new(sys);
-		for interest in sys.interests().into_iter() {
+		for interest in sys.interests() {
 			let mut systems_interests = self.systems_interests.try_borrow_mut().expect("new_system systems_interests.try_borrrow_mut");
 			systems_interests.entry(interest).or_insert_with(Vec::new).push(Rc::clone(&sys));
 		}
@@ -232,9 +239,9 @@ impl World {
 		let to_run = {
 			let mut v = Vec::new();
 			let systems_interests = self.systems_interests.try_borrow().expect("schedule_systems systems_interests.try_borrow");
-			for type_id in components.clone().into_iter() {
+			for type_id in components.clone() {
 				if let Some(systems) = systems_interests.get(&type_id) {
-					for entity in entities.clone().into_iter() {
+					for entity in entities.clone() {
 						for system in systems.iter() {
 							v.push((entity, Rc::clone(&system)));
 						}
@@ -252,7 +259,7 @@ impl World {
 
 		if topmost_update {
 			let storages = self.storages.try_borrow().expect("remove_entity storages.try_borrow .. flush");
-			for component_id in components.into_iter() {
+			for component_id in components {
 				let mut storage = storages[&component_id].try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. flush_removed");
 				storage.flush();
 				storage.flush_removed();
@@ -313,6 +320,7 @@ pub trait Element: AsEntity + Sized {
 		Children::get_mut_or_default(self).0.push(child.as_entity());
 		Parent::get_mut_or_default(&child).0 = self.as_entity();
 
+		// why not unwrapping? how can this fail?
 		if let (Some(parent_node), Some(child_node)) = (web_sys::Node::try_get(self), web_sys::Node::try_get(&child)) {
 			parent_node.append_child(&child_node).expect("can't append child");
 		}
@@ -388,19 +396,19 @@ pub trait Element: AsEntity + Sized {
 	fn replace_with<T: AsEntity>(&self, other: T) -> T {
 		let other_entity = other.as_entity();
 		if WORLD.is_dead(self) { log::warn!("replace_with dead {:?}", self.as_entity()); return other; }
+
+		// why not unwrapping? how can this fail?
 		if let (Some(this), Some(other)) = (web_sys::Element::try_get(self), web_sys::Node::try_get(other_entity)) {
 			this.replace_with_with_node_1(&other).unwrap();
 		}
 
 		// Fix up reference in parent
-		{
-			if let Some(parent) = Parent::try_get(self).map(|x| x.0) {
-				if WORLD.is_dead(parent) { log::warn!("replace_with parent dead {:?}", parent); return other; }
-				let mut children = Children::get_mut(parent);
-				let position = children.0.iter().position(|&x| x == self.as_entity()).expect("entity claims to be a child while missing in parent");
-				children.0[position] = other.as_entity();
-				Parent::get_mut_or_default(other_entity).0 = parent;
-			}
+		if let Some(parent) = Parent::try_get(self).map(|x| x.0) {
+			if WORLD.is_dead(parent) { log::warn!("replace_with parent dead {:?}", parent); return other; }
+			let mut children = Children::get_mut(parent);
+			let position = children.0.iter().position(|&x| x == self.as_entity()).expect("entity claims to be a child while missing in parent");
+			children.0[position] = other.as_entity();
+			Parent::get_mut_or_default(other_entity).0 = parent;
 		}
 
 		WORLD.remove_entity(self);
@@ -451,25 +459,28 @@ pub trait Component: 'static {
 		if !Self::storage().has(entity) { return None; }
 		Some(OwningRefMut::new(Self::storage_mut()).map_mut(|x| x.get_mut(entity).unwrap()))
 	}
+	#[inline]
 	fn get<'a>(entity: impl AsEntity) -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized {
 		OwningRef::new(Self::storage()).map(|x| x.get(entity).unwrap())
 	}
+	#[inline]
 	fn get_mut<'a>(entity: impl AsEntity) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized {
-		let entity = entity.as_entity();
 		OwningRefMut::new(Self::storage_mut()).map_mut(|x| x.get_mut(entity).unwrap())
 	}
+	#[inline]
 	fn get_mut_or<'a>(entity: impl AsEntity, f: impl FnOnce() -> Self) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized {
 		OwningRefMut::new(Self::storage_mut()).map_mut(move |x| x.get_mut_or(entity, f))
 	}
-	fn get_mut_or_default<'a>(entity: impl AsEntity) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Default + Sized { Self::get_mut_or(entity, Self::default) }
-	fn storage<'a>() -> StorageRef<'a, Self> where Self: Sized { WORLD.storage::<Self>() }
-	fn storage_mut<'a>() -> StorageMutRef<'a, Self> where Self: Sized { WORLD.storage_mut::<Self>() }
 
-	fn register_resource(self) where Self: Sized { World::register_resource(&WORLD, self) }
-	fn resource<'a>() -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized { WORLD.resource::<Self>() }
-	fn resource_mut<'a>() -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized { WORLD.resource_mut::<Self>() }
-	fn try_resource<'a>() -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized { WORLD.try_resource::<Self>() }
-	fn try_resource_mut<'a>() -> Option<OwningRefMut<StorageMutRef<'a, Self>, Self>> where Self: Sized { WORLD.try_resource_mut::<Self>() }
+	#[inline] fn get_mut_or_default<'a>(entity: impl AsEntity) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Default + Sized { Self::get_mut_or(entity, Self::default) }
+	#[inline] fn storage<'a>() -> StorageRef<'a, Self> where Self: Sized { WORLD.storage::<Self>() }
+	#[inline] fn storage_mut<'a>() -> StorageMutRef<'a, Self> where Self: Sized { WORLD.storage_mut::<Self>() }
+
+	#[inline] fn register_resource(self) where Self: Sized { World::register_resource(&WORLD, self) }
+	#[inline] fn resource<'a>() -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized { WORLD.resource::<Self>() }
+	#[inline] fn resource_mut<'a>() -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized { WORLD.resource_mut::<Self>() }
+	#[inline] fn try_resource<'a>() -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized { WORLD.try_resource::<Self>() }
+	#[inline] fn try_resource_mut<'a>() -> Option<OwningRefMut<StorageMutRef<'a, Self>, Self>> where Self: Sized { WORLD.try_resource_mut::<Self>() }
 
 	// fn register_state(self) where Self: Sized { state::State::new(self).register_resource() }
 	// fn state<'a>() -> OwningRef<StorageRef<'a, state::State<Self>>, state::State<Self>> where Self: Sized { <state::State<Self>>::resource() }

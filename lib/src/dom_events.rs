@@ -95,6 +95,7 @@ macro_rules! generate_events {
 				fn [<add_ $f>](&self, mut f: impl FnMut(web_sys::$event_kind) + 'static) {
 					let entity = self.as_entity();
 					if WORLD.is_dead(entity) { log::warn!("callback handler entity dead {:?}", entity); return; }
+					// unwrap? how can this fail?
 					if let Some(target) = web_sys::EventTarget::try_get(entity) {
 						let handler = Closure::wrap(Box::new(move |e| f(e)) as Box<dyn FnMut(web_sys::$event_kind) + 'static>);
 						target.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).expect("can't add event listener");
