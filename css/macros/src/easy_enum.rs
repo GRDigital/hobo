@@ -121,7 +121,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		Value::String => quote! {($str:expr) => { $crate::Property::#property_camel($crate::#property_camel::String($str.into())) };},
 		Value::Raw => quote! {($str:expr) => { $crate::Property::#property_camel($crate::#property_camel::Raw($str.into())) };},
 		Value::Number => quote! {($num:expr) => { $crate::Property::#property_camel($crate::#property_camel::Number($num)) };},
-		Value::Float => quote! {($num:expr) => { $crate::Property::#property_camel($crate::#property_camel::Number(unsafe { $crate::units::F32::unchecked_new($num as _) })) };},
+		Value::Float => quote! {($num:expr) => { $crate::Property::#property_camel($crate::#property_camel::Number(unsafe { $crate::units::F32::new_unchecked($num as _) })) };},
 	});
 
 	let res = quote!(

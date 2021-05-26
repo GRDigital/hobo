@@ -50,9 +50,9 @@ impl std::fmt::Display for Unit {
 macro_rules! unit {
 	(0)                                             => { $crate::units::Unit::Zero };
 
-	($e:literal $(px)?)                             => { $crate::units::Unit::Px(                                  unsafe { $crate::units::F32::unchecked_new($e as _) }) };
-	($e:literal $frag:ident)                        => { $crate::paste::item!{$crate::units::Unit::[<$frag:camel>](unsafe { $crate::units::F32::unchecked_new($e as _) })} };
-	($e:literal %)                                  => { $crate::units::Unit::Percent(                             unsafe { $crate::units::F32::unchecked_new($e as _) }) };
+	($e:literal $(px)?)                             => { $crate::units::Unit::Px(                                  unsafe { $crate::units::F32::new_unchecked($e as _) }) };
+	($e:literal $frag:ident)                        => { $crate::paste::item!{$crate::units::Unit::[<$frag:camel>](unsafe { $crate::units::F32::new_unchecked($e as _) })} };
+	($e:literal %)                                  => { $crate::units::Unit::Percent(                             unsafe { $crate::units::F32::new_unchecked($e as _) }) };
 
 	($e:ident $(px)?)                               => { $crate::units::px($e) };
 	($e:ident $frag:ident)                          => { $crate::units::$frag($e) };
