@@ -109,7 +109,7 @@ macro_rules! generate_events {
 			impl<T: Element> [<$name:camel>] for T {}
 		)+
 
-		pub mod impls {$(pub use super::[<$name:camel>] as _;)+}
+		pub mod impls {$(pub use super::[<$name:camel>];)+}
 	}};
 }
 
