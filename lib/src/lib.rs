@@ -344,6 +344,10 @@ pub trait Element: AsEntity + Sized {
 
 		Classes::get_mut_or_default(self).styles.insert(tag_hash, style.into());
 	}
+	// Cannot mix impl Into<css::Style> with generic type arguments
+	fn set_class_typed<Type: 'static>(&self, style: css::Style) {
+    	self.set_class_tagged(TypeId::of::<Type>(), style)
+	}
 	fn set_class(&self, style: impl Into<css::Style>) { self.set_class_tagged(0u64, style); }
 	fn add_class(&self, style: impl Into<css::Style>) {
 		let id = Classes::try_get(self).map(|x| x.styles.len() as u64).unwrap_or(0);
@@ -351,6 +355,7 @@ pub trait Element: AsEntity + Sized {
 	}
 	fn class(self, style: impl Into<css::Style>) -> Self { self.add_class(style); self }
 	fn class_tagged<Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<css::Style>) -> Self { self.set_class_tagged(tag, style); self }
+	fn class_typed<Type: 'static>(self, style: css::Style) -> Self { self.set_class_typed::<Type>(style); self }
 
 	fn add_component<T: 'static>(&self, component: T) { T::storage_mut().add(self, component); }
 	fn component<T: 'static>(self, component: T) -> Self { self.add_component(component); self }
