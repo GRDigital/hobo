@@ -116,12 +116,25 @@ impl<T: 'static> State<T> {
 
 	// the difference between this and subscribe is that subscribe will automatically unsubscribe on drop via Weak to StateMeta
 	// thus subscribe_key should almost never be called
-	pub fn subscribe_key(&self, f: impl FnMut() + 'static) -> SubscriptionKey {
+	pub fn subscribe_free_key(&self, f: impl FnMut() + 'static) -> SubscriptionKey {
 		self.meta.borrow_mut().subscribers.insert(Rc::new(RefCell::new(f)))
 	}
 
 	#[must_use]
-	pub fn subscribe(&self, f: impl FnMut() + 'static) -> Subscription {
+	pub fn subscribe_free(&self, f: impl FnMut() + 'static) -> Subscription {
+		Subscription(Rc::downgrade(&self.meta), self.subscribe_free_key(f))
+	}
+
+	pub fn subscribe_key(&self, mut f: impl FnMut(&T) + 'static) -> SubscriptionKey {
+		let weak = Rc::downgrade(&self.data);
+		self.meta.borrow_mut().subscribers.insert(Rc::new(RefCell::new(move || {
+			let x = if let Some(x) = weak.upgrade() { x } else { return; };
+			f(&*x.borrow());
+		})))
+	}
+
+	#[must_use]
+	pub fn subscribe(&self, f: impl FnMut(&T) + 'static) -> Subscription {
 		Subscription(Rc::downgrade(&self.meta), self.subscribe_key(f))
 	}
 
