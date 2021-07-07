@@ -346,7 +346,7 @@ pub trait Element: AsEntity + Sized {
 	}
 	// Cannot mix impl Into<css::Style> with generic type arguments
 	fn set_class_typed<Type: 'static>(&self, style: css::Style) {
-    	self.set_class_tagged(TypeId::of::<Type>(), style)
+		self.set_class_tagged(TypeId::of::<Type>(), style)
 	}
 	fn set_class(&self, style: impl Into<css::Style>) { self.set_class_tagged(0u64, style); }
 	fn add_class(&self, style: impl Into<css::Style>) {
