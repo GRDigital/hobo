@@ -2,7 +2,7 @@
 
 use crate::{prelude::*, Element, AsEntity};
 
-pub enum EventHandler {
+pub enum EventHandlerCallback {
 	MouseEvent(Closure<dyn FnMut(web_sys::MouseEvent) + 'static>),
 	KeyboardEvent(Closure<dyn FnMut(web_sys::KeyboardEvent) + 'static>),
 	Event(Closure<dyn FnMut(web_sys::Event) + 'static>),
@@ -88,19 +88,49 @@ pub enum EventHandler {
 	// DeviceLightEvent
 }
 
+pub struct EventHandler {
+	target: web_sys::EventTarget,
+	name: &'static str,
+	cb: EventHandlerCallback,
+}
+
+impl Drop for EventHandler {
+	fn drop(&mut self) {
+		self.target.remove_event_listener_with_callback(self.name, match &self.cb {
+			EventHandlerCallback::MouseEvent(cb) => cb.as_ref().unchecked_ref(),
+			EventHandlerCallback::KeyboardEvent(cb) => cb.as_ref().unchecked_ref(),
+			EventHandlerCallback::Event(cb) => cb.as_ref().unchecked_ref(),
+			EventHandlerCallback::FocusEvent(cb) => cb.as_ref().unchecked_ref(),
+			EventHandlerCallback::TouchEvent(cb) => cb.as_ref().unchecked_ref(),
+		}).unwrap();
+	}
+}
+
 macro_rules! generate_events {
 	($($event_kind:ident, $name:ident, $f:ident);+$(;)*) => {paste::item!{
 		$(
-			pub trait [<$name:camel>]: AsEntity {
-				fn [<add_ $f>](&self, mut f: impl FnMut(web_sys::$event_kind) + 'static) {
-					let entity = self.as_entity();
-					if WORLD.is_dead(entity) { log::warn!("callback handler entity dead {:?}", entity); return; }
-					// unwrap? how can this fail?
-					if let Some(target) = web_sys::EventTarget::try_get(entity) {
-						let handler = Closure::wrap(Box::new(move |e| f(e)) as Box<dyn FnMut(web_sys::$event_kind) + 'static>);
-						target.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).expect("can't add event listener");
-						<Vec<EventHandler>>::get_mut_or_default(entity).push(EventHandler::$event_kind(handler));
+			pub trait [<Raw $name:camel>] {
+				fn $f(&self, f: impl FnMut(web_sys::$event_kind) + 'static) -> EventHandler;
+			}
+
+			impl [<Raw $name:camel>] for web_sys::EventTarget {
+				fn $f(&self, mut f: impl FnMut(web_sys::$event_kind) + 'static) -> EventHandler {
+					let handler = Closure::wrap(Box::new(move |e| f(e)) as Box<dyn FnMut(web_sys::$event_kind) + 'static>);
+					self.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).expect("can't add event listener");
+					EventHandler {
+						target: self.clone(),
+						name: web_str::$name(),
+						cb: EventHandlerCallback::$event_kind(handler),
 					}
+				}
+			}
+
+			pub trait [<$name:camel>]: AsEntity {
+				fn [<add_ $f>](&self, f: impl FnMut(web_sys::$event_kind) + 'static) {
+					let entity = self.as_entity();
+					if entity.is_dead() { log::warn!("callback handler entity dead {:?}", entity); return; }
+					let target = entity.get_component::<web_sys::EventTarget>();
+					entity.get_component_mut_or_default::<Vec<EventHandler>>().push(target.$f(f));
 				}
 
 				fn $f(self, f: impl FnMut(web_sys::$event_kind) + 'static) -> Self where Self: Sized { self.[<add_ $f>](f); self }
@@ -109,7 +139,10 @@ macro_rules! generate_events {
 			impl<T: Element> [<$name:camel>] for T {}
 		)+
 
-		pub mod impls {$(pub use super::[<$name:camel>];)+}
+		pub mod impls {$(
+			pub use super::[<$name:camel>];
+			pub use super::[<Raw $name:camel>];
+		)+}
 	}};
 }
 

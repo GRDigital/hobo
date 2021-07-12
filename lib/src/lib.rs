@@ -8,6 +8,7 @@ pub mod state;
 pub mod create;
 mod dom_events;
 pub mod events;
+mod element;
 
 pub use hobo_css as css;
 pub use hobo_derive::*;
@@ -22,9 +23,8 @@ use std::cell::{RefCell, Cell, Ref, RefMut};
 use std::marker::PhantomData;
 use storage::*;
 use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
-use std::borrow::Cow;
 use style_storage::STYLE_STORAGE;
-use futures_signals::signal::SignalExt;
+pub use element::{Element, Classes, Parent, Children, SomeElement};
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
 
@@ -40,12 +40,34 @@ impl Entity {
 
 pub trait AsEntity {
 	fn as_entity(&self) -> Entity;
-	#[inline] fn try_get_component<'a, C: Component>(&self) -> Option<OwningRef<StorageRef<'a, C>, C>> where Self: Sized { C::try_get(self) }
-	#[inline] fn try_get_component_mut<'a, C: Component>(&self) -> Option<OwningRefMut<StorageMutRef<'a, C>, C>> where Self: Sized { C::try_get_mut(self) }
-	#[inline] fn get_component<'a, C: Component>(&self) -> OwningRef<StorageRef<'a, C>, C> where Self: Sized { C::get(self) }
-	#[inline] fn get_component_mut<'a, C: Component>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized { C::get_mut(self) }
-	#[inline] fn get_component_mut_or<'a, C: Component>(&self, f: impl FnOnce() -> C) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized { C::get_mut_or(self, f) }
-	#[inline] fn get_component_mut_or_default<'a, C: Component + Default>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized { C::get_mut_or_default(self) }
+	#[inline] fn try_get_component<'a, C: 'static>(&self) -> Option<OwningRef<StorageRef<'a, C>, C>> where Self: Sized {
+		let entity = self.as_entity();
+		let storage = WORLD.storage::<C>();
+		if !storage.has(entity) { return None; }
+		Some(OwningRef::new(storage).map(|x| x.get(entity).unwrap()))
+	}
+	#[inline] fn try_get_component_mut<'a, C: 'static>(&self) -> Option<OwningRefMut<StorageMutRef<'a, C>, C>> where Self: Sized {
+		let entity = self.as_entity();
+		if !WORLD.storage::<C>().has(entity) { return None; }
+		Some(OwningRefMut::new(WORLD.storage_mut::<C>()).map_mut(|x| x.get_mut(entity).unwrap()))
+	}
+	#[inline] fn get_component<'a, C: 'static>(&self) -> OwningRef<StorageRef<'a, C>, C> where Self: Sized {
+		OwningRef::new(WORLD.storage::<C>()).map(|x| x.get(self).unwrap())
+	}
+	#[inline] fn get_component_mut<'a, C: 'static>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
+		OwningRefMut::new(WORLD.storage_mut::<C>()).map_mut(|x| x.get_mut(self).unwrap())
+	}
+	#[inline] fn get_component_mut_or<'a, C: 'static>(&self, f: impl FnOnce() -> C) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
+		OwningRefMut::new(WORLD.storage_mut::<C>()).map_mut(move |x| x.get_mut_or(self, f))
+	}
+	#[inline] fn get_component_mut_or_default<'a, C: 'static + Default>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
+		self.get_component_mut_or(Default::default)
+	}
+
+	fn remove(&self) { WORLD.remove_entity(self.as_entity()) }
+	fn is_dead(&self)  -> bool { WORLD.is_dead(self.as_entity()) }
+	fn add_component<T: 'static>(&self, component: T) { WORLD.storage_mut::<T>().add(self.as_entity(), component); }
+	fn component<T: 'static>(self, component: T) -> Self where Self: Sized { self.add_component(component); self }
 }
 
 impl AsEntity for Entity {
@@ -101,7 +123,7 @@ pub static WORLD: Lazy<World> = Lazy::new(|| {
 	let sys = <(Or<Added<(Classes,)>, Modified<(Classes,)>>, Present<(web_sys::Element,)>)>::run(move |entity| {
 		use std::fmt::Write;
 
-		let classes = Classes::get(entity);
+		let classes = entity.get_component::<Classes>();
 		let mut res = format!("e{}g{}", entity.id, entity.generation);
 
 		if let Some(id) = &classes.type_tag {
@@ -120,7 +142,7 @@ pub static WORLD: Lazy<World> = Lazy::new(|| {
 			}
 		});
 
-		web_sys::Element::get(entity).set_attribute(web_str::class(), &res).expect("can't set class attribute");
+		entity.get_component::<web_sys::Element>().set_attribute(web_str::class(), &res).expect("can't set class attribute");
 	});
 
 	world.new_system(sys);
@@ -200,7 +222,7 @@ impl World {
 		let entity = entity.as_entity();
 		if WORLD.is_dead(entity) { log::warn!("remove entity already dead {:?}", entity); return; }
 
-		if let Some(children) = Children::try_get(entity).map(|x| x.0.clone()) {
+		if let Some(children) = entity.try_get_component::<Children>().map(|x| x.0.clone()) {
 			for child in children { self.remove_entity(child); }
 		}
 
@@ -210,8 +232,8 @@ impl World {
 			entities.generations[entity.id as usize] += 1;
 		}
 
-		if let Some(parent) = Parent::try_get(entity).map(|x| x.0) {
-			let mut children = Children::get_mut(parent);
+		if let Some(parent) = entity.try_get_component::<Parent>() {
+			let mut children = parent.get_component_mut::<Children>();
 			if let Some(child_pos) = children.0.iter().position(|&x| x == entity) { children.0.remove(child_pos); }
 		}
 
@@ -270,224 +292,12 @@ impl World {
 	}
 }
 
-#[derive(Default, Debug, shrinkwraprs::Shrinkwrap, Clone, Copy, PartialEq, Eq, AsEntity)]
-pub struct Parent(Entity);
-
-#[derive(Default, Debug, shrinkwraprs::Shrinkwrap)]
-#[shrinkwrap(mutable)]
-pub struct Children(pub Vec<Entity>);
-
-impl Parent {
-	pub fn ancestors(entity: impl AsEntity) -> Vec<Entity> {
-		if let Some(parent) = Parent::try_get(entity).map(|x| x.0) {
-			let mut v = Self::ancestors(parent);
-			v.push(parent);
-			v
-		} else {
-			Vec::new()
-		}
-	}
-
-	pub fn ancestor_with_cmp<T: Component>(entity: Entity) -> Entity {
-		let parent = Parent::get(entity).0;
-		if T::storage().has(parent) { parent } else { Parent::ancestor_with_cmp::<T>(parent) }
-	}
-}
-
-impl Children {
-	pub fn clear(entity: impl AsEntity) {
-		if let Some(children) = Children::try_get_mut(entity).map(|mut x| x.0.drain(..).collect::<Vec<_>>()) {
-			for child in children {
-				WORLD.remove_entity(child);
-			}
-		}
-	}
-}
-
-#[derive(Default)]
-pub struct Classes {
-	type_tag: Option<TypeId>,
-	styles: HashMap<u64, css::Style>,
-}
-
-pub trait Element: AsEntity + Sized {
-	fn remove(&self) { WORLD.remove_entity(self) }
-
-	fn is_dead(&self)  -> bool { WORLD.is_dead(self) }
-
-	fn add_child(&self, child: impl Element) {
-		if WORLD.is_dead(self) { log::warn!("add_child parent dead {:?}", self.as_entity()); return; }
-		if WORLD.is_dead(&child) { log::warn!("add_child child dead {:?}", child.as_entity()); return; }
-		Children::get_mut_or_default(self).0.push(child.as_entity());
-		Parent::get_mut_or_default(&child).0 = self.as_entity();
-
-		// why not unwrapping? how can this fail?
-		if let (Some(parent_node), Some(child_node)) = (web_sys::Node::try_get(self), web_sys::Node::try_get(&child)) {
-			parent_node.append_child(&child_node).expect("can't append child");
-		}
-	}
-	fn child(self, child: impl Element) -> Self { self.add_child(child); self }
-	fn add_children<Item: Element>(&self, children: impl IntoIterator<Item = Item>) { for child in children.into_iter() { self.add_child(child); } }
-	fn children<Item: Element>(self, children: impl IntoIterator<Item = Item>) -> Self { self.add_children(children); self }
-
-	fn set_class_tagged<Tag: std::hash::Hash + 'static>(&self, tag: Tag, style: impl Into<css::Style>) {
-		if WORLD.is_dead(self) { log::warn!("set_class_tagged dead {:?}", self.as_entity()); return; }
-
-		// tested and different types with same byte-level representation hash to the same thing (not surprising)
-		// i.e. the type is not taken into account when hashing so I have to do it manually
-		let tag_hash = {
-			use std::hash::{Hash, Hasher};
-			let mut hasher = std::collections::hash_map::DefaultHasher::new();
-			TypeId::of::<Tag>().hash(&mut hasher);
-			tag.hash(&mut hasher);
-			hasher.finish()
-		};
-
-		Classes::get_mut_or_default(self).styles.insert(tag_hash, style.into());
-	}
-	// Cannot mix impl Into<css::Style> with generic type arguments
-	fn set_class_typed<Type: 'static>(&self, style: css::Style) {
-		self.set_class_tagged(TypeId::of::<Type>(), style)
-	}
-	fn set_class(&self, style: impl Into<css::Style>) { self.set_class_tagged(0u64, style); }
-	fn add_class(&self, style: impl Into<css::Style>) {
-		let id = Classes::try_get(self).map(|x| x.styles.len() as u64).unwrap_or(0);
-		self.set_class_tagged(id, style);
-	}
-	fn class(self, style: impl Into<css::Style>) -> Self { self.add_class(style); self }
-	fn class_tagged<Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<css::Style>) -> Self { self.set_class_tagged(tag, style); self }
-	fn class_typed<Type: 'static>(self, style: css::Style) -> Self { self.set_class_typed::<Type>(style); self }
-
-	fn add_component<T: 'static>(&self, component: T) { T::storage_mut().add(self, component); }
-	fn component<T: 'static>(self, component: T) -> Self { self.add_component(component); self }
-
-	fn set_attr<'k, 'v>(&self, key: impl Into<Cow<'k, str>>, value: impl Into<Cow<'v, str>>) {
-		if WORLD.is_dead(self) { log::warn!("set_attr dead {:?}", self.as_entity()); return; }
-		// TODO: HACK! shoudl fix analytics-platform inspector not to try to set invalid shit
-		// web_sys::Element::get(self).set_attribute(&key.into(), &value.into()).expect("can't set attribute");
-		let _ = web_sys::Element::get(self).set_attribute(&key.into(), &value.into()).ok();
-	}
-	fn attr<'k, 'v>(self, key: impl Into<Cow<'k, str>>, value: impl Into<Cow<'v, str>>) -> Self { self.set_attr(key, value); self }
-	fn set_bool_attr<'k>(&self, key: impl Into<Cow<'k, str>>, value: bool) { if value { self.set_attr(key, "") } else { self.remove_attr(key) } }
-	fn bool_attr<'k>(self, key: impl Into<Cow<'k, str>>, value: bool) -> Self { self.set_bool_attr(key, value); self }
-	fn remove_attr<'k>(&self, key: impl Into<Cow<'k, str>>) {
-		if WORLD.is_dead(self) { log::warn!("remove_attr dead {:?}", self.as_entity()); return; }
-		web_sys::Element::get(self).remove_attribute(&key.into()).expect("can't remove attribute");
-	}
-
-	fn set_attr_signal<'k, 'v, S, K, V>(&self, signal: S) where
-		K: Into<Cow<'k, str>>,
-		V: Into<Cow<'v, str>>,
-		S: futures_signals::signal::Signal<Item=(K, V)> + 'static,
-	{
-		let entity = self.as_entity();
-		if WORLD.is_dead(entity) { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
-		wasm_bindgen_futures::spawn_local(signal.for_each(move |(k, v)| {
-			SomeElement(entity).set_attr(k, v);
-			async move { }
-		}));
-	}
-	fn attr_signal<'k, 'v, S, K, V>(self, x: S) -> Self where
-		K: Into<Cow<'k, str>>,
-		V: Into<Cow<'v, str>>,
-		S: futures_signals::signal::Signal<Item=(K, V)> + 'static,
-	{ self.set_attr_signal(x); self }
-
-	fn set_bool_attr_signal<'k, S, K>(&self, signal: S) where
-		K: Into<Cow<'k, str>>,
-		S: futures_signals::signal::Signal<Item=(K, bool)> + 'static,
-	{
-		let entity = self.as_entity();
-		if WORLD.is_dead(entity) { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
-		wasm_bindgen_futures::spawn_local(signal.for_each(move |(k, v)| {
-			SomeElement(entity).set_bool_attr(k, v);
-			async move { }
-		}));
-	}
-	fn bool_attr_signal<'k, S, K>(self, x: S) -> Self where
-		K: Into<Cow<'k, str>>,
-		S: futures_signals::signal::Signal<Item=(K, bool)> + 'static,
-	{ self.set_bool_attr_signal(x); self }
-
-	fn set_text<'a>(&self, text: impl Into<std::borrow::Cow<'a, str>>) {
-		if WORLD.is_dead(self) { log::warn!("set_text dead entity {:?}", self.as_entity()); return; }
-		web_sys::HtmlElement::get(self).set_inner_text(&text.into());
-	}
-	fn text<'a>(self, x: impl Into<std::borrow::Cow<'a, str>>) -> Self { self.set_text(x); self }
-
-	// TODO: style, etc
-	fn set_text_signal<'a, S, I>(&self, signal: S) where
-		I: Into<Cow<'a, str>>,
-		S: futures_signals::signal::Signal<Item=I> + 'static,
-	{
-		let entity = self.as_entity();
-		if WORLD.is_dead(entity) { log::warn!("set_text_signal dead entity {:?}", entity); return; }
-		wasm_bindgen_futures::spawn_local(signal.for_each(move |text| {
-			SomeElement(entity).set_text(text);
-			async move { }
-		}));
-	}
-	fn text_signal<'a, S, I>(self, x: S) -> Self where
-		I: Into<Cow<'a, str>>,
-		S: futures_signals::signal::Signal<Item=I> + 'static,
-	{ self.set_text_signal(x); self }
-
-	fn set_style(&self, style: impl AppendProperty) {
-		let mut props = Vec::new();
-		style.append_property(&mut props);
-		self.set_attr(web_str::style(), props.iter().map(std::string::ToString::to_string).collect::<String>());
-	}
-	fn style(self, style: impl AppendProperty) -> Self { self.set_style(style); self }
-	fn remove_style(&self) { self.remove_attr(web_str::style()); }
-
-	fn mark<T: 'static>(self) -> Self {
-		if WORLD.is_dead(&self) { log::warn!("mark dead {:?}", self.as_entity()); return self; }
-		Classes::get_mut_or_default(&self).type_tag = Some(TypeId::of::<T>());
-		self
-	}
-
-	// TODO: this should steal components from other and delete it
-	// instead of deleting self
-	// this would cause a lot less issue with invalidating stuff
-	// !!!!!! NOT TRUE - any handler that was created with the new entity will be busted, so this is fine
-	fn replace_with<T: AsEntity>(&self, other: T) -> T {
-		let other_entity = other.as_entity();
-		if WORLD.is_dead(self) { log::warn!("replace_with dead {:?}", self.as_entity()); return other; }
-
-		// why not unwrapping? how can this fail?
-		if let (Some(this), Some(other)) = (web_sys::Element::try_get(self), web_sys::Node::try_get(other_entity)) {
-			this.replace_with_with_node_1(&other).unwrap();
-		}
-
-		// Fix up reference in parent
-		if let Some(parent) = Parent::try_get(self).map(|x| x.0) {
-			if WORLD.is_dead(parent) { log::warn!("replace_with parent dead {:?}", parent); return other; }
-			let mut children = Children::get_mut(parent);
-			let position = children.0.iter().position(|&x| x == self.as_entity()).expect("entity claims to be a child while missing in parent");
-			children.0[position] = other.as_entity();
-			Parent::get_mut_or_default(other_entity).0 = parent;
-		}
-
-		WORLD.remove_entity(self);
-		other
-	}
-
-	fn with(self, f: impl FnOnce(&Self)) -> Self { f(&self); self }
-
-	fn erase(&self) -> SomeElement { SomeElement(self.as_entity()) }
-}
-
 impl<T: AsEntity> AsEntity for &T {
 	fn as_entity(&self) -> Entity { T::as_entity(*self) }
 }
 impl<T: AsEntity> AsEntity for &mut T {
 	fn as_entity(&self) -> Entity { T::as_entity(*self) }
 }
-impl<T: Element> Element for &T { }
-impl<T: Element> Element for &mut T { }
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Element)]
-pub struct SomeElement(pub Entity);
 
 pub fn fetch_classname(style: impl Into<css::Style>) -> String {
 	STYLE_STORAGE.with(|x| x.borrow_mut().fetch(style.into()))
@@ -505,31 +315,6 @@ impl<T: 'static> T {
 }
 
 pub trait Component: 'static {
-	fn try_get<'a>(entity: impl AsEntity) -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized {
-		let entity = entity.as_entity();
-		let storage = Self::storage();
-		if !storage.has(entity) { return None; }
-		Some(OwningRef::new(storage).map(|x| x.get(entity).unwrap()))
-	}
-	fn try_get_mut<'a>(entity: impl AsEntity) -> Option<OwningRefMut<StorageMutRef<'a, Self>, Self>> where Self: Sized {
-		let entity = entity.as_entity();
-		if !Self::storage().has(entity) { return None; }
-		Some(OwningRefMut::new(Self::storage_mut()).map_mut(|x| x.get_mut(entity).unwrap()))
-	}
-	#[inline]
-	fn get<'a>(entity: impl AsEntity) -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized {
-		OwningRef::new(Self::storage()).map(|x| x.get(entity).unwrap())
-	}
-	#[inline]
-	fn get_mut<'a>(entity: impl AsEntity) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized {
-		OwningRefMut::new(Self::storage_mut()).map_mut(|x| x.get_mut(entity).unwrap())
-	}
-	#[inline]
-	fn get_mut_or<'a>(entity: impl AsEntity, f: impl FnOnce() -> Self) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized {
-		OwningRefMut::new(Self::storage_mut()).map_mut(move |x| x.get_mut_or(entity, f))
-	}
-
-	#[inline] fn get_mut_or_default<'a>(entity: impl AsEntity) -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Default + Sized { Self::get_mut_or(entity, Self::default) }
 	#[inline] fn storage<'a>() -> StorageRef<'a, Self> where Self: Sized { WORLD.storage::<Self>() }
 	#[inline] fn storage_mut<'a>() -> StorageMutRef<'a, Self> where Self: Sized { WORLD.storage_mut::<Self>() }
 
