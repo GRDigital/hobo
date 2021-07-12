@@ -24,6 +24,7 @@ use storage::*;
 use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
 use std::borrow::Cow;
 use style_storage::STYLE_STORAGE;
+use futures_signals::signal::SignalExt;
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
 
@@ -360,25 +361,76 @@ pub trait Element: AsEntity + Sized {
 	fn add_component<T: 'static>(&self, component: T) { T::storage_mut().add(self, component); }
 	fn component<T: 'static>(self, component: T) -> Self { self.add_component(component); self }
 
-	fn set_attr<'a>(&self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) {
+	fn set_attr<'k, 'v>(&self, key: impl Into<Cow<'k, str>>, value: impl Into<Cow<'v, str>>) {
 		if WORLD.is_dead(self) { log::warn!("set_attr dead {:?}", self.as_entity()); return; }
 		// TODO: HACK! shoudl fix analytics-platform inspector not to try to set invalid shit
 		// web_sys::Element::get(self).set_attribute(&key.into(), &value.into()).expect("can't set attribute");
 		let _ = web_sys::Element::get(self).set_attribute(&key.into(), &value.into()).ok();
 	}
-	fn attr<'a>(self, key: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) -> Self { self.set_attr(key, value); self }
-	fn set_bool_attr<'a>(&self, key: impl Into<Cow<'a, str>>, value: bool) { if value { self.set_attr(key, "") } else { self.remove_attr(key) } }
-	fn bool_attr<'a>(self, key: impl Into<Cow<'a, str>>, value: bool) -> Self { self.set_bool_attr(key, value); self }
-	fn remove_attr<'a>(&self, key: impl Into<Cow<'a, str>>) {
+	fn attr<'k, 'v>(self, key: impl Into<Cow<'k, str>>, value: impl Into<Cow<'v, str>>) -> Self { self.set_attr(key, value); self }
+	fn set_bool_attr<'k>(&self, key: impl Into<Cow<'k, str>>, value: bool) { if value { self.set_attr(key, "") } else { self.remove_attr(key) } }
+	fn bool_attr<'k>(self, key: impl Into<Cow<'k, str>>, value: bool) -> Self { self.set_bool_attr(key, value); self }
+	fn remove_attr<'k>(&self, key: impl Into<Cow<'k, str>>) {
 		if WORLD.is_dead(self) { log::warn!("remove_attr dead {:?}", self.as_entity()); return; }
 		web_sys::Element::get(self).remove_attribute(&key.into()).expect("can't remove attribute");
 	}
+
+	fn set_attr_signal<'k, 'v, S, K, V>(&self, signal: S) where
+		K: Into<Cow<'k, str>>,
+		V: Into<Cow<'v, str>>,
+		S: futures_signals::signal::Signal<Item=(K, V)> + 'static,
+	{
+		let entity = self.as_entity();
+		if WORLD.is_dead(entity) { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
+		wasm_bindgen_futures::spawn_local(signal.for_each(move |(k, v)| {
+			SomeElement(entity).set_attr(k, v);
+			async move { }
+		}));
+	}
+	fn attr_signal<'k, 'v, S, K, V>(self, x: S) -> Self where
+		K: Into<Cow<'k, str>>,
+		V: Into<Cow<'v, str>>,
+		S: futures_signals::signal::Signal<Item=(K, V)> + 'static,
+	{ self.set_attr_signal(x); self }
+
+	fn set_bool_attr_signal<'k, S, K>(&self, signal: S) where
+		K: Into<Cow<'k, str>>,
+		S: futures_signals::signal::Signal<Item=(K, bool)> + 'static,
+	{
+		let entity = self.as_entity();
+		if WORLD.is_dead(entity) { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
+		wasm_bindgen_futures::spawn_local(signal.for_each(move |(k, v)| {
+			SomeElement(entity).set_bool_attr(k, v);
+			async move { }
+		}));
+	}
+	fn bool_attr_signal<'k, S, K>(self, x: S) -> Self where
+		K: Into<Cow<'k, str>>,
+		S: futures_signals::signal::Signal<Item=(K, bool)> + 'static,
+	{ self.set_bool_attr_signal(x); self }
 
 	fn set_text<'a>(&self, text: impl Into<std::borrow::Cow<'a, str>>) {
 		if WORLD.is_dead(self) { log::warn!("set_text dead entity {:?}", self.as_entity()); return; }
 		web_sys::HtmlElement::get(self).set_inner_text(&text.into());
 	}
 	fn text<'a>(self, x: impl Into<std::borrow::Cow<'a, str>>) -> Self { self.set_text(x); self }
+
+	// TODO: style, etc
+	fn set_text_signal<'a, S, I>(&self, signal: S) where
+		I: Into<Cow<'a, str>>,
+		S: futures_signals::signal::Signal<Item=I> + 'static,
+	{
+		let entity = self.as_entity();
+		if WORLD.is_dead(entity) { log::warn!("set_text_signal dead entity {:?}", entity); return; }
+		wasm_bindgen_futures::spawn_local(signal.for_each(move |text| {
+			SomeElement(entity).set_text(text);
+			async move { }
+		}));
+	}
+	fn text_signal<'a, S, I>(self, x: S) -> Self where
+		I: Into<Cow<'a, str>>,
+		S: futures_signals::signal::Signal<Item=I> + 'static,
+	{ self.set_text_signal(x); self }
 
 	fn set_style(&self, style: impl AppendProperty) {
 		let mut props = Vec::new();
