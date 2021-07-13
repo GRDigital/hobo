@@ -40,28 +40,28 @@ impl Entity {
 
 pub trait AsEntity {
 	fn as_entity(&self) -> Entity;
-	#[inline] fn try_get_component<'a, C: 'static>(&self) -> Option<OwningRef<StorageRef<'a, C>, C>> where Self: Sized {
+	#[inline] fn try_get_cmp<'a, C: 'static>(&self) -> Option<OwningRef<StorageRef<'a, C>, C>> where Self: Sized {
 		let entity = self.as_entity();
 		let storage = WORLD.storage::<C>();
 		if !storage.has(entity) { return None; }
 		Some(OwningRef::new(storage).map(|x| x.get(entity).unwrap()))
 	}
-	#[inline] fn try_get_component_mut<'a, C: 'static>(&self) -> Option<OwningRefMut<StorageMutRef<'a, C>, C>> where Self: Sized {
+	#[inline] fn try_get_cmp_mut<'a, C: 'static>(&self) -> Option<OwningRefMut<StorageMutRef<'a, C>, C>> where Self: Sized {
 		let entity = self.as_entity();
 		if !WORLD.storage::<C>().has(entity) { return None; }
 		Some(OwningRefMut::new(WORLD.storage_mut::<C>()).map_mut(|x| x.get_mut(entity).unwrap()))
 	}
-	#[inline] fn get_component<'a, C: 'static>(&self) -> OwningRef<StorageRef<'a, C>, C> where Self: Sized {
+	#[inline] fn get_cmp<'a, C: 'static>(&self) -> OwningRef<StorageRef<'a, C>, C> where Self: Sized {
 		OwningRef::new(WORLD.storage::<C>()).map(|x| x.get(self).unwrap())
 	}
-	#[inline] fn get_component_mut<'a, C: 'static>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
+	#[inline] fn get_cmp_mut<'a, C: 'static>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
 		OwningRefMut::new(WORLD.storage_mut::<C>()).map_mut(|x| x.get_mut(self).unwrap())
 	}
-	#[inline] fn get_component_mut_or<'a, C: 'static>(&self, f: impl FnOnce() -> C) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
+	#[inline] fn get_cmp_mut_or<'a, C: 'static>(&self, f: impl FnOnce() -> C) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
 		OwningRefMut::new(WORLD.storage_mut::<C>()).map_mut(move |x| x.get_mut_or(self, f))
 	}
-	#[inline] fn get_component_mut_or_default<'a, C: 'static + Default>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
-		self.get_component_mut_or(Default::default)
+	#[inline] fn get_cmp_mut_or_default<'a, C: 'static + Default>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
+		self.get_cmp_mut_or(Default::default)
 	}
 
 	fn remove(&self) { WORLD.remove_entity(self.as_entity()) }
@@ -123,7 +123,7 @@ pub static WORLD: Lazy<World> = Lazy::new(|| {
 	let sys = <(Or<Added<(Classes,)>, Modified<(Classes,)>>, Present<(web_sys::Element,)>)>::run(move |entity| {
 		use std::fmt::Write;
 
-		let classes = entity.get_component::<Classes>();
+		let classes = entity.get_cmp::<Classes>();
 		let mut res = format!("e{}g{}", entity.id, entity.generation);
 
 		if let Some(id) = &classes.type_tag {
@@ -142,7 +142,7 @@ pub static WORLD: Lazy<World> = Lazy::new(|| {
 			}
 		});
 
-		entity.get_component::<web_sys::Element>().set_attribute(web_str::class(), &res).expect("can't set class attribute");
+		entity.get_cmp::<web_sys::Element>().set_attribute(web_str::class(), &res).expect("can't set class attribute");
 	});
 
 	world.new_system(sys);
@@ -222,7 +222,7 @@ impl World {
 		let entity = entity.as_entity();
 		if WORLD.is_dead(entity) { log::warn!("remove entity already dead {:?}", entity); return; }
 
-		if let Some(children) = entity.try_get_component::<Children>().map(|x| x.0.clone()) {
+		if let Some(children) = entity.try_get_cmp::<Children>().map(|x| x.0.clone()) {
 			for child in children { self.remove_entity(child); }
 		}
 
@@ -232,8 +232,8 @@ impl World {
 			entities.generations[entity.id as usize] += 1;
 		}
 
-		if let Some(parent) = entity.try_get_component::<Parent>() {
-			let mut children = parent.get_component_mut::<Children>();
+		if let Some(parent) = entity.try_get_cmp::<Parent>() {
+			let mut children = parent.get_cmp_mut::<Children>();
 			if let Some(child_pos) = children.0.iter().position(|&x| x == entity) { children.0.remove(child_pos); }
 		}
 

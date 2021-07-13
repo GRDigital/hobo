@@ -149,24 +149,24 @@ pub trait StringValue {
 }
 
 impl StringValue for components::Input {
-	fn value(&self) -> String { self.get_component::<web_sys::HtmlInputElement>().value() }
-	fn set_value(&self, x: &str) { self.get_component::<web_sys::HtmlInputElement>().set_value(x) }
+	fn value(&self) -> String { self.get_cmp::<web_sys::HtmlInputElement>().value() }
+	fn set_value(&self, x: &str) { self.get_cmp::<web_sys::HtmlInputElement>().set_value(x) }
 }
 
 impl StringValue for components::Textarea {
-	fn value(&self) -> String { self.get_component::<web_sys::HtmlTextAreaElement>().value() }
-	fn set_value(&self, x: &str) { self.get_component::<web_sys::HtmlTextAreaElement>().set_value(x) }
+	fn value(&self) -> String { self.get_cmp::<web_sys::HtmlTextAreaElement>().value() }
+	fn set_value(&self, x: &str) { self.get_cmp::<web_sys::HtmlTextAreaElement>().set_value(x) }
 }
 
 impl components::Select {
 	pub fn selected_index(&self) -> i32 {
-		self.get_component::<web_sys::HtmlSelectElement>().selected_index()
+		self.get_cmp::<web_sys::HtmlSelectElement>().selected_index()
 	}
 }
 
 impl components::Input {
 	pub async fn file_data(&self, id: u32) -> Option<Vec<u8>> {
-		let file = self.get_component::<web_sys::HtmlInputElement>().files()?.get(id)?;
+		let file = self.get_cmp::<web_sys::HtmlInputElement>().files()?.get(id)?;
 		let arr_buffer: js_sys::ArrayBuffer = wasm_bindgen_futures::JsFuture::from(file.array_buffer()).await.ok()?.dyn_into().ok()?;
 		let vec = js_sys::Uint8Array::new(&arr_buffer).to_vec();
 		Some(vec)

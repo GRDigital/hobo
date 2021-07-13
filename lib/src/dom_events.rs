@@ -129,8 +129,8 @@ macro_rules! generate_events {
 				fn [<add_ $f>](&self, f: impl FnMut(web_sys::$event_kind) + 'static) {
 					let entity = self.as_entity();
 					if entity.is_dead() { log::warn!("callback handler entity dead {:?}", entity); return; }
-					let target = entity.get_component::<web_sys::EventTarget>();
-					entity.get_component_mut_or_default::<Vec<EventHandler>>().push(target.$f(f));
+					let target = entity.get_cmp::<web_sys::EventTarget>();
+					entity.get_cmp_mut_or_default::<Vec<EventHandler>>().push(target.$f(f));
 				}
 
 				fn $f(self, f: impl FnMut(web_sys::$event_kind) + 'static) -> Self where Self: Sized { self.[<add_ $f>](f); self }
