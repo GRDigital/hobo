@@ -23,7 +23,7 @@ roxmltree = "0.14"
 shrinkwraprs = "0.3"
 slotmap = "1"
 smart-default = "0.6"
-strum = { version = "0.20", features = ["derive"] }
+strum = { version = "0.21", features = ["derive"] }
 sugars = "3"
 wasm-bindgen = { version = "0.2", features = ["serde-serialize", "strict-macro", "enable-interning"] }
 wasm-bindgen-futures = "0.4"
