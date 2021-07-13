@@ -146,6 +146,24 @@ pub trait Element: AsEntity + Sized {
 		S: futures_signals::signal::Signal<Item = I> + 'static,
 	{ self.set_class_typed_signal::<Type, S, I>(signal); self }
 
+	fn set_class_tagged_signal<Tag, S, I>(&self, signal: S) where
+		Tag: std::hash::Hash + 'static,
+		I: Into<css::Style>,
+		S: futures_signals::signal::Signal<Item = (Tag, I)> + 'static,
+	{
+		let entity = self.as_entity();
+		if WORLD.is_dead(entity) { log::warn!("set_class_signal dead entity {:?}", entity); return; }
+		wasm_bindgen_futures::spawn_local(signal.for_each(move |(tag, class)| {
+			SomeElement(entity).set_class_tagged(tag, class);
+			async move { }
+		}));
+	}
+	fn class_tagged_signal<Tag, S, I>(self, signal: S) -> Self where
+		Tag: std::hash::Hash + 'static,
+		I: Into<css::Style>,
+		S: futures_signals::signal::Signal<Item = (Tag, I)> + 'static,
+	{ self.set_class_tagged_signal::<Tag, S, I>(signal); self }
+
 	fn set_attr<'k, 'v>(&self, key: impl Into<Cow<'k, str>>, value: impl Into<Cow<'v, str>>) {
 		if WORLD.is_dead(self) { log::warn!("set_attr dead {:?}", self.as_entity()); return; }
 		// TODO: HACK! shoudl fix analytics-platform inspector not to try to set invalid shit
