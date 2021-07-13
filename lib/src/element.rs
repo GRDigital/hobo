@@ -64,6 +64,26 @@ pub trait Element: AsEntity + Sized {
 	fn add_children<Item: Element>(&self, children: impl IntoIterator<Item = Item>) { for child in children.into_iter() { self.add_child(child); } }
 	fn children<Item: Element>(self, children: impl IntoIterator<Item = Item>) -> Self { self.add_children(children); self }
 
+	// be mindful about holding child references with this one
+	fn add_child_signal<S, E>(&self, signal: S) where
+		E: Element,
+		S: futures_signals::signal::Signal<Item = E> + 'static,
+	{
+		// placeholder at first
+		let mut child = crate::create::components::div().class(crate::css::Display::None).erase();
+		self.add_child(child);
+		wasm_bindgen_futures::spawn_local(signal.for_each(move |new_child| {
+			let new_child = new_child.erase();
+			child.replace_with(new_child);
+			child = new_child;
+			async {}
+		}));
+	}
+	fn child_signal<S, E>(self, signal: S) -> Self where
+		E: Element,
+		S: futures_signals::signal::Signal<Item = E> + 'static,
+	{ self.add_child_signal(signal); self }
+
 	fn set_class_tagged<Tag: std::hash::Hash + 'static>(&self, tag: Tag, style: impl Into<css::Style>) {
 		if WORLD.is_dead(self) { log::warn!("set_class_tagged dead {:?}", self.as_entity()); return; }
 
@@ -109,7 +129,7 @@ pub trait Element: AsEntity + Sized {
 	fn set_attr_signal<'k, 'v, S, K, V>(&self, signal: S) where
 		K: Into<Cow<'k, str>>,
 		V: Into<Cow<'v, str>>,
-		S: futures_signals::signal::Signal<Item=(K, V)> + 'static,
+		S: futures_signals::signal::Signal<Item = (K, V)> + 'static,
 	{
 		let entity = self.as_entity();
 		if WORLD.is_dead(entity) { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
@@ -121,12 +141,12 @@ pub trait Element: AsEntity + Sized {
 	fn attr_signal<'k, 'v, S, K, V>(self, x: S) -> Self where
 		K: Into<Cow<'k, str>>,
 		V: Into<Cow<'v, str>>,
-		S: futures_signals::signal::Signal<Item=(K, V)> + 'static,
+		S: futures_signals::signal::Signal<Item = (K, V)> + 'static,
 	{ self.set_attr_signal(x); self }
 
 	fn set_bool_attr_signal<'k, S, K>(&self, signal: S) where
 		K: Into<Cow<'k, str>>,
-		S: futures_signals::signal::Signal<Item=(K, bool)> + 'static,
+		S: futures_signals::signal::Signal<Item = (K, bool)> + 'static,
 	{
 		let entity = self.as_entity();
 		if WORLD.is_dead(entity) { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
@@ -137,7 +157,7 @@ pub trait Element: AsEntity + Sized {
 	}
 	fn bool_attr_signal<'k, S, K>(self, x: S) -> Self where
 		K: Into<Cow<'k, str>>,
-		S: futures_signals::signal::Signal<Item=(K, bool)> + 'static,
+		S: futures_signals::signal::Signal<Item = (K, bool)> + 'static,
 	{ self.set_bool_attr_signal(x); self }
 
 	fn set_text<'a>(&self, text: impl Into<std::borrow::Cow<'a, str>>) {
@@ -149,7 +169,7 @@ pub trait Element: AsEntity + Sized {
 	// TODO: style, etc
 	fn set_text_signal<'a, S, I>(&self, signal: S) where
 		I: Into<Cow<'a, str>>,
-		S: futures_signals::signal::Signal<Item=I> + 'static,
+		S: futures_signals::signal::Signal<Item = I> + 'static,
 	{
 		let entity = self.as_entity();
 		if WORLD.is_dead(entity) { log::warn!("set_text_signal dead entity {:?}", entity); return; }
@@ -160,7 +180,7 @@ pub trait Element: AsEntity + Sized {
 	}
 	fn text_signal<'a, S, I>(self, x: S) -> Self where
 		I: Into<Cow<'a, str>>,
-		S: futures_signals::signal::Signal<Item=I> + 'static,
+		S: futures_signals::signal::Signal<Item = I> + 'static,
 	{ self.set_text_signal(x); self }
 
 	fn set_style(&self, style: impl AppendProperty) {
