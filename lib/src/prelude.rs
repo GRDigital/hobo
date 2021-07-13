@@ -7,8 +7,12 @@ pub use crate::{
 	WORLD,
 	World,
 	Entity,
-	Element,
-	SomeElement,
+	element::{
+		Element,
+		SomeElement,
+		Parent,
+		Children,
+	},
 	AsEntity,
 	storage::{
 		Storage,
@@ -16,7 +20,6 @@ pub use crate::{
 	},
 	query::*,
 	TypeClassString,
-	Component,
 	dom_events::impls::*,
 	create::StringValue,
 };

@@ -4,7 +4,7 @@
 //!
 //! all of these functions return the most fitting web_sys element types
 
-use crate::{dom, prelude::*, World, Entity, storage::Storage, Element, Component, AsEntity};
+use crate::{dom, prelude::*, World, Entity, storage::Storage, Element, AsEntity};
 use std::collections::HashSet;
 use std::any::TypeId;
 use sugars::*;
@@ -29,11 +29,11 @@ pub fn register_systems(world: &World) {
 		WORLD.storage_mut::<web_sys::Element>().take_removed(entity).unwrap().remove();
 		WORLD.storage_mut::<web_sys::Node>().remove(entity);
 		WORLD.storage_mut::<web_sys::EventTarget>().remove(entity);
-		DomTypes::storage_mut().remove(entity);
+		WORLD.storage_mut::<DomTypes>().remove(entity);
 		WORLD.storage_mut::<Vec<crate::dom_events::EventHandler>>().remove(entity);
 	}));
 	world.new_system(<(Removed<(DomTypes,)>,)>::run(move |entity| {
-		for t in DomTypes::storage_mut().take_removed(entity).unwrap().0 {
+		for t in WORLD.storage_mut::<DomTypes>().take_removed(entity).unwrap().0 {
 			// TODO: WARNING: this won't notify systems watching it
 			// which isn't a problem for now
 			WORLD.storages.borrow_mut()[&t].borrow_mut().dyn_remove(entity);
@@ -41,33 +41,33 @@ pub fn register_systems(world: &World) {
 	}));
 }
 
-pub fn html_element<T: AsRef<web_sys::HtmlElement> + Component + Clone>(element: &T) -> Entity {
+pub fn html_element<T: AsRef<web_sys::HtmlElement> + 'static + Clone>(element: &T) -> Entity {
 	let entity = WORLD.new_entity();
 	let html_element = element.as_ref().clone();
 	dom_element(&WORLD, entity, &html_element);
-	web_sys::HtmlElement::storage_mut().add(entity, html_element);
+	WORLD.storage_mut::<web_sys::HtmlElement>().add(entity, html_element);
 
 	if TypeId::of::<web_sys::HtmlElement>() == TypeId::of::<T>() {
-		DomTypes::storage_mut().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>()]));
+		WORLD.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>()]));
 	} else {
-		T::storage_mut().add(entity, element.clone());
-		DomTypes::storage_mut().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>(), TypeId::of::<T>()]));
+		WORLD.storage_mut::<T>().add(entity, element.clone());
+		WORLD.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>(), TypeId::of::<T>()]));
 	}
 
 	entity
 }
 
-pub fn svg_element<T: AsRef<web_sys::SvgElement> + Component + Clone>(element: &T) -> Entity {
+pub fn svg_element<T: AsRef<web_sys::SvgElement> + 'static + Clone>(element: &T) -> Entity {
 	let entity = WORLD.new_entity();
 	let svg_element = element.as_ref().clone();
 	dom_element(&WORLD, entity, &svg_element);
-	web_sys::SvgElement::storage_mut().add(entity, svg_element);
+	WORLD.storage_mut::<web_sys::SvgElement>().add(entity, svg_element);
 
 	if TypeId::of::<web_sys::SvgElement>() == TypeId::of::<T>() {
-		DomTypes::storage_mut().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>()]));
+		WORLD.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>()]));
 	} else {
-		T::storage_mut().add(entity, element.clone());
-		DomTypes::storage_mut().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>(), TypeId::of::<T>()]));
+		WORLD.storage_mut::<T>().add(entity, element.clone());
+		WORLD.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>(), TypeId::of::<T>()]));
 	}
 
 	entity
@@ -149,24 +149,24 @@ pub trait StringValue {
 }
 
 impl StringValue for components::Input {
-	fn value(&self) -> String { <web_sys::HtmlInputElement as Component>::get(self).value() }
-	fn set_value(&self, x: &str) { <web_sys::HtmlInputElement as Component>::get(self).set_value(x) }
+	fn value(&self) -> String { self.get_component::<web_sys::HtmlInputElement>().value() }
+	fn set_value(&self, x: &str) { self.get_component::<web_sys::HtmlInputElement>().set_value(x) }
 }
 
 impl StringValue for components::Textarea {
-	fn value(&self) -> String { <web_sys::HtmlTextAreaElement as Component>::get(self).value() }
-	fn set_value(&self, x: &str) { <web_sys::HtmlTextAreaElement as Component>::get(self).set_value(x) }
+	fn value(&self) -> String { self.get_component::<web_sys::HtmlTextAreaElement>().value() }
+	fn set_value(&self, x: &str) { self.get_component::<web_sys::HtmlTextAreaElement>().set_value(x) }
 }
 
 impl components::Select {
 	pub fn selected_index(&self) -> i32 {
-		<web_sys::HtmlSelectElement as Component>::get(self).selected_index()
+		self.get_component::<web_sys::HtmlSelectElement>().selected_index()
 	}
 }
 
 impl components::Input {
 	pub async fn file_data(&self, id: u32) -> Option<Vec<u8>> {
-		let file = web_sys::HtmlInputElement::get(self).files()?.get(id)?;
+		let file = self.get_component::<web_sys::HtmlInputElement>().files()?.get(id)?;
 		let arr_buffer: js_sys::ArrayBuffer = wasm_bindgen_futures::JsFuture::from(file.array_buffer()).await.ok()?.dyn_into().ok()?;
 		let vec = js_sys::Uint8Array::new(&arr_buffer).to_vec();
 		Some(vec)
