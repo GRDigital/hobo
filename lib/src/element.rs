@@ -218,7 +218,6 @@ pub trait Element: AsEntity + Sized {
 	}
 	fn text<'a>(self, x: impl Into<std::borrow::Cow<'a, str>>) -> Self { self.set_text(x); self }
 
-	// TODO: style, etc
 	fn set_text_signal<'a, S, I>(&self, signal: S) where
 		I: Into<Cow<'a, str>>,
 		S: futures_signals::signal::Signal<Item = I> + 'static,
