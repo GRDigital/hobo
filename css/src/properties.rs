@@ -289,8 +289,8 @@ generate_properties! {
 		"padding-top" => PaddingTop(UnitValue),
 		"padding-bottom" => PaddingBottom(UnitValue),
 
-		"width" => Width(Dimension),
-		"height" => Height(Dimension),
+		"width" => Width(DimensionExtremity),
+		"height" => Height(DimensionExtremity),
 		"min-width" => MinWidth(DimensionExtremity),
 		"max-width" => MaxWidth(DimensionExtremity),
 		"min-height" => MinHeight(DimensionExtremity),
@@ -349,7 +349,7 @@ generate_properties! {
 
 crate::macros::easy_enum! {box-sizing content-box border-box}
 crate::macros::easy_enum! {visibility visible hidden collapse}
-crate::macros::easy_enum! {display block none inline inline-block flex inline-flex grid inline-grid flow-root contents table table-row list-item}
+crate::macros::easy_enum! {display block none inline inline-block flex inline-flex grid inline-grid flow-root contents table table-row table-row-group table-header-group table-footer-group table-cell table-column-group table-column table-caption list-item}
 crate::macros::easy_enum! {user-select auto none text all}
 crate::macros::easy_enum! {scroll-behavior auto smooth}
 crate::macros::easy_enum! {pointer-events auto none}

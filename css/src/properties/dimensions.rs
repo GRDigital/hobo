@@ -11,6 +11,7 @@ pub enum Dimension {
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum DimensionExtremity {
+	Auto,
 	Initial,
 	Inherit,
 	Unset,
@@ -37,6 +38,7 @@ impl std::fmt::Display for Dimension {
 impl std::fmt::Display for DimensionExtremity {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
+			Self::Auto       => "auto".fmt(f),
 			Self::Initial    => "initial".fmt(f),
 			Self::Inherit    => "inherit".fmt(f),
 			Self::Unset      => "unset".fmt(f),
@@ -59,13 +61,14 @@ macro_rules! __dimension {
 	($kind:ident, $($val:tt)+) => {$crate::Property::$kind($crate::Dimension::Some($crate::unit!($($val)+)))};
 }
 
-#[macro_export] macro_rules! width { ($($tt:tt)+) => {$crate::__dimension!(Width, $($tt)+)} }
-#[macro_export] macro_rules! height { ($($tt:tt)+) => {$crate::__dimension!(Height, $($tt)+)} }
+#[macro_export] macro_rules! width { ($($tt:tt)+) => {$crate::__dimension_extremity!(Width, $($tt)+)} }
+#[macro_export] macro_rules! height { ($($tt:tt)+) => {$crate::__dimension_extremity!(Height, $($tt)+)} }
 
 #[rustfmt::skip]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __dimension_extremity {
+	($kind:ident, auto)        => {$crate::Property::$kind($crate::DimensionExtremity::Auto)};
 	($kind:ident, initial)     => {$crate::Property::$kind($crate::DimensionExtremity::Initial)};
 	($kind:ident, inherit)     => {$crate::Property::$kind($crate::DimensionExtremity::Inherit)};
 	($kind:ident, unset)       => {$crate::Property::$kind($crate::DimensionExtremity::Unset)};
