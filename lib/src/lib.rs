@@ -63,6 +63,12 @@ pub trait AsEntity {
 	#[inline] fn get_cmp_mut_or_default<'a, C: 'static + Default>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
 		self.get_cmp_mut_or(Default::default)
 	}
+	#[inline] fn get_cmp_from_ancestors<'a, C: 'static>(&self) -> OwningRef<StorageRef<'a, C>, C> where Self: Sized {
+		Parent::ancestor_with_cmp::<C>(self.as_entity()).get_cmp::<C>()
+	}
+	#[inline] fn get_cmp_mut_from_ancestors<'a, C: 'static>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
+		Parent::ancestor_with_cmp::<C>(self.as_entity()).get_cmp_mut::<C>()
+	}
 
 	fn remove(&self) { WORLD.remove_entity(self.as_entity()) }
 	fn is_dead(&self)  -> bool { WORLD.is_dead(self.as_entity()) }
