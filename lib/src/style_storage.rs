@@ -6,6 +6,7 @@ use std::cell::RefCell;
 #[derive(Default)]
 pub struct StyleStorage {
 	map: HashMap<css::Style, u64>,
+	style_element: Option<web_sys::Element>,
 }
 
 thread_local! {
@@ -49,16 +50,20 @@ impl StyleStorage {
 
 		fixup_class_placeholders(&mut style, class.clone());
 
-		let dom = crate::dom();
-		let head = dom.head().expect("dom has no head");
+		let style_element = if let Some(x) = self.style_element.as_ref() { x } else {
+			let dom = crate::dom();
+			let head = dom.head().expect("dom has no head");
 
-		// either get or construct a <style> element
-		let style_element = if let Some(x) = head.get_elements_by_tag_name("style").get_with_index(0) {
-			x
-		} else {
-			let element = dom.create_element(web_str::style()).expect("can't create style element");
-			head.append_child(&element).expect("can't append child");
-			element
+			// either get or construct a <style> element
+			let element = if let Some(x) = head.get_elements_by_tag_name("style").get_with_index(0) {
+				x
+			} else {
+				let element = dom.create_element(web_str::style()).expect("can't create style element");
+				head.append_child(&element).expect("can't append child");
+				element
+			};
+			self.style_element.replace(element);
+			self.style_element.as_ref().unwrap()
 		};
 
 		// insert the stringified generated css into the style tag
