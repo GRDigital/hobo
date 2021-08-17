@@ -13,19 +13,22 @@ thread_local! {
 	pub static STYLE_STORAGE: RefCell<StyleStorage> = RefCell::default();
 }
 
-// replace the ClassPlaceholder with actual element class
-fn fixup_class_placeholders(style: &mut css::Style, class: String) {
-	for rule in style.0.iter_mut() {
-		match rule {
-			css::Rule::Style(style_rule) => {
-				for selector_component in (style_rule.0).0.iter_mut() {
-					if *selector_component == css::selector::SelectorComponent::ClassPlaceholder {
-						*selector_component = css::selector::SelectorComponent::Class(class.clone());
+#[extend::ext]
+impl css::Style {
+	// replace the ClassPlaceholder with actual element class
+	fn fixup_class_placeholders(&mut self, class: String) {
+		for rule in self.0.iter_mut() {
+			match rule {
+				css::Rule::Style(style_rule) => {
+					for selector_component in (style_rule.0).0.iter_mut() {
+						if *selector_component == css::selector::SelectorComponent::ClassPlaceholder {
+							*selector_component = css::selector::SelectorComponent::Class(class.clone());
+						}
 					}
-				}
-			},
-			css::Rule::Media(_, style) => fixup_class_placeholders(style, class.clone()),
-			_ => {},
+				},
+				css::Rule::Media(_, style) => style.fixup_class_placeholders(class.clone()),
+				_ => {},
+			}
 		}
 	}
 }
@@ -34,9 +37,13 @@ fn fixup_class_placeholders(style: &mut css::Style, class: String) {
 // it checks if the style is already inserted as css into <style>
 // if yes, just returns the class name
 // if no, inserts it into <style> and then returns the class name
+//
+// can use owner_document().unwrap().default_view().unwrap() to get owning window from an element
+// alternatively can manually register windows and just append_with_str_1 into every window, BUT SEEMS INEFFICIENT
+// first way is 2 extra dom calls per style, second way is an extra dom call per window + slowdown from css changing, but doesn't happen on style reuse
 impl StyleStorage {
 	pub fn fetch(&mut self, mut style: css::Style) -> String {
-		// check if style exists in cache, in which case it's already inserted - just retrieve clas name
+		// check if style exists in cache, in which case it's already inserted - just retrieve class name
 		if let Some(id) = self.map.get(&style) {
 			return format!("s{}", id);
 		}
@@ -48,7 +55,7 @@ impl StyleStorage {
 		self.map.insert(style.clone(), id);
 		let class = format!("s{}", id);
 
-		fixup_class_placeholders(&mut style, class.clone());
+		style.fixup_class_placeholders(class.clone());
 
 		let style_element = if let Some(x) = self.style_element.as_ref() { x } else {
 			let dom = crate::dom();
