@@ -74,6 +74,12 @@ pub enum TransformFunction {
 	Perspective(Unit),
 }
 
+impl crate::AppendProperty for TransformFunction {
+	fn append_property(self, properties: &mut Vec<crate::Property>) {
+		Transform::Some(vec![self]).append_property(properties)
+	}
+}
+
 impl std::fmt::Display for TransformFunction {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
