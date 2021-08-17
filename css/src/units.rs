@@ -39,7 +39,7 @@ impl std::fmt::Display for Unit {
 			Self::Vmax(x)               => write!(f, "{}vmax", x),
 			Self::Fr(x)                 => write!(f, "{}fr", x),
 			Self::Percent(x)            => write!(f, "{}%", x),
-			Self::Calc(left, op, right) => write!(f, "{} {} {}", left, op, right),
+			Self::Calc(left, op, right) => write!(f, "calc({} {} {})", left, op, right),
 		}
 	}
 }
