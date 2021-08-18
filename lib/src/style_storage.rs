@@ -6,11 +6,20 @@ use std::cell::RefCell;
 #[derive(Default)]
 pub struct StyleStorage {
 	map: HashMap<css::Style, u64>,
-	style_element: Option<web_sys::Element>,
+	style_elements: Vec<web_sys::Element>,
 }
 
 thread_local! {
-	pub static STYLE_STORAGE: RefCell<StyleStorage> = RefCell::default();
+	pub static STYLE_STORAGE: RefCell<StyleStorage> = RefCell::new(StyleStorage {
+		map: HashMap::new(),
+		style_elements: vec![{
+			let dom = crate::dom();
+			let head = dom.head().expect("dom has no head");
+			let element = dom.create_element(web_str::style()).expect("can't create style element");
+			head.append_child(&element).expect("can't append child");
+			element
+		}],
+	});
 }
 
 #[extend::ext]
@@ -33,14 +42,9 @@ impl css::Style {
 	}
 }
 
-// TODO: right now if the same style is reused in multiple windows - won't work, need to track style insertion per window
 // it checks if the style is already inserted as css into <style>
 // if yes, just returns the class name
 // if no, inserts it into <style> and then returns the class name
-//
-// can use owner_document().unwrap().default_view().unwrap() to get owning window from an element
-// alternatively can manually register windows and just append_with_str_1 into every window, BUT SEEMS INEFFICIENT
-// first way is 2 extra dom calls per style, second way is an extra dom call per window + slowdown from css changing, but doesn't happen on style reuse
 impl StyleStorage {
 	pub fn fetch(&mut self, mut style: css::Style) -> String {
 		// check if style exists in cache, in which case it's already inserted - just retrieve class name
@@ -57,24 +61,20 @@ impl StyleStorage {
 
 		style.fixup_class_placeholders(class.clone());
 
-		let style_element = if let Some(x) = self.style_element.as_ref() { x } else {
-			let dom = crate::dom();
-			let head = dom.head().expect("dom has no head");
+		for style_element in &self.style_elements {
+			// insert the stringified generated css into the style tag
+			style_element.append_with_str_1(&style.to_string()).expect("can't append css string");
+		}
 
-			// either get or construct a <style> element
-			let element = if let Some(x) = head.get_elements_by_tag_name("style").get_with_index(0) {
-				x
-			} else {
-				let element = dom.create_element(web_str::style()).expect("can't create style element");
-				head.append_child(&element).expect("can't append child");
-				element
-			};
-			self.style_element.replace(element);
-			self.style_element.as_ref().unwrap()
-		};
-
-		// insert the stringified generated css into the style tag
-		style_element.append_with_str_1(&style.to_string()).expect("can't append css string");
 		class
+	}
+
+	pub fn register_window(&mut self, window: &web_sys::Window) {
+		let dom = window.document().expect("window has no dom");
+		let head = dom.head().expect("dom has no head");
+		let element = dom.create_element(web_str::style()).expect("can't create style element");
+		head.append_child(&element).expect("can't append child");
+
+		self.style_elements.push(element);
 	}
 }

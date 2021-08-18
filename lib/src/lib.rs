@@ -309,6 +309,10 @@ pub fn fetch_classname(style: impl Into<css::Style>) -> String {
 	STYLE_STORAGE.with(|x| x.borrow_mut().fetch(style.into()))
 }
 
+pub fn register_window(window: &web_sys::Window) {
+	STYLE_STORAGE.with(|x| x.borrow_mut().register_window(window));
+}
+
 #[extend::ext(pub, name = TypeClassString)]
 impl<T: 'static> T {
 	fn type_class_string() -> String {
