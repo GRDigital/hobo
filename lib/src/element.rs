@@ -28,7 +28,7 @@ impl Parent {
 
 	pub fn ancestor_with_cmp<T: 'static>(entity: Entity) -> Entity {
 		let parent = entity.get_cmp::<Parent>().0;
-		if WORLD.storage::<T>().has(parent) { parent } else { Parent::ancestor_with_cmp::<T>(parent) }
+		if parent.has_cmp::<T>() { parent } else { Parent::ancestor_with_cmp::<T>(parent) }
 	}
 }
 
@@ -39,6 +39,10 @@ impl Children {
 				WORLD.remove_entity(child);
 			}
 		}
+	}
+
+	pub fn collect_with_cmp<T: 'static>(&self) -> Vec<Entity> {
+		self.0.iter().filter(|e| e.has_cmp::<T>()).copied().collect::<Vec<_>>()
 	}
 }
 
