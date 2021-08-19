@@ -48,6 +48,9 @@ pub struct Classes {
 	pub(crate) styles: HashMap<u64, css::Style>,
 }
 
+#[derive(Default)]
+struct SignalHandlesCollection(Vec<discard::DiscardOnDrop<futures_signals::CancelableFutureHandle>>);
+
 pub trait Element: AsEntity + Sized {
 	fn add_child(&self, child: impl Element) {
 		if WORLD.is_dead(self) { log::warn!("add_child parent dead {:?}", self.as_entity()); return; }
@@ -72,12 +75,15 @@ pub trait Element: AsEntity + Sized {
 		// placeholder at first
 		let mut child = crate::create::components::div().class(crate::css::Display::None).erase();
 		self.add_child(child);
-		wasm_bindgen_futures::spawn_local(signal.for_each(move |new_child| {
+		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |new_child| {
 			let new_child = new_child.erase();
 			child.replace_with(new_child);
 			child = new_child;
-			async {}
-		}));
+			async move {}
+		}), || {});
+
+		wasm_bindgen_futures::spawn_local(fut);
+		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
 	fn child_signal<S, E>(self, signal: S) -> Self where
 		E: Element,
@@ -118,10 +124,13 @@ pub trait Element: AsEntity + Sized {
 	{
 		let entity = self.as_entity();
 		if WORLD.is_dead(entity) { log::warn!("set_class_signal dead entity {:?}", entity); return; }
-		wasm_bindgen_futures::spawn_local(signal.for_each(move |class| {
+		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |class| {
 			SomeElement(entity).set_class(class);
 			async move { }
-		}));
+		}), || {});
+
+		wasm_bindgen_futures::spawn_local(fut);
+		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
 	fn class_signal<S, I>(self, signal: S) -> Self where
 		I: Into<css::Style>,
@@ -135,10 +144,13 @@ pub trait Element: AsEntity + Sized {
 	{
 		let entity = self.as_entity();
 		if WORLD.is_dead(entity) { log::warn!("set_class_signal dead entity {:?}", entity); return; }
-		wasm_bindgen_futures::spawn_local(signal.for_each(move |class| {
+		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |class| {
 			SomeElement(entity).set_class_typed::<Type>(class.into());
 			async move { }
-		}));
+		}), || {});
+
+		wasm_bindgen_futures::spawn_local(fut);
+		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
 	fn class_typed_signal<Type, S, I>(self, signal: S) -> Self where
 		Type: 'static,
@@ -153,10 +165,13 @@ pub trait Element: AsEntity + Sized {
 	{
 		let entity = self.as_entity();
 		if WORLD.is_dead(entity) { log::warn!("set_class_signal dead entity {:?}", entity); return; }
-		wasm_bindgen_futures::spawn_local(signal.for_each(move |(tag, class)| {
+		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |(tag, class)| {
 			SomeElement(entity).set_class_tagged(tag, class);
 			async move { }
-		}));
+		}), || {});
+
+		wasm_bindgen_futures::spawn_local(fut);
+		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
 	fn class_tagged_signal<Tag, S, I>(self, signal: S) -> Self where
 		Tag: std::hash::Hash + 'static,
@@ -185,10 +200,13 @@ pub trait Element: AsEntity + Sized {
 	{
 		let entity = self.as_entity();
 		if WORLD.is_dead(entity) { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
-		wasm_bindgen_futures::spawn_local(signal.for_each(move |(k, v)| {
+		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |(k, v)| {
 			SomeElement(entity).set_attr(k, v);
 			async move { }
-		}));
+		}), || {});
+
+		wasm_bindgen_futures::spawn_local(fut);
+		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
 	fn attr_signal<'k, 'v, S, K, V>(self, x: S) -> Self where
 		K: Into<Cow<'k, str>>,
@@ -202,10 +220,13 @@ pub trait Element: AsEntity + Sized {
 	{
 		let entity = self.as_entity();
 		if WORLD.is_dead(entity) { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
-		wasm_bindgen_futures::spawn_local(signal.for_each(move |(k, v)| {
+		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |(k, v)| {
 			SomeElement(entity).set_bool_attr(k, v);
 			async move { }
-		}));
+		}), || {});
+
+		wasm_bindgen_futures::spawn_local(fut);
+		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
 	fn bool_attr_signal<'k, S, K>(self, x: S) -> Self where
 		K: Into<Cow<'k, str>>,
@@ -224,10 +245,13 @@ pub trait Element: AsEntity + Sized {
 	{
 		let entity = self.as_entity();
 		if WORLD.is_dead(entity) { log::warn!("set_text_signal dead entity {:?}", entity); return; }
-		wasm_bindgen_futures::spawn_local(signal.for_each(move |text| {
+		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |text| {
 			SomeElement(entity).set_text(text);
 			async move { }
-		}));
+		}), || {});
+
+		wasm_bindgen_futures::spawn_local(fut);
+		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
 	fn text_signal<'a, S, I>(self, x: S) -> Self where
 		I: Into<Cow<'a, str>>,
@@ -248,10 +272,13 @@ pub trait Element: AsEntity + Sized {
 	{
 		let entity = self.as_entity();
 		if WORLD.is_dead(entity) { log::warn!("set_style_signal dead entity {:?}", entity); return; }
-		wasm_bindgen_futures::spawn_local(signal.for_each(move |style| {
+		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |style| {
 			SomeElement(entity).set_style(style);
 			async move { }
-		}));
+		}), || {});
+
+		wasm_bindgen_futures::spawn_local(fut);
+		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
 	fn style_signal<S, I>(self, signal: S) -> Self where
 		I: AppendProperty,
