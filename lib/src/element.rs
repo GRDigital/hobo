@@ -218,24 +218,25 @@ pub trait Element: AsEntity + Sized {
 		S: futures_signals::signal::Signal<Item = (K, V)> + 'static,
 	{ self.set_attr_signal(x); self }
 
-	fn set_bool_attr_signal<'k, S, K>(&self, signal: S) where
+	fn set_bool_attr_signal<'k, S, K>(&self, attr: K, signal: S) where
 		K: Into<Cow<'k, str>>,
-		S: futures_signals::signal::Signal<Item = (K, bool)> + 'static,
+		S: futures_signals::signal::Signal<Item = bool> + 'static,
 	{
 		let entity = self.as_entity();
 		if WORLD.is_dead(entity) { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
-		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |(k, v)| {
-			SomeElement(entity).set_bool_attr(k, v);
+		let attr = attr.into().into_owned();
+		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |v| {
+			SomeElement(entity).set_bool_attr(&attr, v);
 			async move { }
 		}), || {});
 
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
-	fn bool_attr_signal<'k, S, K>(self, x: S) -> Self where
+	fn bool_attr_signal<'k, S, K>(self, attr: K, x: S) -> Self where
 		K: Into<Cow<'k, str>>,
-		S: futures_signals::signal::Signal<Item = (K, bool)> + 'static,
-	{ self.set_bool_attr_signal(x); self }
+		S: futures_signals::signal::Signal<Item = bool> + 'static,
+	{ self.set_bool_attr_signal(attr, x); self }
 
 	fn set_text<'a>(&self, text: impl Into<std::borrow::Cow<'a, str>>) {
 		if WORLD.is_dead(self) { log::warn!("set_text dead entity {:?}", self.as_entity()); return; }
