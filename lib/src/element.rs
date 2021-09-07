@@ -240,7 +240,7 @@ pub trait Element: AsEntity + Sized {
 
 	fn set_text<'a>(&self, text: impl Into<std::borrow::Cow<'a, str>>) {
 		if WORLD.is_dead(self) { log::warn!("set_text dead entity {:?}", self.as_entity()); return; }
-		self.get_cmp::<web_sys::HtmlElement>().set_inner_text(&text.into());
+		self.get_cmp::<web_sys::Node>().set_text_content(Some(&text.into()));
 	}
 	fn text<'a>(self, x: impl Into<std::borrow::Cow<'a, str>>) -> Self { self.set_text(x); self }
 
