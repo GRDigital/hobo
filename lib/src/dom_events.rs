@@ -8,6 +8,8 @@ pub enum EventHandlerCallback {
 	Event(Closure<dyn FnMut(web_sys::Event) + 'static>),
 	FocusEvent(Closure<dyn FnMut(web_sys::FocusEvent) + 'static>),
 	TouchEvent(Closure<dyn FnMut(web_sys::TouchEvent) + 'static>),
+	WheelEvent(Closure<dyn FnMut(web_sys::WheelEvent) + 'static>),
+	UiEvent(Closure<dyn FnMut(web_sys::UiEvent) + 'static>),
 
 	// AnimationEvent
 	// AnimationPlaybackEvent
@@ -41,7 +43,6 @@ pub enum EventHandlerCallback {
 	// MidiConnectionEvent
 	// MidiMessageEvent
 	// BlobEvent
-	// MouseScrollEvent
 	// MutationEvent
 	// NotificationEvent
 	// OfflineAudioCompletionEvent
@@ -76,10 +77,8 @@ pub enum EventHandlerCallback {
 	// TimeEvent
 	// TrackEvent
 	// TransitionEvent
-	// UiEvent
 	// UserProximityEvent
 	// WebGlContextEvent
-	// WheelEvent
 	// XrInputSourceEvent
 	// XrInputSourcesChangeEvent
 	// CustomEvent
@@ -102,6 +101,8 @@ impl Drop for EventHandler {
 			EventHandlerCallback::Event(cb) => cb.as_ref().unchecked_ref(),
 			EventHandlerCallback::FocusEvent(cb) => cb.as_ref().unchecked_ref(),
 			EventHandlerCallback::TouchEvent(cb) => cb.as_ref().unchecked_ref(),
+			EventHandlerCallback::WheelEvent(cb) => cb.as_ref().unchecked_ref(),
+			EventHandlerCallback::UiEvent(cb) => cb.as_ref().unchecked_ref(),
 		}).unwrap();
 	}
 }
@@ -160,11 +161,12 @@ generate_events! {
 	KeyboardEvent, keydown,     on_key_down;
 	KeyboardEvent, keyup,       on_key_up;
 	Event,         change,      on_change;
-	Event,         scroll,      on_scroll;
+	UiEvent,       scroll,      on_scroll;
 	FocusEvent,    blur,        on_blur;
 	FocusEvent,    focus,       on_focus;
 	TouchEvent,    touchstart,  on_touch_start;
 	TouchEvent,    touchend,    on_touch_end;
 	TouchEvent,    touchmove,   on_touch_move;
 	TouchEvent,    touchcancel, on_touch_cancel;
+	WheelEvent,    wheel,       on_wheel;
 }
