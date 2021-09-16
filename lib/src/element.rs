@@ -296,11 +296,13 @@ pub trait Element: AsEntity + Sized {
 		self
 	}
 
+	fn with_component<T: 'static>(self, f: impl FnOnce(&Self) -> T) -> Self { self.add_component(f(&self)); self }
+
 	// TODO: this should steal components from other and delete it
 	// instead of deleting self
 	// this would cause a lot less issue with invalidating stuff
 	// !!!!!! NOT TRUE - any handler that was created with the new entity will be busted, so this is fine
-	fn replace_with<T: AsEntity>(&self, other: T) -> T {
+	fn replace_with<T: Element>(&self, other: T) -> T {
 		let other_entity = other.as_entity();
 		if WORLD.is_dead(self) { log::warn!("replace_with dead {:?}", self.as_entity()); return other; }
 
