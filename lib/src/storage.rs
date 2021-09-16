@@ -66,7 +66,7 @@ impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 	fn add(&mut self, entity: impl AsEntity, component: Component) {
 		let entity = entity.as_entity();
 		if self.has(entity) {
-			// log::info!("overwriting {:?}", std::any::type_name::<Component>());
+			log::warn!("overwriting {:?}", std::any::type_name::<Component>());
 			self.modified.insert(entity);
 		} else {
 			self.added.insert(entity);
