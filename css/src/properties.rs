@@ -276,6 +276,8 @@ generate_properties! {
 		BoxShadow,
 		TransformOrigin,
 		Appearance,
+		MaskImage,
+		MaskSize,
 		Float,
 		Clear,
 	),

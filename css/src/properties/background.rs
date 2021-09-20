@@ -36,3 +36,71 @@ impl std::fmt::Display for BackgroundImage {
 		}
 	}
 }
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub enum MaskImage {
+	None,
+	Initial,
+	Inherit,
+	Unset,
+	Some(Vec<crate::Image>),
+}
+
+impl std::fmt::Display for MaskImage {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Self::None    => "mask-image:none;-webkit-mask-image:none;".fmt(f),
+			Self::Initial => "mask-image:initial;-webkit-mask-image:initial;".fmt(f),
+			Self::Inherit => "mask-image:inherit;-webkit-mask-image:inherit;".fmt(f),
+			Self::Unset   => "mask-image:unset;-webkit-mask-image:unset;".fmt(f),
+			Self::Some(images) => {
+				let write = |f: &mut std::fmt::Formatter<'_>| -> std::fmt::Result {
+					if let Some((first, rest)) = images.split_first() {
+						write!(f, "{}", first)?;
+						for image in rest {
+							write!(f, ",{}", image)?;
+						}
+					}
+
+					Ok(())
+				};
+				"mask-image:".fmt(f)?; write(f)?; ";".fmt(f)?;
+				"-webkit-mask-image:".fmt(f)?; write(f)?; ";".fmt(f)
+			},
+		}
+	}
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub enum MaskSize {
+	Initial,
+	Inherit,
+	Unset,
+	Auto,
+	Cover,
+	Contain,
+}
+
+#[rustfmt::skip]
+impl std::fmt::Display for MaskSize {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Self::Initial => "mask-size:initial;-webkit-mask-size:initial;".fmt(f),
+			Self::Inherit => "mask-size:inherit;-webkit-mask-size:inherit;".fmt(f),
+			Self::Unset   => "mask-size:unset;-webkit-mask-size:unset;".fmt(f),
+			Self::Auto    => "mask-size:auto;-webkit-mask-size:auto;".fmt(f),
+			Self::Cover   => "mask-size:cover;-webkit-mask-size:cover;".fmt(f),
+			Self::Contain => "mask-size:contain;-webkit-mask-size:contain;".fmt(f),
+		}
+	}
+}
+
+#[macro_export]
+macro_rules! mask_size {
+	(initial) => {$crate::Property::MaskSize($crate::MaskSize::Initial)};
+	(inherit) => {$crate::Property::MaskSize($crate::MaskSize::Inherit)};
+	(unset)   => {$crate::Property::MaskSize($crate::MaskSize::Unset)};
+	(auto)    => {$crate::Property::MaskSize($crate::MaskSize::Auto)};
+	(cover)   => {$crate::Property::MaskSize($crate::MaskSize::Cover)};
+	(contain) => {$crate::Property::MaskSize($crate::MaskSize::Contain)};
+}
