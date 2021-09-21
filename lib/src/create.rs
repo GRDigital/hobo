@@ -350,7 +350,7 @@ create![
 		feTurbulence, SvgfeTurbulenceElement,
 		filter, SvgFilterElement,
 		foreignObject, SvgForeignObjectElement,
-		gSvg, SvggElement,
+		g, SvggElement,
 		// hatch, SvgHatchElement,
 		// hatchpath, SvgHatchpathElement,
 		image, SvgImageElement,
