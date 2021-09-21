@@ -253,6 +253,7 @@ generate_properties! {
 		TextDecorationLine,
 		TextRendering,
 		VectorEffect,
+		AlignmentBaseline,
 		DominantBaseline,
 		TextAnchor,
 		BackgroundImage,
