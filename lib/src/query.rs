@@ -1,6 +1,23 @@
 use super::*;
 use sugars::*;
 
+/* dream syntax:
+	hobo::find::<(&C1, &C2, With<C3>)>() // -> Vec<(&C1, &C2, bool)>
+	hobo::find_one::<(&C1, &C2, With<C3>)>() // -> (&C1, &C2, bool)
+	hobo::try_find_one::<(&C1, &C2, With<C3>)>() // -> Option<(&C1, &C2, bool)>
+
+	hobo::find::<(&mut C1, &C2)>() // -> Vec<(&mut C1, &C2)>
+	hobo::find::<(Entity, &mut C1, &C2)>() // -> Vec<(&mut C1, &C2)>
+
+	trait QueryParam {
+		fn apply(world: &mut World, entities: &mut Vec<Entity>) -> Self;
+	}
+*/
+
+// impl<T: 'static> QueryParam for &mut T {
+//     fn apply(world: &World, entities: &mut Vec<Entity>) -> Vec<Self> { todo!() }
+// }
+
 pub trait BasicQuery: 'static {
 	fn exists(world: &World, entity: Entity) -> bool;
 	fn added(world: &World, entity: Entity) -> bool;

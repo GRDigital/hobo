@@ -83,6 +83,10 @@ impl AsEntity for Entity {
 	fn as_entity(&self) -> Entity { *self }
 }
 
+// @Awpteamoose: in practice turns out not to be useful much
+// or maybe it's not convenient in a way where it would be useful
+// the only way it's used right now is in create.rs to remove web_sys dom types and clean up handlers, etc
+// so probably it should be scrapped
 pub struct System {
 	f: Box<dyn Fn(Entity) + 'static>,
 	query: fn(&World, Entity) -> bool,
@@ -111,9 +115,13 @@ impl Default for Entities {
 	} }
 }
 
+// @Awpteamoose: I think this could have all members as non-cells and the World itself can be in a cell
+// since in practice it turns out that WORLD isn't used, most methods are instead more conveniently called from AsEntity or smth
+// maybe World doesn't even have to be pub
 #[derive(Default)]
 pub struct World {
 	storages: RefCell<HashMap<TypeId, StorageRc>>,
+	// this is used to remove components for when an entity has been removed
 	component_ownership: RefCell<HashMap<Entity, HashSet<TypeId>>>,
 	entities: RefCell<Entities>,
 
@@ -122,7 +130,7 @@ pub struct World {
 	system_update_lock: Cell<bool>,
 }
 
-// only safe until threading becomes a thing
+// ONLY safe until wasm threading becomes a thing
 unsafe impl Send for World {}
 unsafe impl Sync for World {}
 
@@ -328,17 +336,10 @@ impl<T: 'static> T {
 }
 
 pub trait Component: 'static {
-	#[inline] fn storage<'a>() -> StorageRef<'a, Self> where Self: Sized { WORLD.storage::<Self>() }
-	#[inline] fn storage_mut<'a>() -> StorageMutRef<'a, Self> where Self: Sized { WORLD.storage_mut::<Self>() }
-
 	#[inline] fn register_resource(self) where Self: Sized { World::register_resource(&WORLD, self) }
 	#[inline] fn resource<'a>() -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized { WORLD.resource::<Self>() }
 	#[inline] fn resource_mut<'a>() -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized { WORLD.resource_mut::<Self>() }
 	#[inline] fn try_resource<'a>() -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized { WORLD.try_resource::<Self>() }
 	#[inline] fn try_resource_mut<'a>() -> Option<OwningRefMut<StorageMutRef<'a, Self>, Self>> where Self: Sized { WORLD.try_resource_mut::<Self>() }
-
-	// fn register_state(self) where Self: Sized { state::State::new(self).register_resource() }
-	// fn state<'a>() -> OwningRef<StorageRef<'a, state::State<Self>>, state::State<Self>> where Self: Sized { <state::State<Self>>::resource() }
-	// fn try_state<'a>() -> Option<OwningRef<StorageRef<'a, state::State<Self>>, state::State<Self>>> where Self: Sized { <state::State<Self>>::try_resource() }
 }
 impl<T: 'static + Sized> Component for T {}
