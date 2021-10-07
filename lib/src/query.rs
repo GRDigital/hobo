@@ -19,16 +19,16 @@ use sugars::*;
 // }
 
 pub trait BasicQuery: 'static {
-	fn exists(world: &World, entity: Entity) -> bool;
-	fn added(world: &World, entity: Entity) -> bool;
-	fn modified(world: &World, entity: Entity) -> bool;
-	fn removed(world: &World, entity: Entity) -> bool;
+	fn exists(world: &mut World, entity: Entity) -> bool;
+	fn added(world: &mut World, entity: Entity) -> bool;
+	fn modified(world: &mut World, entity: Entity) -> bool;
+	fn removed(world: &mut World, entity: Entity) -> bool;
 }
 
 pub trait Query: 'static {
 	fn components() -> HashSet<TypeId>;
-	fn query(world: &World, entity: Entity) -> bool;
-	fn run<F: Fn(Entity) + 'static>(f: F) -> System {
+	fn query(world: &mut World, entity: Entity) -> bool;
+	fn run<F: Fn(&mut World, Entity) + 'static>(f: F) -> System {
 		System { f: Box::new(f), query: Self::query, interests: Self::components }
 	}
 }
@@ -46,7 +46,7 @@ pub struct Present<T: BasicQuery>(PhantomData<T>);
 
 pub struct Or<Left: Query, Right: Query>(PhantomData<Left>, PhantomData<Right>);
 impl<Left: Query, Right: Query> Query for Or<Left, Right> {
-	fn query(world: &World, entity: Entity) -> bool {
+	fn query(world: &mut World, entity: Entity) -> bool {
 		Left::query(world, entity) || Right::query(world, entity)
 	}
 
@@ -58,19 +58,19 @@ impl<Left: Query, Right: Query> Query for Or<Left, Right> {
 }
 
 impl<T: 'static> BasicQuery for T {
-	fn exists(world: &World, entity: Entity) -> bool {
+	fn exists(world: &mut World, entity: Entity) -> bool {
 		world.storage::<Self>().has(entity)
 	}
 
-	fn added(world: &World, entity: Entity) -> bool {
+	fn added(world: &mut World, entity: Entity) -> bool {
 		world.storage::<Self>().added.contains(&entity)
 	}
 
-	fn modified(world: &World, entity: Entity) -> bool {
+	fn modified(world: &mut World, entity: Entity) -> bool {
 		world.storage::<Self>().modified.contains(&entity)
 	}
 
-	fn removed(world: &World, entity: Entity) -> bool {
+	fn removed(world: &mut World, entity: Entity) -> bool {
 		world.storage::<Self>().removed.contains(&entity)
 	}
 }
@@ -120,7 +120,7 @@ macro_rules! tuple_query {
 	($first:ident $($id:ident)*) => {
 		paste::item! {
 			impl<$first: Query, $($id: Query),*> Query for ($first, $($id),*) {
-				fn query(world: &World, entity: Entity) -> bool {
+				fn query(world: &mut World, entity: Entity) -> bool {
 					$first::query(world, entity)
 					$(&& $id::query(world, entity))*
 				}
@@ -134,7 +134,7 @@ macro_rules! tuple_query {
 			}
 
 			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Present<($first, $($id),*)> {
-				fn query(world: &World, entity: Entity) -> bool {
+				fn query(world: &mut World, entity: Entity) -> bool {
 					$first::exists(world, entity)
 					$(&& $id::exists(world, entity))*
 				}
@@ -149,7 +149,7 @@ macro_rules! tuple_query {
 
 			// TODO: could use clever bitmasking to achieve a similar effect to Removed
 			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Added<($first, $($id),*)> {
-				fn query(world: &World, entity: Entity) -> bool {
+				fn query(world: &mut World, entity: Entity) -> bool {
 					$first::added(world, entity)
 					$(|| $id::added(world, entity))*
 				}
@@ -163,7 +163,7 @@ macro_rules! tuple_query {
 			}
 
 			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Modified<($first, $($id),*)> {
-				fn query(world: &World, entity: Entity) -> bool {
+				fn query(world: &mut World, entity: Entity) -> bool {
 					$first::modified(world, entity)
 					$(|| $id::modified(world, entity))*
 				}
@@ -178,7 +178,7 @@ macro_rules! tuple_query {
 
 			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Removed<($first, $($id),*)> {
 				#[allow(unused_mut)]
-				fn query(world: &World, entity: Entity) -> bool {
+				fn query(world: &mut World, entity: Entity) -> bool {
 					// total - bitmask with 1s for every component queried
 					// present - bitmask with 1s for every queried component that exists
 					// missing - bitmask with 1s for every queried component that is marked as removed

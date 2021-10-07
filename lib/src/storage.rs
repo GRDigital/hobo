@@ -112,7 +112,7 @@ impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 	}
 }
 
-pub struct StorageGuard<'a, Component: 'static, Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>>(pub &'a World, pub Option<Inner>);
+pub struct StorageGuard<'a, Component: 'static, Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>>(pub &'a mut World, pub Option<Inner>);
 unsafe impl<'a, Component: 'static, Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>> owning_ref::StableAddress for StorageGuard<'a, Component, Inner> {}
 
 impl<'a, Component, Inner> std::ops::Deref for StorageGuard<'a, Component, Inner> where
@@ -142,16 +142,15 @@ impl<'a, Component, Inner> Drop for StorageGuard<'a, Component, Inner> where
 		drop(inner.take());
 
 		let set = {
-			let mut storages = world.storages.borrow_mut();
-			let mut storage = storages.get_mut(&TypeId::of::<Component>()).unwrap().borrow_mut();
+			// let mut storages = world.storages.borrow_mut();
+			let mut storage = world.storages.get_mut(&TypeId::of::<Component>()).unwrap().borrow_mut();
 			let storage = storage.as_any_mut().downcast_mut::<SimpleStorage<Component>>().unwrap();
 
-			let mut component_ownership = world.component_ownership.borrow_mut();
 			for &added in &storage.added {
-				component_ownership.entry(added).or_default().insert(std::any::TypeId::of::<Component>());
+				world.component_ownership.entry(added).or_default().insert(std::any::TypeId::of::<Component>());
 			}
 			for removed in &storage.removed {
-				if let Some(components) = component_ownership.get_mut(removed) {
+				if let Some(components) = world.component_ownership.get_mut(removed) {
 					components.remove(&std::any::TypeId::of::<Component>());
 				}
 			}

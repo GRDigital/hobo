@@ -12,7 +12,7 @@ use sugars::*;
 #[cfg(test)] use wasm_bindgen_test::*;
 #[cfg(test)] wasm_bindgen_test_configure!(run_in_browser);
 
-pub fn dom_element<T, E>(world: &'static World, entity: T, element: &E) where
+pub fn dom_element<T, E>(world: &mut World, entity: T, element: &E) where
 	T: AsEntity,
 	E: AsRef<web_sys::Node> + AsRef<web_sys::Element> + AsRef<web_sys::EventTarget>
 {
@@ -24,52 +24,65 @@ pub fn dom_element<T, E>(world: &'static World, entity: T, element: &E) where
 
 struct DomTypes(HashSet<TypeId>);
 
-pub fn register_systems(world: &World) {
-	world.new_system(<(Removed<(web_sys::Element,)>,)>::run(move |entity| {
-		WORLD.storage_mut::<web_sys::Element>().take_removed(entity).unwrap().remove();
-		WORLD.storage_mut::<web_sys::Node>().remove(entity);
-		WORLD.storage_mut::<web_sys::EventTarget>().remove(entity);
-		WORLD.storage_mut::<DomTypes>().remove(entity);
-		WORLD.storage_mut::<Vec<crate::dom_events::EventHandler>>().remove(entity);
+pub fn register_systems(world: &mut World) {
+	world.new_system(<(Removed<(web_sys::Element,)>,)>::run(move |world, entity| {
+		// World::mark_borrow_mut();
+		// let world = unsafe { &mut *WORLD.get() as &mut World };
+		world.storage_mut::<web_sys::Element>().take_removed(entity).unwrap().remove();
+		world.storage_mut::<web_sys::Node>().remove(entity);
+		world.storage_mut::<web_sys::EventTarget>().remove(entity);
+		world.storage_mut::<DomTypes>().remove(entity);
+		world.storage_mut::<Vec<crate::dom_events::EventHandler>>().remove(entity);
+		// World::unmark_borrow_mut();
 	}));
-	world.new_system(<(Removed<(DomTypes,)>,)>::run(move |entity| {
-		for t in WORLD.storage_mut::<DomTypes>().take_removed(entity).unwrap().0 {
+	world.new_system(<(Removed<(DomTypes,)>,)>::run(move |world, entity| {
+		// World::mark_borrow_mut();
+		// let world = unsafe { &mut *WORLD.get() as &mut World };
+		let removeds = world.storage_mut::<DomTypes>().take_removed(entity).unwrap().0;
+		for t in removeds {
 			// TODO: WARNING: this won't notify systems watching it
 			// which isn't a problem for now
-			WORLD.storages.borrow_mut()[&t].borrow_mut().dyn_remove(entity);
+			world.storages[&t].borrow_mut().dyn_remove(entity);
 		}
+		// World::unmark_borrow_mut();
 	}));
 }
 
 pub fn html_element<T: AsRef<web_sys::HtmlElement> + 'static + Clone>(element: &T) -> Entity {
-	let entity = WORLD.new_entity();
+	World::mark_borrow_mut();
+	let mut world = unsafe { &mut *WORLD.get() as &mut World };
+	let entity = world.new_entity();
+
 	let html_element = element.as_ref().clone();
-	dom_element(&WORLD, entity, &html_element);
-	WORLD.storage_mut::<web_sys::HtmlElement>().add(entity, html_element);
+	dom_element(&mut world, entity, &html_element);
+	world.storage_mut::<web_sys::HtmlElement>().add(entity, html_element);
 
 	if TypeId::of::<web_sys::HtmlElement>() == TypeId::of::<T>() {
-		WORLD.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>()]));
+		world.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>()]));
 	} else {
-		WORLD.storage_mut::<T>().add(entity, element.clone());
-		WORLD.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>(), TypeId::of::<T>()]));
+		world.storage_mut::<T>().add(entity, element.clone());
+		world.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>(), TypeId::of::<T>()]));
 	}
 
+	World::unmark_borrow_mut();
 	entity
 }
 
 pub fn svg_element<T: AsRef<web_sys::SvgElement> + 'static + Clone>(element: &T) -> Entity {
-	let entity = WORLD.new_entity();
+	World::mark_borrow_mut();
+	let mut world = unsafe { &mut *WORLD.get() as &mut World };
+	let entity = world.new_entity();
 	let svg_element = element.as_ref().clone();
-	dom_element(&WORLD, entity, &svg_element);
-	WORLD.storage_mut::<web_sys::SvgElement>().add(entity, svg_element);
+	dom_element(&mut world, entity, &svg_element);
+	world.storage_mut::<web_sys::SvgElement>().add(entity, svg_element);
 
 	if TypeId::of::<web_sys::SvgElement>() == TypeId::of::<T>() {
-		WORLD.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>()]));
+		world.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>()]));
 	} else {
-		WORLD.storage_mut::<T>().add(entity, element.clone());
-		WORLD.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>(), TypeId::of::<T>()]));
+		world.storage_mut::<T>().add(entity, element.clone());
+		world.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>(), TypeId::of::<T>()]));
 	}
-
+	World::unmark_borrow_mut();
 	entity
 }
 
