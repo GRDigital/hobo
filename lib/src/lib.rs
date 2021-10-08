@@ -25,6 +25,7 @@ use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
 use style_storage::{STYLE_STORAGE, StyleStorage};
 pub use element::{Element, Classes, Parent, Children, SomeElement};
 use racy_cell::RacyCell;
+use sugars::hash;
 
 // NOTES:
 // queries to be able to find entities with/by components
@@ -167,12 +168,7 @@ pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 				let classes = storage.get(entity).unwrap();
 
 				if let Some(id) = &classes.type_tag {
-					use std::hash::{Hash, Hasher};
-
-					let mut hasher = std::collections::hash_map::DefaultHasher::new();
-					id.hash(&mut hasher);
-					let id = hasher.finish();
-					write!(&mut res, "t-{:x} ", id).unwrap();
+					write!(&mut res, "t-{:x} ", hash!(id)).unwrap();
 				}
 
 				let style_storage = unsafe { &mut *STYLE_STORAGE.get() as &mut StyleStorage };
@@ -337,11 +333,7 @@ pub fn register_window(window: &web_sys::Window) {
 #[extend::ext(pub, name = TypeClassString)]
 impl<T: 'static> T {
 	fn type_class_string() -> String {
-		use std::hash::{Hash, Hasher};
-		let mut hasher = std::collections::hash_map::DefaultHasher::new();
-		TypeId::of::<Self>().hash(&mut hasher);
-		let id = hasher.finish();
-		format!("t-{:x}", id)
+		format!("t-{:x}", hash!(TypeId::of::<Self>()))
 	}
 }
 
