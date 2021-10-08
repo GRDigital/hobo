@@ -31,7 +31,7 @@ use sugars::hash;
 pub use prelude::{Parent, Children};
 
 // NOTES:
-// queries to be able to find entities with/by components in children/parent/ancestor/family
+// queries to be able to find entities with/by components in children/parent/ancestor/family - done
 // * optionaly specify depth?
 // resources stay, resources could be useful for caching/memoization/etc
 // add a name component that sets data-name or smth
@@ -396,11 +396,40 @@ pub fn try_find_one<Q: query::Query>() -> Option<Q::Fetch> {
 
 pub fn find_one<Q: query::Query>() -> Q::Fetch { try_find_one::<Q>().unwrap() }
 
-// pub trait Component: 'static {
-//     #[inline] fn register_resource(self) where Self: Sized { WORLD.with(move |world| World::register_resource(&*world.borrow(), self)) }
-//     #[inline] fn resource<'a>() -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized { WORLD.with(move |world| World::resource::<Self>(&*world.borrow())) }
-//     #[inline] fn resource_mut<'a>() -> OwningRefMut<StorageRefMut<'a, Self>, Self> where Self: Sized { WORLD.with(move |world| World::resource_mut::<Self>(&*world.borrow())) }
-//     #[inline] fn try_resource<'a>() -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized { WORLD.with(move |world| World::try_resource::<Self>(&*world.borrow())) }
-//     #[inline] fn try_resource_mut<'a>() -> Option<OwningRefMut<StorageRefMut<'a, Self>, Self>> where Self: Sized { WORLD.try_resource_mut::<Self>() }
-// }
-// impl<T: 'static + Sized> Component for T {}
+pub trait Component: 'static {
+	#[inline] fn register_resource(self) where Self: Sized {
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		World::register_resource(world, self);
+		World::unmark_borrow_mut();
+	}
+	#[inline] fn resource<'a>() -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized {
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		let res = World::resource::<Self>(world);
+		World::unmark_borrow_mut();
+		res
+	}
+	#[inline] fn resource_mut<'a>() -> OwningRefMut<StorageGuard<'a, Self, StorageRefMut<'a, Self>>, Self> where Self: Sized {
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		let res = World::resource_mut::<Self>(world);
+		World::unmark_borrow_mut();
+		res
+	}
+	#[inline] fn try_resource<'a>() -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized {
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		let res = World::try_resource::<Self>(world);
+		World::unmark_borrow_mut();
+		res
+	}
+	#[inline] fn try_resource_mut<'a>() -> Option<OwningRefMut<StorageGuard<'a, Self, StorageRefMut<'a, Self>>, Self>> where Self: Sized {
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		let res = World::try_resource_mut::<Self>(world);
+		World::unmark_borrow_mut();
+		res
+	}
+}
+impl<T: 'static + Sized> Component for T {}
