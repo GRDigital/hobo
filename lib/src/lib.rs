@@ -22,7 +22,7 @@ use once_cell::sync::Lazy;
 use std::cell::{RefCell, Ref, RefMut};
 use storage::*;
 use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
-use style_storage::STYLE_STORAGE;
+use style_storage::{STYLE_STORAGE, StyleStorage};
 pub use element::{Element, Classes, Parent, Children, SomeElement};
 use racy_cell::RacyCell;
 
@@ -32,6 +32,7 @@ use racy_cell::RacyCell;
 // * optionaly specify depth?
 // resources stay, resources could be useful for caching/memoization/etc
 // add a name component that sets data-name or smth
+// could use an attribute macro over intostyle expressions to give them names and use names rather than hashes
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
 
@@ -161,7 +162,7 @@ pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 		fn update_classes(storage: &mut SimpleStorage<Classes>, world: &mut World, entity: Entity) {
 			use std::fmt::Write;
 
-			let mut res = format!("e-{:x}", entity.0);
+			let mut res = String::new();
 			{
 				let classes = storage.get(entity).unwrap();
 
@@ -171,19 +172,17 @@ pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 					let mut hasher = std::collections::hash_map::DefaultHasher::new();
 					id.hash(&mut hasher);
 					let id = hasher.finish();
-					write!(&mut res, " t-{:x}", id).unwrap();
+					write!(&mut res, "t-{:x} ", id).unwrap();
 				}
 
-				STYLE_STORAGE.with(|x| {
-					let mut style_storage = x.borrow_mut();
-					for style in classes.styles.values() {
-						write!(&mut res, " {}", style_storage.fetch(style.clone())).unwrap();
-					}
-				});
+				let style_storage = unsafe { &mut *STYLE_STORAGE.get() as &mut StyleStorage };
+				for style in classes.styles.values() {
+					write!(&mut res, "{} ", style_storage.fetch(style.clone())).unwrap();
+				}
 			}
 
 			let elements = world.storage::<web_sys::Element>();
-			elements.get(entity).unwrap().set_attribute(web_str::class(), &res).expect("can't set class attribute");
+			elements.get(entity).unwrap().set_attribute(web_str::class(), &res.trim()).expect("can't set class attribute");
 		}
 
 		let mut classes = world.storage_mut::<Classes>();
@@ -326,11 +325,13 @@ impl<T: AsEntity> AsEntity for &mut T {
 }
 
 pub fn fetch_classname(style: impl Into<css::Style>) -> String {
-	STYLE_STORAGE.with(|x| x.borrow_mut().fetch(style.into()))
+	let style_storage = unsafe { &mut *STYLE_STORAGE.get() as &mut StyleStorage };
+	style_storage.fetch(style.into())
 }
 
 pub fn register_window(window: &web_sys::Window) {
-	STYLE_STORAGE.with(|x| x.borrow_mut().register_window(window));
+	let style_storage = unsafe { &mut *STYLE_STORAGE.get() as &mut StyleStorage };
+	style_storage.register_window(window);
 }
 
 #[extend::ext(pub, name = TypeClassString)]

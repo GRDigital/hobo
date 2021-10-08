@@ -1,41 +1,41 @@
 use crate::prelude::*;
-use std::collections::HashMap;
+use std::collections::HashSet;
 pub use sugars::hash;
-use std::cell::RefCell;
+use crate::RacyCell;
+use once_cell::sync::Lazy;
 
 #[derive(Default)]
 pub struct StyleStorage {
-	map: HashMap<css::Style, u64>,
+	inserted_style_hashes: HashSet<u64>,
+	// list of <style> elements, prehaps in different windows
 	style_elements: Vec<web_sys::Element>,
 }
 
-thread_local! {
-	pub static STYLE_STORAGE: RefCell<StyleStorage> = RefCell::new(StyleStorage {
-		map: HashMap::new(),
-		style_elements: vec![{
-			let dom = crate::dom();
-			let head = dom.head().expect("dom has no head");
-			let element = dom.create_element(web_str::style()).expect("can't create style element");
-			head.append_child(&element).expect("can't append child");
-			element
-		}],
-	});
-}
+pub(crate) static STYLE_STORAGE: Lazy<RacyCell<StyleStorage>> = Lazy::new(|| RacyCell::new(StyleStorage {
+	inserted_style_hashes: HashSet::new(),
+	style_elements: vec![{
+		let dom = crate::dom();
+		let head = dom.head().expect("dom has no head");
+		let element = dom.create_element(web_str::style()).expect("can't create style element");
+		head.append_child(&element).expect("can't append child");
+		element
+	}],
+}));
 
 #[extend::ext]
 impl css::Style {
 	// replace the ClassPlaceholder with actual element class
-	fn fixup_class_placeholders(&mut self, class: String) {
+	fn fixup_class_placeholders(&mut self, class: &str) {
 		for rule in self.0.iter_mut() {
 			match rule {
 				css::Rule::Style(style_rule) => {
 					for selector_component in (style_rule.0).0.iter_mut() {
 						if *selector_component == css::selector::SelectorComponent::ClassPlaceholder {
-							*selector_component = css::selector::SelectorComponent::Class(class.clone());
+							*selector_component = css::selector::SelectorComponent::Class(class.to_owned());
 						}
 					}
 				},
-				css::Rule::Media(_, style) => style.fixup_class_placeholders(class.clone()),
+				css::Rule::Media(_, style) => style.fixup_class_placeholders(class),
 				_ => {},
 			}
 		}
@@ -47,23 +47,24 @@ impl css::Style {
 // if no, inserts it into <style> and then returns the class name
 impl StyleStorage {
 	pub fn fetch(&mut self, mut style: css::Style) -> String {
-		// check if style exists in cache, in which case it's already inserted - just retrieve class name
-		if let Some(id) = self.map.get(&style) {
-			return format!("s-{:x}", id);
-		}
-
-		// just getting the u64 hash from style
+		// u64 hash from style
 		let id = hash!(style);
 
-		// caching the id
-		self.map.insert(style.clone(), id);
+		// recover class name
 		let class = format!("s-{:x}", id);
 
-		style.fixup_class_placeholders(class.clone());
+		// check if style exists in cache, in which case it's already inserted - just return class name
+		if self.inserted_style_hashes.contains(&id) { return class; }
 
+		// caching the style id
+		self.inserted_style_hashes.insert(id);
+
+		style.fixup_class_placeholders(&class);
+
+		let style_string = style.to_string();
 		for style_element in &self.style_elements {
 			// insert the stringified generated css into the style tag
-			style_element.append_with_str_1(&style.to_string()).expect("can't append css string");
+			style_element.append_with_str_1(&style_string).expect("can't append css string");
 		}
 
 		class

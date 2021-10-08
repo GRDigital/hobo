@@ -48,6 +48,7 @@ pub fn html_element<T: AsRef<web_sys::HtmlElement> + 'static + Clone>(element: &
 	let entity = world.new_entity();
 
 	let html_element = element.as_ref().clone();
+	#[cfg(debug_assertions)] html_element.set_attribute(wasm_bindgen::intern("data-entity"), &format!("{}", entity.0)).unwrap();
 	dom_element(&mut world, entity, &html_element);
 	world.storage_mut::<web_sys::HtmlElement>().add(entity, html_element);
 
