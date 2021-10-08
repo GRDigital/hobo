@@ -24,28 +24,22 @@ pub fn dom_element<T, E>(world: &mut World, entity: T, element: &E) where
 
 struct DomTypes(HashSet<TypeId>);
 
-pub fn register_systems(world: &mut World) {
-	world.new_system(<(Removed<(web_sys::Element,)>,)>::run(move |world, entity| {
-		// World::mark_borrow_mut();
-		// let world = unsafe { &mut *WORLD.get() as &mut World };
-		world.storage_mut::<web_sys::Element>().take_removed(entity).unwrap().remove();
+pub fn register_handlers(world: &mut World) {
+	world.storage_mut::<web_sys::Element>().on_removed = Some(move |_, world, entity, element| {
 		world.storage_mut::<web_sys::Node>().remove(entity);
 		world.storage_mut::<web_sys::EventTarget>().remove(entity);
 		world.storage_mut::<DomTypes>().remove(entity);
 		world.storage_mut::<Vec<crate::dom_events::EventHandler>>().remove(entity);
-		// World::unmark_borrow_mut();
-	}));
-	world.new_system(<(Removed<(DomTypes,)>,)>::run(move |world, entity| {
-		// World::mark_borrow_mut();
-		// let world = unsafe { &mut *WORLD.get() as &mut World };
-		let removeds = world.storage_mut::<DomTypes>().take_removed(entity).unwrap().0;
-		for t in removeds {
-			// TODO: WARNING: this won't notify systems watching it
+		element.remove();
+	});
+
+	world.storage_mut::<DomTypes>().on_removed = Some(move |_, world, entity, dom_types| {
+		for t in dom_types.0 {
+			// TODO: WARNING: this won't run handlers watching it
 			// which isn't a problem for now
 			world.storages[&t].borrow_mut().dyn_remove(entity);
 		}
-		// World::unmark_borrow_mut();
-	}));
+	});
 }
 
 pub fn html_element<T: AsRef<web_sys::HtmlElement> + 'static + Clone>(element: &T) -> Entity {
@@ -72,6 +66,7 @@ pub fn svg_element<T: AsRef<web_sys::SvgElement> + 'static + Clone>(element: &T)
 	World::mark_borrow_mut();
 	let mut world = unsafe { &mut *WORLD.get() as &mut World };
 	let entity = world.new_entity();
+
 	let svg_element = element.as_ref().clone();
 	dom_element(&mut world, entity, &svg_element);
 	world.storage_mut::<web_sys::SvgElement>().add(entity, svg_element);
@@ -82,6 +77,7 @@ pub fn svg_element<T: AsRef<web_sys::SvgElement> + 'static + Clone>(element: &T)
 		world.storage_mut::<T>().add(entity, element.clone());
 		world.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>(), TypeId::of::<T>()]));
 	}
+
 	World::unmark_borrow_mut();
 	entity
 }

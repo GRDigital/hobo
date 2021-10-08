@@ -2,7 +2,6 @@ pub mod prelude;
 pub mod web_str;
 mod style_storage;
 mod enclose;
-mod query;
 mod storage;
 pub mod state;
 pub mod create;
@@ -20,8 +19,7 @@ use std::collections::{HashMap, HashSet};
 use std::any::TypeId;
 use std::rc::Rc;
 use once_cell::sync::Lazy;
-use std::cell::{RefCell, Cell, Ref, RefMut, UnsafeCell};
-use std::marker::PhantomData;
+use std::cell::{RefCell, Ref, RefMut};
 use storage::*;
 use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
 use style_storage::STYLE_STORAGE;
@@ -56,7 +54,10 @@ pub trait AsEntity {
 		let world = unsafe { &mut *WORLD.get() as &mut World };
 		let entity = self.as_entity();
 		let storage = world.storage::<C>();
-		if !storage.has(entity) { World::unmark_borrow_mut(); return None; }
+		if !storage.has(entity) {
+			World::unmark_borrow_mut();
+			return None;
+		}
 		let res = Some(OwningRef::new(storage).map(|x| x.get(entity).unwrap()));
 		World::unmark_borrow_mut();
 		res
@@ -65,7 +66,10 @@ pub trait AsEntity {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
 		let entity = self.as_entity();
-		if !world.storage::<C>().has(entity) { World::unmark_borrow_mut(); return None; }
+		if !world.storage::<C>().has(entity) {
+			World::unmark_borrow_mut();
+			return None;
+		}
 		let res = Some(OwningRefMut::new(world.storage_mut::<C>()).map_mut(|x| x.get_mut(entity).unwrap()));
 		World::unmark_borrow_mut();
 		res
@@ -136,22 +140,6 @@ impl AsEntity for Entity {
 	fn as_entity(&self) -> Entity { *self }
 }
 
-// @Awpteamoose: in practice turns out not to be useful much
-// or maybe it's not convenient in a way where it would be useful
-// the only way it's used right now is in create.rs to remove web_sys dom types and clean up handlers, etc
-// so probably it should be scrapped
-pub struct System {
-	f: Box<dyn Fn(&mut World, Entity) + 'static>,
-	query: fn(&mut World, Entity) -> bool,
-	interests: fn() -> HashSet<TypeId>,
-}
-
-impl System {
-	pub fn f(&self, world: &mut World, entity: Entity) { (self.f)(world, entity) }
-	pub fn interests(&self) -> HashSet<TypeId> { (self.interests)() }
-	pub fn query(&self, world: &mut World, entity: Entity) -> bool { (self.query)(world, entity) }
-}
-
 type StorageRc = Rc<RefCell<Box<dyn DynStorage>>>;
 
 #[derive(Debug)]
@@ -177,53 +165,51 @@ pub struct World {
 	// this is used to remove components for when an entity has been removed
 	component_ownership: HashMap<Entity, HashSet<TypeId>>,
 	entities: Entities,
-
-	// TODO: should keep weak refs and have a separate map with strong refs so systems can be deregistered
-	systems_interests: HashMap<TypeId, Vec<Rc<System>>>,
-	system_update_lock: bool,
 }
 
-// ONLY safe until wasm threading becomes a thing
-unsafe impl Send for World {}
-unsafe impl Sync for World {}
-
-pub(crate) static WORLD_BORROWED: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
-pub(crate) static WORLD_BORROWED_MUT: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+// super turbo unsafe and dangerous, in debug checked at runtime via a global scope pseudo-refcell refcount
+// worth it tho since it's being constantly hit and wrapping everything in RefCells introduces a nontrivial perf cost
+// but also convenience/efficiency cost since you don't actually get a reference from a RefCell
+#[cfg(debug_assertions)] pub(crate) static WORLD_BORROWED: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+#[cfg(debug_assertions)] pub(crate) static WORLD_BORROWED_MUT: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 	let mut world = World::default();
 
-	let sys = <(Or<Added<(Classes,)>, Modified<(Classes,)>>, Present<(web_sys::Element,)>)>::run(move |world, entity| {
-		use std::fmt::Write;
+	{
+		fn update_classes(storage: &mut SimpleStorage<Classes>, world: &mut World, entity: Entity) {
+			use std::fmt::Write;
 
-		let mut res = format!("e{}g{}", entity.id, entity.generation);
-		{
-			let classes = world.storage::<Classes>();
-			let classes = classes.get(entity).unwrap();
+			let mut res = format!("e{}g{}", entity.id, entity.generation);
+			{
+				let classes = storage.get(entity).unwrap();
 
-			if let Some(id) = &classes.type_tag {
-				use std::hash::{Hash, Hasher};
+				if let Some(id) = &classes.type_tag {
+					use std::hash::{Hash, Hasher};
 
-				let mut hasher = std::collections::hash_map::DefaultHasher::new();
-				id.hash(&mut hasher);
-				let id = hasher.finish();
-				write!(&mut res, " t{}", id).unwrap();
+					let mut hasher = std::collections::hash_map::DefaultHasher::new();
+					id.hash(&mut hasher);
+					let id = hasher.finish();
+					write!(&mut res, " t{}", id).unwrap();
+				}
+
+				STYLE_STORAGE.with(|x| {
+					let mut style_storage = x.borrow_mut();
+					for style in classes.styles.values() {
+						write!(&mut res, " {}", style_storage.fetch(style.clone())).unwrap();
+					}
+				});
 			}
 
-			STYLE_STORAGE.with(|x| {
-				let mut style_storage = x.borrow_mut();
-				for style in classes.styles.values() {
-					write!(&mut res, " {}", style_storage.fetch(style.clone())).unwrap();
-				}
-			});
+			let elements = world.storage::<web_sys::Element>();
+			elements.get(entity).unwrap().set_attribute(web_str::class(), &res).expect("can't set class attribute");
 		}
 
-		let elements = world.storage::<web_sys::Element>();
-		elements.get(entity).unwrap().set_attribute(web_str::class(), &res).expect("can't set class attribute");
-	});
+		let mut classes = world.storage_mut::<Classes>();
+		classes.on_added = Some(update_classes);
+		classes.on_modified = Some(update_classes);
+	}
 
-	world.new_system(sys);
-
-	create::register_systems(&mut world);
+	create::register_handlers(&mut world);
 
 	world
 }));
@@ -234,30 +220,42 @@ type StorageMutRef<'a, Component> = StorageGuard<'a, Component, OwningRefMut<Own
 
 impl World {
 	#[track_caller]
+	#[inline]
 	pub(crate) fn mark_borrow() {
-		if WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to borrow World while it's mutably borrowed") }
-		WORLD_BORROWED.store(WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) + 1, std::sync::atomic::Ordering::Relaxed);
+		#[cfg(debug_assertions)] {
+			if WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to borrow World while it's mutably borrowed") }
+			WORLD_BORROWED.store(WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) + 1, std::sync::atomic::Ordering::Relaxed);
+		}
 	}
 
 	#[track_caller]
+	#[inline]
 	pub(crate) fn unmark_borrow() {
-		if WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to return borrow World but it's mutably borrowed") }
-		if WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) == 0 { panic!("trying to return borrow World but it's not borrowed") }
-		WORLD_BORROWED.store(WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) - 1, std::sync::atomic::Ordering::Relaxed);
+		#[cfg(debug_assertions)] {
+			if WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to return borrow World but it's mutably borrowed") }
+			if WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) == 0 { panic!("trying to return borrow World but it's not borrowed") }
+			WORLD_BORROWED.store(WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) - 1, std::sync::atomic::Ordering::Relaxed);
+		}
 	}
 
 	#[track_caller]
+	#[inline]
 	pub(crate) fn mark_borrow_mut() {
-		if WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) > 0 { panic!("trying to mutably borrow World while it's already got a borrow") }
-		if WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to mutably borrow World while it's mutably borrowed") }
-		WORLD_BORROWED_MUT.store(true, std::sync::atomic::Ordering::Relaxed);
+		#[cfg(debug_assertions)] {
+			if WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) > 0 { panic!("trying to mutably borrow World while it's already got a borrow") }
+			if WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to mutably borrow World while it's mutably borrowed") }
+			WORLD_BORROWED_MUT.store(true, std::sync::atomic::Ordering::Relaxed);
+		}
 	}
 
 	#[track_caller]
+	#[inline]
 	pub(crate) fn unmark_borrow_mut() {
-		if WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) > 0 { panic!("trying to return mutable borrow World but it's got a borrow") }
-		if !WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to return mutable borrow World but it's not mutably borrowed") }
-		WORLD_BORROWED_MUT.store(false, std::sync::atomic::Ordering::Relaxed);
+		#[cfg(debug_assertions)] {
+			if WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) > 0 { panic!("trying to return mutable borrow World but it's got a borrow") }
+			if !WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to return mutable borrow World but it's not mutably borrowed") }
+			WORLD_BORROWED_MUT.store(false, std::sync::atomic::Ordering::Relaxed);
+		}
 	}
 
 	fn dyn_storage<Component: 'static>(&mut self) -> Rc<RefCell<Box<dyn DynStorage>>> {
@@ -311,14 +309,6 @@ impl World {
 		}
 	}
 
-	pub fn new_system(&mut self, sys: System) {
-		let sys = Rc::new(sys);
-		for interest in sys.interests() {
-			self.systems_interests.entry(interest).or_insert_with(Vec::new).push(Rc::clone(&sys));
-		}
-	}
-
-	// TODO: add check systems in entity components
 	pub fn remove_entity(&mut self, entity: impl AsEntity) {
 		let entity = entity.as_entity();
 		if self.is_dead(entity) { log::warn!("remove entity already dead {:?}", entity); return; }
@@ -341,56 +331,19 @@ impl World {
 			if let Some(child_pos) = children.0.iter().position(|&x| x == entity) { children.0.remove(child_pos); }
 		}
 
-		// TODO: just take component_ids
-		let mut set: HashSet<TypeId> = HashSet::new();
-
 		if let Some(component_ids) = self.component_ownership.remove(&entity) {
-			// let storages = self.storages.try_borrow().expect("remove_entity storages.try_borrow .. remove");
 			for component_id in component_ids {
-				set.insert(component_id);
-				self.storages[&component_id].try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. remove").dyn_remove(entity);
+				let storage = Rc::clone(&self.storages[&component_id]);
+				let mut storage = storage.try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. remove");
+				storage.dyn_remove(entity);
+				storage.flush(self);
 			}
 		}
-
-		self.run_systems(std::iter::once(entity), set);
 	}
 
 	pub fn is_dead(&self, entity: impl AsEntity) -> bool {
 		let entity = entity.as_entity();
 		self.entities.generations[entity.id as usize] != entity.generation
-	}
-
-	fn run_systems(&mut self, entities: impl IntoIterator<Item = Entity> + Clone, components: impl IntoIterator<Item = TypeId> + Clone) {
-		let topmost_update = if self.system_update_lock { false } else { self.system_update_lock = true; true };
-
-		let to_run = {
-			let mut v = Vec::new();
-			for type_id in components.clone() {
-				if let Some(systems) = self.systems_interests.get(&type_id) {
-					for entity in entities.clone() {
-						for system in systems.iter() {
-							v.push((entity, Rc::clone(&system)));
-						}
-					}
-				}
-			}
-			v
-		};
-
-		for (entity, system) in to_run {
-			if system.query(self, entity) {
-				system.f(self, entity);
-			}
-		}
-
-		if topmost_update {
-			for component_id in components {
-				let mut storage = self.storages[&component_id].try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. flush_removed");
-				storage.flush();
-				storage.flush_removed();
-			}
-			self.system_update_lock = false;
-		}
 	}
 }
 

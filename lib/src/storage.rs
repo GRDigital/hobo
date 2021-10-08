@@ -6,8 +6,7 @@ use std::any::TypeId;
 pub trait DynStorage: as_any::AsAny {
 	fn dyn_has(&self, entity: Entity) -> bool;
 	fn dyn_remove(&mut self, entity: Entity);
-	fn flush(&mut self);
-	fn flush_removed(&mut self);
+	fn flush(&mut self, world: &mut World);
 }
 
 pub trait Storage<Component: 'static>: DynStorage {
@@ -27,14 +26,30 @@ pub trait Storage<Component: 'static>: DynStorage {
 pub struct SimpleStorage<Component: 'static> {
 	pub data: HashMap<Entity, Component>,
 	pub data_removed: HashMap<Entity, Component>,
+
 	pub added: HashSet<Entity>,
 	pub modified: HashSet<Entity>,
 	pub removed: HashSet<Entity>,
+
+	pub on_added: Option<fn(&mut SimpleStorage<Component>, &mut World, Entity)>,
+	pub on_modified: Option<fn(&mut SimpleStorage<Component>, &mut World, Entity)>,
+	pub on_removed: Option<fn(&mut SimpleStorage<Component>, &mut World, Entity, Component)>,
 }
 
 impl<Component> Default for SimpleStorage<Component> {
 	fn default() -> Self {
-		Self { data: default(), data_removed: default(), added: default(), removed: default(), modified: default() }
+		Self {
+			data: default(),
+			data_removed: default(),
+
+			added: default(),
+			removed: default(),
+			modified: default(),
+
+			on_added: default(),
+			on_modified: default(),
+			on_removed: default(),
+		}
 	}
 }
 
@@ -51,14 +66,38 @@ impl<Component: 'static> DynStorage for SimpleStorage<Component> {
 		}
 	}
 
-	fn flush(&mut self) {
-		std::mem::take(&mut self.added);
-		std::mem::take(&mut self.modified);
-		std::mem::take(&mut self.removed);
-	}
+	fn flush(&mut self, world: &mut World) {
+		for &added in &self.added {
+			world.component_ownership.entry(added).or_default().insert(std::any::TypeId::of::<Component>());
+		}
 
-	fn flush_removed(&mut self) {
-		self.data_removed.clear();
+		for removed in &self.removed {
+			if let Some(components) = world.component_ownership.get_mut(removed) {
+				components.remove(&std::any::TypeId::of::<Component>());
+			}
+		}
+
+		let entities = std::mem::take(&mut self.added);
+		if let Some(f) = self.on_added {
+			for &entity in &entities {
+				f(self, world, entity);
+			}
+		}
+
+		let entities = std::mem::take(&mut self.modified);
+		if let Some(f) = self.on_modified {
+			for &entity in &entities {
+				f(self, world, entity);
+			}
+		}
+
+		let entities = std::mem::take(&mut self.removed);
+		let mut data_removed = std::mem::take(&mut self.data_removed);
+		if let Some(f) = self.on_removed {
+			for entity in &entities {
+				f(self, world, *entity, data_removed.remove(entity).unwrap());
+			}
+		}
 	}
 }
 
@@ -139,24 +178,7 @@ impl<'a, Component, Inner> Drop for StorageGuard<'a, Component, Inner> where
 {
 	fn drop(&mut self) {
 		let StorageGuard(world, inner) = self;
-		drop(inner.take());
-
-		let set = {
-			// let mut storages = world.storages.borrow_mut();
-			let mut storage = world.storages.get_mut(&TypeId::of::<Component>()).unwrap().borrow_mut();
-			let storage = storage.as_any_mut().downcast_mut::<SimpleStorage<Component>>().unwrap();
-
-			for &added in &storage.added {
-				world.component_ownership.entry(added).or_default().insert(std::any::TypeId::of::<Component>());
-			}
-			for removed in &storage.removed {
-				if let Some(components) = world.component_ownership.get_mut(removed) {
-					components.remove(&std::any::TypeId::of::<Component>());
-				}
-			}
-			storage.added.iter().chain(storage.modified.iter()).chain(storage.removed.iter()).cloned().collect::<HashSet<_>>()
-		};
-
-		world.run_systems(set, std::iter::once(TypeId::of::<Component>()));
+		let storage = &mut *inner.take().unwrap();
+		storage.flush(world);
 	}
 }
