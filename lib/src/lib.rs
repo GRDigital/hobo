@@ -27,24 +27,19 @@ pub use element::{Element, Classes, Parent, Children, SomeElement};
 use racy_cell::RacyCell;
 
 // NOTES:
-// remove systems - handle deletion of web_sys stuff directly and handle classes changes directly
-// remove entity generations
 // queries to be able to find entities with/by components
 // queries to be able to find entities with/by components in children/parent/ancestor/family
 // * optionaly specify depth?
-// maybe can register event handlers (add, remove, change) for storages for each storage
 // resources stay, resources could be useful for caching/memoization/etc
+// add a name component that sets data-name or smth
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Entity {
-	id: u32,
-	generation: u32
-}
+pub struct Entity(u64);
 
 impl Entity {
-	fn root() -> Self { Self { id: 0, generation: 0 } }
+	fn root() -> Self { Self(0) }
 }
 
 pub trait AsEntity {
@@ -142,20 +137,6 @@ impl AsEntity for Entity {
 
 type StorageRc = Rc<RefCell<Box<dyn DynStorage>>>;
 
-#[derive(Debug)]
-struct Entities {
-	free_ids: Vec<u32>,
-	generations: Vec<u32>,
-}
-
-impl Default for Entities {
-	fn default() -> Self { Self {
-		free_ids: default(),
-		// Entity(0, 0) is a fake entity for holding resources
-		generations: vec![0],
-	} }
-}
-
 // @Awpteamoose: I think this could have all members as non-cells and the World itself can be in a cell
 // since in practice it turns out that WORLD isn't used, most methods are instead more conveniently called from AsEntity or smth
 // maybe World doesn't even have to be pub
@@ -164,7 +145,8 @@ pub struct World {
 	storages: HashMap<TypeId, StorageRc>,
 	// this is used to remove components for when an entity has been removed
 	component_ownership: HashMap<Entity, HashSet<TypeId>>,
-	entities: Entities,
+	next_entity: u64,
+	dead_entities: HashSet<Entity>,
 }
 
 // super turbo unsafe and dangerous, in debug checked at runtime via a global scope pseudo-refcell refcount
@@ -179,7 +161,7 @@ pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 		fn update_classes(storage: &mut SimpleStorage<Classes>, world: &mut World, entity: Entity) {
 			use std::fmt::Write;
 
-			let mut res = format!("e{}g{}", entity.id, entity.generation);
+			let mut res = format!("e-{:x}", entity.0);
 			{
 				let classes = storage.get(entity).unwrap();
 
@@ -189,7 +171,7 @@ pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 					let mut hasher = std::collections::hash_map::DefaultHasher::new();
 					id.hash(&mut hasher);
 					let id = hasher.finish();
-					write!(&mut res, " t{}", id).unwrap();
+					write!(&mut res, " t-{:x}", id).unwrap();
 				}
 
 				STYLE_STORAGE.with(|x| {
@@ -296,33 +278,22 @@ impl World {
 		Some(OwningRefMut::new(self.storage_mut()).map_mut(|x| x.get_mut(Entity::root()).unwrap()))
 	}
 
-	// if there's a removed entity, take that one
-	// otherwise the next id would be the one with unassigned generation,
-	// i.e. index of last generation + 1
 	pub fn new_entity(&mut self) -> Entity {
-		if let Some(id) = self.entities.free_ids.pop() {
-			Entity { id, generation: self.entities.generations[id as usize] }
-		} else {
-			let id = self.entities.generations.len() as u32;
-			self.entities.generations.push(0);
-			Entity { id, generation: 0 }
-		}
+		let entity = Entity(self.next_entity);
+		self.next_entity += 1;
+		entity
 	}
 
 	pub fn remove_entity(&mut self, entity: impl AsEntity) {
 		let entity = entity.as_entity();
 		if self.is_dead(entity) { log::warn!("remove entity already dead {:?}", entity); return; }
 
-		// if let Some(children) = entity.try_get_cmp::<Children>().map(|x| x.0.clone()) {
 		let children = self.storage::<Children>().get(entity).map(|x| x.0.clone());
 		if let Some(children) = children {
 			for child in children { self.remove_entity(child); }
 		}
 
-		{
-			self.entities.free_ids.push(entity.id);
-			self.entities.generations[entity.id as usize] += 1;
-		}
+		self.dead_entities.insert(entity);
 
 		let parent = self.storage::<Parent>().get(entity).copied();
 		if let Some(parent) = parent {
@@ -343,7 +314,7 @@ impl World {
 
 	pub fn is_dead(&self, entity: impl AsEntity) -> bool {
 		let entity = entity.as_entity();
-		self.entities.generations[entity.id as usize] != entity.generation
+		self.dead_entities.contains(&entity)
 	}
 }
 
@@ -369,7 +340,7 @@ impl<T: 'static> T {
 		let mut hasher = std::collections::hash_map::DefaultHasher::new();
 		TypeId::of::<Self>().hash(&mut hasher);
 		let id = hasher.finish();
-		format!("t{}", id)
+		format!("t-{:x}", id)
 	}
 }
 

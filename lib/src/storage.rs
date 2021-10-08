@@ -1,7 +1,5 @@
-// use super::*;
 use crate::{Entity, World, AsEntity, prelude::default};
 use std::collections::{HashMap, HashSet};
-use std::any::TypeId;
 
 pub trait DynStorage: as_any::AsAny {
 	fn dyn_has(&self, entity: Entity) -> bool;

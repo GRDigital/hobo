@@ -49,7 +49,7 @@ impl StyleStorage {
 	pub fn fetch(&mut self, mut style: css::Style) -> String {
 		// check if style exists in cache, in which case it's already inserted - just retrieve class name
 		if let Some(id) = self.map.get(&style) {
-			return format!("s{}", id);
+			return format!("s-{:x}", id);
 		}
 
 		// just getting the u64 hash from style
@@ -57,7 +57,7 @@ impl StyleStorage {
 
 		// caching the id
 		self.map.insert(style.clone(), id);
-		let class = format!("s{}", id);
+		let class = format!("s-{:x}", id);
 
 		style.fixup_class_placeholders(class.clone());
 
