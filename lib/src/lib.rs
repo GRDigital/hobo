@@ -169,7 +169,7 @@ pub trait AsEntity {
 	#[inline] fn get_cmp_mut_from_ancestors<'a, C: 'static>(&self) -> OwningRefMut<StorageGuard<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
 		Parent::ancestor_with_cmp::<C>(self.as_entity()).get_cmp_mut::<C>()
 	}
-	#[inline] fn has_cmp<'a, C: 'static>(&self) -> bool where Self: Sized {
+	#[inline] fn has_cmp<C: 'static>(&self) -> bool where Self: Sized {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
 		let res = world.storage::<C>().has(self.as_entity());
@@ -246,7 +246,7 @@ pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 			}
 
 			let elements = world.storage::<web_sys::Element>();
-			elements.get(entity).unwrap().set_attribute(web_str::class(), &res.trim()).expect("can't set class attribute");
+			elements.get(entity).unwrap().set_attribute(web_str::class(), res.trim()).expect("can't set class attribute");
 		}
 
 		let mut classes = world.storage_mut::<Classes>();
