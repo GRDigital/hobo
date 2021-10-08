@@ -39,6 +39,7 @@ pub use prelude::{Parent, Children};
 // could use an attribute macro over intostyle expressions to give them names and use names rather than hashes
 // organise uses, itnernal prelude uses could be pub(crate)
 // test shit ffs
+// move World and AsEntity into separate files
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
 
