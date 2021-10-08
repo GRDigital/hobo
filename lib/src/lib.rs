@@ -40,6 +40,7 @@ pub use prelude::{Parent, Children};
 // organise uses, itnernal prelude uses could be pub(crate)
 // test shit ffs
 // move World and AsEntity into separate files
+// could remove all *_mut elements and specify whether you want mutable or immutable component with the same trick as in Query
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
 
@@ -102,9 +103,9 @@ pub trait AsEntity {
 		self.get_cmp_mut_or(Default::default)
 	}
 	fn find_in_ancestors<Q: query::Query>(&self) -> Vec<Q::Fetch> {
+		let mut entities = Parent::ancestors(self.as_entity()).into_iter().collect();
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
-		let mut entities = Parent::ancestors(self.as_entity()).into_iter().collect();
 		Q::filter(world, &mut entities);
 		let res = entities.into_iter().map(|entity| Q::fetch(world, entity)).collect::<Vec<_>>();
 		World::unmark_borrow_mut();
