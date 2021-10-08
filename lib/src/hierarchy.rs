@@ -12,8 +12,8 @@ impl Parent {
 	pub fn ancestors(entity: impl AsEntity) -> Vec<Entity> {
 		fn inner(entity: Entity, ancestors: &mut Vec<Entity>) {
 			if let Some(parent) = entity.try_get_cmp::<Parent>().map(|x| x.0) {
-				inner(parent, ancestors);
 				ancestors.push(parent);
+				inner(parent, ancestors);
 			}
 		}
 
