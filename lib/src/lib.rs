@@ -9,13 +9,14 @@ mod dom_events;
 pub mod events;
 mod element;
 mod racy_cell;
+mod query;
 
 pub use hobo_css as css;
 pub use hobo_derive::*;
 pub use web_sys;
 pub use paste;
 use crate::prelude::*;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, BTreeSet};
 use std::any::TypeId;
 use std::rc::Rc;
 use once_cell::sync::Lazy;
@@ -33,6 +34,7 @@ use sugars::hash;
 // * optionaly specify depth?
 // resources stay, resources could be useful for caching/memoization/etc
 // add a name component that sets data-name or smth
+// * should be possible to find by name for those cases where you cba to set up a proper relationship
 // could use an attribute macro over intostyle expressions to give them names and use names rather than hashes
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
@@ -59,7 +61,7 @@ pub trait AsEntity {
 		World::unmark_borrow_mut();
 		res
 	}
-	#[inline] fn try_get_cmp_mut<'a, C: 'static>(&self) -> Option<OwningRefMut<StorageMutRef<'a, C>, C>> where Self: Sized {
+	#[inline] fn try_get_cmp_mut<'a, C: 'static>(&self) -> Option<OwningRefMut<StorageGuard<'a, C, StorageRefMut<'a, C>>, C>> where Self: Sized {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
 		let entity = self.as_entity();
@@ -78,27 +80,27 @@ pub trait AsEntity {
 		World::unmark_borrow_mut();
 		res
 	}
-	#[inline] fn get_cmp_mut<'a, C: 'static>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
+	#[inline] fn get_cmp_mut<'a, C: 'static>(&self) -> OwningRefMut<StorageGuard<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
 		let res = OwningRefMut::new(world.storage_mut::<C>()).map_mut(|x| x.get_mut(self).unwrap());
 		World::unmark_borrow_mut();
 		res
 	}
-	#[inline] fn get_cmp_mut_or<'a, C: 'static>(&self, f: impl FnOnce() -> C) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
+	#[inline] fn get_cmp_mut_or<'a, C: 'static>(&self, f: impl FnOnce() -> C) -> OwningRefMut<StorageGuard<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
 		let res = OwningRefMut::new(world.storage_mut::<C>()).map_mut(move |x| x.get_mut_or(self, f));
 		World::unmark_borrow_mut();
 		res
 	}
-	#[inline] fn get_cmp_mut_or_default<'a, C: 'static + Default>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
+	#[inline] fn get_cmp_mut_or_default<'a, C: 'static + Default>(&self) -> OwningRefMut<StorageGuard<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
 		self.get_cmp_mut_or(Default::default)
 	}
 	#[inline] fn get_cmp_from_ancestors<'a, C: 'static>(&self) -> OwningRef<StorageRef<'a, C>, C> where Self: Sized {
 		Parent::ancestor_with_cmp::<C>(self.as_entity()).get_cmp::<C>()
 	}
-	#[inline] fn get_cmp_mut_from_ancestors<'a, C: 'static>(&self) -> OwningRefMut<StorageMutRef<'a, C>, C> where Self: Sized {
+	#[inline] fn get_cmp_mut_from_ancestors<'a, C: 'static>(&self) -> OwningRefMut<StorageGuard<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
 		Parent::ancestor_with_cmp::<C>(self.as_entity()).get_cmp_mut::<C>()
 	}
 	#[inline] fn has_cmp<'a, C: 'static>(&self) -> bool where Self: Sized {
@@ -146,9 +148,9 @@ type StorageRc = Rc<RefCell<Box<dyn DynStorage>>>;
 pub struct World {
 	storages: HashMap<TypeId, StorageRc>,
 	// this is used to remove components for when an entity has been removed
-	component_ownership: HashMap<Entity, HashSet<TypeId>>,
+	component_ownership: HashMap<Entity, BTreeSet<TypeId>>,
 	next_entity: u64,
-	dead_entities: HashSet<Entity>,
+	dead_entities: BTreeSet<Entity>,
 }
 
 // super turbo unsafe and dangerous, in debug checked at runtime via a global scope pseudo-refcell refcount
@@ -193,7 +195,7 @@ pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 
 // this is not necessary, but it makes it convenient to further remap to some OwningRef or whatever
 type StorageRef<'a, Component> = OwningRef<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, Ref<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;
-type StorageMutRef<'a, Component> = StorageGuard<'a, Component, OwningRefMut<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, RefMut<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>>;
+type StorageRefMut<'a, Component> = OwningRefMut<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, RefMut<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;
 
 impl World {
 	#[track_caller]
@@ -241,7 +243,7 @@ impl World {
 			.or_insert_with(|| Rc::new(RefCell::new(Box::new(SimpleStorage::<Component>::default())))))
 	}
 
-	pub fn storage_mut<Component: 'static>(&mut self) -> StorageMutRef<Component> {
+	pub fn storage_mut<Component: 'static>(&mut self) -> StorageGuard<Component, StorageRefMut<Component>> {
 		let storage = OwningRefMut::new(OwningHandle::new_mut(self.dyn_storage::<Component>()))
 			.map_mut(|x| x.as_any_mut().downcast_mut().unwrap());
 		StorageGuard(self, Some(storage))
@@ -259,7 +261,7 @@ impl World {
 		OwningRef::new(self.storage()).map(|x| x.get(Entity::root()).unwrap())
 	}
 
-	pub fn resource_mut<T: 'static>(&mut self) -> OwningRefMut<StorageMutRef<T>, T> {
+	pub fn resource_mut<T: 'static>(&mut self) -> OwningRefMut<StorageGuard<T, StorageRefMut<T>>, T> {
 		OwningRefMut::new(self.storage_mut()).map_mut(|x| x.get_mut(Entity::root()).unwrap())
 	}
 
@@ -268,7 +270,7 @@ impl World {
 		Some(OwningRef::new(self.storage()).map(|x| x.get(Entity::root()).unwrap()))
 	}
 
-	pub fn try_resource_mut<T: 'static>(&mut self) -> Option<OwningRefMut<StorageMutRef<T>, T>> {
+	pub fn try_resource_mut<T: 'static>(&mut self) -> Option<OwningRefMut<StorageGuard<T, StorageRefMut<T>>, T>> {
 		if !self.storage::<T>().has(Entity::root()) { return None; }
 		Some(OwningRefMut::new(self.storage_mut()).map_mut(|x| x.get_mut(Entity::root()).unwrap()))
 	}
@@ -337,11 +339,40 @@ impl<T: 'static> T {
 	}
 }
 
+pub fn find<Q: query::Query>() -> Vec<Q::Fetch> {
+	World::mark_borrow_mut();
+	let world = unsafe { &mut *WORLD.get() as &mut World };
+	let mut entities = Q::populate(world);
+	Q::filter(world, &mut entities);
+	let res = entities.into_iter().map(|entity| Q::fetch(world, entity)).collect::<Vec<_>>();
+	World::unmark_borrow_mut();
+	res
+}
+
+pub fn try_find_one<Q: query::Query>() -> Option<Q::Fetch> {
+	World::mark_borrow_mut();
+	let world = unsafe { &mut *WORLD.get() as &mut World };
+	let mut entities = Q::populate(world);
+	Q::filter(world, &mut entities);
+	let res = entities.into_iter().next().map(|entity| Q::fetch(world, entity));
+	World::unmark_borrow_mut();
+	res
+}
+
+pub fn find_one<Q: query::Query>() -> Q::Fetch { try_find_one::<Q>().unwrap() }
+
+// #[test]
+fn poopoo() {
+	for (entity, u64s, u32s, _) in find::<(Entity, &u64, &u32, query::With<String>)>() {
+		let my_u64: u64 = *u64s;
+	}
+}
+
 // pub trait Component: 'static {
 //     #[inline] fn register_resource(self) where Self: Sized { WORLD.with(move |world| World::register_resource(&*world.borrow(), self)) }
 //     #[inline] fn resource<'a>() -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized { WORLD.with(move |world| World::resource::<Self>(&*world.borrow())) }
-//     #[inline] fn resource_mut<'a>() -> OwningRefMut<StorageMutRef<'a, Self>, Self> where Self: Sized { WORLD.with(move |world| World::resource_mut::<Self>(&*world.borrow())) }
+//     #[inline] fn resource_mut<'a>() -> OwningRefMut<StorageRefMut<'a, Self>, Self> where Self: Sized { WORLD.with(move |world| World::resource_mut::<Self>(&*world.borrow())) }
 //     #[inline] fn try_resource<'a>() -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized { WORLD.with(move |world| World::try_resource::<Self>(&*world.borrow())) }
-//     #[inline] fn try_resource_mut<'a>() -> Option<OwningRefMut<StorageMutRef<'a, Self>, Self>> where Self: Sized { WORLD.try_resource_mut::<Self>() }
+//     #[inline] fn try_resource_mut<'a>() -> Option<OwningRefMut<StorageRefMut<'a, Self>, Self>> where Self: Sized { WORLD.try_resource_mut::<Self>() }
 // }
 // impl<T: 'static + Sized> Component for T {}

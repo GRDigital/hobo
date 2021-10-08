@@ -8,10 +8,10 @@ use futures_signals::signal::SignalExt;
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Element)]
 pub struct SomeElement(pub Entity);
 
-#[derive(Default, Debug, shrinkwraprs::Shrinkwrap, Clone, Copy, PartialEq, Eq, AsEntity)]
+#[derive(Default, Debug, shrinkwraprs::Shrinkwrap, Clone, Copy, PartialEq, Eq, Hash, AsEntity)]
 pub struct Parent(Entity);
 
-#[derive(Default, Debug, shrinkwraprs::Shrinkwrap)]
+#[derive(Default, Debug, shrinkwraprs::Shrinkwrap, Clone, PartialEq, Eq, Hash)]
 #[shrinkwrap(mutable)]
 pub struct Children(pub Vec<Entity>);
 
@@ -37,7 +37,6 @@ impl Children {
 		if let Some(children) = entity.try_get_cmp_mut::<Children>().map(|mut x| x.0.drain(..).collect::<Vec<_>>()) {
 			for child in children {
 				child.remove();
-				// WORLD.remove_entity(child);
 			}
 		}
 	}
