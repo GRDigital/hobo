@@ -111,6 +111,16 @@ pub trait AsEntity {
 		World::unmark_borrow_mut();
 		res
 	}
+	fn try_find_first_in_ancestors<Q: query::Query>(&self) -> Option<Q::Fetch> {
+		let mut entities = Parent::ancestors(self.as_entity()).into_iter().collect();
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		Q::filter(world, &mut entities);
+		let res = Some(Q::fetch(world, entities.into_iter().next()?));
+		World::unmark_borrow_mut();
+		res
+	}
+	#[inline] fn find_first_in_ancestors<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_ancestors::<Q>().unwrap() }
 	fn find_in_descendants<Q: query::Query>(&self) -> Vec<Q::Fetch> {
 		let mut entities = Children::descendants(self.as_entity()).into_iter().collect();
 		World::mark_borrow_mut();
@@ -129,6 +139,26 @@ pub trait AsEntity {
 		World::unmark_borrow_mut();
 		res
 	}
+	fn try_find_first_in_descendants<Q: query::Query>(&self) -> Option<Q::Fetch> {
+		let mut entities = Children::descendants(self.as_entity()).into_iter().collect();
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		Q::filter(world, &mut entities);
+		let res = Some(Q::fetch(world, entities.into_iter().next()?));
+		World::unmark_borrow_mut();
+		res
+	}
+	fn try_find_first_in_children<Q: query::Query>(&self) -> Option<Q::Fetch> {
+		let mut entities = self.as_entity().try_get_cmp::<Children>().map_or_else(default, |x| x.0.iter().copied().collect());
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		Q::filter(world, &mut entities);
+		let res = Some(Q::fetch(world, entities.into_iter().next()?));
+		World::unmark_borrow_mut();
+		res
+	}
+	#[inline] fn find_first_in_descendants<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_descendants::<Q>().unwrap() }
+	#[inline] fn find_first_in_children<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_children::<Q>().unwrap() }
 	#[deprecated]
 	#[allow(deprecated)]
 	#[inline] fn get_cmp_from_ancestors<'a, C: 'static>(&self) -> OwningRef<StorageRef<'a, C>, C> where Self: Sized {
