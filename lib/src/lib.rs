@@ -361,13 +361,6 @@ pub fn try_find_one<Q: query::Query>() -> Option<Q::Fetch> {
 
 pub fn find_one<Q: query::Query>() -> Q::Fetch { try_find_one::<Q>().unwrap() }
 
-// #[test]
-fn poopoo() {
-	for (entity, u64s, u32s, _) in find::<(Entity, &u64, &u32, query::With<String>)>() {
-		let my_u64: u64 = *u64s;
-	}
-}
-
 // pub trait Component: 'static {
 //     #[inline] fn register_resource(self) where Self: Sized { WORLD.with(move |world| World::register_resource(&*world.borrow(), self)) }
 //     #[inline] fn resource<'a>() -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized { WORLD.with(move |world| World::resource::<Self>(&*world.borrow())) }
