@@ -2,14 +2,13 @@
 #[doc(hidden)] pub use wasm_bindgen::JsCast;
 
 pub use crate::{
+	hierarchy::{Parent, Children},
 	state,
 	web_str,
 	Entity,
 	element::{
 		Element,
 		SomeElement,
-		Parent,
-		Children,
 	},
 	AsEntity,
 	storage::{

@@ -10,6 +10,7 @@ pub mod events;
 mod element;
 mod racy_cell;
 mod query;
+mod hierarchy;
 
 pub use hobo_css as css;
 pub use hobo_derive::*;
@@ -24,18 +25,20 @@ use std::cell::{RefCell, Ref, RefMut};
 use storage::*;
 use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
 use style_storage::{STYLE_STORAGE, StyleStorage};
-pub use element::{Element, Classes, Parent, Children, SomeElement};
+pub use element::{Element, Classes, SomeElement};
 use racy_cell::RacyCell;
 use sugars::hash;
+pub use prelude::{Parent, Children};
 
 // NOTES:
-// queries to be able to find entities with/by components
 // queries to be able to find entities with/by components in children/parent/ancestor/family
 // * optionaly specify depth?
 // resources stay, resources could be useful for caching/memoization/etc
 // add a name component that sets data-name or smth
 // * should be possible to find by name for those cases where you cba to set up a proper relationship
 // could use an attribute macro over intostyle expressions to give them names and use names rather than hashes
+// organise uses, itnernal prelude uses could be pub(crate)
+// test shit ffs
 
 fn dom() -> web_sys::Document { web_sys::window().expect("no window").document().expect("no document") }
 
@@ -97,9 +100,40 @@ pub trait AsEntity {
 	#[inline] fn get_cmp_mut_or_default<'a, C: 'static + Default>(&self) -> OwningRefMut<StorageGuard<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
 		self.get_cmp_mut_or(Default::default)
 	}
+	fn find_in_ancestors<Q: query::Query>(&self) -> Vec<Q::Fetch> {
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		let mut entities = Parent::ancestors(self.as_entity()).into_iter().collect();
+		Q::filter(world, &mut entities);
+		let res = entities.into_iter().map(|entity| Q::fetch(world, entity)).collect::<Vec<_>>();
+		World::unmark_borrow_mut();
+		res
+	}
+	fn find_in_descendants<Q: query::Query>(&self) -> Vec<Q::Fetch> {
+		let mut entities = Children::descendants(self.as_entity()).into_iter().collect();
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		Q::filter(world, &mut entities);
+		let res = entities.into_iter().map(|entity| Q::fetch(world, entity)).collect::<Vec<_>>();
+		World::unmark_borrow_mut();
+		res
+	}
+	fn find_in_children<Q: query::Query>(&self) -> Vec<Q::Fetch> {
+		let mut entities = self.as_entity().try_get_cmp::<Children>().map_or_else(default, |x| x.0.iter().copied().collect());
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		Q::filter(world, &mut entities);
+		let res = entities.into_iter().map(|entity| Q::fetch(world, entity)).collect::<Vec<_>>();
+		World::unmark_borrow_mut();
+		res
+	}
+	#[deprecated]
+	#[allow(deprecated)]
 	#[inline] fn get_cmp_from_ancestors<'a, C: 'static>(&self) -> OwningRef<StorageRef<'a, C>, C> where Self: Sized {
 		Parent::ancestor_with_cmp::<C>(self.as_entity()).get_cmp::<C>()
 	}
+	#[deprecated]
+	#[allow(deprecated)]
 	#[inline] fn get_cmp_mut_from_ancestors<'a, C: 'static>(&self) -> OwningRefMut<StorageGuard<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
 		Parent::ancestor_with_cmp::<C>(self.as_entity()).get_cmp_mut::<C>()
 	}
@@ -111,28 +145,28 @@ pub trait AsEntity {
 		res
 	}
 
-	fn remove(&self) {
+	#[inline] fn remove(&self) {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
 		let res = world.remove_entity(self.as_entity());
 		World::unmark_borrow_mut();
 		res
 	}
-	fn is_dead(&self)  -> bool {
+	#[inline] fn is_dead(&self)  -> bool {
 		World::mark_borrow();
 		let world = unsafe { &*WORLD.get() as &World };
 		let res = world.is_dead(self.as_entity());
 		World::unmark_borrow();
 		res
 	}
-	fn add_component<T: 'static>(&self, component: T) {
+	#[inline] fn add_component<T: 'static>(&self, component: T) {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
 		let res = world.storage_mut::<T>().add(self.as_entity(), component);
 		World::unmark_borrow_mut();
 		res
 	}
-	fn component<T: 'static>(self, component: T) -> Self where Self: Sized { self.add_component(component); self }
+	#[inline] fn component<T: 'static>(self, component: T) -> Self where Self: Sized { self.add_component(component); self }
 }
 
 impl AsEntity for Entity {
