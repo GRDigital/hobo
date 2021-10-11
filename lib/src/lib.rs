@@ -216,7 +216,7 @@ pub struct World {
 	// this is used to remove components for when an entity has been removed
 	component_ownership: HashMap<Entity, BTreeSet<TypeId>>,
 	next_entity: u64,
-	dead_entities: BTreeSet<Entity>,
+	alive_entities: BTreeSet<Entity>,
 }
 
 // super turbo unsafe and dangerous, in debug checked at runtime via a global scope pseudo-refcell refcount
@@ -344,6 +344,7 @@ impl World {
 	pub fn new_entity(&mut self) -> Entity {
 		let entity = Entity(self.next_entity);
 		self.next_entity += 1;
+		self.alive_entities.insert(entity);
 		entity
 	}
 
@@ -356,7 +357,7 @@ impl World {
 			for child in children { self.remove_entity(child); }
 		}
 
-		self.dead_entities.insert(entity);
+		self.alive_entities.remove(&entity);
 
 		let parent = self.storage::<Parent>().get(entity).copied();
 		if let Some(parent) = parent {
@@ -377,7 +378,7 @@ impl World {
 
 	pub fn is_dead(&self, entity: impl AsEntity) -> bool {
 		let entity = entity.as_entity();
-		self.dead_entities.contains(&entity)
+		!self.alive_entities.contains(&entity)
 	}
 }
 
