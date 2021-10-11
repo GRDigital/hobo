@@ -1,215 +1,94 @@
-use super::*;
-use sugars::*;
+#![allow(unused_variables)]
 
-/* dream syntax:
-	hobo::find::<(&C1, &C2, With<C3>)>() // -> Vec<(&C1, &C2, bool)>
-	hobo::find_one::<(&C1, &C2, With<C3>)>() // -> (&C1, &C2, bool)
-	hobo::try_find_one::<(&C1, &C2, With<C3>)>() // -> Option<(&C1, &C2, bool)>
+use crate::prelude::*;
+use std::collections::BTreeSet;
+use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
+use crate::{StorageRef, StorageRefMut};
 
-	hobo::find::<(&mut C1, &C2)>() // -> Vec<(&mut C1, &C2)>
-	hobo::find::<(Entity, &mut C1, &C2)>() // -> Vec<(&mut C1, &C2)>
+pub trait Query {
+	type Fetch;
 
-	trait QueryParam {
-		fn apply(world: &mut World, entities: &mut Vec<Entity>) -> Self;
-	}
-*/
-
-// impl<T: 'static> QueryParam for &mut T {
-//     fn apply(world: &World, entities: &mut Vec<Entity>) -> Vec<Self> { todo!() }
-// }
-
-pub trait BasicQuery: 'static {
-	fn exists(world: &World, entity: Entity) -> bool;
-	fn added(world: &World, entity: Entity) -> bool;
-	fn modified(world: &World, entity: Entity) -> bool;
-	fn removed(world: &World, entity: Entity) -> bool;
+	fn filter(world: &mut World, entities: &mut BTreeSet<Entity>) {}
+	fn populate(world: &mut World) -> BTreeSet<Entity> { BTreeSet::new() }
+	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch;
 }
 
-pub trait Query: 'static {
-	fn components() -> HashSet<TypeId>;
-	fn query(world: &World, entity: Entity) -> bool;
-	fn run<F: Fn(Entity) + 'static>(f: F) -> System {
-		System { f: Box::new(f), query: Self::query, interests: Self::components }
-	}
+impl Query for Entity {
+	type Fetch = Entity;
+
+	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch { entity }
 }
 
-// Added<(T1, T2, T3)> implies that one of T1, T2, T3 was added
-// the use-case of an archetype that was just entered would be Query<(Added<(T1, T2, T3)>, (T1, T2, T3))>
-pub struct Added<T: BasicQuery>(PhantomData<T>);
-// Removed<(T1, T2, T3)> implies that at least one of T1, T2, T3 was removed
-// the use-case of an archetype having been left could be Query<(Removed<(T1, T2, T3)>)>
-pub struct Removed<T: BasicQuery>(PhantomData<T>);
-// Modified<(T1, T2, T3)> implies that one of T1, T2, T3 was changed
-pub struct Modified<T: BasicQuery>(PhantomData<T>);
-// Present<(T1, T2, T3)> implies that all of T1, T2, T3 are attached to the entity
-pub struct Present<T: BasicQuery>(PhantomData<T>);
+// same search as &Component, but fetch is a noop
+pub struct With<Component: 'static>(std::marker::PhantomData<Component>);
+impl<Component: 'static> Query for With<Component> {
+	type Fetch = ();
 
-pub struct Or<Left: Query, Right: Query>(PhantomData<Left>, PhantomData<Right>);
-impl<Left: Query, Right: Query> Query for Or<Left, Right> {
-	fn query(world: &World, entity: Entity) -> bool {
-		Left::query(world, entity) || Right::query(world, entity)
+	fn filter(world: &mut World, entities: &mut BTreeSet<Entity>) { <&Component as Query>::filter(world, entities); }
+	fn populate(world: &mut World) -> BTreeSet<Entity> { <&Component as Query>::populate(world) }
+	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {}
+}
+
+impl<Component: 'static> Query for &Component {
+	type Fetch = OwningRef<Box<dyn owning_ref::Erased>, Component>;
+
+	fn filter(world: &mut World, entities: &mut BTreeSet<Entity>) {
+		let storage = world.storage::<Component>();
+		entities.retain(|entity| storage.has(entity));
 	}
+	fn populate(world: &mut World) -> BTreeSet<Entity> {
+		let storage = world.storage::<Component>();
+		storage.data.keys().copied().collect()
+	}
+	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {
+		let storage: StorageRef<Component> = OwningRef::new(OwningHandle::new(world.dyn_storage::<Component>()))
+			.map(|x| x.as_any().downcast_ref().unwrap());
 
-	fn components() -> HashSet<TypeId> {
-		let mut acc = Left::components();
-		acc.extend(Right::components());
-		acc
+		storage
+			.map(|x| x.get(entity).unwrap())
+			.map_owner_box().erase_owner()
 	}
 }
 
-impl<T: 'static> BasicQuery for T {
-	fn exists(world: &World, entity: Entity) -> bool {
-		world.storage::<Self>().has(entity)
-	}
+impl<Component: 'static> Query for &mut Component {
+	type Fetch = OwningRefMut<Box<dyn owning_ref::Erased>, Component>;
 
-	fn added(world: &World, entity: Entity) -> bool {
-		world.storage::<Self>().added.contains(&entity)
-	}
+	fn filter(world: &mut World, entities: &mut BTreeSet<Entity>) { <&Component as Query>::filter(world, entities); }
+	fn populate(world: &mut World) -> BTreeSet<Entity> { <&Component as Query>::populate(world) }
+	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {
+		let storage: StorageRefMut<Component> = OwningRefMut::new(OwningHandle::new_mut(world.dyn_storage::<Component>()))
+			.map_mut(|x| x.as_any_mut().downcast_mut().unwrap());
 
-	fn modified(world: &World, entity: Entity) -> bool {
-		world.storage::<Self>().modified.contains(&entity)
-	}
-
-	fn removed(world: &World, entity: Entity) -> bool {
-		world.storage::<Self>().removed.contains(&entity)
+		storage
+			.map_mut(|x| x.get_mut(entity).unwrap())
+			.map_owner_box().erase_owner()
 	}
 }
 
-// impl<T: BasicQuery> Query for Present<T> {
-//     fn query(world: &World, entity: Entity) -> bool {
-//         T::exists(world, entity)
-//     }
+macro_rules! impl_for_tuples {
+	(($($_:ident),*)) => {};
+	(($first:ident, $($old:ident),*) $curr:ident $($rest:tt)*) => {
+		impl<$first: Query, $($old: Query,)* $curr: Query> Query for ($first, $($old,)* $curr) {
+			type Fetch = ($first::Fetch, $($old::Fetch,)* $curr::Fetch);
 
-//     fn components() -> HashSet<TypeId> {
-//         hset![TypeId::of::<T>]
-//     }
-// }
-
-// impl<T: BasicQuery> Query for Added<T> {
-//     fn query(world: &World, entity: Entity) -> bool {
-//         T::added(world, entity)
-//     }
-
-//     fn components() -> HashSet<TypeId> {
-//         hset![TypeId::of::<T>()]
-//     }
-// }
-
-// impl<T: BasicQuery> Query for Modified<T> {
-//     fn query(world: &World, entity: Entity) -> bool {
-//         T::modified(world, entity)
-//     }
-
-//     fn components() -> HashSet<TypeId> {
-//         hset![TypeId::of::<T>()]
-//     }
-// }
-
-// impl<T: BasicQuery> Query for Removed<T> {
-//     fn query(world: &World, entity: Entity) -> bool {
-//         T::removed(world, entity)
-//     }
-
-//     fn components() -> HashSet<TypeId> {
-//         hset![TypeId::of::<T>()]
-//     }
-// }
-
-macro_rules! tuple_query {
-	() => {};
-	($first:ident $($id:ident)*) => {
-		paste::item! {
-			impl<$first: Query, $($id: Query),*> Query for ($first, $($id),*) {
-				fn query(world: &World, entity: Entity) -> bool {
-					$first::query(world, entity)
-					$(&& $id::query(world, entity))*
-				}
-
-				#[allow(unused_mut)]
-				fn components() -> HashSet<TypeId> {
-					let mut acc = $first::components();
-					$(acc.extend($id::components());)*
-					acc
-				}
+			fn filter(world: &mut World, entities: &mut BTreeSet<Entity>) {
+				*entities = Self::populate(world);
+				$($old::filter(world, entities);)*
+				$curr::filter(world, entities);
 			}
-
-			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Present<($first, $($id),*)> {
-				fn query(world: &World, entity: Entity) -> bool {
-					$first::exists(world, entity)
-					$(&& $id::exists(world, entity))*
-				}
-
-				fn components() -> HashSet<TypeId> {
-					hset![
-						TypeId::of::<$first>(),
-						$(TypeId::of::<$id>()),*
-					]
-				}
+			fn populate(world: &mut World) -> BTreeSet<Entity> {
+				$first::populate(world)
 			}
-
-			// TODO: could use clever bitmasking to achieve a similar effect to Removed
-			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Added<($first, $($id),*)> {
-				fn query(world: &World, entity: Entity) -> bool {
-					$first::added(world, entity)
-					$(|| $id::added(world, entity))*
-				}
-
-				fn components() -> HashSet<TypeId> {
-					hset![
-						TypeId::of::<$first>(),
-						$(TypeId::of::<$id>()),*
-					]
-				}
-			}
-
-			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Modified<($first, $($id),*)> {
-				fn query(world: &World, entity: Entity) -> bool {
-					$first::modified(world, entity)
-					$(|| $id::modified(world, entity))*
-				}
-
-				fn components() -> HashSet<TypeId> {
-					hset![
-						TypeId::of::<$first>(),
-						$(TypeId::of::<$id>()),*
-					]
-				}
-			}
-
-			impl<$first: BasicQuery, $($id: BasicQuery),*> Query for Removed<($first, $($id),*)> {
-				#[allow(unused_mut)]
-				fn query(world: &World, entity: Entity) -> bool {
-					// total - bitmask with 1s for every component queried
-					// present - bitmask with 1s for every queried component that exists
-					// missing - bitmask with 1s for every queried component that is marked as removed
-
-					let mut total: u32;
-					let mut present: u32;
-					let mut missing: u32;
-
-					total = 1;
-					present = if $first::exists(world, entity) { 1 } else { 0 };
-					missing = if $first::removed(world, entity) { 1 } else { 0 };
-
-					$(
-						total = (total << 1) + 1;
-						present = (present << 1) + if $id::exists(world, entity) { 1 } else { 0 };
-						missing = (missing << 1) + if $id::removed(world, entity) { 1 } else { 0 };
-					)*
-
-					(present != total) && ((present | missing) == total)
-				}
-
-				fn components() -> HashSet<TypeId> {
-					hset![
-						TypeId::of::<$first>(),
-						$(TypeId::of::<$id>()),*
-					]
-				}
+			fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {
+				($first::fetch(world, entity), $($old::fetch(world, entity),)* $curr::fetch(world, entity))
 			}
 		}
-		tuple_query! {$($id)*}
+
+		impl_for_tuples![($first, $($old,)* $curr) $($rest)*];
+	};
+	($first:ident $($rest:tt)*) => {
+		impl_for_tuples![($first, ) $($rest)*];
 	};
 }
 
-tuple_query! {A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
+impl_for_tuples![A B C D E F G H I J K L M N O P Q R S T U V W X Y Z];

@@ -2,16 +2,13 @@
 #[doc(hidden)] pub use wasm_bindgen::JsCast;
 
 pub use crate::{
+	hierarchy::{Parent, Children},
 	state,
 	web_str,
-	WORLD,
-	World,
 	Entity,
 	element::{
 		Element,
 		SomeElement,
-		Parent,
-		Children,
 	},
 	AsEntity,
 	storage::{
@@ -23,6 +20,7 @@ pub use crate::{
 	dom_events::impls::*,
 	create::StringValue,
 };
+pub(crate) use crate::{World, WORLD};
 pub use crate::css::{self, AppendProperty, F32, F32Ext as _};
 pub use wasm_bindgen::prelude::*;
 pub use web_sys;

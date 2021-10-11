@@ -8,44 +8,6 @@ use futures_signals::signal::SignalExt;
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Element)]
 pub struct SomeElement(pub Entity);
 
-#[derive(Default, Debug, shrinkwraprs::Shrinkwrap, Clone, Copy, PartialEq, Eq, AsEntity)]
-pub struct Parent(Entity);
-
-#[derive(Default, Debug, shrinkwraprs::Shrinkwrap)]
-#[shrinkwrap(mutable)]
-pub struct Children(pub Vec<Entity>);
-
-impl Parent {
-	pub fn ancestors(entity: impl AsEntity) -> Vec<Entity> {
-		if let Some(parent) = entity.try_get_cmp::<Parent>().map(|x| x.0) {
-			let mut v = Self::ancestors(parent);
-			v.push(parent);
-			v
-		} else {
-			Vec::new()
-		}
-	}
-
-	pub fn ancestor_with_cmp<T: 'static>(entity: Entity) -> Entity {
-		let parent = entity.get_cmp::<Parent>().0;
-		if parent.has_cmp::<T>() { parent } else { Parent::ancestor_with_cmp::<T>(parent) }
-	}
-}
-
-impl Children {
-	pub fn clear(entity: impl AsEntity) {
-		if let Some(children) = entity.try_get_cmp_mut::<Children>().map(|mut x| x.0.drain(..).collect::<Vec<_>>()) {
-			for child in children {
-				WORLD.remove_entity(child);
-			}
-		}
-	}
-
-	pub fn collect_with_cmp<T: 'static>(&self) -> Vec<Entity> {
-		self.0.iter().filter(|e| e.has_cmp::<T>()).copied().collect::<Vec<_>>()
-	}
-}
-
 #[derive(Default)]
 pub struct Classes {
 	pub(crate) type_tag: Option<TypeId>,
@@ -57,8 +19,8 @@ struct SignalHandlesCollection(Vec<discard::DiscardOnDrop<futures_signals::Cance
 
 pub trait Element: AsEntity + Sized {
 	fn add_child(&self, child: impl Element) {
-		if WORLD.is_dead(self) { log::warn!("add_child parent dead {:?}", self.as_entity()); return; }
-		if WORLD.is_dead(&child) { log::warn!("add_child child dead {:?}", child.as_entity()); return; }
+		if self.is_dead() { log::warn!("add_child parent dead {:?}", self.as_entity()); return; }
+		if child.is_dead() { log::warn!("add_child child dead {:?}", child.as_entity()); return; }
 		self.get_cmp_mut_or_default::<Children>().0.push(child.as_entity());
 		child.get_cmp_mut_or_default::<Parent>().0 = self.as_entity();
 
@@ -95,7 +57,7 @@ pub trait Element: AsEntity + Sized {
 	{ self.add_child_signal(signal); self }
 
 	fn set_class_tagged<Tag: std::hash::Hash + 'static>(&self, tag: Tag, style: impl Into<css::Style>) {
-		if WORLD.is_dead(self) { log::warn!("set_class_tagged dead {:?}", self.as_entity()); return; }
+		if self.is_dead() { log::warn!("set_class_tagged dead {:?}", self.as_entity()); return; }
 
 		// tested and different types with same byte-level representation hash to the same thing (not surprising)
 		// i.e. the type is not taken into account when hashing so I have to do it manually
@@ -127,7 +89,7 @@ pub trait Element: AsEntity + Sized {
 		S: futures_signals::signal::Signal<Item = I> + 'static,
 	{
 		let entity = self.as_entity();
-		if WORLD.is_dead(entity) { log::warn!("set_class_signal dead entity {:?}", entity); return; }
+		if entity.is_dead() { log::warn!("set_class_signal dead entity {:?}", entity); return; }
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |class| {
 			SomeElement(entity).set_class(class);
 			async move { }
@@ -147,7 +109,7 @@ pub trait Element: AsEntity + Sized {
 		S: futures_signals::signal::Signal<Item = I> + 'static,
 	{
 		let entity = self.as_entity();
-		if WORLD.is_dead(entity) { log::warn!("set_class_signal dead entity {:?}", entity); return; }
+		if entity.is_dead() { log::warn!("set_class_signal dead entity {:?}", entity); return; }
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |class| {
 			SomeElement(entity).set_class_typed::<Type>(class.into());
 			async move { }
@@ -168,7 +130,7 @@ pub trait Element: AsEntity + Sized {
 		S: futures_signals::signal::Signal<Item = (Tag, I)> + 'static,
 	{
 		let entity = self.as_entity();
-		if WORLD.is_dead(entity) { log::warn!("set_class_signal dead entity {:?}", entity); return; }
+		if entity.is_dead() { log::warn!("set_class_signal dead entity {:?}", entity); return; }
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |(tag, class)| {
 			SomeElement(entity).set_class_tagged(tag, class);
 			async move { }
@@ -184,7 +146,7 @@ pub trait Element: AsEntity + Sized {
 	{ self.set_class_tagged_signal::<Tag, S, I>(signal); self }
 
 	fn set_attr<'k, 'v>(&self, key: impl Into<Cow<'k, str>>, value: impl Into<Cow<'v, str>>) {
-		if WORLD.is_dead(self) { log::warn!("set_attr dead {:?}", self.as_entity()); return; }
+		if self.is_dead() { log::warn!("set_attr dead {:?}", self.as_entity()); return; }
 		let key = key.into();
 		let value = value.into();
 		self.get_cmp::<web_sys::Element>().set_attribute(&key, &value).unwrap_or_else(|_| panic!("can't set attribute {} to {}", key, value));
@@ -193,7 +155,7 @@ pub trait Element: AsEntity + Sized {
 	fn set_bool_attr<'k>(&self, key: impl Into<Cow<'k, str>>, value: bool) { if value { self.set_attr(key, "") } else { self.remove_attr(key) } }
 	fn bool_attr<'k>(self, key: impl Into<Cow<'k, str>>, value: bool) -> Self { self.set_bool_attr(key, value); self }
 	fn remove_attr<'k>(&self, key: impl Into<Cow<'k, str>>) {
-		if WORLD.is_dead(self) { log::warn!("remove_attr dead {:?}", self.as_entity()); return; }
+		if self.is_dead() { log::warn!("remove_attr dead {:?}", self.as_entity()); return; }
 		self.get_cmp::<web_sys::Element>().remove_attribute(&key.into()).expect("can't remove attribute");
 	}
 
@@ -203,7 +165,7 @@ pub trait Element: AsEntity + Sized {
 		S: futures_signals::signal::Signal<Item = (K, V)> + 'static,
 	{
 		let entity = self.as_entity();
-		if WORLD.is_dead(entity) { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
+		if entity.is_dead() { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |(k, v)| {
 			SomeElement(entity).set_attr(k, v);
 			async move { }
@@ -223,7 +185,7 @@ pub trait Element: AsEntity + Sized {
 		S: futures_signals::signal::Signal<Item = bool> + 'static,
 	{
 		let entity = self.as_entity();
-		if WORLD.is_dead(entity) { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
+		if entity.is_dead() { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
 		let attr = attr.into().into_owned();
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |v| {
 			SomeElement(entity).set_bool_attr(&attr, v);
@@ -239,7 +201,7 @@ pub trait Element: AsEntity + Sized {
 	{ self.set_bool_attr_signal(attr, x); self }
 
 	fn set_text<'a>(&self, text: impl Into<std::borrow::Cow<'a, str>>) {
-		if WORLD.is_dead(self) { log::warn!("set_text dead entity {:?}", self.as_entity()); return; }
+		if self.is_dead() { log::warn!("set_text dead entity {:?}", self.as_entity()); return; }
 		self.get_cmp::<web_sys::Node>().set_text_content(Some(&text.into()));
 	}
 	fn text<'a>(self, x: impl Into<std::borrow::Cow<'a, str>>) -> Self { self.set_text(x); self }
@@ -249,7 +211,7 @@ pub trait Element: AsEntity + Sized {
 		S: futures_signals::signal::Signal<Item = I> + 'static,
 	{
 		let entity = self.as_entity();
-		if WORLD.is_dead(entity) { log::warn!("set_text_signal dead entity {:?}", entity); return; }
+		if entity.is_dead() { log::warn!("set_text_signal dead entity {:?}", entity); return; }
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |text| {
 			SomeElement(entity).set_text(text);
 			async move { }
@@ -276,7 +238,7 @@ pub trait Element: AsEntity + Sized {
 		S: futures_signals::signal::Signal<Item = I> + 'static,
 	{
 		let entity = self.as_entity();
-		if WORLD.is_dead(entity) { log::warn!("set_style_signal dead entity {:?}", entity); return; }
+		if entity.is_dead() { log::warn!("set_style_signal dead entity {:?}", entity); return; }
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |style| {
 			SomeElement(entity).set_style(style);
 			async move { }
@@ -291,7 +253,7 @@ pub trait Element: AsEntity + Sized {
 	{ self.set_style_signal(signal); self }
 
 	fn mark<T: 'static>(self) -> Self {
-		if WORLD.is_dead(&self) { log::warn!("mark dead {:?}", self.as_entity()); return self; }
+		if self.is_dead() { log::warn!("mark dead {:?}", self.as_entity()); return self; }
 		self.get_cmp_mut_or_default::<Classes>().type_tag = Some(TypeId::of::<T>());
 		self
 	}
@@ -304,7 +266,7 @@ pub trait Element: AsEntity + Sized {
 	// !!!!!! NOT TRUE - any handler that was created with the new entity will be busted, so this is fine
 	fn replace_with<T: Element>(&self, other: T) -> T {
 		let other_entity = other.as_entity();
-		if WORLD.is_dead(self) { log::warn!("replace_with dead {:?}", self.as_entity()); return other; }
+		if self.is_dead() { log::warn!("replace_with dead {:?}", self.as_entity()); return other; }
 
 		// why not unwrapping? how can this fail?
 		if let (Some(this), Some(other)) = (self.try_get_cmp::<web_sys::Element>(), other_entity.try_get_cmp::<web_sys::Node>()) {
@@ -313,14 +275,15 @@ pub trait Element: AsEntity + Sized {
 
 		// Fix up reference in parent
 		if let Some(parent) = self.try_get_cmp::<Parent>().map(|x| x.0) {
-			if WORLD.is_dead(parent) { log::warn!("replace_with parent dead {:?}", parent); return other; }
+			if parent.is_dead() { log::warn!("replace_with parent dead {:?}", parent); return other; }
 			let mut children = parent.get_cmp_mut::<Children>();
 			let position = children.0.iter().position(|&x| x == self.as_entity()).expect("entity claims to be a child while missing in parent");
 			children.0[position] = other.as_entity();
 			other_entity.get_cmp_mut_or_default::<Parent>().0 = parent;
 		}
 
-		WORLD.remove_entity(self);
+		self.remove();
+		// WORLD.remove_entity(self);
 		other
 	}
 
