@@ -8,8 +8,7 @@ use crate::{StorageRef, StorageRefMut};
 pub trait Query {
 	type Fetch;
 
-	fn filter(world: &mut World, entities: &mut BTreeSet<Entity>) {}
-	fn populate(world: &mut World) -> BTreeSet<Entity> { BTreeSet::new() }
+	fn filter(world: &mut World, entities: &mut Option<BTreeSet<Entity>>) {}
 	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch;
 }
 
@@ -24,21 +23,20 @@ pub struct With<Component: 'static>(std::marker::PhantomData<Component>);
 impl<Component: 'static> Query for With<Component> {
 	type Fetch = ();
 
-	fn filter(world: &mut World, entities: &mut BTreeSet<Entity>) { <&Component as Query>::filter(world, entities); }
-	fn populate(world: &mut World) -> BTreeSet<Entity> { <&Component as Query>::populate(world) }
+	fn filter(world: &mut World, entities: &mut Option<BTreeSet<Entity>>) { <&Component as Query>::filter(world, entities); }
 	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {}
 }
 
 impl<Component: 'static> Query for &Component {
 	type Fetch = OwningRef<Box<dyn owning_ref::Erased>, Component>;
 
-	fn filter(world: &mut World, entities: &mut BTreeSet<Entity>) {
+	fn filter(world: &mut World, entities: &mut Option<BTreeSet<Entity>>) {
 		let storage = world.storage::<Component>();
-		entities.retain(|entity| storage.has(entity));
-	}
-	fn populate(world: &mut World) -> BTreeSet<Entity> {
-		let storage = world.storage::<Component>();
-		storage.data.keys().copied().collect()
+		if let Some(entities) = entities {
+			entities.retain(|entity| storage.has(entity));
+		} else {
+			*entities = Some(storage.data.keys().copied().collect());
+		}
 	}
 	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {
 		let storage: StorageRef<Component> = OwningRef::new(OwningHandle::new(world.dyn_storage::<Component>()))
@@ -53,8 +51,7 @@ impl<Component: 'static> Query for &Component {
 impl<Component: 'static> Query for &mut Component {
 	type Fetch = OwningRefMut<Box<dyn owning_ref::Erased>, Component>;
 
-	fn filter(world: &mut World, entities: &mut BTreeSet<Entity>) { <&Component as Query>::filter(world, entities); }
-	fn populate(world: &mut World) -> BTreeSet<Entity> { <&Component as Query>::populate(world) }
+	fn filter(world: &mut World, entities: &mut Option<BTreeSet<Entity>>) { <&Component as Query>::filter(world, entities); }
 	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {
 		let storage: StorageRefMut<Component> = OwningRefMut::new(OwningHandle::new_mut(world.dyn_storage::<Component>()))
 			.map_mut(|x| x.as_any_mut().downcast_mut().unwrap());
@@ -67,27 +64,23 @@ impl<Component: 'static> Query for &mut Component {
 
 macro_rules! impl_for_tuples {
 	(($($_:ident),*)) => {};
-	(($first:ident, $($old:ident),*) $curr:ident $($rest:tt)*) => {
-		impl<$first: Query, $($old: Query,)* $curr: Query> Query for ($first, $($old,)* $curr) {
-			type Fetch = ($first::Fetch, $($old::Fetch,)* $curr::Fetch);
+	(($($old:ident),*) $curr:ident $($rest:tt)*) => {
+		impl<$($old: Query,)* $curr: Query> Query for ($($old,)* $curr) {
+			type Fetch = ($($old::Fetch,)* $curr::Fetch);
 
-			fn filter(world: &mut World, entities: &mut BTreeSet<Entity>) {
-				*entities = Self::populate(world);
+			fn filter(world: &mut World, entities: &mut Option<BTreeSet<Entity>>) {
 				$($old::filter(world, entities);)*
 				$curr::filter(world, entities);
 			}
-			fn populate(world: &mut World) -> BTreeSet<Entity> {
-				$first::populate(world)
-			}
 			fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {
-				($first::fetch(world, entity), $($old::fetch(world, entity),)* $curr::fetch(world, entity))
+				($($old::fetch(world, entity),)* $curr::fetch(world, entity))
 			}
 		}
 
-		impl_for_tuples![($first, $($old,)* $curr) $($rest)*];
+		impl_for_tuples![($($old,)* $curr) $($rest)*];
 	};
 	($first:ident $($rest:tt)*) => {
-		impl_for_tuples![($first, ) $($rest)*];
+		impl_for_tuples![($first) $($rest)*];
 	};
 }
 
