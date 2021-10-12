@@ -10,6 +10,11 @@ impl Color {
 		let [r, g, b, a] = hex.to_be_bytes();
 		Self { r, g, b, a }
 	}
+
+	pub const fn r(mut self, x: u8) -> Self { self.r = x; self }
+	pub const fn g(mut self, x: u8) -> Self { self.g = x; self }
+	pub const fn b(mut self, x: u8) -> Self { self.b = x; self }
+	pub const fn a(mut self, x: u8) -> Self { self.a = x; self }
 }
 
 impl From<u32> for Color {
