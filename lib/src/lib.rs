@@ -159,16 +159,6 @@ pub trait AsEntity {
 	}
 	#[inline] fn find_first_in_descendants<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_descendants::<Q>().unwrap() }
 	#[inline] fn find_first_in_children<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_children::<Q>().unwrap() }
-	#[deprecated]
-	#[allow(deprecated)]
-	#[inline] fn get_cmp_from_ancestors<'a, C: 'static>(&self) -> OwningRef<StorageRef<'a, C>, C> where Self: Sized {
-		Parent::ancestor_with_cmp::<C>(self.as_entity()).get_cmp::<C>()
-	}
-	#[deprecated]
-	#[allow(deprecated)]
-	#[inline] fn get_cmp_mut_from_ancestors<'a, C: 'static>(&self) -> OwningRefMut<StorageGuard<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
-		Parent::ancestor_with_cmp::<C>(self.as_entity()).get_cmp_mut::<C>()
-	}
 	#[inline] fn has_cmp<C: 'static>(&self) -> bool where Self: Sized {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };

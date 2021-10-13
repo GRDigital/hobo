@@ -21,12 +21,6 @@ impl Parent {
 		inner(entity.as_entity(), &mut v);
 		v
 	}
-
-	#[deprecated]
-	pub fn ancestor_with_cmp<T: 'static>(entity: Entity) -> Entity {
-		let parent = entity.get_cmp::<Parent>().0;
-		if parent.has_cmp::<T>() { parent } else { Parent::ancestor_with_cmp::<T>(parent) }
-	}
 }
 
 impl Children {
@@ -51,10 +45,5 @@ impl Children {
 				child.remove();
 			}
 		}
-	}
-
-	#[deprecated]
-	pub fn collect_with_cmp<T: 'static>(&self) -> Vec<Entity> {
-		self.0.iter().filter(|e| e.has_cmp::<T>()).copied().collect::<Vec<_>>()
 	}
 }
