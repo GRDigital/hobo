@@ -124,14 +124,14 @@ pub trait Element: AsEntity + Sized {
 		S: futures_signals::signal::Signal<Item = I> + 'static,
 	{ self.set_class_typed_signal::<Type, S, I>(signal); self }
 
-	fn set_class_tagged_signal<Tag, S, I>(&self, signal: S) where
-		Tag: std::hash::Hash + 'static,
+	fn set_class_tagged_signal<Tag, S, I>(&self, tag: Tag, signal: S) where
+		Tag: std::hash::Hash + Copy + 'static,
 		I: Into<css::Style>,
-		S: futures_signals::signal::Signal<Item = (Tag, I)> + 'static,
+		S: futures_signals::signal::Signal<Item = I> + 'static,
 	{
 		let entity = self.as_entity();
 		if entity.is_dead() { log::warn!("set_class_signal dead entity {:?}", entity); return; }
-		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |(tag, class)| {
+		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |class| {
 			SomeElement(entity).set_class_tagged(tag, class);
 			async move { }
 		}), || {});
@@ -139,11 +139,11 @@ pub trait Element: AsEntity + Sized {
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
-	fn class_tagged_signal<Tag, S, I>(self, signal: S) -> Self where
-		Tag: std::hash::Hash + 'static,
+	fn class_tagged_signal<Tag, S, I>(self, tag: Tag, signal: S) -> Self where
+		Tag: std::hash::Hash + Copy + 'static,
 		I: Into<css::Style>,
-		S: futures_signals::signal::Signal<Item = (Tag, I)> + 'static,
-	{ self.set_class_tagged_signal::<Tag, S, I>(signal); self }
+		S: futures_signals::signal::Signal<Item = I> + 'static,
+	{ self.set_class_tagged_signal::<Tag, S, I>(tag, signal); self }
 
 	fn set_attr<'k, 'v>(&self, key: impl Into<Cow<'k, str>>, value: impl Into<Cow<'v, str>>) {
 		if self.is_dead() { log::warn!("set_attr dead {:?}", self.as_entity()); return; }
