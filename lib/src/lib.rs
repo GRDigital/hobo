@@ -422,6 +422,30 @@ pub fn try_find_one<Q: query::Query>() -> Option<Q::Fetch> {
 
 pub fn find_one<Q: query::Query>() -> Q::Fetch { try_find_one::<Q>().unwrap() }
 
+pub struct WorldMut(&'static mut World);
+impl AsRef<World> for WorldMut {
+	fn as_ref(&self) -> &World {
+		&self.0
+	}
+}
+
+impl AsMut<World> for WorldMut {
+	fn as_mut(&mut self) -> &mut World {
+		&mut self.0
+	}
+}
+
+impl Drop for WorldMut {
+	fn drop(&mut self) {
+		World::unmark_borrow_mut();
+	}
+}
+pub fn world() -> WorldMut {
+	World::mark_borrow_mut();
+	let world = unsafe { &mut *WORLD.get() as &mut World };
+	WorldMut(world)
+}
+
 pub trait Resource: 'static {
 	#[inline] fn register_resource(self) where Self: Sized {
 		World::mark_borrow_mut();
