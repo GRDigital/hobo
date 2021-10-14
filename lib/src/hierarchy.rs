@@ -27,7 +27,7 @@ impl Children {
 	pub fn descendants(entity: impl AsEntity) -> Vec<Entity> {
 		fn inner(entity: Entity, descendants: &mut Vec<Entity>) {
 			if let Some(children) = entity.try_get_cmp::<Children>() {
-				descendants.copy_from_slice(&children.0);
+				descendants.extend_from_slice(&children.0);
 				for &child in &children.0 {
 					inner(child, descendants);
 				}
