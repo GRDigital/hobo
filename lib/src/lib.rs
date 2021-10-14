@@ -321,6 +321,10 @@ impl World {
 		OwningRefMut::new(self.storage_mut()).map_mut(|x| x.get_mut(Entity::root()).unwrap())
 	}
 
+	pub fn resource_exists<T: 'static>(&mut self) -> bool {
+		self.storage::<T>().has(Entity::root())
+	}
+
 	pub fn try_resource<T: 'static>(&mut self) -> Option<OwningRef<StorageRef<T>, T>> {
 		if !self.storage::<T>().has(Entity::root()) { return None; }
 		Some(OwningRef::new(self.storage()).map(|x| x.get(Entity::root()).unwrap()))
@@ -418,7 +422,7 @@ pub fn try_find_one<Q: query::Query>() -> Option<Q::Fetch> {
 
 pub fn find_one<Q: query::Query>() -> Q::Fetch { try_find_one::<Q>().unwrap() }
 
-pub trait Component: 'static {
+pub trait Resource: 'static {
 	#[inline] fn register_resource(self) where Self: Sized {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
@@ -454,4 +458,18 @@ pub trait Component: 'static {
 		res
 	}
 }
-impl<T: 'static + Sized> Component for T {}
+impl<T: 'static + Sized> Resource for T {}
+
+pub trait DefaultResource: Default + 'static {
+	#[inline] fn resource_mut_or_default<'a>() -> OwningRefMut<StorageGuard<'a, Self, StorageRefMut<'a, Self>>, Self> where Self: Sized {
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		if !World::resource_exists::<Self>(world) {
+			World::register_resource(world, Self::default());
+		}
+		let res = World::resource_mut::<Self>(world);
+		World::unmark_borrow_mut();
+		res
+	}
+}
+impl<T: Default + 'static + Sized> DefaultResource for T {}
