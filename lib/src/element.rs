@@ -21,7 +21,7 @@ pub trait Element: AsEntity + Sized {
 	fn add_child(&self, child: impl Element) {
 		if self.is_dead() { log::warn!("add_child parent dead {:?}", self.as_entity()); return; }
 		if child.is_dead() { log::warn!("add_child child dead {:?}", child.as_entity()); return; }
-		self.get_cmp_mut_or_default::<Children>().0.push(child.as_entity());
+		self.get_cmp_mut_or_default::<Children>().push(child.as_entity());
 		child.get_cmp_mut_or_default::<Parent>().0 = self.as_entity();
 
 		// why not unwrapping? how can this fail?
@@ -32,6 +32,26 @@ pub trait Element: AsEntity + Sized {
 	fn child(self, child: impl Element) -> Self { self.add_child(child); self }
 	fn add_children<Item: Element>(&self, children: impl IntoIterator<Item = Item>) { for child in children.into_iter() { self.add_child(child); } }
 	fn children<Item: Element>(self, children: impl IntoIterator<Item = Item>) -> Self { self.add_children(children); self }
+
+	// add a child at an index, useful to update tables without regenerating the whole container element
+	fn add_child_at(&self, at_id: usize, child: impl Element) {
+		if self.is_dead() { log::warn!("add_child_at parent dead {:?}", self.as_entity()); return; }
+		if child.is_dead() { log::warn!("add_child_at child dead {:?}", child.as_entity()); return; }
+		let mut children = self.get_cmp_mut_or_default::<Children>();
+		let shifted_sibling = children.get(at_id).copied();
+		children.insert(at_id, child.as_entity());
+		child.get_cmp_mut_or_default::<Parent>().0 = self.as_entity();
+
+		if let (Some(parent_node), Some(child_node), shifted_sibling_node) = (
+			self.try_get_cmp::<web_sys::Node>(),
+			child.try_get_cmp::<web_sys::Node>(),
+			shifted_sibling.map(|x| x.try_get_cmp::<web_sys::Node>()).flatten(),
+		) {
+			parent_node
+				.insert_before(&child_node, shifted_sibling_node.as_ref().map(|x| &**x as &web_sys::Node))
+				.expect("can't append child");
+		}
+	}
 
 	// be mindful about holding child references with this one
 	fn add_child_signal<S, E>(&self, signal: S) where
