@@ -10,7 +10,7 @@ pub struct SomeElement(pub Entity);
 
 #[derive(Default)]
 pub struct Classes {
-	pub(crate) type_tag: Option<TypeId>,
+	pub(crate) marks: Vec<TypeId>,
 	pub(crate) styles: HashMap<u64, css::Style>,
 }
 
@@ -274,7 +274,7 @@ pub trait Element: AsEntity + Sized {
 
 	fn mark<T: 'static>(self) -> Self {
 		if self.is_dead() { log::warn!("mark dead {:?}", self.as_entity()); return self; }
-		self.get_cmp_mut_or_default::<Classes>().type_tag = Some(TypeId::of::<T>());
+		self.get_cmp_mut_or_default::<Classes>().marks.push(TypeId::of::<T>());
 		self
 	}
 

@@ -225,7 +225,7 @@ pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 			{
 				let classes = storage.get(entity).unwrap();
 
-				if let Some(id) = &classes.type_tag {
+				for id in &classes.marks {
 					write!(&mut res, "t-{:x} ", hash!(id)).unwrap();
 				}
 
@@ -393,9 +393,9 @@ pub fn register_window(window: &web_sys::Window) {
 	style_storage.register_window(window);
 }
 
-#[extend::ext(pub, name = TypeClassString)]
+#[extend::ext(pub, name = MarkClassString)]
 impl<T: 'static> T {
-	fn type_class_string() -> String {
+	fn mark_class_string() -> String {
 		format!("t-{:x}", hash!(TypeId::of::<Self>()))
 	}
 }

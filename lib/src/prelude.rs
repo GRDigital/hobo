@@ -16,7 +16,7 @@ pub use crate::{
 		DynStorage,
 	},
 	query::*,
-	TypeClassString,
+	MarkClassString,
 	dom_events::impls::*,
 	create::StringValue,
 };

@@ -29,7 +29,7 @@ impl Parse for Selector {
 					if input.peek(syn::token::Bracket) {
 						// some element type
 						let content = { let content; syn::bracketed!(content in input); content.parse::<syn::Type>()? };
-						quote! { .class(<#content>::type_class_string()) }
+						quote! { .class(<#content>::mark_class_string()) }
 					} else if input.peek(syn::token::Paren) {
 						// class expr
 						let content = { let content; syn::parenthesized!(content in input); content.parse::<syn::Expr>()? };
