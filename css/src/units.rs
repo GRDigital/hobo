@@ -22,6 +22,8 @@ pub enum Unit {
 	Vmax(F32),
 	Fr(F32),
 	Percent(F32),
+	// probably a hack
+	Duration(i32), // TODO: chrono duration?
 	Calc(Box<Unit>, Operator, Box<Unit>),
 }
 
@@ -39,6 +41,7 @@ impl std::fmt::Display for Unit {
 			Self::Vmax(x)               => write!(f, "{}vmax", x),
 			Self::Fr(x)                 => write!(f, "{}fr", x),
 			Self::Percent(x)            => write!(f, "{}%", x),
+			Self::Duration(x)           => write!(f, "{}ms", x),
 			Self::Calc(left, op, right) => write!(f, "calc({} {} {})", left, op, right),
 		}
 	}
@@ -50,18 +53,22 @@ impl std::fmt::Display for Unit {
 macro_rules! unit {
 	(0)                                             => { $crate::units::Unit::Zero };
 
-	($e:literal $(px)?)                             => { $crate::units::Unit::Px(                                  unsafe { $crate::units::F32::new_unchecked($e as _) }) };
-	($e:literal $frag:ident)                        => { $crate::paste::item!{$crate::units::Unit::[<$frag:camel>](unsafe { $crate::units::F32::new_unchecked($e as _) })} };
-	($e:literal %)                                  => { $crate::units::Unit::Percent(                             unsafe { $crate::units::F32::new_unchecked($e as _) }) };
+	($e:literal $(px)?)                             => { $crate::units::px($e) };
+	($e:literal ms)                                 => { $crate::units::dur($e) };
+	($e:literal $frag:ident)                        => { $crate::units::$frag($e) };
+	($e:literal %)                                  => { $crate::units::pct($e) };
 
 	($e:ident $(px)?)                               => { $crate::units::px($e) };
+	($e:ident ms)                                   => { $crate::units::dur($e) };
 	($e:ident $frag:ident)                          => { $crate::units::$frag($e) };
 	($e:ident %)                                    => { $crate::units::pct($e) };
 
 	(($($e:tt)+) $(px)?)                            => { $crate::units::px($($e)+) };
+	(($($e:tt)+) ms)                                => { $crate::units::dur($($e)+) };
 	(($($e:tt)+) $frag:ident)                       => { $crate::units::$frag($($e)+) };
 	(($($e:tt)+) %)                                 => { $crate::units::pct($($e)+) };
 
+	// garbage
 	($e1:literal $frag1:tt + $e2:literal $frag2:tt) => { $crate::units::Unit::Calc(Box::new($crate::unit!($e1 $frag1)), $crate::units::Operator::Plus,  Box::new($crate::unit!($e2 $frag2))) };
 	($e1:ident   $frag1:tt + $e2:literal $frag2:tt) => { $crate::units::Unit::Calc(Box::new($crate::unit!($e1 $frag1)), $crate::units::Operator::Plus,  Box::new($crate::unit!($e2 $frag2))) };
 	($e1:literal $frag1:tt + $e2:ident   $frag2:tt) => { $crate::units::Unit::Calc(Box::new($crate::unit!($e1 $frag1)), $crate::units::Operator::Plus,  Box::new($crate::unit!($e2 $frag2))) };
@@ -73,12 +80,13 @@ macro_rules! unit {
 	($e1:ident   $frag1:tt - $e2:ident   $frag2:tt) => { $crate::units::Unit::Calc(Box::new($crate::unit!($e1 $frag1)), $crate::units::Operator::Minus, Box::new($crate::unit!($e2 $frag2))) };
 }
 
-pub fn px<T: AsPrimitive<f32>>(x: T)   -> Unit { Unit::Px(     F32::new(x.as_()).unwrap()) }
-pub fn em<T: AsPrimitive<f32>>(x: T)   -> Unit { Unit::Em(     F32::new(x.as_()).unwrap()) }
-pub fn rem<T: AsPrimitive<f32>>(x: T)  -> Unit { Unit::Rem(    F32::new(x.as_()).unwrap()) }
-pub fn vw<T: AsPrimitive<f32>>(x: T)   -> Unit { Unit::Vw(     F32::new(x.as_()).unwrap()) }
-pub fn vh<T: AsPrimitive<f32>>(x: T)   -> Unit { Unit::Vh(     F32::new(x.as_()).unwrap()) }
-pub fn vmin<T: AsPrimitive<f32>>(x: T) -> Unit { Unit::Vmin(   F32::new(x.as_()).unwrap()) }
-pub fn vmax<T: AsPrimitive<f32>>(x: T) -> Unit { Unit::Vmax(   F32::new(x.as_()).unwrap()) }
-pub fn fr<T: AsPrimitive<f32>>(x: T)   -> Unit { Unit::Fr(     F32::new(x.as_()).unwrap()) }
-pub fn pct<T: AsPrimitive<f32>>(x: T)  -> Unit { Unit::Percent(F32::new(x.as_()).unwrap()) }
+#[inline] pub fn px<T: AsPrimitive<f32>>(x: T)   -> Unit { Unit::Px(     F32::new(x.as_()).unwrap()) }
+#[inline] pub fn em<T: AsPrimitive<f32>>(x: T)   -> Unit { Unit::Em(     F32::new(x.as_()).unwrap()) }
+#[inline] pub fn rem<T: AsPrimitive<f32>>(x: T)  -> Unit { Unit::Rem(    F32::new(x.as_()).unwrap()) }
+#[inline] pub fn vw<T: AsPrimitive<f32>>(x: T)   -> Unit { Unit::Vw(     F32::new(x.as_()).unwrap()) }
+#[inline] pub fn vh<T: AsPrimitive<f32>>(x: T)   -> Unit { Unit::Vh(     F32::new(x.as_()).unwrap()) }
+#[inline] pub fn vmin<T: AsPrimitive<f32>>(x: T) -> Unit { Unit::Vmin(   F32::new(x.as_()).unwrap()) }
+#[inline] pub fn vmax<T: AsPrimitive<f32>>(x: T) -> Unit { Unit::Vmax(   F32::new(x.as_()).unwrap()) }
+#[inline] pub fn fr<T: AsPrimitive<f32>>(x: T)   -> Unit { Unit::Fr(     F32::new(x.as_()).unwrap()) }
+#[inline] pub fn pct<T: AsPrimitive<f32>>(x: T)  -> Unit { Unit::Percent(F32::new(x.as_()).unwrap()) }
+#[inline] pub fn dur(x: i32)                     -> Unit { Unit::Duration(x) }

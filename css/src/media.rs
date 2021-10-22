@@ -115,7 +115,7 @@ impl std::fmt::Display for MediaSelector {
 #[test]
 fn woo() {
 	assert_eq!(
-		macros::media_query!(!All && Orientation(Portrait) && !AspectRatio(4, 3)),
+		hobo_css_macros::media_query!(!All && Orientation(Portrait) && !AspectRatio(4, 3)),
 		MediaQuery {
 			media: Nottable { not: true, data: MediaType::All },
 			features: vec![
@@ -126,14 +126,14 @@ fn woo() {
 	);
 
 	assert_eq!(
-		macros::media_selector!(
+		hobo_css_macros::media_selector!(
 			!All && Orientation(Portrait) && !AspectRatio(4, 3),
 			Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.)))
 		),
 		MediaSelector(
 			vec![
-				macros::media_query!(!All && Orientation(Portrait) && !AspectRatio(4, 3)),
-				macros::media_query!(Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.)))),
+				hobo_css_macros::media_query!(!All && Orientation(Portrait) && !AspectRatio(4, 3)),
+				hobo_css_macros::media_query!(Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.)))),
 			],
 		),
 	);
@@ -149,7 +149,7 @@ fn woo() {
 		crate::Style(
 			vec![
 				crate::Rule::Media(
-					macros::media_selector!(!All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.)))),
+					hobo_css_macros::media_selector!(!All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.)))),
 					crate::style!(
 						html {
 							background_color!(rgb 0xFF_00_00)

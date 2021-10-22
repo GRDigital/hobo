@@ -261,6 +261,10 @@ generate_properties! {
 
 		AnimationDirection, AnimationFillMode, AnimationIterationCount,
 		AnimationName, AnimationPlayState, AnimationTimingFunction,
+		AnimationDuration, AnimationDelay,
+
+		TransitionProperty, TransitionTimingFunction,
+		TransitionDuration, TransitionDelay,
 
 		Transform,
 		Filter,
@@ -270,6 +274,7 @@ generate_properties! {
 
 		ClipPath,
 		BackgroundOrigin,
+		BackgroundClip,
 		GridAutoFlow,
 		RowGap,
 		ColumnGap,

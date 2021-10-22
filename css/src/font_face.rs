@@ -185,7 +185,7 @@ fn font_face() {
 			src: vec![Source::Url("https://fonts.gstatic.com/s/montserrat/v14/JTUSjIg1_i6t8kCHKm459Wlhyw.woff2".into(), Some(Format::Woff2))],
 			family: "Montserrat".into(),
 			weight: (Weight::Normal, Some(Weight::Normal)),
-			..default()
+			..Default::default()
 		}.to_string(),
 		r#"@font-face{font-family:"Montserrat";src:url("https://fonts.gstatic.com/s/montserrat/v14/JTUSjIg1_i6t8kCHKm459Wlhyw.woff2") format("woff2");font-display:auto;font-stretch:normal normal;font-style:normal;font-weight:normal normal;}"#,
 	);
