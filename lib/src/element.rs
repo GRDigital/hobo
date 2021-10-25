@@ -1,6 +1,6 @@
 use crate::prelude::*;
 pub use hobo_derive::Element;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::any::TypeId;
 use std::borrow::Cow;
 use futures_signals::signal::SignalExt;
@@ -10,7 +10,7 @@ pub struct SomeElement(pub Entity);
 
 #[derive(Default)]
 pub struct Classes {
-	pub(crate) marks: Vec<TypeId>,
+	pub(crate) marks: HashSet<TypeId>,
 	pub(crate) styles: HashMap<u64, css::Style>,
 }
 
@@ -274,7 +274,12 @@ pub trait Element: AsEntity + Sized {
 
 	fn mark<T: 'static>(self) -> Self {
 		if self.is_dead() { log::warn!("mark dead {:?}", self.as_entity()); return self; }
-		self.get_cmp_mut_or_default::<Classes>().marks.push(TypeId::of::<T>());
+		self.get_cmp_mut_or_default::<Classes>().marks.insert(TypeId::of::<T>());
+		self
+	}
+	fn unmark<T: 'static>(self) -> Self {
+		if self.is_dead() { log::warn!("unmark dead {:?}", self.as_entity()); return self; }
+		self.get_cmp_mut_or_default::<Classes>().marks.remove(&TypeId::of::<T>());
 		self
 	}
 
