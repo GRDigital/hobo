@@ -282,6 +282,20 @@ pub trait Element: AsEntity + Sized {
 		self.get_cmp_mut_or_default::<Classes>().marks.remove(&TypeId::of::<T>());
 		self
 	}
+	fn mark_signal<T: 'static, S>(self, signal: S) -> Self where
+		S: futures_signals::signal::Signal<Item = bool> + 'static,
+	{
+		let entity = self.as_entity();
+		if entity.is_dead() { log::warn!("mark_signal dead entity {:?}", entity); return self; }
+		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |enabled| {
+			if enabled { SomeElement(entity).mark::<T>(); } else { SomeElement(entity).unmark::<T>(); }
+			async move { }
+		}), || {});
+
+		wasm_bindgen_futures::spawn_local(fut);
+		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
+		self
+	}
 
 	fn with_component<T: 'static>(self, f: impl FnOnce(&Self) -> T) -> Self { self.add_component(f(&self)); self }
 
