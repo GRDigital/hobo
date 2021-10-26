@@ -95,7 +95,7 @@ pub enum Element {
 	feDropShadow, feFlood, feFuncA, feFuncB, feFuncG, feFuncR, feGaussianBlur,
 	feImage, feMerge, feMergeNode, feMorphology, feOffset, fePointLight,
 	feSpecularLighting, feSpotLight, feTile, feTurbulence,
-	filter, foreignObject, gSvg, image, line, linearGradient, marker, mask,
+	filter, foreignObject, g, image, line, linearGradient, marker, mask,
 	metadata, mpath, path, pattern, polygon, polyline, radialGradient,
 	rect, set, stop, switch, symbol, text, textPath, tspan, r#use, view,
 
