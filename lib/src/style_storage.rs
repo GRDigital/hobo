@@ -14,7 +14,7 @@ pub struct StyleStorage {
 pub(crate) static STYLE_STORAGE: Lazy<RacyCell<StyleStorage>> = Lazy::new(|| RacyCell::new(StyleStorage {
 	inserted_style_hashes: HashSet::new(),
 	style_elements: vec![{
-		let dom = crate::dom();
+		let dom = web_sys::window().expect("no window").document().expect("no document");
 		let head = dom.head().expect("dom has no head");
 		let element = dom.create_element(web_str::style()).expect("can't create style element");
 		head.append_child(&element).expect("can't append child");

@@ -4,7 +4,7 @@
 //!
 //! all of these functions return the most fitting web_sys element types
 
-use crate::{dom, prelude::*, World, Entity, storage::Storage, Element, AsEntity};
+use crate::{prelude::*, World, Entity, storage::Storage, Element, AsEntity};
 use std::collections::HashSet;
 use std::any::TypeId;
 use sugars::*;
@@ -89,7 +89,13 @@ macro_rules! create {
 		SVG => [$($svg_name:ident, $svg_t:ident),*$(,)?],
 	) => {paste::item! {
 		$(
-			pub fn $html_name() -> web_sys::$html_t { wasm_bindgen::JsCast::unchecked_into(dom().create_element(crate::web_str::$html_name()).expect("can't create element")) }
+			pub fn $html_name() -> web_sys::$html_t {
+				wasm_bindgen::JsCast::unchecked_into(
+					web_sys::window().expect("no window")
+						.document().expect("no document")
+						.create_element(crate::web_str::$html_name()).expect("can't create element")
+				)
+			}
 
 			#[cfg(test)]
 			#[wasm_bindgen_test]
@@ -97,7 +103,13 @@ macro_rules! create {
 		)*
 
 		$(
-			pub fn $svg_name() -> web_sys::$svg_t { wasm_bindgen::JsCast::unchecked_into(dom().create_element_ns(Some(wasm_bindgen::intern("http://www.w3.org/2000/svg")), crate::web_str::$svg_name()).expect("can't create svg element")) }
+			pub fn $svg_name() -> web_sys::$svg_t {
+				wasm_bindgen::JsCast::unchecked_into(
+					web_sys::window().expect("no window")
+						.document().expect("no document")
+						.create_element_ns(Some(wasm_bindgen::intern("http://www.w3.org/2000/svg")), crate::web_str::$svg_name()).expect("can't create svg element")
+				)
+			}
 
 			#[cfg(test)]
 			#[wasm_bindgen_test]
