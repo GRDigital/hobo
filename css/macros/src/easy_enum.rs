@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use crate::HyphenatedName;
+use crate::{prelude::*, HyphenatedName};
 
 #[derive(Debug)]
 struct Input {

@@ -1,9 +1,11 @@
 // use crate::prelude::*;
-use std::any::{Any, TypeId};
 use slotmap::DenseSlotMap;
-use std::rc::Weak;
-use std::cell::RefCell;
-use std::collections::HashMap;
+use std::{
+	any::{Any, TypeId},
+	cell::RefCell,
+	collections::HashMap,
+	rc::Weak,
+};
 
 slotmap::new_key_type! {pub struct SubKey;}
 

@@ -1,8 +1,6 @@
-use crate::prelude::*;
-use crate::storage::StorageGuard;
-use owning_ref::{OwningRef, OwningRefMut};
-use crate::{StorageRef, StorageRefMut, query};
+use crate::{prelude::*, query, storage::StorageGuard, StorageRef, StorageRefMut};
 pub use hobo_derive::AsEntity;
+use owning_ref::{OwningRef, OwningRefMut};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Entity(pub(crate) u64);

@@ -47,7 +47,7 @@ macro_rules! overflow {
 	($($tt:tt)+) => {vec![
 		$crate::overflow_x!($($tt)+),
 		$crate::overflow_y!($($tt)+),
-	]}
+	]};
 }
 
 #[macro_export]
@@ -55,7 +55,7 @@ macro_rules! size {
 	($($tt:tt)+) => {vec![
 		$crate::width!($($tt)+),
 		$crate::height!($($tt)+),
-	]}
+	]};
 }
 
 #[macro_export]
@@ -63,5 +63,5 @@ macro_rules! gap {
 	($($tt:tt)+) => {vec![
 		$crate::row_gap!($($tt)+),
 		$crate::column_gap!($($tt)+),
-	]}
+	]};
 }

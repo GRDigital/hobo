@@ -4,26 +4,22 @@ pub mod prelude;
 #[macro_use] pub mod shortcuts;
 #[macro_use] pub mod units;
 #[macro_use] pub mod selector;
+pub mod append_property;
 pub mod color;
 pub mod font_face;
 pub mod media;
-pub mod append_property;
 
-#[doc(hidden)]
-pub use paste;
-pub use properties::*;
-pub use units::Unit;
-pub use hobo_css_macros as macros;
-pub use color::Color;
-pub use units::F32;
 pub use append_property::AppendProperty;
+pub use color::Color;
+pub use hobo_css_macros as macros;
 pub use macros::AppendProperty;
+#[doc(hidden)] pub use paste;
+pub use properties::*;
+pub use units::{Unit, F32};
 
 #[extend::ext(pub)]
 impl F32 {
-	fn new_unwrap(x: f32) -> Self {
-		F32::new(x).unwrap()
-	}
+	fn new_unwrap(x: f32) -> Self { F32::new(x).unwrap() }
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]

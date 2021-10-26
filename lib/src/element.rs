@@ -1,9 +1,11 @@
 use crate::prelude::*;
-pub use hobo_derive::Element;
-use std::collections::{HashMap, HashSet};
-use std::any::TypeId;
-use std::borrow::Cow;
 use futures_signals::signal::SignalExt;
+pub use hobo_derive::Element;
+use std::{
+	any::TypeId,
+	borrow::Cow,
+	collections::{HashMap, HashSet},
+};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Element)]
 pub struct SomeElement(pub Entity);
@@ -330,5 +332,5 @@ pub trait Element: AsEntity + Sized {
 	fn erase(&self) -> SomeElement { SomeElement(self.as_entity()) }
 }
 
-impl<T: Element> Element for &T { }
-impl<T: Element> Element for &mut T { }
+impl<T: Element> Element for &T {}
+impl<T: Element> Element for &mut T {}

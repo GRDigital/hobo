@@ -1,37 +1,39 @@
-pub mod prelude;
-pub mod web_str;
-mod style_storage;
-mod enclose;
-mod storage;
-pub mod state;
 pub mod create;
 mod dom_events;
-pub mod events;
 mod element;
-mod racy_cell;
-mod query;
-mod hierarchy;
-mod signals_ext;
+mod enclose;
 mod entity;
+pub mod events;
+mod hierarchy;
+pub mod prelude;
+mod query;
+mod racy_cell;
 mod resource;
+mod signals_ext;
+pub mod state;
+mod storage;
+mod style_storage;
+pub mod web_str;
 mod world;
 
-pub use hobo_css as css;
-pub use web_sys;
-pub use paste;
-pub use futures_signals as signals;
-pub use discard;
 use crate::prelude::*;
-use std::any::TypeId;
-use std::rc::Rc;
-use std::cell::{RefCell, Ref, RefMut};
-use storage::*;
-use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
-use style_storage::{STYLE_STORAGE, StyleStorage};
-pub use element::{Element, Classes, SomeElement};
+pub use discard;
+pub use element::{Classes, Element, SomeElement};
+pub use futures_signals as signals;
+pub use hobo_css as css;
+use owning_ref::{OwningHandle, OwningRef, OwningRefMut};
+pub use paste;
+pub use prelude::{Children, Parent};
 use racy_cell::RacyCell;
+use std::{
+	any::TypeId,
+	cell::{Ref, RefCell, RefMut},
+	rc::Rc,
+};
+use storage::*;
+use style_storage::{StyleStorage, STYLE_STORAGE};
 use sugars::hash;
-pub use prelude::{Parent, Children};
+pub use web_sys;
 
 // NOTES:
 // queries to be able to find entities with/by components in children/parent/ancestor/family - done
@@ -44,7 +46,6 @@ pub use prelude::{Parent, Children};
 // test shit ffs
 // move World and AsEntity into separate files
 // could remove all *_mut elements and specify whether you want mutable or immutable component with the same trick as in Query
-
 
 // this is not necessary, but it makes it convenient to further remap to some OwningRef or whatever
 type StorageRef<'a, Component> = OwningRef<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, Ref<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;

@@ -1,4 +1,4 @@
-use crate::{Entity, World, AsEntity, prelude::default};
+use crate::{prelude::default, AsEntity, Entity, World};
 use std::collections::{HashMap, HashSet};
 
 pub trait DynStorage: as_any::AsAny {

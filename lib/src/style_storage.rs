@@ -1,8 +1,7 @@
-use crate::prelude::*;
+use crate::{prelude::*, RacyCell};
+use once_cell::sync::Lazy;
 use std::collections::HashSet;
 pub use sugars::hash;
-use crate::RacyCell;
-use once_cell::sync::Lazy;
 
 #[derive(Default)]
 pub struct StyleStorage {

@@ -1,5 +1,5 @@
 use derive_utils::quick_derive as enum_derive;
-use proc_macro2::{TokenStream, Span};
+use proc_macro2::{Span, TokenStream};
 use proc_quote::quote;
 use quote::ToTokens;
 // use proc_macro_error::proc_macro_error;

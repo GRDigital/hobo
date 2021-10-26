@@ -4,13 +4,9 @@ use std::cell::UnsafeCell;
 pub(crate) struct RacyCell<T>(UnsafeCell<T>);
 
 impl<T> RacyCell<T> {
-    pub(crate) const fn new(value: T) -> Self {
-        RacyCell(UnsafeCell::new(value))
-    }
+	pub(crate) const fn new(value: T) -> Self { RacyCell(UnsafeCell::new(value)) }
 
-    pub(crate) fn get(&self) -> *mut T {
-        self.0.get()
-    }
+	pub(crate) fn get(&self) -> *mut T { self.0.get() }
 }
 
 unsafe impl<T> Sync for RacyCell<T> {}

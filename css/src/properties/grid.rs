@@ -208,7 +208,7 @@ macro_rules! __repeat {
 			number: $crate::__repeat_number!($($repeat_number)-+),
 			values: vec![$($crate::__nested_unit!($v)),+],
 		}
-	}
+	};
 }
 
 #[doc(hidden)]

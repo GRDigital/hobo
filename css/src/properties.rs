@@ -16,6 +16,7 @@
 
 use crate::prelude::*;
 pub use animation::*;
+pub use appearance::*;
 pub use background::*;
 pub use border::*;
 pub use clip_path::*;
@@ -29,7 +30,6 @@ pub use position::*;
 pub use svg::*;
 pub use text::*;
 pub use transform::*;
-pub use appearance::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum ColorValue {

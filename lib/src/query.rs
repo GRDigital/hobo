@@ -1,9 +1,8 @@
 #![allow(unused_variables)]
 
-use crate::prelude::*;
+use crate::{prelude::*, StorageRef, StorageRefMut};
+use owning_ref::{OwningHandle, OwningRef, OwningRefMut};
 use std::collections::BTreeSet;
-use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
-use crate::{StorageRef, StorageRefMut};
 
 pub trait Query {
 	type Fetch;
@@ -24,6 +23,7 @@ impl<Component: 'static> Query for With<Component> {
 	type Fetch = ();
 
 	fn filter(world: &mut World, entities: &mut Option<BTreeSet<Entity>>) { <&Component as Query>::filter(world, entities); }
+
 	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {}
 }
 
@@ -38,6 +38,7 @@ impl<Component: 'static> Query for &Component {
 			*entities = Some(storage.data.keys().copied().collect());
 		}
 	}
+
 	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {
 		let storage: StorageRef<Component> = OwningRef::new(OwningHandle::new(world.dyn_storage::<Component>()))
 			.map(|x| x.as_any().downcast_ref().unwrap());
@@ -52,6 +53,7 @@ impl<Component: 'static> Query for &mut Component {
 	type Fetch = OwningRefMut<Box<dyn owning_ref::Erased>, Component>;
 
 	fn filter(world: &mut World, entities: &mut Option<BTreeSet<Entity>>) { <&Component as Query>::filter(world, entities); }
+
 	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {
 		let storage: StorageRefMut<Component> = OwningRefMut::new(OwningHandle::new_mut(world.dyn_storage::<Component>()))
 			.map_mut(|x| x.as_any_mut().downcast_mut().unwrap());

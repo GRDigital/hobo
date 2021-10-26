@@ -1,18 +1,22 @@
 use crate::prelude::*;
 
-use std::collections::{HashMap, BTreeSet};
-use std::any::TypeId;
-use std::rc::Rc;
+use crate::{
+	create,
+	element::Classes,
+	racy_cell::RacyCell,
+	storage::{SimpleStorage, StorageGuard},
+	style_storage::{StyleStorage, STYLE_STORAGE},
+	StorageRef, StorageRefMut,
+};
 use once_cell::sync::Lazy;
-use std::cell::RefCell;
-use crate::storage::{StorageGuard, SimpleStorage};
-use owning_ref::{OwningRef, OwningRefMut, OwningHandle};
-use crate::style_storage::{STYLE_STORAGE, StyleStorage};
-use crate::racy_cell::RacyCell;
+use owning_ref::{OwningHandle, OwningRef, OwningRefMut};
+use std::{
+	any::TypeId,
+	cell::RefCell,
+	collections::{BTreeSet, HashMap},
+	rc::Rc,
+};
 use sugars::hash;
-use crate::element::Classes;
-use crate::create;
-use crate::{StorageRef, StorageRefMut};
 
 type StorageRc = Rc<RefCell<Box<dyn DynStorage>>>;
 
@@ -159,7 +163,10 @@ impl World {
 
 	pub fn remove_entity(&mut self, entity: impl AsEntity) {
 		let entity = entity.as_entity();
-		if self.is_dead(entity) { log::warn!("remove entity already dead {:?}", entity); return; }
+		if self.is_dead(entity) {
+			log::warn!("remove entity already dead {:?}", entity);
+			return;
+		}
 
 		let children = self.storage::<Children>().get(entity).map(|x| x.0.clone());
 		if let Some(children) = children {
@@ -172,7 +179,9 @@ impl World {
 		if let Some(parent) = parent {
 			let mut children_store = self.storage_mut::<Children>();
 			let children = children_store.get_mut(parent).unwrap();
-			if let Some(child_pos) = children.0.iter().position(|&x| x == entity) { children.0.remove(child_pos); }
+			if let Some(child_pos) = children.0.iter().position(|&x| x == entity) {
+				children.0.remove(child_pos);
+			}
 		}
 
 		if let Some(component_ids) = self.component_ownership.remove(&entity) {
@@ -193,19 +202,13 @@ impl World {
 
 pub struct WorldMut(pub(crate) &'static mut World);
 impl AsRef<World> for WorldMut {
-	fn as_ref(&self) -> &World {
-		&self.0
-	}
+	fn as_ref(&self) -> &World { &self.0 }
 }
 
 impl AsMut<World> for WorldMut {
-	fn as_mut(&mut self) -> &mut World {
-		&mut self.0
-	}
+	fn as_mut(&mut self) -> &mut World { &mut self.0 }
 }
 
 impl Drop for WorldMut {
-	fn drop(&mut self) {
-		World::unmark_borrow_mut();
-	}
+	fn drop(&mut self) { World::unmark_borrow_mut(); }
 }

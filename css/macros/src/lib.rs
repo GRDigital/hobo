@@ -1,10 +1,10 @@
-mod prelude;
-mod media;
-mod selector;
 mod easy_enum;
+mod media;
+mod prelude;
+mod selector;
 
-use prelude::*;
 use derive_utils::quick_derive as enum_derive;
+use prelude::*;
 use quote::ToTokens;
 
 #[derive(Debug, Clone)]

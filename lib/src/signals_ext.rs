@@ -1,10 +1,10 @@
+use discard::DiscardOnDrop;
 use futures_signals::{
 	signal::{Signal, SignalExt},
 	signal_map::{MapDiff, SignalMap, SignalMapExt},
-	signal_vec::{VecDiff, SignalVec, SignalVecExt},
+	signal_vec::{SignalVec, SignalVecExt, VecDiff},
+	CancelableFutureHandle,
 };
-use futures_signals::CancelableFutureHandle;
-use discard::DiscardOnDrop;
 use wasm_bindgen_futures::spawn_local as spawn;
 
 pub trait SignalExt2: Signal {

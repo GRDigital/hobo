@@ -4,13 +4,13 @@
 
 // mod tests;
 
+use owning_ref::OwningRefMut;
 use slotmap::DenseSlotMap;
 use std::{
-	cell::{RefCell, RefMut, Ref},
+	cell::{Ref, RefCell, RefMut},
 	ops::{Deref, DerefMut},
 	rc::{Rc, Weak},
 };
-use owning_ref::OwningRefMut;
 
 slotmap::new_key_type! {pub struct SubscriptionKey;}
 static MAX_NESTED_UPDATES: usize = 100;

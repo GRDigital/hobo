@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use crate::{Property, append_property::AppendProperty};
+use crate::{append_property::AppendProperty, prelude::*, Property};
 
 crate::macros::easy_enum! {border-collapse separate collapse}
 crate::macros::easy_enum! {box-decoration-break slice clone}

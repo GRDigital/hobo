@@ -1,7 +1,5 @@
-use crate::prelude::*;
-use crate::storage::StorageGuard;
+use crate::{prelude::*, storage::StorageGuard, StorageRef, StorageRefMut};
 use owning_ref::{OwningRef, OwningRefMut};
-use crate::{StorageRef, StorageRefMut};
 
 pub trait Resource: 'static {
 	#[inline] fn register_resource(self) where Self: Sized {

@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use crate::{Property, append_property::AppendProperty};
+use crate::{append_property::AppendProperty, prelude::*, Property};
 
 #[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone)]
 pub enum Filter {

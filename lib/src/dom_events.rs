@@ -1,6 +1,6 @@
 //! everything that has to do with HTML event handling
 
-use crate::{prelude::*, Element, AsEntity};
+use crate::{prelude::*, AsEntity, Element};
 
 pub enum EventHandlerCallback {
 	MouseEvent(Closure<dyn FnMut(web_sys::MouseEvent) + 'static>),

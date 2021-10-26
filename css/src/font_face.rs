@@ -1,5 +1,5 @@
-use crate::prelude::*;
 pub use crate::__unicode_range as unicode_range;
+use crate::prelude::*;
 
 // TODO: replace @font-face selector with regular rust struct
 
@@ -45,7 +45,7 @@ impl std::fmt::Display for Stretch {
 	}
 }
 
-#[derive(SmartDefault,  Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(SmartDefault, Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Style {
 	#[default]
 	Normal,
@@ -143,7 +143,7 @@ impl From<std::ops::Range<u32>> for UnicodeRange {
 
 #[macro_export]
 macro_rules! __unicode_range {
-	($($expr:expr),*) => {vec![$(UnicodeRange::from($expr)),*]}
+	($($expr:expr),*) => {vec![$(UnicodeRange::from($expr)),*]};
 }
 
 impl std::fmt::Display for FontFace {

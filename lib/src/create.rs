@@ -4,9 +4,8 @@
 //!
 //! all of these functions return the most fitting web_sys element types
 
-use crate::{prelude::*, World, Entity, storage::Storage, Element, AsEntity};
-use std::collections::HashSet;
-use std::any::TypeId;
+use crate::{prelude::*, storage::Storage, AsEntity, Element, Entity, World};
+use std::{any::TypeId, collections::HashSet};
 use sugars::*;
 
 #[cfg(test)] use wasm_bindgen_test::*;
@@ -14,7 +13,7 @@ use sugars::*;
 
 pub fn dom_element<T, E>(world: &mut World, entity: T, element: &E) where
 	T: AsEntity,
-	E: AsRef<web_sys::Node> + AsRef<web_sys::Element> + AsRef<web_sys::EventTarget>
+	E: AsRef<web_sys::Node> + AsRef<web_sys::Element> + AsRef<web_sys::EventTarget>,
 {
 	let entity = entity.as_entity();
 	world.storage_mut::<web_sys::Node>().add(entity, (element.as_ref() as &web_sys::Node).clone());
@@ -172,11 +171,13 @@ pub trait StringValue {
 
 impl StringValue for components::Input {
 	fn value(&self) -> String { self.get_cmp::<web_sys::HtmlInputElement>().value() }
+
 	fn set_value(&self, x: &str) { self.get_cmp::<web_sys::HtmlInputElement>().set_value(x) }
 }
 
 impl StringValue for components::Textarea {
 	fn value(&self) -> String { self.get_cmp::<web_sys::HtmlTextAreaElement>().value() }
+
 	fn set_value(&self, x: &str) { self.get_cmp::<web_sys::HtmlTextAreaElement>().set_value(x) }
 }
 
