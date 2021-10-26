@@ -16,6 +16,7 @@ mod style_storage;
 pub mod web_str;
 mod world;
 
+pub use web_sys;
 use crate::prelude::*;
 pub use discard;
 pub use element::{Classes, Element, SomeElement};
@@ -33,7 +34,6 @@ use std::{
 use storage::*;
 use style_storage::{StyleStorage, STYLE_STORAGE};
 use sugars::hash;
-pub use web_sys;
 
 // NOTES:
 // queries to be able to find entities with/by components in children/parent/ancestor/family - done
