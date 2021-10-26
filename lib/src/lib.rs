@@ -11,11 +11,14 @@ mod element;
 mod racy_cell;
 mod query;
 mod hierarchy;
+mod signals_ext;
 
 pub use hobo_css as css;
 pub use hobo_derive::*;
 pub use web_sys;
 pub use paste;
+pub use futures_signals;
+pub use discard;
 use crate::prelude::*;
 use std::collections::{HashMap, BTreeSet};
 use std::any::TypeId;

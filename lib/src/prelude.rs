@@ -19,6 +19,7 @@ pub use crate::{
 	MarkClassString,
 	dom_events::impls::*,
 	create::StringValue,
+	signals_ext::{SignalExt2, SignalMapExt2, SignalVecExt2},
 };
 pub(crate) use crate::{World, WORLD};
 pub use crate::css::{self, AppendProperty, F32, F32Ext as _};
