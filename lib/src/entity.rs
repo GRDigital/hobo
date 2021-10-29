@@ -74,7 +74,7 @@ pub trait AsEntity {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
 		Q::filter(world, &mut entities);
-		let res = Some(Q::fetch(world, entities.unwrap_or_default().into_iter().next()?));
+		let res = entities.unwrap_or_default().into_iter().next().map(|e| Q::fetch(world, e));
 		World::unmark_borrow_mut();
 		res
 	}
@@ -102,7 +102,7 @@ pub trait AsEntity {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
 		Q::filter(world, &mut entities);
-		let res = Some(Q::fetch(world, entities.unwrap_or_default().into_iter().next()?));
+		let res = entities.unwrap_or_default().into_iter().next().map(|e| Q::fetch(world, e));
 		World::unmark_borrow_mut();
 		res
 	}
@@ -111,7 +111,7 @@ pub trait AsEntity {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
 		Q::filter(world, &mut entities);
-		let res = Some(Q::fetch(world, entities.unwrap_or_default().into_iter().next()?));
+		let res = entities.unwrap_or_default().into_iter().next().map(|e| Q::fetch(world, e));
 		World::unmark_borrow_mut();
 		res
 	}
