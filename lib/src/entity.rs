@@ -36,17 +36,21 @@ pub trait AsEntity {
 		World::unmark_borrow_mut();
 		res
 	}
-	#[inline] fn get_cmp<'a, C: 'static>(&self) -> OwningRef<StorageRef<'a, C>, C> where Self: Sized {
+	#[inline]
+	#[track_caller]
+	fn get_cmp<'a, C: 'static>(&self) -> OwningRef<StorageRef<'a, C>, C> where Self: Sized {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
-		let res = OwningRef::new(world.storage::<C>()).map(|x| x.get(self).unwrap());
+		let res = OwningRef::new(world.storage::<C>()).map(|x| x.get(self).expect("entity does not have component"));
 		World::unmark_borrow_mut();
 		res
 	}
-	#[inline] fn get_cmp_mut<'a, C: 'static>(&self) -> OwningRefMut<StorageGuard<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
+	#[inline]
+	#[track_caller]
+	fn get_cmp_mut<'a, C: 'static>(&self) -> OwningRefMut<StorageGuard<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
-		let res = OwningRefMut::new(world.storage_mut::<C>()).map_mut(|x| x.get_mut(self).unwrap());
+		let res = OwningRefMut::new(world.storage_mut::<C>()).map_mut(|x| x.get_mut(self).expect("entity does not have component"));
 		World::unmark_borrow_mut();
 		res
 	}
@@ -78,7 +82,9 @@ pub trait AsEntity {
 		World::unmark_borrow_mut();
 		res
 	}
-	#[inline] fn find_first_in_ancestors<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_ancestors::<Q>().unwrap() }
+	#[inline]
+	#[track_caller]
+	fn find_first_in_ancestors<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_ancestors::<Q>().expect("could not find ancestor") }
 	fn find_in_descendants<Q: query::Query>(&self) -> Vec<Q::Fetch> {
 		let mut entities = Some(Children::descendants(self.as_entity()).into_iter().collect());
 		World::mark_borrow_mut();
@@ -115,8 +121,12 @@ pub trait AsEntity {
 		World::unmark_borrow_mut();
 		res
 	}
-	#[inline] fn find_first_in_descendants<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_descendants::<Q>().unwrap() }
-	#[inline] fn find_first_in_children<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_children::<Q>().unwrap() }
+	#[inline]
+	#[track_caller]
+	fn find_first_in_descendants<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_descendants::<Q>().expect("could not find descentant") }
+	#[inline]
+	#[track_caller]
+	fn find_first_in_children<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_children::<Q>().expect("could not find child") }
 	#[inline] fn has_cmp<C: 'static>(&self) -> bool where Self: Sized {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
