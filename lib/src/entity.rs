@@ -84,7 +84,7 @@ pub trait AsEntity {
 	}
 	#[inline]
 	#[track_caller]
-	fn find_first_in_ancestors<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_ancestors::<Q>().expect("could not find ancestor") }
+	fn find_first_in_ancestors<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_ancestors::<Q>().expect("could not find query in ancestor") }
 	fn find_in_descendants<Q: query::Query>(&self) -> Vec<Q::Fetch> {
 		let mut entities = Some(Children::descendants(self.as_entity()).into_iter().collect());
 		World::mark_borrow_mut();
@@ -123,7 +123,7 @@ pub trait AsEntity {
 	}
 	#[inline]
 	#[track_caller]
-	fn find_first_in_descendants<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_descendants::<Q>().expect("could not find descentant") }
+	fn find_first_in_descendants<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_descendants::<Q>().expect("could not find query in descendant") }
 	#[inline]
 	#[track_caller]
 	fn find_first_in_children<Q: query::Query>(&self) -> Q::Fetch { self.try_find_first_in_children::<Q>().expect("could not find child") }
