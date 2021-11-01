@@ -38,17 +38,17 @@ pub fn derive_as_entity(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 	match &input.data {
 		syn::Data::Enum(_) => enum_derive! {
 			input.to_token_stream(),
-			::hobo::AsEntity,
+			::hobo::entity::AsEntity,
 			trait AsEntity {
-				fn as_entity(&self) -> ::hobo::Entity;
+				fn as_entity(&self) -> ::hobo::entity::Entity;
 			}
 		},
 		syn::Data::Struct(syn::DataStruct { fields: syn::Fields::Named(_), .. }) => {
 			let name = input.ident;
 			let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 			(quote! {
-				impl #impl_generics #crate_name::AsEntity for #name #ty_generics #where_clause {
-					fn as_entity(&self) -> #crate_name::Entity { self.element.as_entity() }
+				impl #impl_generics #crate_name::entity::AsEntity for #name #ty_generics #where_clause {
+					fn as_entity(&self) -> #crate_name::entity::Entity { self.element.as_entity() }
 				}
 			}).into()
 		},
@@ -56,8 +56,8 @@ pub fn derive_as_entity(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 			let name = input.ident;
 			let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 			(quote! {
-				impl #impl_generics #crate_name::AsEntity for #name #ty_generics #where_clause {
-					fn as_entity(&self) -> #crate_name::Entity { self.0.as_entity() }
+				impl #impl_generics #crate_name::entity::AsEntity for #name #ty_generics #where_clause {
+					fn as_entity(&self) -> #crate_name::entity::Entity { self.0.as_entity() }
 				}
 			}).into()
 		},
