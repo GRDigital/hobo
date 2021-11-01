@@ -64,6 +64,12 @@ pub trait AsEntity {
 	#[inline] fn get_cmp_mut_or_default<'a, C: 'static + Default>(&self) -> OwningRefMut<StorageGuard<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
 		self.get_cmp_mut_or(Default::default)
 	}
+	#[inline] fn remove_cmp<C: 'static>(&self) where Self: Sized {
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		world.storage_mut::<C>().remove(self);
+		World::unmark_borrow_mut();
+	}
 	fn find_in_ancestors<Q: query::Query>(&self) -> Vec<Q::Fetch> {
 		let mut entities = Some(Parent::ancestors(self.as_entity()).into_iter().collect());
 		World::mark_borrow_mut();
