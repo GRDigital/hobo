@@ -34,6 +34,21 @@ pub trait Element: AsEntity + Sized {
 	fn child(self, child: impl Element) -> Self { self.add_child(child); self }
 	fn add_children<Item: Element>(&self, children: impl IntoIterator<Item = Item>) { for child in children.into_iter() { self.add_child(child); } }
 	fn children<Item: Element>(self, children: impl IntoIterator<Item = Item>) -> Self { self.add_children(children); self }
+	fn leave_parent(self) {
+		if self.is_dead() { log::warn!("leave_parent child dead {:?}", self.as_entity()); return; }
+		let parent = self.get_cmp::<Parent>().0;
+		if parent.is_dead() { log::warn!("leave_parent parent dead {:?}", self.as_entity()); return; }
+
+		if let (Some(parent_node), Some(child_node)) = (parent.try_get_cmp::<web_sys::Node>(), self.try_get_cmp::<web_sys::Node>()) {
+			parent_node.remove_child(&child_node).expect("can't remove child");
+		}
+
+		self.remove_cmp::<Parent>();
+		let mut siblings = parent.get_cmp_mut::<Children>();
+		if let Some(child_pos) = siblings.0.iter().position(|&x| x == self.as_entity()) {
+			siblings.0.remove(child_pos);
+		}
+	}
 
 	// add a child at an index, useful to update tables without regenerating the whole container element
 	fn add_child_at(&self, at_id: usize, child: impl Element) {
