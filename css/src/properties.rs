@@ -31,7 +31,7 @@ pub use svg::*;
 pub use text::*;
 pub use transform::*;
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, PartialOrd, Ord)]
 pub enum ColorValue {
 	Rgba(crate::color::Color),
 	Initial,
@@ -51,7 +51,7 @@ impl std::fmt::Display for ColorValue {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum UnitValue {
 	Unit(Unit),
 	Initial,
@@ -85,7 +85,7 @@ pub struct RadialGradient {
 }
 */
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub struct LinearGradient {
 	pub angle: F32,
 	pub stop_list: Vec<(crate::Color, Unit)>,
@@ -101,7 +101,7 @@ impl std::fmt::Display for LinearGradient {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum Image {
 	Url(String),
 	LinearGradient(LinearGradient),
@@ -121,7 +121,7 @@ impl std::fmt::Display for Image {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum BasicShape {
 	Polygon(Vec<(Unit, Unit)>),
 	// etc
@@ -151,7 +151,7 @@ macro_rules! generate_properties {
 	) => {
 		pub use Property::{$($named_name),*};
 
-		#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+		#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 		pub enum Property {
 			Raw(String),
 			$($stutter_name($stutter_name),)*

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, PartialEq, Eq, Hash, SmartDefault, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, SmartDefault, Clone, PartialOrd, Ord)]
 pub enum TransformOrigin {
 	#[default]
 	None,
@@ -23,7 +23,7 @@ impl std::fmt::Display for TransformOrigin {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, SmartDefault, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, SmartDefault, Clone, PartialOrd, Ord)]
 pub enum Transform {
 	#[default]
 	None,
@@ -55,7 +55,7 @@ impl std::fmt::Display for Transform {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum TransformFunction {
 	Matrix(F32, F32, F32, F32, F32, F32),
 	Matrix3d(F32, F32, F32, F32, F32, F32, F32, F32, F32, F32, F32, F32, F32, F32, F32, F32),

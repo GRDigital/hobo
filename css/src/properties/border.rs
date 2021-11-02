@@ -10,7 +10,7 @@ crate::macros::easy_enum! {border-image-outset [raw]} // TODO:
 crate::macros::easy_enum! {border-image-repeat stretch repeat round space}
 crate::macros::easy_color! {outline-color}
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum BorderImageSource {
 	None,
 	Initial,
@@ -41,7 +41,7 @@ impl std::fmt::Display for BorderImageSource {
 }
 
 #[rustfmt::skip]
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display, PartialOrd, Ord)]
 pub enum BorderStyle {
 	#[strum(to_string = "none")] None,
 	#[strum(to_string = "hidden")] Hidden,
@@ -58,7 +58,7 @@ pub enum BorderStyle {
 	#[strum(to_string = "unset")] Unset,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum BorderWidth {
 	Medium,
 	Thin,
@@ -84,7 +84,7 @@ impl std::fmt::Display for BorderWidth {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Default)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Default, PartialOrd, Ord)]
 pub struct BoxShadowEffect {
 	pub inset: bool,
 	pub offset_x: Unit,
@@ -105,7 +105,7 @@ impl AppendProperty for BoxShadowEffect {
 	fn append_property(self, props: &mut Vec<Property>) { BoxShadow::Some(vec![self]).append_property(props) }
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum BoxShadow {
 	None,
 	Initial,

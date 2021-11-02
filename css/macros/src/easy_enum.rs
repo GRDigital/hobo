@@ -124,7 +124,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	});
 
 	let res = quote!(
-		#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+		#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 		pub enum #property_camel {
 			#(#enum_members)*
 		}

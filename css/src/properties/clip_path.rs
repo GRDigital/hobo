@@ -1,6 +1,6 @@
 use crate::BasicShape;
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display, PartialOrd, Ord)]
 pub enum GeometryBox {
 	#[strum(to_string = "margin-box")] MarginBox,
 	#[strum(to_string = "border-box")] BorderBox,
@@ -11,7 +11,7 @@ pub enum GeometryBox {
 	#[strum(to_string = "view-box")] ViewBox,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum ClipPathShape {
 	BasicShape(BasicShape),
 	GeometryBox(GeometryBox),
@@ -26,7 +26,7 @@ impl std::fmt::Display for ClipPathShape {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum ClipPath {
 	None,
 	Initial,

@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Default)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Default, PartialOrd, Ord)]
 pub struct Color { pub r: u8, pub g: u8, pub b: u8, pub a: u8 }
 
 impl Color {

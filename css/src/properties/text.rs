@@ -37,7 +37,7 @@ crate::macros::easy_color! {text-decoration-color}
 crate::macros::unit_value_macro! {text_indent TextIndent}
 crate::macros::unit_value_macro! {outline_offset OutlineOffset}
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum FontFamily {
 	Initial,
 	Inherit,

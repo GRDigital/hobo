@@ -3,13 +3,13 @@ use num_traits::cast::AsPrimitive;
 
 pub type F32 = ordered_float::NotNan<f32>;
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display, PartialOrd, Ord)]
 pub enum Operator {
 	#[strum(to_string = "+")] Plus,
 	#[strum(to_string = "-")] Minus,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, SmartDefault)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, SmartDefault, PartialOrd, Ord)]
 pub enum Unit {
 	#[default]
 	Zero,

@@ -7,7 +7,7 @@ crate::macros::easy_color! {background-color}
 crate::macros::unit_value_macro! {background_position_x BackgroundPositionX}
 crate::macros::unit_value_macro! {background_position_y BackgroundPositionY}
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum BackgroundImage {
 	None,
 	Initial,
@@ -37,7 +37,7 @@ impl std::fmt::Display for BackgroundImage {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum MaskImage {
 	None,
 	Initial,
@@ -71,7 +71,7 @@ impl std::fmt::Display for MaskImage {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, PartialOrd, Ord)]
 pub enum MaskSize {
 	Initial,
 	Inherit,

@@ -1,6 +1,6 @@
 use crate::{append_property::AppendProperty, prelude::*, Property};
 
-#[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, PartialOrd, Ord)]
 pub enum Filter {
 	#[default]
 	None,
@@ -30,7 +30,7 @@ impl std::fmt::Display for Filter {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum FilterFunction {
 	Blur(i32),
 	Brightness(F32),

@@ -12,7 +12,7 @@ css::grid!(
 )
 */
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, PartialOrd, Ord)]
 pub enum GridSpan {
 	Auto,
 	Initial,
@@ -35,7 +35,7 @@ impl std::fmt::Display for GridSpan {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, PartialOrd, Ord)]
 pub enum GridAutoFlow {
 	Inherit,
 	Initial,
@@ -75,7 +75,7 @@ macro_rules! grid_auto_flow {
 // what follows is not a great bunch of structs and macros, but it covers basic grid usage
 // the actual grid syntax is absolutely bananas and nothing short of a full grammar parser would suffice
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, PartialOrd, Ord)]
 pub enum GridRepeatNumber {
 	AutoFit,
 	AutoFill,
@@ -93,7 +93,7 @@ impl std::fmt::Display for GridRepeatNumber {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub struct GridRepeat {
 	pub number: GridRepeatNumber,
 	pub values: Vec<Unit>,
@@ -110,7 +110,7 @@ impl std::fmt::Display for GridRepeat {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum GridTemplate {
 	Inherit,
 	Initial,
@@ -140,7 +140,7 @@ impl std::fmt::Display for GridTemplate {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum GridTemplateValue {
 	Repeat(GridRepeat),
 	Unit(Unit),
@@ -156,7 +156,7 @@ impl std::fmt::Display for GridTemplateValue {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum GridAuto {
 	Inherit,
 	Initial,
