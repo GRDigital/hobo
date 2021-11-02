@@ -47,6 +47,9 @@ use sugars::hash;
 // test shit ffs
 // move World and AsEntity into separate files
 // could remove all *_mut elements and specify whether you want mutable or immutable component with the same trick as in Query
+//
+// if stable sort used on properties before hashing, then order of declarations would be preserved
+// but different elements that use the same properties in a different order would still reuse the same class
 
 // this is not necessary, but it makes it convenient to further remap to some OwningRef or whatever
 type StorageRef<'a, Component> = OwningRef<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, Ref<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;
