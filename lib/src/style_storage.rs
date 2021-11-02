@@ -39,6 +39,18 @@ impl css::Style {
 			}
 		}
 	}
+
+	fn sort_properties(&mut self) {
+		for rule in self.0.iter_mut() {
+			match rule {
+				css::Rule::Style(style_rule) => {
+					style_rule.1.sort();
+				},
+				css::Rule::Media(_, style) => style.sort_properties(),
+				_ => {},
+			}
+		}
+	}
 }
 
 // it checks if the style is already inserted as css into <style>
@@ -46,6 +58,12 @@ impl css::Style {
 // if no, inserts it into <style> and then returns the class name
 impl StyleStorage {
 	pub fn fetch(&mut self, mut style: css::Style) -> String {
+		// if stable sort used on properties before hashing, then order of declarations would be preserved
+		// but different elements that use the same properties in a different order would still reuse the same class
+		// in other words, if you're specifying the same property multiple times to override it - that should still work
+		// but the order of properties should no longer influence the hash result
+		// style.sort_properties();
+
 		// u64 hash from style
 		let id = hash!(style);
 

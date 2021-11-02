@@ -151,11 +151,18 @@ macro_rules! generate_properties {
 	) => {
 		pub use Property::{$($named_name),*};
 
-		#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
+		#[derive(Debug, PartialEq, Eq, Hash, Clone, strum::EnumDiscriminants, Ord)]
+		#[strum_discriminants(derive(PartialOrd))]
 		pub enum Property {
 			Raw(String),
 			$($stutter_name($stutter_name),)*
 			$($named_name($named_type)),*
+		}
+
+		impl std::cmp::PartialOrd for Property {
+			fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+				PropertyDiscriminants::from(self).partial_cmp(&PropertyDiscriminants::from(other))
+			}
 		}
 
 		impl std::fmt::Display for Property {
