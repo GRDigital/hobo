@@ -62,7 +62,7 @@ impl StyleStorage {
 		// but different elements that use the same properties in a different order would still reuse the same class
 		// in other words, if you're specifying the same property multiple times to override it - that should still work
 		// but the order of properties should no longer influence the hash result
-		// style.sort_properties();
+		style.sort_properties();
 
 		// u64 hash from style
 		let id = hash!(style);
