@@ -40,6 +40,16 @@ pub trait Resource: 'static {
 impl<T: 'static + Sized> Resource for T {}
 
 pub trait DefaultResource: Default + 'static {
+	#[inline] fn resource_or_default<'a>() -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized {
+		World::mark_borrow_mut();
+		let world = unsafe { &mut *WORLD.get() as &mut World };
+		if !World::resource_exists::<Self>(world) {
+			World::register_resource(world, Self::default());
+		}
+		let res = World::resource::<Self>(world);
+		World::unmark_borrow_mut();
+		res
+	}
 	#[inline] fn resource_mut_or_default<'a>() -> OwningRefMut<StorageGuard<'a, Self, StorageRefMut<'a, Self>>, Self> where Self: Sized {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
