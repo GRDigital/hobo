@@ -65,3 +65,11 @@ macro_rules! gap {
 		$crate::column_gap!($($tt)+),
 	]};
 }
+
+#[macro_export]
+macro_rules! background_position {
+	($($tt:tt)+) => {vec![
+		$crate::background_position_x!($($tt)+),
+		$crate::background_position_y!($($tt)+),
+	]};
+}
