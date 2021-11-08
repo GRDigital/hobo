@@ -16,6 +16,10 @@ pub enum BackgroundImage {
 	Some(Vec<crate::Image>),
 }
 
+impl BackgroundImage {
+	pub fn single(x: crate::Image) -> Self { Self::Some(vec![x]) }
+}
+
 impl std::fmt::Display for BackgroundImage {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
@@ -44,6 +48,10 @@ pub enum MaskImage {
 	Inherit,
 	Unset,
 	Some(Vec<crate::Image>),
+}
+
+impl MaskImage {
+	pub fn single(x: crate::Image) -> Self { Self::Some(vec![x]) }
 }
 
 impl std::fmt::Display for MaskImage {

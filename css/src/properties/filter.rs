@@ -1,4 +1,5 @@
 use crate::{append_property::AppendProperty, prelude::*, Property};
+use num_traits::cast::AsPrimitive;
 
 #[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, PartialOrd, Ord)]
 pub enum Filter {
@@ -43,6 +44,20 @@ pub enum FilterFunction {
 	Saturate(F32),
 	Sepia(F32),
 	Url(String),
+}
+
+impl FilterFunction {
+	pub fn blur(x: i32) -> Self { Self::Blur(x) }
+	pub fn brightness<T: AsPrimitive<f32>>(x: T) -> Self { Self::Brightness(F32::new(x.as_()).unwrap()) }
+	pub fn contrast<T: AsPrimitive<f32>>(x: T) -> Self { Self::Contrast(F32::new(x.as_()).unwrap()) }
+	// pub fn drop_shadow(...)
+	pub fn grayscale<T: AsPrimitive<f32>>(x: T) -> Self { Self::Grayscale(F32::new(x.as_()).unwrap()) }
+	pub fn hue_rotate<T: AsPrimitive<f32>>(x: T) -> Self { Self::HueRotate(F32::new(x.as_()).unwrap()) }
+	pub fn invert<T: AsPrimitive<f32>>(x: T) -> Self { Self::Invert(F32::new(x.as_()).unwrap()) }
+	pub fn opacity<T: AsPrimitive<f32>>(x: T) -> Self { Self::Opacity(F32::new(x.as_()).unwrap()) }
+	pub fn saturate<T: AsPrimitive<f32>>(x: T) -> Self { Self::Saturate(F32::new(x.as_()).unwrap()) }
+	pub fn sepia<T: AsPrimitive<f32>>(x: T) -> Self { Self::Sepia(F32::new(x.as_()).unwrap()) }
+	pub fn url<T: Into<String>>(x: T) -> Self { Self::Url(x.into()) }
 }
 
 impl AppendProperty for FilterFunction {

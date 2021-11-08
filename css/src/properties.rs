@@ -111,6 +111,12 @@ pub enum Image {
 	// conic ??
 }
 
+impl Image {
+	pub fn url(x: impl Into<String>) -> Self { Self::Url(x.into()) }
+	pub fn linear_gradient(angle: f32, stop_list: Vec<(crate::Color, Unit)>) -> Self { Self::LinearGradient(LinearGradient { angle: F32::new(angle).unwrap(), stop_list }) }
+	pub fn repeating_linear_gradient(angle: f32, stop_list: Vec<(crate::Color, Unit)>) -> Self { Self::RepeatingLinearGradient(LinearGradient { angle: F32::new(angle).unwrap(), stop_list }) }
+}
+
 impl std::fmt::Display for Image {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
