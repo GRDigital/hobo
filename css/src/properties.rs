@@ -193,6 +193,7 @@ macro_rules! generate_properties {
 	};
 }
 
+// rather than having this huge enum, it might be possible fo just having a Vec of `Box<Display>` or `Box<Property>` with `Property` being a trait
 generate_properties! {
 	// different properties that have specific to them arguments
 	// basis/grow/shrink/order kind of take the same, but basis and shrink are 1 by default while others are 0 so /shrug
