@@ -300,6 +300,7 @@ generate_properties! {
 		MaskSize,
 		Float,
 		Clear,
+		AspectRatio,
 	),
 	// different properties that take the same argument
 	named => (
