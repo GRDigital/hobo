@@ -6,6 +6,7 @@ use std::{
 	collections::HashMap,
 	rc::Weak,
 };
+use once_cell::sync::Lazy;
 
 slotmap::new_key_type! {pub struct SubKey;}
 
@@ -15,6 +16,8 @@ type SubFn = Box<dyn FnMut(&dyn Any)>;
 pub struct Events {
 	subscribers: RefCell<HashMap<TypeId, DenseSlotMap<SubKey, SubFn>>>,
 }
+
+pub static EVENTS: Lazy<Events> = Lazy::new(Default::default);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SubInfo {
@@ -29,13 +32,13 @@ unsafe impl Sync for Events {}
 
 // TODO: nested subscribtions etc?
 impl Events {
-	pub fn fire<E: Any>(&self, e: &E) {
+	fn fire<E: Any>(&self, e: &E) {
 		for subscriber in self.subscribers.borrow_mut().entry(TypeId::of::<E>()).or_default().values_mut() {
 			subscriber(e);
 		}
 	}
 
-	pub fn on_key<E: Any>(&self, mut f: impl FnMut(&E) + 'static) -> SubInfo {
+	fn on_key<E: Any>(&self, mut f: impl FnMut(&E) + 'static) -> SubInfo {
 		let wrapper = move |e: &dyn Any| {
 			if let Some(e) = e.downcast_ref::<E>() {
 				f(e);
@@ -48,11 +51,11 @@ impl Events {
 		}
 	}
 
-	pub fn on<E: Any>(&'static self, f: impl FnMut(&E) + 'static) -> Subscription {
+	fn on<E: Any>(&'static self, f: impl FnMut(&E) + 'static) -> Subscription {
 		Subscription(Box::new(self), self.on_key(f))
 	}
 
-	pub fn unsubscribe(&self, info: SubInfo) {
+	fn unsubscribe(&self, info: SubInfo) {
 		self.subscribers.borrow_mut().entry(info.typeid).or_default().remove(info.key);
 	}
 }
@@ -73,3 +76,6 @@ impl Unsub for &'static Events {
 
 pub struct Subscription(Box<dyn Unsub>, SubInfo);
 impl Drop for Subscription { fn drop(&mut self) { self.0.unsubscribe(self.1); } }
+
+pub fn fire<E: Any>(e: &E) { EVENTS.fire(e); }
+pub fn on<E: Any>(f: impl FnMut(&E) + 'static) -> Subscription { EVENTS.on(f) }
