@@ -47,7 +47,13 @@ pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 			}
 
 			let elements = world.storage::<web_sys::Element>();
-			elements.get(entity).unwrap().set_attribute(web_str::class(), res.trim()).expect("can't set class attribute");
+			let element = elements.get(entity).unwrap();
+			let res = res.trim();
+			if res.is_empty() {
+				element.remove_attribute(web_str::class()).expect("can't remove class attribute");
+			} else {
+				element.set_attribute(web_str::class(), res).expect("can't set class attribute");
+			}
 		}
 
 		let mut classes = world.storage_mut::<Classes>();
