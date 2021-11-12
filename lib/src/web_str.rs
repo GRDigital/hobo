@@ -78,5 +78,5 @@ intern_strings! {
 	mouseleave; mousemove; mouseover; mouseout; mouseup;
 	change; keydown; keyup; scroll; resize; blur; focus;
 	touchstart; touchend; touchmove; touchcancel; wheel;
-	load;
+	load; canplay;
 }

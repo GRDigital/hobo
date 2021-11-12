@@ -170,4 +170,5 @@ generate_events! {
 	TouchEvent,    touchcancel, on_touch_cancel;
 	WheelEvent,    wheel,       on_wheel;
 	Event,         load,        on_load;
+	Event,         canplay,     on_can_play;
 }
