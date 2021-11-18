@@ -248,6 +248,7 @@ generate_properties! {
 		BackgroundAttachment,
 		Cursor,
 		TextTransform,
+		TextShadow,
 		FontKerning,
 		FontFamily,
 		WordSpacing,
