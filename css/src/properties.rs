@@ -223,6 +223,7 @@ generate_properties! {
 		UserSelect,
 		ScrollBehavior,
 		PointerEvents,
+		TouchAction,
 		Resize,
 		ObjectFit,
 		ListStyleType, ListStyleImage, ListStylePosition,
@@ -379,6 +380,7 @@ crate::macros::easy_enum! {display block none inline inline-block flex inline-fl
 crate::macros::easy_enum! {user-select auto none text all}
 crate::macros::easy_enum! {scroll-behavior auto smooth}
 crate::macros::easy_enum! {pointer-events auto none}
+crate::macros::easy_enum! {touch-action auto none manipulation}
 crate::macros::easy_enum! {resize none both horizontal vertical}
 crate::macros::easy_enum! {object-fit fill contain cover scale-down none}
 crate::macros::easy_enum! {transform-style flat preserve-3d}
