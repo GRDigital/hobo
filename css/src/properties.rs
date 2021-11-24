@@ -302,7 +302,7 @@ generate_properties! {
 		MaskSize,
 		Float,
 		Clear,
-		AspectRatio,
+		// AspectRatio,
 	),
 	// different properties that take the same argument
 	named => (
@@ -377,7 +377,7 @@ generate_properties! {
 crate::macros::easy_enum! {box-sizing content-box border-box}
 crate::macros::easy_enum! {visibility visible hidden collapse}
 crate::macros::easy_enum! {display block none inline inline-block flex inline-flex grid inline-grid flow-root contents table table-row table-row-group table-header-group table-footer-group table-cell table-column-group table-column table-caption list-item}
-crate::macros::easy_enum! {user-select auto none text all}
+// crate::macros::easy_enum! {user-select auto none text all}
 crate::macros::easy_enum! {scroll-behavior auto smooth}
 crate::macros::easy_enum! {pointer-events auto none}
 crate::macros::easy_enum! {touch-action auto none manipulation}
@@ -400,3 +400,40 @@ crate::macros::easy_enum! {overflow-x visible hidden scroll auto}
 crate::macros::easy_enum! {overflow-y visible hidden scroll auto}
 crate::macros::easy_enum! {float none left right inline-start inline-end}
 crate::macros::easy_enum! {clear none left right inline-start inline-end both}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, PartialOrd, Ord)]
+pub enum UserSelect {
+	Initial,
+	Inherit,
+	Unset,
+	Auto,
+	None,
+	Text,
+	All,
+}
+
+#[rustfmt::skip]
+impl std::fmt::Display for UserSelect {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Self::Initial => "user-select:initial;-webkit-user-select:initial;-moz-user-select:initial;".fmt(f),
+			Self::Inherit => "user-select:inherit;-webkit-user-select:inherit;-moz-user-select:inherit;".fmt(f),
+			Self::Unset   => "user-select:unset;-webkit-user-select:unset;-moz-user-select:unset;".fmt(f),
+			Self::Auto    => "user-select:auto;-webkit-user-select:auto;-moz-user-select:auto;".fmt(f),
+			Self::None    => "user-select:none;-webkit-user-select:none;-moz-user-select:none;".fmt(f),
+			Self::Text    => "user-select:text;-webkit-user-select:text;-moz-user-select:text;".fmt(f),
+			Self::All     => "user-select:all;-webkit-user-select:all;-moz-user-select:all;".fmt(f),
+		}
+	}
+}
+
+#[macro_export]
+macro_rules! user_select {
+	(initial) => {$crate::Property::UserSelect($crate::UserSelect::Initial)};
+	(inherit) => {$crate::Property::UserSelect($crate::UserSelect::Inherit)};
+	(unset)   => {$crate::Property::UserSelect($crate::UserSelect::Unset)};
+	(auto)    => {$crate::Property::UserSelect($crate::UserSelect::Auto)};
+	(none)    => {$crate::Property::UserSelect($crate::UserSelect::None)};
+	(text)    => {$crate::Property::UserSelect($crate::UserSelect::Text)};
+	(all)     => {$crate::Property::UserSelect($crate::UserSelect::All)};
+}

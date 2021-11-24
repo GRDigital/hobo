@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
-crate::macros::easy_enum! {aspect-ratio auto [float]}
+// doesn't work in safari
+// crate::macros::easy_enum! {aspect-ratio auto [float]}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum Dimension {
