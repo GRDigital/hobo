@@ -1,9 +1,5 @@
 #![allow(non_snake_case)]
 
-//! everything that has to do with raw HTML elements
-//!
-//! all of these functions return the most fitting web_sys element types
-
 use crate::{prelude::*, storage::Storage, AsEntity, Element, Entity, World};
 use std::{any::TypeId, collections::HashSet};
 use sugars::*;
@@ -88,56 +84,38 @@ macro_rules! create {
 		SVG => [$($svg_name:ident, $svg_t:ident),*$(,)?],
 	) => {paste::item! {
 		$(
-			pub fn $html_name() -> web_sys::$html_t {
-				wasm_bindgen::JsCast::unchecked_into(
+			#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Element)]
+			pub struct [<$html_name:camel>](pub crate::Entity);
+
+			pub fn $html_name() -> [<$html_name:camel>] {
+				let raw: web_sys::$html_t = wasm_bindgen::JsCast::unchecked_into(
 					web_sys::window().expect("no window")
 						.document().expect("no document")
 						.create_element(crate::web_str::$html_name()).expect("can't create element")
-				)
+				);
+				[<$html_name:camel>](html_element(&raw))
 			}
 
-			#[cfg(test)]
-			#[wasm_bindgen_test]
-			fn [<can_create_$html_name>]() { components::$html_name(); }
+			#[test]
+			fn [<$html_name _has_selector>]() { crate::css::macros::selector!($html_name); }
 		)*
 
 		$(
-			pub fn $svg_name() -> web_sys::$svg_t {
-				wasm_bindgen::JsCast::unchecked_into(
+			#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Element)]
+			pub struct [<$svg_name:camel>](pub crate::Entity);
+
+			pub fn $svg_name() -> [<$svg_name:camel>] {
+				let raw: web_sys::$svg_t = wasm_bindgen::JsCast::unchecked_into(
 					web_sys::window().expect("no window")
 						.document().expect("no document")
 						.create_element_ns(Some(wasm_bindgen::intern("http://www.w3.org/2000/svg")), crate::web_str::$svg_name()).expect("can't create svg element")
-				)
+				);
+				[<$svg_name:camel>](svg_element(&raw))
 			}
 
-			#[cfg(test)]
-			#[wasm_bindgen_test]
-			fn [<can_create_$svg_name>]() { components::$svg_name(); }
+			#[test]
+			fn [<$svg_name _has_selector>]() { crate::css::macros::selector!($svg_name); }
 		)*
-
-		pub mod components {
-			use super::*;
-
-			$(
-				#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Element)]
-				pub struct [<$html_name:camel>](pub crate::Entity);
-
-				pub fn $html_name() -> [<$html_name:camel>] { [<$html_name:camel>](html_element(&super::$html_name())) }
-
-				#[test]
-				fn [<$html_name _has_selector>]() { crate::css::macros::selector!($html_name); }
-			)*
-
-			$(
-				#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Element)]
-				pub struct [<$svg_name:camel>](pub crate::Entity);
-
-				pub fn $svg_name() -> [<$svg_name:camel>] { [<$svg_name:camel>](svg_element(&super::$svg_name())) }
-
-				#[test]
-				fn [<$svg_name _has_selector>]() { crate::css::macros::selector!($svg_name); }
-			)*
-		}
 
 		#[doc(hidden)]
 		pub mod strings {
@@ -169,26 +147,26 @@ pub trait StringValue {
 	fn set_value(&self, x: &str);
 }
 
-impl StringValue for components::Input {
+impl StringValue for Input {
 	fn value(&self) -> String { self.get_cmp::<web_sys::HtmlInputElement>().value() }
 
 	fn set_value(&self, x: &str) { self.get_cmp::<web_sys::HtmlInputElement>().set_value(x) }
 }
 
-impl StringValue for components::Textarea {
+impl StringValue for Textarea {
 	fn value(&self) -> String { self.get_cmp::<web_sys::HtmlTextAreaElement>().value() }
 
 	fn set_value(&self, x: &str) { self.get_cmp::<web_sys::HtmlTextAreaElement>().set_value(x) }
 }
 
-impl components::Select {
+impl Select {
 	pub fn selected_index(&self) -> i32 {
 		self.get_cmp::<web_sys::HtmlSelectElement>().selected_index()
 	}
 }
 
-impl components::Input {
-	pub async fn file_data(&self, id: u32) -> Option<Vec<u8>> {
+impl Input {
+	pub async fn file_data(&self, id: u32) -> ::std::option::Option<Vec<u8>> {
 		let file = self.get_cmp::<web_sys::HtmlInputElement>().files()?.get(id)?;
 		let arr_buffer: js_sys::ArrayBuffer = wasm_bindgen_futures::JsFuture::from(file.array_buffer()).await.ok()?.dyn_into().ok()?;
 		let vec = js_sys::Uint8Array::new(&arr_buffer).to_vec();
@@ -196,7 +174,7 @@ impl components::Input {
 	}
 }
 
-// impl AsRef<web_sys::HtmlSelectElement> for components::Select {
+// impl AsRef<web_sys::HtmlSelectElement> for Select {
 //     fn as_ref(&self) -> &web_sys::HtmlSelectElement {
 //         <web_sys::HtmlSelectElement as Component>::get(self)
 //     }

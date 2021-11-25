@@ -5,7 +5,7 @@
 //! all of these functions return interned strings
 //! to find out more about string interning, refer to [wasm-bindgen documentation](https://rustwasm.github.io/wasm-bindgen/api/wasm_bindgen/fn.intern.html)
 
-#[doc(inline)] pub use crate::create::strings::*;
+#[doc(inline)] pub use crate::components::strings::*;
 
 // interning disabled in debug mode to help track memory leaks
 macro_rules! intern_strings {

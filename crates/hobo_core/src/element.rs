@@ -76,7 +76,7 @@ pub trait Element: AsEntity + Sized {
 		S: futures_signals::signal::Signal<Item = E> + 'static,
 	{
 		// placeholder at first
-		let mut child = crate::create::components::div().class(crate::css::Display::None).erase();
+		let mut child = crate::components::div().class(crate::css::Display::None).erase();
 		self.add_child(child);
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |new_child| {
 			let new_child = new_child.erase();
