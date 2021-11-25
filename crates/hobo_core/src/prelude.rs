@@ -9,7 +9,7 @@ pub use crate::{
 	element::{Element, SomeElement},
 	entity::{AsEntity, Entity},
 	hierarchy::{Children, Parent},
-	query::*,
+	query::{Query, With},
 	resource::{DefaultResource, Resource},
 	signals_ext::{SignalExt2, SignalMapExt2, SignalVecExt2},
 	state,
