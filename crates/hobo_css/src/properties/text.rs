@@ -117,9 +117,9 @@ impl std::fmt::Display for TextShadow {
 			Self::Some(effects) => {
 				"text-shadow:".fmt(f)?;
 				if let Some((first, rest)) = effects.split_first() {
-					write!(f, r#"{first}"#)?;
+					write!(f, r#"{}"#, first)?;
 					for effect in rest {
-						write!(f, r#",{effect}"#)?;
+						write!(f, r#",{}"#, effect)?;
 					}
 				}
 				";".fmt(f)
