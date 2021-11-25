@@ -8,19 +8,19 @@ use std::{
 };
 use once_cell::sync::Lazy;
 
-slotmap::new_key_type! {pub struct SubKey;}
+slotmap::new_key_type! {struct SubKey;}
 
 type SubFn = Box<dyn FnMut(&dyn Any)>;
 
 #[derive(Default)]
-pub struct Events {
+struct Events {
 	subscribers: RefCell<HashMap<TypeId, DenseSlotMap<SubKey, SubFn>>>,
 }
 
-pub static EVENTS: Lazy<Events> = Lazy::new(Default::default);
+static EVENTS: Lazy<Events> = Lazy::new(Default::default);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct SubInfo {
+struct SubInfo {
 	key: SubKey,
 	typeid: TypeId,
 }
@@ -60,7 +60,7 @@ impl Events {
 	}
 }
 
-pub trait Unsub {
+trait Unsub {
 	fn unsubscribe(&self, info: SubInfo);
 }
 

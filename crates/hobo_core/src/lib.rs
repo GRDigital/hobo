@@ -1,7 +1,7 @@
 pub mod components;
 pub mod dom_events;
 pub mod element;
-pub mod enclose;
+mod enclose;
 pub mod entity;
 pub mod events;
 pub mod hierarchy;
@@ -10,7 +10,7 @@ pub mod query;
 mod racy_cell;
 pub mod resource;
 pub mod signals_ext;
-pub mod state;
+#[doc(hidden)] pub mod state;
 mod storage;
 mod style_storage;
 pub mod web_str;
@@ -18,7 +18,7 @@ mod world;
 
 pub use web_sys;
 use crate::prelude::*;
-pub use discard;
+#[doc(hidden)] pub use discard;
 pub use element::{Classes, Element, SomeElement};
 pub use entity::AsEntity;
 pub use futures_signals as signals;
