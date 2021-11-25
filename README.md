@@ -17,7 +17,7 @@
 * Entity-Component based approach allowing flexible state propagation and cohesion between elements without coupling or a need for global store or state
 
 ### Sneak peek:
-```rust
+```rust,noplaypen
 fn counter() -> impl hobo::Element {
 	let counter = Mutable::new(0);
 
