@@ -1,9 +1,9 @@
 pub mod prelude;
 #[macro_use] pub mod units;
 #[macro_use] pub mod properties;
-#[macro_use] pub mod shortcuts;
+#[macro_use] mod shortcuts;
 #[macro_use] pub mod selector;
-pub mod append_property;
+mod append_property;
 pub mod color;
 pub mod font_face;
 pub mod media;

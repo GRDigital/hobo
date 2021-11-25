@@ -16,8 +16,8 @@ pub use crate::{
 	storage::{DynStorage, Storage},
 	web_str, MarkClassString,
 };
-pub use wasm_bindgen::prelude::*;
+#[doc(hidden)] pub use wasm_bindgen::prelude::*;
 pub use web_sys;
 
 #[must_use]
-pub fn default<T: Default>() -> T { T::default() }
+pub(crate) fn default<T: Default>() -> T { T::default() }

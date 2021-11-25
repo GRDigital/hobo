@@ -141,6 +141,7 @@ impl From<std::ops::Range<u32>> for UnicodeRange {
 	fn from(x: std::ops::Range<u32>) -> Self { Self(x.start, Some(x.end)) }
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! __unicode_range {
 	($($expr:expr),*) => {vec![$(UnicodeRange::from($expr)),*]};

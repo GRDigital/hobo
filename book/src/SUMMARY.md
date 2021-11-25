@@ -28,6 +28,7 @@
 - [Building the DOM](building-the-dom.md)
 - [Other utilities](utilities.md)
 	- [web_str](utilities/web_str.md)
+	- [Events]()
 - [Recipes](recipes.md)
 	- [Elements that change](recipes/elements-that-change.md)
 	- [SVGs](recipes/svgs.md)

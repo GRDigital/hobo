@@ -1,6 +1,5 @@
 use crate::Property;
 
-#[doc(hidden)]
 pub trait AppendProperty {
 	fn append_property(self, decls: &mut Vec<Property>);
 }

@@ -12,7 +12,7 @@ use hobo::{prelude::*, components as cmp};
 // </div>
 
 fn counter() -> impl hobo::Element {
-	let counter_value = Mutable::new(0);
+	let counter_value = Mutable::new(0_i32);
 
 	cmp::div()
 		.class((
