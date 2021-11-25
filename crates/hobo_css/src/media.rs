@@ -128,19 +128,19 @@ fn woo() {
 	assert_eq!(
 		hobo_css_macros::media_selector!(
 			!All && Orientation(Portrait) && !AspectRatio(4, 3),
-			Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.)))
+			Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new(200.).unwrap()))
 		),
 		MediaSelector(
 			vec![
 				hobo_css_macros::media_query!(!All && Orientation(Portrait) && !AspectRatio(4, 3)),
-				hobo_css_macros::media_query!(Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.)))),
+				hobo_css_macros::media_query!(Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new(200.).unwrap()))),
 			],
 		),
 	);
 
 	assert_eq!(
 		crate::style!(
-			@media !All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.))) {
+			@media !All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new(200.).unwrap())) {
 				html {
 					background_color!(rgb 0xFF_00_00)
 				}
@@ -149,7 +149,7 @@ fn woo() {
 		crate::Style(
 			vec![
 				crate::Rule::Media(
-					hobo_css_macros::media_selector!(!All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.)))),
+					hobo_css_macros::media_selector!(!All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new(200.).unwrap()))),
 					crate::style!(
 						html {
 							background_color!(rgb 0xFF_00_00)
@@ -162,7 +162,7 @@ fn woo() {
 
 	assert_eq!(
 		crate::style!(
-			@media !All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new_unwrap(200.))) {
+			@media !All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(crate::Unit::Px(crate::F32::new(200.).unwrap())) {
 				html {
 					background_color!(rgb 0xFF_00_00)
 				}

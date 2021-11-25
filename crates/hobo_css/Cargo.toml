@@ -6,11 +6,11 @@ license = "MIT"
 repository = "https://github.com/grdigital/hobo"
 description = "hobo is a Rust frontend framework"
 authors = ["GR Digital <contact@grdigital.co.uk>"]
-readme = "../README.md"
+readme = "../../README.md"
 
 [dependencies]
 extend = "1"
-hobo_css_macros = "=0.1.10"
+hobo_css_macros = { path = "../hobo_css_macros", version = "=0.1.10" }
 num-traits = "0.2"
 ordered-float = { version = "2", default-features = false }
 paste = "1"

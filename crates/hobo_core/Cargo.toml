@@ -1,20 +1,20 @@
 [package]
-name = "hobo"
+name = "hobo_core"
 version = "0.1.10"
 edition = "2018"
 license = "MIT"
 repository = "https://github.com/grdigital/hobo"
 description = "hobo is a Rust frontend framework"
 authors = ["GR Digital <contact@grdigital.co.uk>"]
-readme = "../README.md"
+readme = "../../README.md"
 
 [dependencies]
 as-any = "0.2"
 discard = "1"
 extend = "1"
 futures-signals = "0.3"
-hobo_css = "=0.1.10"
-hobo_derive = "=0.1.10"
+hobo_css = { path = "../hobo_css", version = "=0.1.10" }
+hobo_derive = { path = "../hobo_derive", version = "=0.1.10" }
 js-sys = "0.3"
 log = "0.4"
 once_cell = "1"

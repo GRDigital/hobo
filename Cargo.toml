@@ -1,13 +1,22 @@
-[workspace]
-members = [
-	"lib",
-	"derive",
-	"css",
-	"css/macros",
-]
+[package]
+name = "hobo"
+version = "0.1.10"
+edition = "2018"
+license = "MIT"
+repository = "https://github.com/grdigital/hobo"
+description = "hobo is a Rust frontend framework"
+authors = ["GR Digital <contact@grdigital.co.uk>"]
+readme = "../README.md"
+exclude = ["crates/**/*", "book/**/*", ".agignore", ".editorconfig", ".gitignore", "publish.rs", "set-version.rs", "test.rs"]
 
-[patch.crates-io]
-hobo = { path = "lib" }
-hobo_derive = { path = "derive" }
-hobo_css = { path = "css" }
-hobo_css_macros = { path = "css/macros" }
+[workspace]
+members = ["crates/*"]
+
+[dependencies]
+hobo_core = { path = "crates/hobo_core", version = "=0.1.10" }
+
+# [patch.crates-io]
+# hobo_core = { path = "crates/hobo_core" }
+# hobo_derive = { path = "crates/hobo_derive" }
+# hobo_css = { path = "crates/hobo_css" }
+# hobo_css_macros = { path = "crates/hobo_css_macros" }

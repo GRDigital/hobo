@@ -17,10 +17,10 @@ pub use macros::AppendProperty;
 pub use properties::*;
 pub use units::{Unit, F32};
 
-#[extend::ext(pub)]
-impl F32 {
-	fn new_unwrap(x: f32) -> Self { F32::new(x).unwrap() }
-}
+// #[extend::ext(pub)]
+// impl F32 {
+//     fn new_unwrap(x: f32) -> Self { F32::new(x).unwrap() }
+// }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Rule {

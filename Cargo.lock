@@ -171,6 +171,13 @@ dependencies = [
 name = "hobo"
 version = "0.1.10"
 dependencies = [
+ "hobo_core",
+]
+
+[[package]]
+name = "hobo_core"
+version = "0.1.10"
+dependencies = [
  "as-any",
  "console_error_panic_hook",
  "console_log",

@@ -5,9 +5,9 @@ use quote::ToTokens;
 // use proc_macro_error::proc_macro_error;
 
 fn crate_name() -> TokenStream {
-	match proc_macro_crate::crate_name("hobo").unwrap() {
-		proc_macro_crate::FoundCrate::Itself => quote! { crate },
-		proc_macro_crate::FoundCrate::Name(x) => { let hobo = syn::Ident::new(&x, Span::call_site()); quote! { #hobo } },
+	match proc_macro_crate::crate_name("hobo") {
+		Err(_) | Ok(proc_macro_crate::FoundCrate::Itself) => quote! { crate },
+		Ok(proc_macro_crate::FoundCrate::Name(x)) => { let hobo = syn::Ident::new(&x, Span::call_site()); quote! { ::#hobo } },
 	}
 }
 
@@ -38,9 +38,9 @@ pub fn derive_as_entity(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 	match &input.data {
 		syn::Data::Enum(_) => enum_derive! {
 			input.to_token_stream(),
-			::hobo::entity::AsEntity,
+			::hobo_core::entity::AsEntity,
 			trait AsEntity {
-				fn as_entity(&self) -> ::hobo::entity::Entity;
+				fn as_entity(&self) -> ::hobo_core::entity::Entity;
 			}
 		},
 		syn::Data::Struct(syn::DataStruct { fields: syn::Fields::Named(_), .. }) => {
