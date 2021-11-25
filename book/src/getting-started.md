@@ -2,40 +2,37 @@
 
 Here's a basic counter component:
 
-```rust
-use hobo::{prelude::*, enclose as e, cmp};
+```rust,noplaypen
+use hobo::{prelude::*, components as cmp};
 
-#[derive(hobo::Element, hobo::Container, hobo::EventTarget, hobo::RawElement)]
-pub struct Counter {
-	element: cmp::Div,
-	count: i32,
-}
-
-// <div>
-//   <button>PLUS</button>
-//   <div>0</div>
+// <div class="s-f4d1763947b5e1ff">
+//   <div>Counter value is: 0</div>
+//   <button>increment</button>
+//   <button>decrement</button>
 // </div>
-impl Counter {
-	#[hobo::trick]
-	fn new() -> Self {
-		// we need this to be able to clone raw element reference into on_click handlers
-		let text = cmp::div().text("0");
 
-		Self { element: cmp::div(), count: 0 }
-			.class(css::class!(
-				css::width!(128 px),
-				css::height!(128 px),
-				// #AA0000FF or #AA0000 of #A00 in css
-				css::background_color!(rgb 0xAA_00_00),
-			))
+fn counter() -> impl hobo::Element {
+	let counter_value = Mutable::new(0);
+
+	cmp::div()
+		.class((
+			css::display!(flex), // enum-like properties can also be set like `css::Display::Flex`
+			css::size!(200 px), // `size` is a shortcut to set `width` and `height` simultaneously
+			css::background_color!(rgb 0xAA_00_00), // #AA0000FF or #AA0000 or #A00 in normal css
+		))
+		.child(cmp::div()
+			.text_signal(counter_value.signal().map(|value| format!("Counter value is: {}", value)))
+		)
+		.component(counter_value)
+		.with(move |&counter_div| counter_div
 			.child(cmp::button()
-				.text("PLUS")
-				.on_click_mut(&this, e!((*text) move |this, _| {
-					this.count += 1;
-					text.set_inner_text(&this.count.to_string());
-				}))
+				.text("increment")
+				.on_click(move |_| *counter_div.get_cmp::<Mutable<i32>>().lock_mut() += 1)
 			)
-			.child(text)
-	}
+			.add_child(cmp::button() // same as .child but non-chaining
+				.text("decrement")
+				.on_click(move |_| *counter_div.get_cmp::<Mutable<i32>>().lock_mut() -= 1)
+			)
+		)
 }
 ```
