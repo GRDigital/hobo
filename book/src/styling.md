@@ -1,20 +1,18 @@
 # Styling facilities
 
-Most hobo components will be styled with either `.class()` or `.style()` functions, where either `css::class!()`, `css::style!()` or `css::properties!()` macros are used. The naming is confusing somewhat, but the distinction is important.
+Most **Elements** will be styled with either `.class()` or `.style()` functions, where either `css::style!()` or a property tuple will be used.
 
-* `.style()` and `.set_style()` use the `style` attribute, which can only take a bunch of properties without any selectors, so `css::properties!()` macro is used.
-* `.class()`, `.set_class()` and `tagged` variants use the `class` attribute:
-	* `css::style!()` uses a css-like `{ <selector> { <properties> } <selector> { <properties> } }` syntax
-	* `css::class!()` is `css::style!(.& { <properties> })` or in other words - it's a bunch of properties applied just to the element being styled, similar to what can go in a `style` attribute, just using a class to refer to it.
+* `.style()` and `.set_style()` use the `style` attribute, which can only take a bunch of properties without any selectors, so a property tuple is used.
+* `.class()`, `.set_class()` and `tagged` or `typed` variants use the `class` attribute:
 
 For example, here's a style:
 
-```rust
-cmp::div()
+```rust,noplaypen
+hobo::components::div()
 	.class(css::style!(
 		.& {
 			css::height!(393 px),
-			css::Display::Flex,
+			css::Display::Flex, // can also be `css::display!(flex)`
 			css::AlignItems::Center,
 			css::Position::Relative,
 		}
@@ -27,28 +25,29 @@ cmp::div()
 			css::UserSelect::None,
 		}
 
-		.& > :not(:nth_child(1)) {
+		.& > :not(:nth_child(0, 1)) { // nth_child will convert to An+B syntax
 			css::z_index!(200),
 		}
 
-		.& > div:not(:nth_child(1)) {
+		.& > div:not(:nth_child(0, 1)) {
 			css::width!(17.5%),
 			css::height!(100%),
 			css::Display::Flex,
 			css::AlignItems::Center,
 		}
 
-		.&.& > :nth_child(5) {
+		// doubling up on the class name increases specificity
+		.&.& > :nth_child(0, 5) { 
 			css::width!(30%),
 		}
 
-		.& > *:nth_child(3) > img,
-		.& > *:nth_child(4) > img,
+		.& > *:nth_child(0, 3) > img,
+		.& > *:nth_child(0, 4) > img,
 		.& > svg:last_child {
-			css::Transform::Some(vec![css::TransformFunction::ScaleX((-1.).into())])
+			css::TransformFunction::TranslateX(css::unit!(50%)),
 		}
 
-		.& >> img {
+		.& >> img { // this is same as `.& img` selector in css
 			css::height!(100%),
 		}
 	))

@@ -13,4 +13,25 @@ There are also several additions:
 
 * `.&` will be replaced at runtime with the name of a class, which will be generated from the rules in the style it belongs to
 	* in other words, it's similar to `&` in SASS or `styled-components`
-* `.[T]` where `T` is some `hobo::Element` will be replaced with the generated classname for a type `T` so you could select based on component type. E.g. assuming you have a `Button` component, `.& >> .[Button]` is a valid slector for all `Button` descendants of whatever this rule is applied to.
+* `.[T]` where `T` is some marker type will be replaced with the generated classname for the type `T` so you could select based on custom marker type.
+
+```rust,noplaypen
+use hobo::components as cmp;
+
+struct ButtonMarker;
+
+cmp::div()
+	.class(css::style!(
+		.& >> .[ButtonMarker] {
+			css::cursor!(pointer),
+		}
+	))
+	.child(cmp::div()
+		.mark::<ButtonMarker>()
+		.text("button 1")
+	)
+	.child(cmp::div()
+		.mark::<ButtonMarker>()
+		.text("button 2")
+	)
+```
