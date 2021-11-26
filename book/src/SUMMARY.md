@@ -9,7 +9,6 @@
 		- [hobo::Element and hobo::AsEntity]()
 	- [Children and Parent]() <!-- also leave_parent -->
 	- [Removing and replacing elements]()
-	- [Signals]()
 	- [DOM Events and EventHandlerCallback]()
 - [Styling](basic-concepts/styling.md)
 	- [Selector](basic-concepts/styling/selector.md)
@@ -18,13 +17,11 @@
 	- [Colors](basic-concepts/styling/colors.md)
 	- [Marking]()
 	- [Every way to make a class]()
+	- [Precedence gotchas due to class reuse]()
 - [Managing state and relations with Components](state.md)
 	- [Raw element access](state/raw_element.md)
 	- [Queries]()
-	<!-- - [Raw element access](state/raw_element.md)-->
-	<!-- - [`Rc\<RefCell\<T>>`](state/rc_refcell.md)-->
-	<!-- - [#[hobo::trick]](state/hobo_trick.md)-->
-	<!-- - [State and StateSlice](state/state.md)-->
+	- [Signals]()
 - [Building the DOM](building-the-dom.md)
 - [Other utilities](utilities.md)
 	- [web_str](utilities/web_str.md)
