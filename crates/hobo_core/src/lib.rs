@@ -52,11 +52,6 @@ use sugars::hash;
 type StorageRef<'a, Component> = OwningRef<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, Ref<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;
 type StorageRefMut<'a, Component> = OwningRefMut<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, RefMut<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;
 
-pub fn fetch_classname(style: impl Into<css::Style>) -> String {
-	let style_storage = unsafe { &mut *STYLE_STORAGE.get() as &mut StyleStorage };
-	style_storage.fetch(style.into())
-}
-
 pub fn register_window(window: &web_sys::Window) {
 	let style_storage = unsafe { &mut *STYLE_STORAGE.get() as &mut StyleStorage };
 	style_storage.register_window(window);

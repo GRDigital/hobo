@@ -30,6 +30,5 @@ pub use hobo_core::{
 	discard,
 	state,
 	MarkClassString,
-	fetch_classname,
 	world,
 };
