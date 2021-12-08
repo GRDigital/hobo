@@ -41,7 +41,7 @@ pub trait AsEntity {
 	fn get_cmp<'a, C: 'static>(&self) -> OwningRef<StorageRef<'a, C>, C> where Self: Sized {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
-		let res = OwningRef::new(world.storage::<C>()).map(|x| x.get(self).expect("entity does not have component"));
+		let res = OwningRef::new(world.storage::<C>()).try_map(|x| x.get(self).ok_or(())).expect("entity does not have component");
 		World::unmark_borrow_mut();
 		res
 	}
@@ -50,7 +50,7 @@ pub trait AsEntity {
 	fn get_cmp_mut<'a, C: 'static>(&self) -> OwningRefMut<StorageGuard<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
 		World::mark_borrow_mut();
 		let world = unsafe { &mut *WORLD.get() as &mut World };
-		let res = OwningRefMut::new(world.storage_mut::<C>()).map_mut(|x| x.get_mut(self).expect("entity does not have component"));
+		let res = OwningRefMut::new(world.storage_mut::<C>()).try_map_mut(|x| x.get_mut(self).ok_or(())).expect("entity does not have component");
 		World::unmark_borrow_mut();
 		res
 	}
