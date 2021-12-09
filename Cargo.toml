@@ -5,9 +5,3 @@ members = [
 	"css",
 	"css/macros",
 ]
-
-[patch.crates-io]
-hobo = { path = "lib" }
-hobo_derive = { path = "derive" }
-hobo_css = { path = "css" }
-hobo_css_macros = { path = "css/macros" }
