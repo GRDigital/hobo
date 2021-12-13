@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>web_str - hobo book</title>
+        <title>DOM Events and EventHandlerCallback - hobo book</title>
 
 
         <!-- Custom HTML head -->
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../../../index.html"><strong aria-hidden="true">1.</strong> hobo</a></li><li class="chapter-item expanded "><a href="../getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../basic-concepts.html"><strong aria-hidden="true">3.</strong> Core Concepts</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../basic-concepts/entities-components-resources.html"><strong aria-hidden="true">3.1.</strong> Entities, Components (and Resources)</a></li><li class="chapter-item expanded "><a href="../basic-concepts/hobo-components.html"><strong aria-hidden="true">3.2.</strong> hobo::components</a></li><li class="chapter-item expanded "><a href="../basic-concepts/children-and-parent.html"><strong aria-hidden="true">3.3.</strong> Children and Parent</a></li><li class="chapter-item expanded "><a href="../basic-concepts/removing-and-replacing-elements.html"><strong aria-hidden="true">3.4.</strong> Removing and replacing elements</a></li><li class="chapter-item expanded "><a href="../basic-concepts/dom-events.html"><strong aria-hidden="true">3.5.</strong> DOM Events and EventHandlerCallback</a></li></ol></li><li class="chapter-item expanded "><a href="../styling.html"><strong aria-hidden="true">4.</strong> Styling</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../styling/selector.html"><strong aria-hidden="true">4.1.</strong> Selector</a></li><li class="chapter-item expanded "><a href="../styling/property.html"><strong aria-hidden="true">4.2.</strong> Property</a></li><li class="chapter-item expanded "><a href="../styling/at-rules.html"><strong aria-hidden="true">4.3.</strong> @-rules</a></li><li class="chapter-item expanded "><a href="../styling/colors.html"><strong aria-hidden="true">4.4.</strong> Colors</a></li><li class="chapter-item expanded "><a href="../styling/every-way-to-make-a-class.html"><strong aria-hidden="true">4.5.</strong> Every way to make a class</a></li><li class="chapter-item expanded "><a href="../styling/precedence-gotchas.html"><strong aria-hidden="true">4.6.</strong> Precedence gotchas due to class reuse</a></li></ol></li><li class="chapter-item expanded "><a href="../state.html"><strong aria-hidden="true">5.</strong> Managing state and relations with Components</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../state/queries.html"><strong aria-hidden="true">5.1.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../state/signals.html"><strong aria-hidden="true">5.2.</strong> Signals</a></li></ol></li><li class="chapter-item expanded "><a href="../building-the-dom.html"><strong aria-hidden="true">6.</strong> Building the DOM</a></li><li class="chapter-item expanded "><a href="../utilities.html"><strong aria-hidden="true">7.</strong> Other utilities</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../utilities/web_str.html" class="active"><strong aria-hidden="true">7.1.</strong> web_str</a></li><li class="chapter-item expanded "><a href="../utilities/events.html"><strong aria-hidden="true">7.2.</strong> Events</a></li></ol></li><li class="chapter-item expanded "><a href="../recipes.html"><strong aria-hidden="true">8.</strong> Recipes</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../recipes/logging.html"><strong aria-hidden="true">8.1.</strong> Logging</a></li><li class="chapter-item expanded "><a href="../recipes/elements-that-change.html"><strong aria-hidden="true">8.2.</strong> Elements that change</a></li><li class="chapter-item expanded "><a href="../recipes/svgs.html"><strong aria-hidden="true">8.3.</strong> SVGs</a></li><li class="chapter-item expanded "><a href="../recipes/async-and-is-dead.html"><strong aria-hidden="true">8.4.</strong> Async and .is_dead()</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../../../index.html"><strong aria-hidden="true">1.</strong> hobo</a></li><li class="chapter-item expanded "><a href="../getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../basic-concepts.html"><strong aria-hidden="true">3.</strong> Core Concepts</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../basic-concepts/entities-components-resources.html"><strong aria-hidden="true">3.1.</strong> Entities, Components (and Resources)</a></li><li class="chapter-item expanded "><a href="../basic-concepts/hobo-components.html"><strong aria-hidden="true">3.2.</strong> hobo::components</a></li><li class="chapter-item expanded "><a href="../basic-concepts/children-and-parent.html"><strong aria-hidden="true">3.3.</strong> Children and Parent</a></li><li class="chapter-item expanded "><a href="../basic-concepts/removing-and-replacing-elements.html"><strong aria-hidden="true">3.4.</strong> Removing and replacing elements</a></li><li class="chapter-item expanded "><a href="../basic-concepts/dom-events.html" class="active"><strong aria-hidden="true">3.5.</strong> DOM Events and EventHandlerCallback</a></li></ol></li><li class="chapter-item expanded "><a href="../styling.html"><strong aria-hidden="true">4.</strong> Styling</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../styling/selector.html"><strong aria-hidden="true">4.1.</strong> Selector</a></li><li class="chapter-item expanded "><a href="../styling/property.html"><strong aria-hidden="true">4.2.</strong> Property</a></li><li class="chapter-item expanded "><a href="../styling/at-rules.html"><strong aria-hidden="true">4.3.</strong> @-rules</a></li><li class="chapter-item expanded "><a href="../styling/colors.html"><strong aria-hidden="true">4.4.</strong> Colors</a></li><li class="chapter-item expanded "><a href="../styling/every-way-to-make-a-class.html"><strong aria-hidden="true">4.5.</strong> Every way to make a class</a></li><li class="chapter-item expanded "><a href="../styling/precedence-gotchas.html"><strong aria-hidden="true">4.6.</strong> Precedence gotchas due to class reuse</a></li></ol></li><li class="chapter-item expanded "><a href="../state.html"><strong aria-hidden="true">5.</strong> Managing state and relations with Components</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../state/queries.html"><strong aria-hidden="true">5.1.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../state/signals.html"><strong aria-hidden="true">5.2.</strong> Signals</a></li></ol></li><li class="chapter-item expanded "><a href="../building-the-dom.html"><strong aria-hidden="true">6.</strong> Building the DOM</a></li><li class="chapter-item expanded "><a href="../utilities.html"><strong aria-hidden="true">7.</strong> Other utilities</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../utilities/web_str.html"><strong aria-hidden="true">7.1.</strong> web_str</a></li><li class="chapter-item expanded "><a href="../utilities/events.html"><strong aria-hidden="true">7.2.</strong> Events</a></li></ol></li><li class="chapter-item expanded "><a href="../recipes.html"><strong aria-hidden="true">8.</strong> Recipes</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../recipes/logging.html"><strong aria-hidden="true">8.1.</strong> Logging</a></li><li class="chapter-item expanded "><a href="../recipes/elements-that-change.html"><strong aria-hidden="true">8.2.</strong> Elements that change</a></li><li class="chapter-item expanded "><a href="../recipes/svgs.html"><strong aria-hidden="true">8.3.</strong> SVGs</a></li><li class="chapter-item expanded "><a href="../recipes/async-and-is-dead.html"><strong aria-hidden="true">8.4.</strong> Async and .is_dead()</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -142,19 +142,38 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="web_str"><a class="header" href="#web_str">web_str</a></h1>
-<p>The <code>web_str</code> module is just a bunch of commonly used interned strings. It includes all element names, all event names and a bunch of common attributes and values like <code>class</code>, <code>min</code>, <code>max</code>, <code>checked</code>, <code>href</code>, <code>readonly</code>, etc. If something is missing - PRs welcome!</p>
-<p>To read more about what is string interning and why is it useful: <a href="https://rustwasm.github.io/wasm-bindgen/api/wasm_bindgen/fn.intern.html">wasm-bindgen docs</a></p>
+                        <h1 id="dom-events-and-eventhandlercallback"><a class="header" href="#dom-events-and-eventhandlercallback">DOM Events and EventHandlerCallback</a></h1>
+<p><strong>Elements</strong> have methods that allow reacting to DOM Events. All of these methods are <code>snake_case</code> in the form of <code>.on_&lt;name&gt;</code> e.g. <code>.on_click</code> or <code>.on_touch_start</code>. Not all possible events are supported currently, but adding new ones is very easy - PRs welcome!</p>
+<pre><code class="language-rust noplaypen">element
+	.on_click(move |_| { // the argument here is web_sys::MouseEvent
+		element.set_text(&quot;I am clicked!&quot;);
+	})
+</code></pre>
+<p>These methods operate by means of, unsurprisingly, adding or modifying a <strong>Component</strong> on the element. The callback itself gets wrapped in <code>hobo::dom_events::EventHandlerCallback</code>, which will unsubscribe from DOM when dropped. A <strong>Component</strong> with a <code>Vec&lt;EventHandlerCallback&gt;</code> is created unless it already exists, then the just created <code>EventHandlerCallback</code> is just pushed into it.</p>
+<p>It's possible to manage subscribing/unsubscribing manually by calling the functions on raw <code>web_sys::HtmlElement</code>s. For example, when you're doing some kind of a slider and you want some logic in <code>on_mouse_move</code> even if the mouse leaves the element:</p>
+<pre><code class="language-rust noplaypen">element
+	.on_mouse_down(move |_| {
+		// &quot;drag&quot; start
+	})
+	.component((
+		web_sys::window().unwrap().on_mouse_move(move |e| {
+			// if dragging, run some dragging logic even once mouse leaves the element
+		}),
+		web_sys::window().unwrap().on_mouse_up(move |e| {
+			// &quot;drag&quot; stop
+		}),
+	))
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../utilities.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../basic-concepts/removing-and-replacing-elements.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../utilities/events.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../styling.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -164,11 +183,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../utilities.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../basic-concepts/removing-and-replacing-elements.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../utilities/events.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../styling.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
