@@ -2,40 +2,73 @@
 
 Here's a basic counter component:
 
-```rust
-use hobo::{prelude::*, enclose as e, cmp};
+```rust,noplaypen
+use hobo::{prelude::*, components as cmp};
 
-#[derive(hobo::Element, hobo::Container, hobo::EventTarget, hobo::RawElement)]
-pub struct Counter {
-	element: cmp::Div,
-	count: i32,
-}
-
-// <div>
-//   <button>PLUS</button>
-//   <div>0</div>
+// <div class="s-f4d1763947b5e1ff">
+//   <div>Counter value is: 0</div>
+//   <button>increment</button>
+//   <button>decrement</button>
 // </div>
-impl Counter {
-	#[hobo::trick]
-	fn new() -> Self {
-		// we need this to be able to clone raw element reference into on_click handlers
-		let text = cmp::div().text("0");
 
-		Self { element: cmp::div(), count: 0 }
-			.class(css::class!(
-				css::width!(128 px),
-				css::height!(128 px),
-				// #AA0000FF or #AA0000 of #A00 in css
-				css::background_color!(rgb 0xAA_00_00),
-			))
+fn counter() -> impl hobo::Element {
+	let counter_value = Mutable::new(0_i32);
+
+	cmp::div()
+		.class((
+			// enum-like properties can also be set like `css::Display::Flex`
+			css::display!(flex),
+			css::width!(400 px),
+			// #AA0000FF or #AA0000 or #A00 in normal css
+			css::background_color!(rgb 0xAA_00_00),
+			css::align_items!(center),
+			css::justify_content!(space-between),
+		))
+		.child(cmp::div()
+			.text_signal(counter_value.signal().map(|value| {
+				format!("Counter value is: {}", value)
+			}))
+		)
+		.component(counter_value)
+		.with(move |&counter_div| counter_div
 			.child(cmp::button()
-				.text("PLUS")
-				.on_click_mut(&this, e!((*text) move |this, _| {
-					this.count += 1;
-					text.set_inner_text(&this.count.to_string());
-				}))
+				.class(css::style!(
+					// .& is replaced with "current" class name, similar to SASS
+					// or styled-components
+					.& {
+						// shortcut for padding-left and padding-right
+						css::padding_horizontal!(16 px),
+						css::background_color!(css::color::PALEVIOLETRED),
+					}
+
+					.&:hover {
+						css::background_color!(css::color::GREEN),
+					}
+				))
+				.text("increment")
+				.on_click(move |_| {
+					*counter_div.get_cmp::<Mutable<i32>>().lock_mut() += 1;
+				})
 			)
-			.child(text)
-	}
+			.add_child(cmp::button() // same as .child but non-chaining
+				// since this style is identical to the one above it - the class will be
+				// reused to avoid copypasting - the button generating code can be
+				// moved into a function or maybe just the code that defines the style
+				.class(css::style!(
+					.& {
+						css::padding_horizontal!(16 px),
+						css::background_color!(css::color::PALEVIOLETRED),
+					}
+
+					.&:hover {
+						css::background_color!(css::color::GREEN),
+					}
+				))
+				.text("decrement")
+				.on_click(move |_| {
+					*counter_div.get_cmp::<Mutable<i32>>().lock_mut() -= 1;
+				})
+			)
+		)
 }
 ```
