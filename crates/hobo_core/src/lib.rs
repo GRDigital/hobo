@@ -1,13 +1,17 @@
+/// methods to create HTML Elements as well as their types
 pub mod components;
 pub mod dom_events;
 pub mod element;
 mod enclose;
 pub mod entity;
+/// simple way to fire and respond to arbitrarily-typed events
 pub mod events;
+/// Parent and Child relations
 pub mod hierarchy;
 pub mod prelude;
 pub mod query;
 mod racy_cell;
+/// resources are globally-accessible components
 pub mod resource;
 pub mod signals_ext;
 #[doc(hidden)] pub mod state;
@@ -19,7 +23,7 @@ mod world;
 pub use web_sys;
 use crate::prelude::*;
 #[doc(hidden)] pub use discard;
-pub use element::{Classes, Element, SomeElement};
+pub use element::{Element, SomeElement};
 pub use entity::AsEntity;
 pub use futures_signals as signals;
 pub use hobo_css as css;
@@ -52,6 +56,7 @@ use sugars::hash;
 type StorageRef<'a, Component> = OwningRef<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, Ref<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;
 type StorageRefMut<'a, Component> = OwningRefMut<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, RefMut<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;
 
+/// Register a browser window to also receive styles, automatically called for the global `window` object
 pub fn register_window(window: &web_sys::Window) {
 	let style_storage = unsafe { &mut *STYLE_STORAGE.get() as &mut StyleStorage };
 	style_storage.register_window(window);
@@ -64,6 +69,7 @@ impl<T: 'static> T {
 	}
 }
 
+/// Find all entities matching a query
 pub fn find<Q: query::Query>() -> Vec<Q::Fetch> {
 	World::mark_borrow_mut();
 	let world = unsafe { &mut *WORLD.get() as &mut World };
@@ -74,6 +80,7 @@ pub fn find<Q: query::Query>() -> Vec<Q::Fetch> {
 	res
 }
 
+/// Find one entity matching a query if there is one
 pub fn try_find_one<Q: query::Query>() -> Option<Q::Fetch> {
 	World::mark_borrow_mut();
 	let world = unsafe { &mut *WORLD.get() as &mut World };
@@ -84,6 +91,7 @@ pub fn try_find_one<Q: query::Query>() -> Option<Q::Fetch> {
 	res
 }
 
+/// Find one entity matching a query, panic otherwise
 pub fn find_one<Q: query::Query>() -> Q::Fetch { try_find_one::<Q>().unwrap() }
 
 pub fn world() -> world::WorldMut {

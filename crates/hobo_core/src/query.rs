@@ -1,3 +1,30 @@
+//! Queries allow finding entities across the hierarchy
+//! # Examples
+//!
+//! ```
+//! struct Foo {
+//! 	// some fields
+//! }
+//!
+//! // find the first (presumably only) entity with some component Foo
+//! let (entity, _) = hobo::find_one::<(Entity, With<Foo>)>();
+//! let element = SomeElement(entity);
+//! element.set_text("This entity has Foo");
+//! ```
+//!
+//! ```
+//! struct Frobnicator {
+//! 	num_fraculations: u32,
+//! 	// other fields
+//! }
+//!
+//! // find all entities with a Frobnicator component and mutate it
+//! // perhaps as a result of some combined transformation
+//! for frobnicator in hobo::find::<&mut Frobnicator>() {
+//! 	frobnicator.num_fraculations += 1;
+//! }
+//! ```
+
 #![allow(unused_variables)]
 
 use crate::{prelude::*, StorageRef, StorageRefMut};

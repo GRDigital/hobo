@@ -7,11 +7,12 @@ use std::{
 	collections::{HashMap, HashSet},
 };
 
+/// An `Element` with specific type erased
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Element)]
 pub struct SomeElement(pub Entity);
 
 #[derive(Default)]
-pub struct Classes {
+pub(crate) struct Classes {
 	pub(crate) marks: HashSet<TypeId>,
 	pub(crate) styles: HashMap<u64, css::Style>,
 }
@@ -19,6 +20,7 @@ pub struct Classes {
 #[derive(Default)]
 struct SignalHandlesCollection(Vec<discard::DiscardOnDrop<futures_signals::CancelableFutureHandle>>);
 
+/// Marker trait for an entity that has `web_sys::Node`, `web_sys::Element`, `web_sys::EventTarget` and one of `web_sys::HtmlElement` or `web_sys::SvgElement` as attached components
 pub trait Element: AsEntity + Sized {
 	fn add_child(&self, child: impl Element) {
 		if self.is_dead() { log::warn!("add_child parent dead {:?}", self.as_entity()); return; }

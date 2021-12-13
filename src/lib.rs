@@ -14,7 +14,6 @@ pub use hobo_core::{
 	signals_ext,
 	enclose,
 	Children,
-	Classes,
 	Parent,
 	SomeElement,
 	AsEntity,

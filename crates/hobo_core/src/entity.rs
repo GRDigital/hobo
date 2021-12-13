@@ -3,6 +3,7 @@ pub use hobo_derive::AsEntity;
 use owning_ref::{OwningRef, OwningRefMut};
 use std::any::type_name;
 
+/// An opaque copyable identifier that is used to attach and fetch components
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Entity(pub(crate) u64);
 

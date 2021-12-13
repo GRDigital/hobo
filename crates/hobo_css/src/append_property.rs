@@ -1,5 +1,6 @@
 use crate::Property;
 
+/// A trait implemented by everything that can be added to a list of properties
 pub trait AppendProperty {
 	fn append_property(self, decls: &mut Vec<Property>);
 }

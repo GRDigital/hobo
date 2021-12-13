@@ -2,6 +2,7 @@
 
 use crate::{prelude::*, AsEntity, Element};
 
+/// An enum for different event types
 pub enum EventHandlerCallback {
 	MouseEvent(Closure<dyn FnMut(web_sys::MouseEvent) + 'static>),
 	KeyboardEvent(Closure<dyn FnMut(web_sys::KeyboardEvent) + 'static>),
@@ -87,6 +88,7 @@ pub enum EventHandlerCallback {
 	// DeviceLightEvent
 }
 
+/// A dom event subscription, that will unsubscribe from dom when dropped
 pub struct EventHandler {
 	target: web_sys::EventTarget,
 	name: &'static str,

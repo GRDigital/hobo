@@ -231,8 +231,7 @@ macro_rules! __e_inner {
 	};
 }
 
-/// Essentially a "move-by-clone" closure creator with some special cases for common hobo idioms    
-/// for more information, refer to the [book](https://grdigital.github.io/hobo/state.html)
+/// Essentially a "move-by-clone" closure creator, with special syntax for automatic refcell up/downgrading
 #[macro_export]
 macro_rules! enclose {
 	(($($input:tt)*) $($closure_input:tt)+) => {

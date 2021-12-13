@@ -1,9 +1,11 @@
 use crate::prelude::*;
 
+/// A component with a single `Entity` representing the parent
 #[derive(Default, Debug, shrinkwraprs::Shrinkwrap, Clone, Copy, PartialEq, Eq, Hash, AsEntity)]
 #[shrinkwrap(mutable)]
 pub struct Parent(pub Entity);
 
+/// A component with a simple `Vec<Entity>` of child entities
 #[derive(Default, Debug, shrinkwraprs::Shrinkwrap, Clone, PartialEq, Eq, Hash)]
 #[shrinkwrap(mutable)]
 pub struct Children(pub Vec<Entity>);
