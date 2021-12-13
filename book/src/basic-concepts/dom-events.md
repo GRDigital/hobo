@@ -9,9 +9,9 @@ element
 	})
 ```
 
-These methods operate by means of, unsurprisingly, adding or modifying a **Component** on the element. The callback itself gets wrapped in `hobo::dom_events::EventHandlerCallback`, which will unsubscribe from DOM when dropped. A **Component** with a `Vec<hobo::dom_events::EventHandlerCallback>` is created unless it already exists, then the just created `EventHandlerCallback` is just pushed into it.    
+These methods operate by means of, unsurprisingly, adding or modifying a **Component** on the element. The callback itself gets wrapped in `hobo::dom_events::EventHandlerCallback`, which will unsubscribe from DOM when dropped. A **Component** with a `Vec<EventHandlerCallback>` is created unless it already exists, then the just created `EventHandlerCallback` is just pushed into it.    
 
-It's possible to manage subscribing/unsubscribing manually, if really necessary, or have handlers for other components, particularly might be useful when you're doing some kind of a slider and you want some logic in `on_mouse_move` even if the mouse leaves the element:
+It's possible to manage subscribing/unsubscribing manually by calling the functions on raw `web_sys::HtmlElement`s. For example, when you're doing some kind of a slider and you want some logic in `on_mouse_move` even if the mouse leaves the element:
 
 ```rust,noplaypen
 element
@@ -20,7 +20,7 @@ element
 	})
 	.component((
 		web_sys::window().unwrap().on_mouse_move(move |e| {
-			// run some dragging logic even once mouse leaves the element
+			// if dragging, run some dragging logic even once mouse leaves the element
 		}),
 		web_sys::window().unwrap().on_mouse_up(move |e| {
 			// "drag" stop

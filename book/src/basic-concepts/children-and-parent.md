@@ -1,6 +1,8 @@
 # Children and Parent
 
-Hierarchical relations in `hobo` are maintained through regular **Components** - `hobo::Children` and `hobo::Parent`.   
+Hierarchical DOM relations in `hobo` are maintained through regular **Components** - `hobo::Children` and `hobo::Parent`.   
+
+Usually you won't have to care about it since `.add_child()` (and the like) and `.remove()` already take care of updating `Children` and `Parent` components of affected entities.
 
 `hobo::Children` is just a `Vec` of `hobo::Entity`, `hobo::Parent` is a newtype wrapper over `hobo::Entity` as well. If you have an **Element** and you want to operate on all (or some) of its children - it's as simple as:
 

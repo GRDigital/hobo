@@ -9,9 +9,9 @@ It looks something like this:
 
 ```rust
 @font-face {
-	src: vec![("https://fonts.gstatic.com/s/encodesans/v4/LDI2apOFNxEwR-Bd1O9uYPOreec.woff2".into(), Some(css::font_face::Format::Woff2))],
+	src: vec![("https://fonts.gstatic.com/.../....woff2".into(), Some(Format::Woff2))],
 	font_family: "Encode Sans".into(),
-	font_weight: (css::font_face::Weight::Number(400), None),
+	font_weight: (Weight::Number(400), None),
 }
 ```
 
@@ -28,7 +28,7 @@ The syntax is different to `@media` rules in css:
 So these two would be equivalent:
 
 ```rust
-@media !All && Orientation(Portrait) && !AspectRatio(4, 3), Print && Color(4) && !Width(css::unit!(200 px)) {
+@media All && MaxWidth(css::unit!(1023 px)) {
 	html {
 		css::background_color!(rgb 0xFF_00_00),
 	}
@@ -36,11 +36,11 @@ So these two would be equivalent:
 ```
 
 ```css
-@media not all and (orientation: portrait) and (not (aspect-ratio: 4/3)), print and (color: 4) and (not (width: 200px)) {
+@media all and (max-width: 1023px) {
 	html {
 		background-color: #FF0000;
 	}
 }
 ```
 
-Support for `@keyframes` and `@page` is planned
+Support for `@keyframes` and `@page` is planned, but meanwhile the escape hatch raw string syntax can be used if really necessary.

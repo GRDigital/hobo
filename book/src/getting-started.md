@@ -16,21 +16,28 @@ fn counter() -> impl hobo::Element {
 
 	cmp::div()
 		.class((
-			css::display!(flex), // enum-like properties can also be set like `css::Display::Flex`
+			// enum-like properties can also be set like `css::Display::Flex`
+			css::display!(flex),
 			css::width!(400 px),
-			css::background_color!(rgb 0xAA_00_00), // #AA0000FF or #AA0000 or #A00 in normal css
+			// #AA0000FF or #AA0000 or #A00 in normal css
+			css::background_color!(rgb 0xAA_00_00),
 			css::align_items!(center),
 			css::justify_content!(space-between),
 		))
 		.child(cmp::div()
-			.text_signal(counter_value.signal().map(|value| format!("Counter value is: {}", value)))
+			.text_signal(counter_value.signal().map(|value| {
+				format!("Counter value is: {}", value)
+			}))
 		)
 		.component(counter_value)
 		.with(move |&counter_div| counter_div
 			.child(cmp::button()
 				.class(css::style!(
-					.& { // .& is replaced with "current" class name, similar to SASS or styled-components
-						css::padding_horizontal!(16 px), // shortcut for padding-left and padding-right
+					// .& is replaced with "current" class name, similar to SASS
+					// or styled-components
+					.& {
+						// shortcut for padding-left and padding-right
+						css::padding_horizontal!(16 px),
 						css::background_color!(css::color::PALEVIOLETRED),
 					}
 
@@ -39,11 +46,14 @@ fn counter() -> impl hobo::Element {
 					}
 				))
 				.text("increment")
-				.on_click(move |_| *counter_div.get_cmp::<Mutable<i32>>().lock_mut() += 1)
+				.on_click(move |_| {
+					*counter_div.get_cmp::<Mutable<i32>>().lock_mut() += 1;
+				})
 			)
 			.add_child(cmp::button() // same as .child but non-chaining
-				// since this style is identical to the one above it - the class will be reused
-				// to avoid copypasting - the button generating code can be moved into a function or maybe just the code that defines the style
+				// since this style is identical to the one above it - the class will be
+				// reused to avoid copypasting - the button generating code can be
+				// moved into a function or maybe just the code that defines the style
 				.class(css::style!(
 					.& {
 						css::padding_horizontal!(16 px),
@@ -55,7 +65,9 @@ fn counter() -> impl hobo::Element {
 					}
 				))
 				.text("decrement")
-				.on_click(move |_| *counter_div.get_cmp::<Mutable<i32>>().lock_mut() -= 1)
+				.on_click(move |_| {
+					*counter_div.get_cmp::<Mutable<i32>>().lock_mut() -= 1;
+				})
 			)
 		)
 }
