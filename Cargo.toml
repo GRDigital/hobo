@@ -1,6 +1,6 @@
 [package]
 name = "hobo"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/grdigital/hobo"
@@ -13,7 +13,7 @@ exclude = ["crates/**/*", "book/**/*", ".agignore", ".editorconfig", ".gitignore
 members = ["crates/*"]
 
 [dependencies]
-hobo_core = { path = "crates/hobo_core", version = "=0.2.0" }
+hobo_core = { path = "crates/hobo_core", version = "=0.2.1" }
 
 # [patch.crates-io]
 # hobo_core = { path = "crates/hobo_core" }
