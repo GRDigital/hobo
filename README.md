@@ -27,7 +27,9 @@ fn counter() -> impl hobo::Element {
             css::width!(400 px),
         ))
         .child(cmp::div()
-            .text_signal(counter.signal().map(|value| format!("Counter value is: {}", value)))
+            .text_signal(counter.signal().map(|value| {
+                format!("Counter value is: {}", value);
+            }))
         )
         .child(cmp::button()
             .text("increment")
