@@ -19,19 +19,19 @@
 ### Sneak peek:
 ```rust,noplaypen
 fn counter() -> impl hobo::Element {
-	let counter = Mutable::new(0);
+    let counter = Mutable::new(0);
 
-	cmp::div()
-		.class((
-			css::display!(flex),
-			css::width!(400 px),
-		))
-		.child(cmp::div()
-			.text_signal(counter.signal().map(|value| format!("Counter value is: {}", value)))
-		)
-		.child(cmp::button()
-			.text("increment")
-			.on_click(move |_| *counter.lock_mut() += 1)
-		)
+    cmp::div()
+        .class((
+            css::display!(flex),
+            css::width!(400 px),
+        ))
+        .child(cmp::div()
+            .text_signal(counter.signal().map(|value| format!("Counter value is: {}", value)))
+        )
+        .child(cmp::button()
+            .text("increment")
+            .on_click(move |_| *counter.lock_mut() += 1)
+        )
 }
 ```
