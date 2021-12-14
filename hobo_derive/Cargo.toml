@@ -1,23 +1,20 @@
 [package]
-name = "hobo_css_macros"
+name = "hobo_derive"
 version = "0.2.1"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/grdigital/hobo"
 description = "hobo is a Rust frontend framework"
 authors = ["GR Digital <contact@grdigital.co.uk>"]
-readme = "../../README.md"
+readme = "../README.md"
 
 [lib]
 proc-macro = true
 
 [dependencies]
 derive_utils = "0.11"
-heck = "0.3"
-itertools = "0.10"
 proc-macro-crate = "1"
 proc-macro-error = "1"
-proc-macro-hack = "0.5"
 proc-macro2 = "1"
 proc-quote = "0.4"
 quote = "1"

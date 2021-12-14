@@ -158,14 +158,7 @@ dependencies = [
 
 [[package]]
 name = "hobo"
-version = "0.2.0"
-dependencies = [
- "hobo_core",
-]
-
-[[package]]
-name = "hobo_core"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "as-any",
  "console_error_panic_hook",
@@ -195,7 +188,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_css"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "extend",
  "hobo_css_macros",
@@ -208,7 +201,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_css_macros"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "derive_utils",
  "heck",
@@ -224,7 +217,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_derive"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "derive_utils",
  "proc-macro-crate",

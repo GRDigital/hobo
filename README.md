@@ -13,7 +13,7 @@
 * no Model-View-Update (aka Elm architecture) - state management is manual, usually via Entity-Component relations
 * no HTML macros - just Rust functions
 * built-in macro-based styling, kind of like CSS-in-JS except it's just Rust
-* **reactivity support** via [rust-signals](https://github.com/Pauan/rust-signals)
+* **reactivity support** via [futures-signals](https://github.com/Pauan/rust-signals)
 * Entity-Component based approach allowing flexible state propagation and cohesion between elements without coupling or a need for global store or state
 
 ### Sneak peek:
