@@ -28,7 +28,7 @@ pub use entity::AsEntity;
 pub use futures_signals as signals;
 pub use hobo_css as css;
 use owning_ref::{OwningHandle, OwningRef, OwningRefMut};
-pub use paste;
+#[doc(hidden)] pub use paste;
 pub use prelude::{Children, Parent};
 use racy_cell::RacyCell;
 use std::{
@@ -49,8 +49,7 @@ use sugars::hash;
 // could use an attribute macro over intostyle expressions to give them names and use names rather than hashes
 // organise uses, itnernal prelude uses could be pub(crate)
 // test shit ffs
-// move World and AsEntity into separate files
-// could remove all *_mut elements and specify whether you want mutable or immutable component with the same trick as in Query
+// could? remove all *_mut elements and specify whether you want mutable or immutable component with the same trick as in Query
 
 // this is not necessary, but it makes it convenient to further remap to some OwningRef or whatever
 type StorageRef<'a, Component> = OwningRef<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, Ref<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;
@@ -62,6 +61,7 @@ pub fn register_window(window: &web_sys::Window) {
 	style_storage.register_window(window);
 }
 
+#[doc(hidden)]
 #[extend::ext(pub, name = MarkClassString)]
 impl<T: 'static> T {
 	fn mark_class_string() -> String {
@@ -94,6 +94,7 @@ pub fn try_find_one<Q: query::Query>() -> Option<Q::Fetch> {
 /// Find one entity matching a query, panic otherwise
 pub fn find_one<Q: query::Query>() -> Q::Fetch { try_find_one::<Q>().unwrap() }
 
+#[doc(hidden)]
 pub fn world() -> world::WorldMut {
 	World::mark_borrow_mut();
 	let world = unsafe { &mut *WORLD.get() as &mut World };
