@@ -206,6 +206,16 @@ impl World {
 	}
 }
 
+#[inline]
+#[doc(hidden)]
+pub fn unmark_borrow_mut_force() {
+	#[cfg(debug_assertions)] {
+		if WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) {
+			WORLD_BORROWED_MUT.store(false, std::sync::atomic::Ordering::Relaxed);
+		}
+	}
+}
+
 pub struct WorldMut(pub(crate) &'static mut World);
 impl AsRef<World> for WorldMut {
 	fn as_ref(&self) -> &World { &self.0 }
