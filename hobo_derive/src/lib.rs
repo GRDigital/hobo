@@ -38,9 +38,9 @@ pub fn derive_as_entity(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 	match &input.data {
 		syn::Data::Enum(_) => enum_derive! {
 			input.to_token_stream(),
-			::hobo_core::entity::AsEntity,
+			::hobo::entity::AsEntity,
 			trait AsEntity {
-				fn as_entity(&self) -> ::hobo_core::entity::Entity;
+				fn as_entity(&self) -> ::hobo::entity::Entity;
 			}
 		},
 		syn::Data::Struct(syn::DataStruct { fields: syn::Fields::Named(_), .. }) => {
