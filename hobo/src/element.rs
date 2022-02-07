@@ -34,6 +34,7 @@ pub trait Element: AsEntity + Sized {
 		}
 	}
 	fn child(self, child: impl Element) -> Self { self.add_child(child); self }
+	fn with_child<T: Element>(self, f: impl FnOnce(&Self) -> T) -> Self { let c = f(&self); self.child(c) }
 	fn add_children<Item: Element>(&self, children: impl IntoIterator<Item = Item>) { for child in children.into_iter() { self.add_child(child); } }
 	fn children<Item: Element>(self, children: impl IntoIterator<Item = Item>) -> Self { self.add_children(children); self }
 	fn leave_parent(self) {
