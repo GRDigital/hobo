@@ -174,6 +174,16 @@ impl Input {
 	}
 }
 
+impl Image {
+	pub fn src(self, url: &str) -> Self {
+		self.attr(web_str::src(), url)
+	}
+
+	pub fn set_src(&self, url: &str) {
+		self.set_attr(web_str::src(), url)
+	}
+}
+
 // impl AsRef<web_sys::HtmlSelectElement> for Select {
 //     fn as_ref(&self) -> &web_sys::HtmlSelectElement {
 //         <web_sys::HtmlSelectElement as Component>::get(self)
