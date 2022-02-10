@@ -56,10 +56,16 @@ use sugars::hash;
 type StorageRef<'a, Component> = OwningRef<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, Ref<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;
 type StorageRefMut<'a, Component> = OwningRefMut<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, RefMut<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;
 
-/// Register a browser window to also receive styles, automatically called for the global `window` object
-pub fn register_window(window: &web_sys::Window) {
+/// Register a browser window to also receive styles, automatically called for the global `window` object with the name "default"
+pub fn register_window(window: &web_sys::Window, window_name: String) {
 	let style_storage = unsafe { &mut *STYLE_STORAGE.get() as &mut StyleStorage };
-	style_storage.register_window(window);
+	style_storage.register_window(window, window_name);
+}
+
+/// Removes a window from the style storage
+pub fn unregister_window(window_name: &str) {
+	let style_storage = unsafe { &mut *STYLE_STORAGE.get() as &mut StyleStorage };
+	style_storage.unregister_window(window_name);
 }
 
 #[doc(hidden)]

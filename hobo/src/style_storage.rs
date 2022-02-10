@@ -1,18 +1,19 @@
 use crate::{prelude::*, RacyCell};
 use once_cell::sync::Lazy;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+use sugars::hmap;
 pub use sugars::hash;
 
 #[derive(Default)]
 pub struct StyleStorage {
 	inserted_style_hashes: HashSet<u64>,
 	// list of <style> elements, prehaps in different windows
-	style_elements: Vec<web_sys::Element>,
+	style_elements: HashMap<String, web_sys::Element>,
 }
 
 pub(crate) static STYLE_STORAGE: Lazy<RacyCell<StyleStorage>> = Lazy::new(|| RacyCell::new(StyleStorage {
 	inserted_style_hashes: HashSet::new(),
-	style_elements: vec![{
+	style_elements: hmap!["default".to_owned() => {
 		let dom = web_sys::window().expect("no window").document().expect("no document");
 		let head = dom.head().expect("dom has no head");
 		let element = dom.create_element(web_str::style()).expect("can't create style element");
@@ -79,7 +80,7 @@ impl StyleStorage {
 		style.fixup_class_placeholders(&class);
 
 		let style_string = style.to_string();
-		for style_element in &self.style_elements {
+		for style_element in self.style_elements.values() {
 			// insert the stringified generated css into the style tag
 			style_element.append_with_str_1(&style_string).expect("can't append css string");
 		}
@@ -87,12 +88,18 @@ impl StyleStorage {
 		class
 	}
 
-	pub fn register_window(&mut self, window: &web_sys::Window) {
+	pub fn unregister_window(&mut self, window_name: &str) {
+		self.style_elements.remove(window_name);
+	}
+
+	pub fn register_window(&mut self, window: &web_sys::Window, window_name: String) {
 		let dom = window.document().expect("window has no dom");
 		let head = dom.head().expect("dom has no head");
 		let element = dom.create_element(web_str::style()).expect("can't create style element");
 		head.append_child(&element).expect("can't append child");
 
-		self.style_elements.push(element);
+		// if re-registering a window, re-add the already existing style
+		element.set_inner_html(&self.style_elements.get("default").expect("no default element").inner_html());
+		self.style_elements.insert(window_name, element);
 	}
 }
