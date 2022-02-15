@@ -80,6 +80,15 @@ pub struct World {
 }
 
 impl World {
+	#[doc(hidden)]
+	#[inline]
+	pub fn is_marked_borrow_mut() -> bool {
+		#[cfg(debug_assertions)] {
+			return WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed)
+		}
+		false
+	}
+
 	#[track_caller]
 	#[inline]
 	pub(crate) fn mark_borrow() {
@@ -99,9 +108,10 @@ impl World {
 		}
 	}
 
+	#[doc(hidden)]
 	#[track_caller]
 	#[inline]
-	pub(crate) fn mark_borrow_mut() {
+	pub fn mark_borrow_mut() {
 		#[cfg(debug_assertions)] {
 			if WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) > 0 { panic!("trying to mutably borrow World while it's already got a borrow") }
 			if WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to mutably borrow World while it's mutably borrowed") }
@@ -109,9 +119,10 @@ impl World {
 		}
 	}
 
+	#[doc(hidden)]
 	#[track_caller]
 	#[inline]
-	pub(crate) fn unmark_borrow_mut() {
+	pub fn unmark_borrow_mut() {
 		#[cfg(debug_assertions)] {
 			if WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) > 0 { panic!("trying to return mutable borrow World but it's got a borrow") }
 			if !WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to return mutable borrow World but it's not mutably borrowed") }
@@ -204,16 +215,6 @@ impl World {
 	pub fn is_dead(&self, entity: impl AsEntity) -> bool {
 		let entity = entity.as_entity();
 		!self.alive_entities.contains(&entity)
-	}
-}
-
-#[inline]
-#[doc(hidden)]
-pub fn unmark_borrow_mut_force() {
-	#[cfg(debug_assertions)] {
-		if WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) {
-			WORLD_BORROWED_MUT.store(false, std::sync::atomic::Ordering::Relaxed);
-		}
 	}
 }
 

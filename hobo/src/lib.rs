@@ -39,7 +39,7 @@ use std::{
 use storage::*;
 use style_storage::{StyleStorage, STYLE_STORAGE};
 use sugars::hash;
-#[doc(hidden)] pub use world::unmark_borrow_mut_force;
+#[doc(hidden)] pub use world::World;
 
 // NOTES:
 // queries to be able to find entities with/by components in children/parent/ancestor/family - done
