@@ -272,6 +272,7 @@ generate_properties! {
 		AlignmentBaseline,
 		DominantBaseline,
 		TextAnchor,
+		StrokeLinecap,
 		BackgroundImage,
 		BackgroundSize,
 
