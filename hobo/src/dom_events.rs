@@ -97,7 +97,7 @@ pub struct EventHandler {
 
 impl Drop for EventHandler {
 	fn drop(&mut self) {
-		self.target.remove_event_listener_with_callback(self.name, match &self.cb {
+		let res = self.target.remove_event_listener_with_callback(self.name, match &self.cb {
 			EventHandlerCallback::MouseEvent(cb) => cb.as_ref().unchecked_ref(),
 			EventHandlerCallback::KeyboardEvent(cb) => cb.as_ref().unchecked_ref(),
 			EventHandlerCallback::Event(cb) => cb.as_ref().unchecked_ref(),
@@ -105,7 +105,10 @@ impl Drop for EventHandler {
 			EventHandlerCallback::TouchEvent(cb) => cb.as_ref().unchecked_ref(),
 			EventHandlerCallback::WheelEvent(cb) => cb.as_ref().unchecked_ref(),
 			EventHandlerCallback::UiEvent(cb) => cb.as_ref().unchecked_ref(),
-		}).unwrap();
+		});
+		if let Err(e) = res {
+			log::warn!("remove_event_listener_with_callback failed with error: {}", serde_json::to_string_pretty(&e.into_serde::<serde_json::Value>().unwrap()).unwrap());
+		}
 	}
 }
 
