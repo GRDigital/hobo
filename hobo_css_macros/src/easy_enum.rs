@@ -67,7 +67,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = syn::parse_macro_input!(input as Input);
 
 	let property_snek = proc_macro2::Ident::new(&input.property.0.to_snek_case(), Span::call_site());
-	let property_camel = proc_macro2::Ident::new(&input.property.0.to_camel_case(), Span::call_site());
+	let property_camel = proc_macro2::Ident::new(&input.property.0.to_upper_camel_case(), Span::call_site());
 
 	let test_fn_name = quote::format_ident!("{}_initial_inherit_unset", property_snek);
 	let result_initial = format!("{}:initial;", input.property.0);
@@ -76,7 +76,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 	let enum_members = input.values.iter().map(|value| match value {
 		Value::EnumVariant(value) => {
-			let value_camel = proc_macro2::Ident::new(&value.0.to_camel_case(), Span::call_site());
+			let value_camel = proc_macro2::Ident::new(&value.0.to_upper_camel_case(), Span::call_site());
 			quote! {#value_camel,}
 		},
 		Value::Unit => quote! {Some(crate::units::Unit),},
@@ -88,7 +88,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 	let display_lines = input.values.iter().map(|value| match value {
 		Value::EnumVariant(value) => {
-			let value_camel = proc_macro2::Ident::new(&value.0.to_camel_case(), Span::call_site());
+			let value_camel = proc_macro2::Ident::new(&value.0.to_upper_camel_case(), Span::call_site());
 			let css_string = format!("{}:{};", input.property.0, value.0);
 			quote! {Self::#value_camel => write!(f, #css_string),}
 		},
@@ -112,7 +112,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 	let macro_values = input.values.iter().map(|value| match value {
 		Value::EnumVariant(value) => {
-			let value_camel = proc_macro2::Ident::new(&value.0.to_camel_case(), Span::call_site());
+			let value_camel = proc_macro2::Ident::new(&value.0.to_upper_camel_case(), Span::call_site());
 			let value_tt: TokenStream = syn::parse_str(&value.0).unwrap();
 			quote! {(#value_tt) => { $crate::Property::#property_camel($crate::#property_camel::#value_camel) };}
 		},
@@ -159,7 +159,7 @@ pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let property = input.into_iter().map(|x| x.to_string()).collect::<String>();
 
 	let property_snek = proc_macro2::Ident::new(&property.to_snek_case(), Span::call_site());
-	let property_camel = proc_macro2::Ident::new(&property.to_camel_case(), Span::call_site());
+	let property_camel = proc_macro2::Ident::new(&property.to_upper_camel_case(), Span::call_site());
 
 	let test_fn_name = quote::format_ident!("{}_initial_inherit_unset", property_snek);
 	let result_initial = format!("{}:initial;", property.to_kebab_case());
