@@ -27,6 +27,7 @@ type StorageRc = Rc<RefCell<Box<dyn DynStorage>>>;
 #[cfg(debug_assertions)] pub(crate) static WORLD_BORROWED_MUT: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 	let mut world = World::default();
+	world.next_entity = 1;
 
 	{
 		fn update_classes(storage: &mut SimpleStorage<Classes>, world: &mut World, entity: Entity) {
