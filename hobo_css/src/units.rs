@@ -61,6 +61,48 @@ impl std::fmt::Display for Unit {
 	}
 }
 
+impl std::ops::Add for Unit {
+	type Output = Self;
+
+	fn add(self, rhs: Self) -> Self {
+		match (self, rhs) {
+			(Self::Zero, Self::Zero) => Self::Zero,
+			(Self::Px(a), Self::Px(b)) => Self::Px(a + b),
+			(Self::Em(a), Self::Em(b)) => Self::Em(a + b),
+			(Self::Rem(a), Self::Rem(b)) => Self::Rem(a + b),
+			(Self::Vw(a), Self::Vw(b)) => Self::Vw(a + b),
+			(Self::Vh(a), Self::Vh(b)) => Self::Vh(a + b),
+			(Self::Vmin(a), Self::Vmin(b)) => Self::Vmin(a + b),
+			(Self::Vmax(a), Self::Vmax(b)) => Self::Vmax(a + b),
+			(Self::Fr(a), Self::Fr(b)) => Self::Fr(a + b),
+			(Self::Percent(a), Self::Percent(b)) => Self::Percent(a + b),
+			(Self::Duration(a), Self::Duration(b)) => Self::Duration(a + b),
+			(a, b) => Self::Calc(Box::new(a), Operator::Plus, Box::new(b)),
+		}
+	}
+}
+
+impl std::ops::Sub for Unit {
+	type Output = Self;
+
+	fn sub(self, rhs: Self) -> Self {
+		match (self, rhs) {
+			(Self::Zero, Self::Zero) => Self::Zero,
+			(Self::Px(a), Self::Px(b)) => Self::Px(a - b),
+			(Self::Em(a), Self::Em(b)) => Self::Em(a - b),
+			(Self::Rem(a), Self::Rem(b)) => Self::Rem(a - b),
+			(Self::Vw(a), Self::Vw(b)) => Self::Vw(a - b),
+			(Self::Vh(a), Self::Vh(b)) => Self::Vh(a - b),
+			(Self::Vmin(a), Self::Vmin(b)) => Self::Vmin(a - b),
+			(Self::Vmax(a), Self::Vmax(b)) => Self::Vmax(a - b),
+			(Self::Fr(a), Self::Fr(b)) => Self::Fr(a - b),
+			(Self::Percent(a), Self::Percent(b)) => Self::Percent(a - b),
+			(Self::Duration(a), Self::Duration(b)) => Self::Duration(a - b),
+			(a, b) => Self::Calc(Box::new(a), Operator::Minus, Box::new(b)),
+		}
+	}
+}
+
 /// As pixels is the most common unit type, specifying `px` is optional
 #[rustfmt::skip]
 #[macro_export]
