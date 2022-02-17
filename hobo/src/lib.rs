@@ -1,5 +1,5 @@
 /// methods to create HTML Elements as well as their types
-pub mod components;
+pub mod create;
 pub mod dom_events;
 pub mod element;
 mod enclose;

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use crate::{
-	components,
+	create,
 	element::Classes,
 	racy_cell::RacyCell,
 	storage::{SimpleStorage, StorageGuard},
@@ -62,7 +62,7 @@ pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 		classes.on_modified = Some(update_classes);
 	}
 
-	components::register_handlers(&mut world);
+	create::register_handlers(&mut world);
 
 	world
 }));
