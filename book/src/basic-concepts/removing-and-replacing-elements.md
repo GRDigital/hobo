@@ -5,6 +5,6 @@ Removing an **Element** (or an **Entity**) is as simple as calling `.remove()`. 
 It is possible to replace an **Element** inplace, fixing up the `hobo::Children` in parent entity as well. This, however, replaces it with a new **Entity** so if a copy is held somewhere - it won't be valid anymore, so take care.
 
 ```rust,noplaypen
-let new_element = hobo::components::div();
+let new_element = hobo::create::div();
 old_element.replace_with(new_element);
 ```

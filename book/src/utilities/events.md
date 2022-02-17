@@ -8,7 +8,7 @@ struct MyEvent(u64);
 // -- snip --
 
 fn make_foo() -> impl hobo::Element {
-	cmp::div()
+	e::div()
 		// etc children and styles
 		.component(hobo::events::on(move |&MyEvent(x)| {
 			// do something with x

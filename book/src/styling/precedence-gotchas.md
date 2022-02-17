@@ -3,14 +3,14 @@
 Due to the order of classes creation, a line that you write later might have higher precedence than a line that you write earlier, perhaps accidentally.
 
 ```rust,noplaypen
-use hobo::components as cmp;
+use hobo::create as e;
 
-cmp::div()
+e::div()
 	.class(css::display!(none));
 
 // -- snip --
 
-let element = cmp::div();
+let element = e::div();
 element
 	.class(css::display!(flex))
 	.on_click(move |_| {
@@ -25,7 +25,7 @@ element
 The workaround is to either use `.style` (that has the highest precedence) or to change the style to prevent class reuse. Of course, you can increase specificity by repeating the same class selector
 
 ```rust,noplaypen
-let element = cmp::div();
+let element = e::div();
 element
 	.class(css::display!(flex))
 	.on_click(move |_| {

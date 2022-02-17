@@ -21,17 +21,17 @@
 fn counter() -> impl hobo::Element {
     let counter = Mutable::new(0);
 
-    cmp::div()
+    e::div()
         .class((
             css::display!(flex),
             css::width!(400 px),
         ))
-        .child(cmp::div()
+        .child(e::div()
             .text_signal(counter.signal().map(|value| {
                 format!("Counter value is: {}", value);
             }))
         )
-        .child(cmp::button()
+        .child(e::button()
             .text("increment")
             .on_click(move |_| *counter.lock_mut() += 1)
         )

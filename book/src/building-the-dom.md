@@ -7,25 +7,25 @@ Here's an example of a somewhat involved element:
 ```rust
 #[derive(hobo::Element)]
 pub struct Input {
-	element: cmp::Div,
-	pub input: cmp::Input,
+	element: e::Div,
+	pub input: e::Input,
 }
 
 impl Input {
-	pub fn new(caption_text: &str, svg: Option<cmp::Svg>) -> Self {
-		let input = cmp::input()
+	pub fn new(caption_text: &str, svg: Option<e::Svg>) -> Self {
+		let input = e::input()
 			.attr(web_str::r#type(), web_str::text())
 			.class(css::class! {
 				// some style
 			});
 
-		let caption_text = cmp::div()
+		let caption_text = e::div()
 			.text(caption_text)
 			.class(css::class! {
 				// some style
 			});
 
-		let mut element = cmp::div()
+		let mut element = e::div()
 			.class(css::style! {
 				// some style
 			})

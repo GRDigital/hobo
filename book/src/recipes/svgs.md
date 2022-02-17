@@ -34,7 +34,7 @@ fn get_svg_element(xml_node: &roxmltree::Node, id: u64) -> web_sys::SvgElement {
 macro_rules! svg {
 	($($name:ident => $address:expr),*$(,)*) => {$(
 		#[must_use]
-		pub fn $name() -> cmp::Svg {
+		pub fn $name() -> e::Svg {
 			let id = LAST_ID.with(move |last_id| {
 				let mut last_id = last_id.borrow_mut();
 				let id = *last_id;
@@ -42,7 +42,7 @@ macro_rules! svg {
 				id
 			});
 			let element: web_sys::SvgElement = get_svg_element(&roxmltree::Document::parse(include_str!($address)).unwrap().root_element(), id);
-			cmp::Svg(hobo::components::svg_element(&element))
+			e::Svg(hobo::create::svg_element(&element))
 		}
 	)*};
 }
@@ -58,9 +58,9 @@ svg![
 Of course, if you need to algorithmically construct an svg, such as if you're making a chart, you can do that too:
 
 ```rust
-let svg = cmp::svg()
+let svg = e::svg()
 	.attr(web_str::viewBox(), "-1 -1 2 2")
-	.child(cmp::circle()
+	.child(e::circle()
 		.attr(web_str::cx(), "0")
 		.attr(web_str::cy(), "0")
 		.attr(web_str::r(), "1")

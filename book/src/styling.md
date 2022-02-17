@@ -8,7 +8,7 @@ Most **Elements** will be styled with either `.class()` or `.style()` functions,
 For example, here's a style:
 
 ```rust,noplaypen
-hobo::components::div()
+hobo::create::div()
 	.class(css::style!(
 		.& {
 			css::height!(393 px),

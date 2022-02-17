@@ -31,19 +31,19 @@ Queries are tuples of `& T`, `&mut T` or `With<T>` where `T` is some component o
 Queries are also often useful to establish relations with distant **Elements**. For example, an **Element** in one part of the DOM can get an **Element** from a completely unrelated part of the DOM.
 
 ```rust,noplaypen
-use hobo::components as cmp;
+use hobo::create as e;
 
 struct SettingsData {
 	speed: f32,
 }
 
-let settings_container = cmp::div()
+let settings_container = e::div()
 	// etc
 	.component(SettingsData { speed: 0.35 })
 
 // -- snip --
 
-let unrelated_display = cmp::div()
+let unrelated_display = e::div()
 	//etc
 	.text(hobo::find::<&SettingsData>().speed.to_string())
 ```

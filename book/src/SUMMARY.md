@@ -4,7 +4,7 @@
 - [Getting Started](getting-started.md)
 - [Core Concepts](basic-concepts.md)
 	- [Entities, Components (and Resources)](basic-concepts/entities-components-resources.md)
-	- [hobo::components](basic-concepts/hobo-components.md)
+	- [hobo::create](basic-concepts/hobo-create.md)
 	- [Children and Parent](basic-concepts/children-and-parent.md)
 	- [Removing and replacing elements](basic-concepts/removing-and-replacing-elements.md)
 	- [DOM Events and EventHandlerCallback](basic-concepts/dom-events.md)

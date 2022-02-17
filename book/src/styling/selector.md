@@ -16,21 +16,21 @@ There are also several additions:
 * `.[T]` where `T` is some marker type will be replaced with the generated classname for the type `T` so you could select based on custom marker type.
 
 ```rust,noplaypen
-use hobo::components as cmp;
+use hobo::create as e;
 
 struct ButtonMarker;
 
-cmp::div()
+e::div()
 	.class(css::style!(
 		.& >> .[ButtonMarker] {
 			css::cursor!(pointer),
 		}
 	))
-	.child(cmp::div()
+	.child(e::div()
 		.mark::<ButtonMarker>()
 		.text("button 1")
 	)
-	.child(cmp::div()
+	.child(e::div()
 		.mark::<ButtonMarker>()
 		.text("button 2")
 	)

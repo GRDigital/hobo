@@ -11,7 +11,7 @@ pub fn spawn_complain<T>(x: impl Future<Output = anyhow::Result<T>> + 'static) {
 	}});
 }
 
-cmp::div()
+e::div()
 	.with(move |&element| spawn_complain(async move {
 		let value = do_some_request_or_something().await?;
 		if element.is_dead() { return Ok(()); }

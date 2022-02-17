@@ -10,7 +10,7 @@ Most hobo components will be styled with either `.class()` or `.style()` functio
 For example, here's a style:
 
 ```rust
-cmp::div()
+e::div()
 	.class(css::style!(
 		.& {
 			css::height!(393 px),

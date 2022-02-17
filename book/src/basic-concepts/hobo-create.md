@@ -1,9 +1,9 @@
-# `hobo::components`
+# `hobo::create`
 
 This module has a `snake_case` function which returns a corresponding `PascalCase` concrete type that implements **Element**.
 
 ```rust,noplaypen
-let some_div: hobo::components::Div = hobo::components::div();
+let some_div: hobo::create::Div = hobo::create::div();
 ```
 
 **Element** has methods that aren't available on regular entities.
@@ -14,7 +14,7 @@ Sometimes it's useful to have custom types so you can have some special capabili
 
 ```rust,noplaypen
 #[derive(hobo::Element, Clone, Copy /* etc */)]
-struct Checkbox(hobo::components::Div);
+struct Checkbox(hobo::create::Div);
 
 // just an example of why you might want to do this
 impl Checkbox {
@@ -35,7 +35,7 @@ The `hobo::Element` derive macro expects either a tuple struct or a regular stru
 ```rust,noplaypen
 #[derive(hobo::Element, Clone, Copy /* etc */)]
 struct CustomSelect {
-	element: hobo::components::Select,
+	element: hobo::create::Select,
 	// etc
 }
 ```
@@ -47,8 +47,8 @@ It's often useful to mix different types of **Elements**, for example:
 ```rust,noplaypen
 fn content() -> impl hobo::Element {
 	match tab {
-		Tab::Main => main_page(), // hobo::components::Div
-		Tab::Blogpost => article(), // hobo::components::Article
+		Tab::Main => main_page(), // hobo::create::Div
+		Tab::Blogpost => article(), // hobo::create::Article
 		// etc
 	}
 }
