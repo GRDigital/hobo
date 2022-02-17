@@ -181,6 +181,7 @@ dependencies = [
  "owning_ref",
  "paste",
  "roxmltree",
+ "serde_json",
  "shrinkwraprs",
  "slotmap",
  "smart-default",
