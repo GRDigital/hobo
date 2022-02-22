@@ -15,4 +15,4 @@ num-traits = "0.2"
 ordered-float = { version = "2", default-features = false }
 paste = "1"
 smart-default = "0.6"
-strum = { version = "0.23", features = ["derive"] }
+strum = { version = "0.24", features = ["derive"] }
