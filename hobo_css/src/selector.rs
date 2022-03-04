@@ -7,6 +7,7 @@ pub enum PseudoElement {
 	#[strum(to_string = "::selection")] selection,
 	#[strum(to_string = "::first-letter")] first_letter,
 	#[strum(to_string = "::first-line")] first_line,
+	#[strum(to_string = "::placeholder")] placeholder,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
