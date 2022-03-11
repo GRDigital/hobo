@@ -295,6 +295,7 @@ generate_properties! {
 		GridAutoFlow,
 		RowGap,
 		ColumnGap,
+		GridGap,
 		OverflowWrap,
 		BoxShadow,
 		TransformOrigin,
