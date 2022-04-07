@@ -68,8 +68,11 @@ intern_strings! {
 	id;
 	password;
 	text;
+	date; datetime_local; time;
+	tel;
+	url;
 	_blank; rel; noopener;
-	viewBox; d; cx; cy; r; x; y; x1; x2; y1; y2;
+	viewBox; d; cx; cy; r; x; y; x1; x2; y1; y2; path_length;
 	file;
 	loading; lazy;
 

@@ -1,5 +1,8 @@
 #![allow(non_snake_case)]
 
+pub mod svg;
+pub mod html;
+
 use crate::{prelude::*, storage::Storage, AsEntity, Element, Entity, World};
 use std::{any::TypeId, collections::HashSet};
 use sugars::*;
@@ -140,48 +143,6 @@ macro_rules! create {
 			)*
 		}
 	}};
-}
-
-pub trait StringValue {
-	fn value(&self) -> String;
-	fn set_value(&self, x: &str);
-}
-
-impl StringValue for Input {
-	fn value(&self) -> String { self.get_cmp::<web_sys::HtmlInputElement>().value() }
-
-	fn set_value(&self, x: &str) { self.get_cmp::<web_sys::HtmlInputElement>().set_value(x) }
-}
-
-impl StringValue for Textarea {
-	fn value(&self) -> String { self.get_cmp::<web_sys::HtmlTextAreaElement>().value() }
-
-	fn set_value(&self, x: &str) { self.get_cmp::<web_sys::HtmlTextAreaElement>().set_value(x) }
-}
-
-impl Select {
-	pub fn selected_index(&self) -> i32 {
-		self.get_cmp::<web_sys::HtmlSelectElement>().selected_index()
-	}
-}
-
-impl Input {
-	pub async fn file_data(&self, id: u32) -> ::std::option::Option<Vec<u8>> {
-		let file = self.get_cmp::<web_sys::HtmlInputElement>().files()?.get(id)?;
-		let arr_buffer: js_sys::ArrayBuffer = wasm_bindgen_futures::JsFuture::from(file.array_buffer()).await.ok()?.dyn_into().ok()?;
-		let vec = js_sys::Uint8Array::new(&arr_buffer).to_vec();
-		Some(vec)
-	}
-}
-
-impl Image {
-	pub fn src(self, url: &str) -> Self {
-		self.attr(web_str::src(), url)
-	}
-
-	pub fn set_src(&self, url: &str) {
-		self.set_attr(web_str::src(), url)
-	}
 }
 
 // impl AsRef<web_sys::HtmlSelectElement> for Select {
