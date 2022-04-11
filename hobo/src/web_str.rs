@@ -72,7 +72,7 @@ intern_strings! {
 	tel;
 	url;
 	_blank; rel; noopener;
-	viewBox; d; cx; cy; r; x; y; x1; x2; y1; y2; path_length;
+	viewBox; d; cx; cy; r; x; y; x1; x2; y1; y2; path_length; points;
 	file;
 	loading; lazy;
 
