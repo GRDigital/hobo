@@ -57,6 +57,41 @@ impl Line {
 	}
 }
 
+impl Circle {
+	#[inline]
+	pub fn cx(self, cx: impl num_traits::Num + std::string::ToString) -> Self {
+		self.set_cx(cx);
+		self
+	}
+
+	#[inline]
+	pub fn set_cx(&self, cx: impl num_traits::Num + std::string::ToString) {
+		self.set_attr(web_str::cx(), cx.to_string());
+	}
+
+	#[inline]
+	pub fn cy(self, cy: impl num_traits::Num + std::string::ToString) -> Self {
+		self.set_cy(cy);
+		self
+	}
+
+	#[inline]
+	pub fn set_cy(&self, cy: impl num_traits::Num + std::string::ToString) {
+		self.set_attr(web_str::cy(), cy.to_string());
+	}
+
+	#[inline]
+	pub fn r(self, r: impl num_traits::Num + std::string::ToString) -> Self {
+		self.set_r(r);
+		self
+	}
+
+	#[inline]
+	pub fn set_r(&self, r: impl num_traits::Num + std::string::ToString) {
+		self.set_attr(web_str::r(), r.to_string());
+	}
+}
+
 impl Svg {
 	#[inline]
 	pub fn viewbox(
