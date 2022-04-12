@@ -83,10 +83,11 @@ impl World {
 	#[doc(hidden)]
 	#[inline]
 	pub fn is_marked_borrow_mut() -> bool {
-		#[cfg(debug_assertions)] {
-			return WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed)
-		}
-		false
+		#[cfg(debug_assertions)]
+		return WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed);
+
+		#[cfg(not(debug_assertions))]
+		return false;
 	}
 
 	#[track_caller]
