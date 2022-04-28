@@ -92,6 +92,19 @@ impl Circle {
 	}
 }
 
+impl Path {
+	#[inline]
+	pub fn d<'a>(self, d: impl Into<std::borrow::Cow<'a, str>>) -> Self {
+		self.set_d(d);
+		self
+	}
+
+	#[inline]
+	pub fn set_d<'a>(&self, d: impl Into<std::borrow::Cow<'a, str>>) {
+		self.set_attr(web_str::d(), d);
+	}
+}
+
 impl Svg {
 	#[inline]
 	pub fn viewbox(

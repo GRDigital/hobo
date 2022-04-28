@@ -73,6 +73,7 @@ intern_strings! {
 	url;
 	_blank; rel; noopener;
 	viewBox; d; cx; cy; r; x; y; x1; x2; y1; y2; path_length; points;
+	transform;
 	file;
 	loading; lazy;
 
