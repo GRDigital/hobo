@@ -168,6 +168,7 @@ generate_events! {
 	KeyboardEvent, keyup,       on_key_up;
 	Event,         change,      on_change;
 	UiEvent,       scroll,      on_scroll;
+	UiEvent,       resize,      on_resize;
 	FocusEvent,    blur,        on_blur;
 	FocusEvent,    focus,       on_focus;
 	TouchEvent,    touchstart,  on_touch_start;
