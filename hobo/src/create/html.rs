@@ -182,3 +182,15 @@ impl Image {
 		self.set_attr(web_str::src(), url)
 	}
 }
+
+impl Script {
+	#[inline]
+	pub fn src(self, url: &str) -> Self {
+		self.attr(web_str::src(), url)
+	}
+
+	#[inline]
+	pub fn set_src(&self, url: &str) {
+		self.set_attr(web_str::src(), url)
+	}
+}
