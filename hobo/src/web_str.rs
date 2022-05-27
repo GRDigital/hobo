@@ -76,6 +76,7 @@ intern_strings! {
 	transform;
 	file;
 	loading; lazy;
+	name; r#for, "for";
 
 	// events
 	click; contextmenu; dblclick; mousedown; mouseenter;
