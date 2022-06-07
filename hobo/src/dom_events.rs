@@ -106,7 +106,7 @@ impl Drop for EventHandler {
 			EventHandlerCallback::WheelEvent(cb) => cb.as_ref().unchecked_ref(),
 			EventHandlerCallback::UiEvent(cb) => cb.as_ref().unchecked_ref(),
 		});
-		if let Err(e) = res {
+		if let Err(_e) = res {
 			// TODO?
 			// log::warn!("remove_event_listener_with_callback failed with error: {}", serde_json::to_string_pretty(&e.into_serde::<serde_json::Value>().unwrap()).unwrap());
 		}
