@@ -168,6 +168,7 @@ dependencies = [
  "hobo_derive",
  "js-sys",
  "log",
+ "num-traits",
  "once_cell",
  "owning_ref",
  "paste",
