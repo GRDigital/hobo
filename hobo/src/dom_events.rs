@@ -141,6 +141,11 @@ macro_rules! generate_events {
 				}
 
 				fn $f(self, f: impl FnMut(web_sys::$event_kind) + 'static) -> Self where Self: Sized { self.[<add_ $f>](f); self }
+				fn [<with_ $f>](self, mut f: impl FnMut(&Self, web_sys::$event_kind) + 'static) -> Self where Self: Sized + Clone + 'static {
+					let self_clone = self.clone();
+					self.[<add_ $f>](move |event| f(&self_clone, event));
+					self
+				}
 			}
 
 			impl<T: Element> [<$name:camel>] for T {}
