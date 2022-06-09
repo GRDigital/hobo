@@ -87,14 +87,14 @@ impl Select {
 	#[inline] pub fn selected_index(&self) -> i32 { self.get_cmp::<web_sys::HtmlSelectElement>().selected_index() }
 }
 
-impl Image {
-	#[inline] pub fn src(self, url: &str) -> Self { self.attr(web_str::src(), url) }
-	#[inline] pub fn set_src(&self, url: &str) { self.set_attr(web_str::src(), url) }
+impl Img {
+	#[inline] pub fn src<'a>(self, url: impl Into<Cow<'a, str>>) -> Self { self.attr(web_str::src(), url) }
+	#[inline] pub fn set_src<'a>(&self, url: impl Into<Cow<'a, str>>) { self.set_attr(web_str::src(), url) }
 }
 
 impl Script {
-	#[inline] pub fn src(self, url: &str) -> Self { self.attr(web_str::src(), url) }
-	#[inline] pub fn set_src(&self, url: &str) { self.set_attr(web_str::src(), url) }
+	#[inline] pub fn src<'a>(self, url: impl Into<Cow<'a, str>>) -> Self { self.attr(web_str::src(), url) }
+	#[inline] pub fn set_src<'a>(&self, url: impl Into<Cow<'a, str>>) { self.set_attr(web_str::src(), url) }
 }
 
 impl Label {
