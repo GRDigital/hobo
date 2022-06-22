@@ -65,7 +65,7 @@ pub fn derive_as_entity(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 	}
 }
 
-#[proc_macro_derive(Element)]
+#[proc_macro_derive(AsElement)]
 pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let crate_name = crate_name();
 	let as_entity: TokenStream = derive_as_entity(input.clone()).into();
@@ -74,7 +74,7 @@ pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 	let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 	(quote! {
 		#as_entity
-		impl #impl_generics #crate_name::Element for #name #ty_generics #where_clause {}
+		impl #impl_generics #crate_name::AsElement for #name #ty_generics #where_clause {}
 	}).into()
 }
 

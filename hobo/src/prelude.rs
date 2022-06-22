@@ -6,7 +6,7 @@ pub use crate::{
 	create::html::{StringValue, BasicAttrs},
 	css::{self, AppendProperty, F32},
 	dom_events::impls::*,
-	element::{Element, SomeElement},
+	element::{AsElement, Element},
 	entity::{AsEntity, Entity},
 	hierarchy::{Children, Parent},
 	query::{Query, With},

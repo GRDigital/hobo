@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use super::*;
 
-pub trait BasicAttrs: Element {
+pub trait BasicAttrs: AsElement {
 	#[inline] fn set_name<'a>(&self, x: impl Into<Cow<'a, str>>) { self.set_attr(web_str::name(), x); }
 	#[inline] fn name<'a>(self, x: impl Into<Cow<'a, str>>) -> Self where Self: Sized { self.set_name(x); self }
 
@@ -9,7 +9,7 @@ pub trait BasicAttrs: Element {
 	#[inline] fn id<'a>(self, x: impl Into<Cow<'a, str>>) -> Self where Self: Sized { self.set_id(x); self }
 }
 
-impl<T: Element> BasicAttrs for T {}
+impl<T: AsElement> BasicAttrs for T {}
 
 impl A {
 	#[inline] pub fn href<'a>(self, href: impl Into<Cow<'a, str>>) -> Self { self.set_href(href); self }
@@ -66,7 +66,7 @@ impl Input {
 	#[inline] pub fn get_checked(&self) -> bool { self.get_cmp::<web_sys::HtmlInputElement>().checked() }
 }
 
-pub trait StringValue: Element {
+pub trait StringValue: AsElement {
 	fn value_attr<'a>(self, value: impl Into<Cow<'a, str>>) -> Self where Self: Sized { self.set_value_attr(value); self }
 	fn set_value_attr<'a>(&self, value: impl Into<Cow<'a, str>>) { self.set_attr(web_str::value(), value) }
 	fn get_value(&self) -> String;

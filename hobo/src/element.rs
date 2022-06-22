@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use futures_signals::signal::SignalExt;
-pub use hobo_derive::Element;
+pub use hobo_derive::AsElement;
 use std::{
 	any::TypeId,
 	borrow::Cow,
@@ -8,8 +8,8 @@ use std::{
 };
 
 /// An `Element` with specific type erased
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Element)]
-pub struct SomeElement(pub Entity);
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, AsElement)]
+pub struct Element(pub Entity);
 
 #[derive(Default)]
 pub(crate) struct Classes {
@@ -21,8 +21,8 @@ pub(crate) struct Classes {
 struct SignalHandlesCollection(Vec<discard::DiscardOnDrop<futures_signals::CancelableFutureHandle>>);
 
 /// Marker trait for an entity that has `web_sys::Node`, `web_sys::Element`, `web_sys::EventTarget` and one of `web_sys::HtmlElement` or `web_sys::SvgElement` as attached components
-pub trait Element: AsEntity + Sized {
-	fn add_child(&self, child: impl Element) {
+pub trait AsElement: AsEntity + Sized {
+	fn add_child(&self, child: impl AsElement) {
 		if self.is_dead() { log::warn!("add_child parent dead {:?}", self.as_entity()); return; }
 		if child.is_dead() { log::warn!("add_child child dead {:?}", child.as_entity()); return; }
 		self.get_cmp_mut_or_default::<Children>().push(child.as_entity());
@@ -33,10 +33,10 @@ pub trait Element: AsEntity + Sized {
 			parent_node.append_child(&child_node).expect("can't append child");
 		}
 	}
-	fn child(self, child: impl Element) -> Self { self.add_child(child); self }
-	fn with_child<T: Element>(self, f: impl FnOnce(&Self) -> T) -> Self { let c = f(&self); self.child(c) }
-	fn add_children<Item: Element>(&self, children: impl IntoIterator<Item = Item>) { for child in children.into_iter() { self.add_child(child); } }
-	fn children<Item: Element>(self, children: impl IntoIterator<Item = Item>) -> Self { self.add_children(children); self }
+	fn child(self, child: impl AsElement) -> Self { self.add_child(child); self }
+	fn with_child<T: AsElement>(self, f: impl FnOnce(&Self) -> T) -> Self { let c = f(&self); self.child(c) }
+	fn add_children<Item: AsElement>(&self, children: impl IntoIterator<Item = Item>) { for child in children.into_iter() { self.add_child(child); } }
+	fn children<Item: AsElement>(self, children: impl IntoIterator<Item = Item>) -> Self { self.add_children(children); self }
 	fn leave_parent(self) {
 		if self.is_dead() { log::warn!("leave_parent child dead {:?}", self.as_entity()); return; }
 		let parent = self.get_cmp::<Parent>().0;
@@ -54,7 +54,7 @@ pub trait Element: AsEntity + Sized {
 	}
 
 	// add a child at an index, useful to update tables without regenerating the whole container element
-	fn add_child_at(&self, at_id: usize, child: impl Element) {
+	fn add_child_at(&self, at_id: usize, child: impl AsElement) {
 		if self.is_dead() { log::warn!("add_child_at parent dead {:?}", self.as_entity()); return; }
 		if child.is_dead() { log::warn!("add_child_at child dead {:?}", child.as_entity()); return; }
 		let mut children = self.get_cmp_mut_or_default::<Children>();
@@ -75,14 +75,14 @@ pub trait Element: AsEntity + Sized {
 
 	// be mindful about holding child references with this one
 	fn add_child_signal<S, E>(&self, signal: S) where
-		E: Element,
+		E: AsElement,
 		S: futures_signals::signal::Signal<Item = E> + 'static,
 	{
 		// placeholder at first
-		let mut child = crate::create::div().class(crate::css::Display::None).erase();
+		let mut child = crate::create::div().class(crate::css::Display::None).as_element();
 		self.add_child(child);
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |new_child| {
-			let new_child = new_child.erase();
+			let new_child = new_child.as_element();
 			child.replace_with(new_child);
 			child = new_child;
 			async move {}
@@ -92,7 +92,7 @@ pub trait Element: AsEntity + Sized {
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
 	fn child_signal<S, E>(self, signal: S) -> Self where
-		E: Element,
+		E: AsElement,
 		S: futures_signals::signal::Signal<Item = E> + 'static,
 	{ self.add_child_signal(signal); self }
 
@@ -131,7 +131,7 @@ pub trait Element: AsEntity + Sized {
 		let entity = self.as_entity();
 		if entity.is_dead() { log::warn!("set_class_signal dead entity {:?}", entity); return; }
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |class| {
-			SomeElement(entity).set_class(class);
+			Element(entity).set_class(class);
 			async move { }
 		}), || {});
 
@@ -151,7 +151,7 @@ pub trait Element: AsEntity + Sized {
 		let entity = self.as_entity();
 		if entity.is_dead() { log::warn!("set_class_signal dead entity {:?}", entity); return; }
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |class| {
-			SomeElement(entity).set_class_typed::<Type>(class.into());
+			Element(entity).set_class_typed::<Type>(class.into());
 			async move { }
 		}), || {});
 
@@ -172,7 +172,7 @@ pub trait Element: AsEntity + Sized {
 		let entity = self.as_entity();
 		if entity.is_dead() { log::warn!("set_class_signal dead entity {:?}", entity); return; }
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |class| {
-			SomeElement(entity).set_class_tagged(tag, class);
+			Element(entity).set_class_tagged(tag, class);
 			async move { }
 		}), || {});
 
@@ -207,7 +207,7 @@ pub trait Element: AsEntity + Sized {
 		let entity = self.as_entity();
 		if entity.is_dead() { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |(k, v)| {
-			SomeElement(entity).set_attr(k, v);
+			Element(entity).set_attr(k, v);
 			async move { }
 		}), || {});
 
@@ -228,7 +228,7 @@ pub trait Element: AsEntity + Sized {
 		if entity.is_dead() { log::warn!("set_attr_signal dead entity {:?}", entity); return; }
 		let attr = attr.into().into_owned();
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |v| {
-			SomeElement(entity).set_bool_attr(&attr, v);
+			Element(entity).set_bool_attr(&attr, v);
 			async move { }
 		}), || {});
 
@@ -253,7 +253,7 @@ pub trait Element: AsEntity + Sized {
 		let entity = self.as_entity();
 		if entity.is_dead() { log::warn!("set_text_signal dead entity {:?}", entity); return; }
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |text| {
-			SomeElement(entity).set_text(text);
+			Element(entity).set_text(text);
 			async move { }
 		}), || {});
 
@@ -280,7 +280,7 @@ pub trait Element: AsEntity + Sized {
 		let entity = self.as_entity();
 		if entity.is_dead() { log::warn!("set_style_signal dead entity {:?}", entity); return; }
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |style| {
-			SomeElement(entity).set_style(style);
+			Element(entity).set_style(style);
 			async move { }
 		}), || {});
 
@@ -308,7 +308,7 @@ pub trait Element: AsEntity + Sized {
 		let entity = self.as_entity();
 		if entity.is_dead() { log::warn!("mark_signal dead entity {:?}", entity); return self; }
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |enabled| {
-			if enabled { SomeElement(entity).mark::<T>(); } else { SomeElement(entity).unmark::<T>(); }
+			if enabled { Element(entity).mark::<T>(); } else { Element(entity).unmark::<T>(); }
 			async move { }
 		}), || {});
 
@@ -323,7 +323,7 @@ pub trait Element: AsEntity + Sized {
 	// instead of deleting self
 	// this would cause a lot less issue with invalidating stuff
 	// !!!!!! NOT TRUE - any handler that was created with the new entity will be busted, so this is fine
-	fn replace_with<T: Element>(&self, other: T) -> T {
+	fn replace_with<T: AsElement>(&self, other: T) -> T {
 		let other_entity = other.as_entity();
 		if self.is_dead() { log::warn!("replace_with dead {:?}", self.as_entity()); return other; }
 
@@ -347,8 +347,8 @@ pub trait Element: AsEntity + Sized {
 	}
 
 	fn with(self, f: impl FnOnce(&Self)) -> Self { f(&self); self }
-	fn erase(&self) -> SomeElement { SomeElement(self.as_entity()) }
+	fn as_element(&self) -> Element { Element(self.as_entity()) }
 }
 
-impl<T: Element> Element for &T {}
-impl<T: Element> Element for &mut T {}
+impl<T: AsElement> AsElement for &T {}
+impl<T: AsElement> AsElement for &mut T {}

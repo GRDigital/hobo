@@ -3,7 +3,7 @@
 pub mod svg;
 pub mod html;
 
-use crate::{prelude::*, storage::Storage, AsEntity, Element, Entity, World};
+use crate::{prelude::*, storage::Storage, AsEntity, AsElement, Entity, World};
 use std::{any::TypeId, collections::HashSet};
 use sugars::*;
 
@@ -82,7 +82,7 @@ macro_rules! create {
 		SVG => [$($svg_name:ident, $svg_t:ident),*$(,)?],
 	) => {paste::item! {
 		$(
-			#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Element)]
+			#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, AsElement)]
 			pub struct [<$html_name:camel>](pub crate::Entity);
 
 			pub fn $html_name() -> [<$html_name:camel>] {
@@ -99,7 +99,7 @@ macro_rules! create {
 		)*
 
 		$(
-			#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Element)]
+			#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, AsElement)]
 			pub struct [<$svg_name:camel>](pub crate::Entity);
 
 			pub fn $svg_name() -> [<$svg_name:camel>] {

@@ -22,7 +22,7 @@ mod world;
 pub use web_sys;
 use crate::prelude::*;
 #[doc(hidden)] pub use discard;
-pub use element::{Element, SomeElement};
+pub use element::{AsElement, Element};
 pub use entity::AsEntity;
 pub use futures_signals as signals;
 pub use hobo_css as css;

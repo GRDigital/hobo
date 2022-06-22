@@ -1,6 +1,6 @@
 //! everything that has to do with HTML event handling
 
-use crate::{prelude::*, AsEntity, Element};
+use crate::{prelude::*, AsEntity, AsElement};
 
 /// An enum for different event types
 pub enum EventHandlerCallback {
@@ -132,7 +132,7 @@ macro_rules! generate_events {
 				}
 			}
 
-			pub trait [<$name:camel>]: Element {
+			pub trait [<$name:camel>]: AsElement {
 				fn [<add_ $f>](&self, f: impl FnMut(web_sys::$event_kind) + 'static) {
 					let entity = self.as_entity();
 					if entity.is_dead() { log::warn!("callback handler entity dead {:?}", entity); return; }
@@ -148,7 +148,7 @@ macro_rules! generate_events {
 				}
 			}
 
-			impl<T: Element> [<$name:camel>] for T {}
+			impl<T: AsElement> [<$name:camel>] for T {}
 		)+
 
 		pub mod impls {$(
