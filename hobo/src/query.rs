@@ -83,7 +83,7 @@ impl<Component: 'static> Query for &mut Component {
 	fn filter(world: &World, entities: &mut Option<BTreeSet<Entity>>) { <&Component as Query>::filter(world, entities); }
 
 	fn fetch(world: &World, entity: Entity) -> Self::Fetch {
-		let storage: StorageRefMut<Component> = OwningRefMut::new(world.dyn_storage::<Component>())
+		let storage: StorageRefMut<Component> = OwningRefMut::new(world.dyn_storage_mut::<Component>())
 			.map_mut(|x| x.as_any_mut().downcast_mut().unwrap());
 
 		storage

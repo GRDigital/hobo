@@ -70,7 +70,10 @@ impl<Component: 'static> DynStorage for SimpleStorage<Component> {
 		}
 
 		for removed in &self.removed {
-			world.component_ownership.borrow_mut().get_mut(removed).unwrap().remove(&std::any::TypeId::of::<Component>());
+			// won't be present if entity was deleted
+			if let Some(ownership) = world.component_ownership.borrow_mut().get_mut(removed) {
+				ownership.remove(&std::any::TypeId::of::<Component>());
+			}
 		}
 
 		let entities = std::mem::take(&mut self.added);

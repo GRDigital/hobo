@@ -31,7 +31,7 @@ use owning_ref::{OwningRef, OwningRefMut};
 pub use prelude::{Children, Parent};
 use std::{
 	any::TypeId,
-	cell::RefMut,
+	cell::{Ref, RefMut},
 };
 use storage::*;
 use style_storage::{StyleStorage, STYLE_STORAGE};
@@ -50,7 +50,7 @@ use sugars::hash;
 // could? remove all *_mut elements and specify whether you want mutable or immutable component with the same trick as in Query
 
 // this is not necessary, but it makes it convenient to further remap to some OwningRef or whatever
-type StorageRef<'a, Component> = OwningRef<RefMut<'a, Box<dyn storage::DynStorage>>, SimpleStorage<Component>>;
+type StorageRef<'a, Component> = OwningRef<Ref<'a, Box<dyn storage::DynStorage>>, SimpleStorage<Component>>;
 type StorageRefMut<'a, Component> = OwningRefMut<RefMut<'a, Box<dyn storage::DynStorage>>, SimpleStorage<Component>>;
 
 /// Register a browser window to also receive styles, automatically called for the global `window` object with the name "default"

@@ -20,6 +20,7 @@ use sugars::hash;
 pub(crate) static WORLD: Lazy<World> = Lazy::new(|| {
 	let mut world = World::default();
 	world.next_entity = AtomicU64::new(1);
+	world.component_ownership.borrow_mut().insert(Entity::root(), BTreeSet::default());
 
 	{
 		fn update_classes(storage: &mut SimpleStorage<Classes>, world: &World, entity: Entity) {
@@ -73,7 +74,18 @@ unsafe impl Send for World {}
 unsafe impl Sync for World {}
 
 impl World {
-	pub(crate) fn dyn_storage<Component: 'static>(&self) -> std::cell::RefMut<'static, Box<dyn DynStorage>> {
+	pub(crate) fn dyn_storage<Component: 'static>(&self) -> std::cell::Ref<'static, Box<dyn DynStorage>> {
+		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.borrow()) {
+			storage
+		} else {
+			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
+			let storage: &'static _ = Box::leak(Box::new(storage));
+			self.storages.insert(TypeId::of::<Component>(), storage);
+			storage.borrow()
+		}
+	}
+
+	pub(crate) fn dyn_storage_mut<Component: 'static>(&self) -> std::cell::RefMut<'static, Box<dyn DynStorage>> {
 		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.borrow_mut()) {
 			storage
 		} else {
@@ -85,7 +97,7 @@ impl World {
 	}
 
 	pub fn storage_mut<Component: 'static>(&self) -> StorageGuard<Component, StorageRefMut<Component>> {
-		let storage = OwningRefMut::new(self.dyn_storage::<Component>())
+		let storage = OwningRefMut::new(self.dyn_storage_mut::<Component>())
 			.map_mut(|x| x.as_any_mut().downcast_mut().unwrap());
 		StorageGuard(self, Some(storage))
 	}
@@ -147,7 +159,8 @@ impl World {
 			}
 		}
 
-		for component_id in self.component_ownership.borrow_mut().remove(&entity).unwrap() {
+		let components = self.component_ownership.borrow_mut().remove(&entity).unwrap();
+		for component_id in components {
 			let mut storage = self.storages.map_get(&component_id, |x| x.try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. remove")).unwrap();
 			storage.dyn_remove(entity);
 			storage.flush(self);
