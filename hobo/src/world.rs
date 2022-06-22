@@ -72,7 +72,7 @@ pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 // maybe World doesn't even have to be pub
 #[derive(Default)]
 pub struct World {
-	pub(crate) storages: HashMap<TypeId, StorageRc>,
+	pub(crate) storages: elsa::FrozenMap<TypeId, StorageRc>,
 	// this is used to remove components for when an entity has been removed
 	pub(crate) component_ownership: HashMap<Entity, BTreeSet<TypeId>>,
 	next_entity: u64,
@@ -131,10 +131,14 @@ impl World {
 		}
 	}
 
-	pub(crate) fn dyn_storage<Component: 'static>(&mut self) -> Rc<RefCell<Box<dyn DynStorage>>> {
-		Rc::clone(self.storages
-			.entry(TypeId::of::<Component>())
-			.or_insert_with(|| Rc::new(RefCell::new(Box::new(SimpleStorage::<Component>::default())))))
+	pub(crate) fn dyn_storage<Component: 'static>(&self) -> Rc<RefCell<Box<dyn DynStorage>>> {
+		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), Rc::clone) {
+			storage
+		} else {
+			let storage: Rc<RefCell<Box<dyn DynStorage>>> = Rc::new(RefCell::new(Box::new(SimpleStorage::<Component>::default())));
+			self.storages.insert(TypeId::of::<Component>(), Rc::clone(&storage));
+			storage
+		}
 	}
 
 	pub fn storage_mut<Component: 'static>(&mut self) -> StorageGuard<Component, StorageRefMut<Component>> {
@@ -143,7 +147,7 @@ impl World {
 		StorageGuard(self, Some(storage))
 	}
 
-	pub fn storage<Component: 'static>(&mut self) -> StorageRef<Component> {
+	pub fn storage<Component: 'static>(&self) -> StorageRef<Component> {
 		OwningRef::new(OwningHandle::new(self.dyn_storage::<Component>()))
 			.map(|x| x.as_any().downcast_ref().unwrap())
 	}
@@ -151,7 +155,7 @@ impl World {
 	pub fn register_resource<T: 'static>(&mut self, resource: T) { self.storage_mut().add(Entity::root(), resource); }
 
 	// resources are just components attached to Entity(0, 0)
-	pub fn resource<T: 'static>(&mut self) -> OwningRef<StorageRef<T>, T> {
+	pub fn resource<T: 'static>(&self) -> OwningRef<StorageRef<T>, T> {
 		OwningRef::new(self.storage()).map(|x| x.get(Entity::root()).unwrap())
 	}
 
@@ -159,11 +163,11 @@ impl World {
 		OwningRefMut::new(self.storage_mut()).map_mut(|x| x.get_mut(Entity::root()).unwrap())
 	}
 
-	pub fn resource_exists<T: 'static>(&mut self) -> bool {
+	pub fn resource_exists<T: 'static>(&self) -> bool {
 		self.storage::<T>().has(Entity::root())
 	}
 
-	pub fn try_resource<T: 'static>(&mut self) -> Option<OwningRef<StorageRef<T>, T>> {
+	pub fn try_resource<T: 'static>(&self) -> Option<OwningRef<StorageRef<T>, T>> {
 		if !self.storage::<T>().has(Entity::root()) { return None; }
 		Some(OwningRef::new(self.storage()).map(|x| x.get(Entity::root()).unwrap()))
 	}
@@ -205,7 +209,7 @@ impl World {
 
 		if let Some(component_ids) = self.component_ownership.remove(&entity) {
 			for component_id in component_ids {
-				let storage = Rc::clone(&self.storages[&component_id]);
+				let storage = self.storages.map_get(&component_id, Rc::clone).unwrap();
 				let mut storage = storage.try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. remove");
 				storage.dyn_remove(entity);
 				storage.flush(self);

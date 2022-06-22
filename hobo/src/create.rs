@@ -35,7 +35,7 @@ pub fn register_handlers(world: &mut World) {
 		for t in dom_types.0 {
 			// TODO: WARNING: this won't run handlers watching it
 			// which isn't a problem for now
-			world.storages[&t].borrow_mut().dyn_remove(entity);
+			world.storages.map_get(&t, std::rc::Rc::clone).unwrap().borrow_mut().dyn_remove(entity);
 		}
 	});
 }
@@ -67,6 +67,7 @@ pub fn svg_element<T: AsRef<web_sys::SvgElement> + 'static + Clone>(element: &T)
 	let entity = world.new_entity();
 
 	let svg_element = element.as_ref().clone();
+	#[cfg(debug_assertions)] svg_element.set_attribute(wasm_bindgen::intern("data-entity"), &format!("{}", entity.0)).unwrap();
 	dom_element(&mut world, entity, &svg_element);
 	world.storage_mut::<web_sys::SvgElement>().add(entity, svg_element);
 

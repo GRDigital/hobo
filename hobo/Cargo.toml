@@ -11,6 +11,7 @@ readme = "../README.md"
 [dependencies]
 as-any = "0.3"
 discard = "1"
+elsa = "1"
 extend = "1"
 futures-signals = "0.3"
 hobo_css = { path = "../hobo_css", version = "=0.2.2" }
