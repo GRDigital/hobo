@@ -3,18 +3,16 @@ use crate::prelude::*;
 use crate::{
 	create,
 	element::Classes,
-	racy_cell::RacyCell,
 	storage::{SimpleStorage, StorageGuard},
 	style_storage::{StyleStorage, STYLE_STORAGE},
 	StorageRef, StorageRefMut,
 };
 use once_cell::sync::Lazy;
-use owning_ref::{OwningHandle, OwningRef, OwningRefMut};
+use owning_ref::{OwningRef, OwningRefMut};
 use std::{
 	any::TypeId,
 	cell::RefCell,
 	collections::{BTreeSet, HashMap},
-	rc::Rc,
 	sync::atomic::{AtomicU64, Ordering},
 };
 use sugars::hash;
@@ -51,13 +49,11 @@ pub(crate) static WORLD: Lazy<World> = Lazy::new(|| {
 			}
 		}
 
-		// let world = unsafe { std::mem::transmute::<&World, &'static World>(&world) };
 		let mut classes = world.storage_mut::<Classes>();
 		classes.on_added = Some(update_classes);
 		classes.on_modified = Some(update_classes);
 	}
 
-	// create::register_handlers(unsafe { std::mem::transmute::<&World, &'static World>(&world) });
 	create::register_handlers(&world);
 
 	world
@@ -81,7 +77,6 @@ impl World {
 		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.borrow_mut()) {
 			storage
 		} else {
-			// todo!()
 			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
 			let storage: &'static _ = Box::leak(Box::new(storage));
 			self.storages.insert(TypeId::of::<Component>(), storage);

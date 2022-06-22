@@ -6,20 +6,16 @@ pub trait Resource: 'static {
 		World::register_resource(&WORLD, self);
 	}
 	#[inline] fn resource<'a>() -> OwningRef<StorageRef<'a, Self>, Self> where Self: Sized {
-		let res = World::resource::<Self>(&WORLD);
-		res
+		World::resource::<Self>(&WORLD)
 	}
 	#[inline] fn resource_mut<'a>() -> OwningRefMut<StorageGuard<'a, Self, StorageRefMut<'a, Self>>, Self> where Self: Sized {
-		let res = World::resource_mut::<Self>(&WORLD);
-		res
+		World::resource_mut::<Self>(&WORLD)
 	}
 	#[inline] fn try_resource<'a>() -> Option<OwningRef<StorageRef<'a, Self>, Self>> where Self: Sized {
-		let res = World::try_resource::<Self>(&WORLD);
-		res
+		World::try_resource::<Self>(&WORLD)
 	}
 	#[inline] fn try_resource_mut<'a>() -> Option<OwningRefMut<StorageGuard<'a, Self, StorageRefMut<'a, Self>>, Self>> where Self: Sized {
-		let res = World::try_resource_mut::<Self>(&WORLD);
-		res
+		World::try_resource_mut::<Self>(&WORLD)
 	}
 }
 impl<T: 'static + Sized> Resource for T {}
@@ -29,15 +25,13 @@ pub trait DefaultResource: Default + 'static {
 		if !World::resource_exists::<Self>(&WORLD) {
 			World::register_resource(&WORLD, Self::default());
 		}
-		let res = World::resource::<Self>(&WORLD);
-		res
+		World::resource::<Self>(&WORLD)
 	}
 	#[inline] fn resource_mut_or_default<'a>() -> OwningRefMut<StorageGuard<'a, Self, StorageRefMut<'a, Self>>, Self> where Self: Sized {
 		if !World::resource_exists::<Self>(&WORLD) {
 			World::register_resource(&WORLD, Self::default());
 		}
-		let res = World::resource_mut::<Self>(&WORLD);
-		res
+		World::resource_mut::<Self>(&WORLD)
 	}
 }
 impl<T: Default + 'static + Sized> DefaultResource for T {}

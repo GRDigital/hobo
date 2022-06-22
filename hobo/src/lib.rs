@@ -26,14 +26,12 @@ pub use element::{Element, SomeElement};
 pub use entity::AsEntity;
 pub use futures_signals as signals;
 pub use hobo_css as css;
-use owning_ref::{OwningHandle, OwningRef, OwningRefMut};
+use owning_ref::{OwningRef, OwningRefMut};
 #[doc(hidden)] pub use paste;
 pub use prelude::{Children, Parent};
-use racy_cell::RacyCell;
 use std::{
 	any::TypeId,
-	cell::{Ref, RefCell, RefMut},
-	rc::Rc,
+	cell::RefMut,
 };
 use storage::*;
 use style_storage::{StyleStorage, STYLE_STORAGE};
