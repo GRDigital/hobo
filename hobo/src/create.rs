@@ -10,7 +10,7 @@ use sugars::*;
 #[cfg(test)] use wasm_bindgen_test::*;
 #[cfg(test)] wasm_bindgen_test_configure!(run_in_browser);
 
-pub fn dom_element<T, E>(world: &mut World, entity: T, element: &E) where
+pub fn dom_element<T, E>(world: &World, entity: T, element: &E) where
 	T: AsEntity,
 	E: AsRef<web_sys::Node> + AsRef<web_sys::Element> + AsRef<web_sys::EventTarget>,
 {
@@ -22,7 +22,7 @@ pub fn dom_element<T, E>(world: &mut World, entity: T, element: &E) where
 
 struct DomTypes(HashSet<TypeId>);
 
-pub fn register_handlers(world: &mut World) {
+pub fn register_handlers(world: &World) {
 	world.storage_mut::<web_sys::Element>().on_removed = Some(move |_, world, entity, element| {
 		world.storage_mut::<web_sys::Node>().remove(entity);
 		world.storage_mut::<web_sys::EventTarget>().remove(entity);
@@ -35,50 +35,44 @@ pub fn register_handlers(world: &mut World) {
 		for t in dom_types.0 {
 			// TODO: WARNING: this won't run handlers watching it
 			// which isn't a problem for now
-			world.storages.map_get(&t, std::rc::Rc::clone).unwrap().borrow_mut().dyn_remove(entity);
+			world.storages.map_get(&t, |x| x.borrow_mut()).unwrap().dyn_remove(entity);
 		}
 	});
 }
 
 pub fn html_element<T: AsRef<web_sys::HtmlElement> + 'static + Clone>(element: &T) -> Entity {
-	World::mark_borrow_mut();
-	let mut world = unsafe { &mut *WORLD.get() as &mut World };
-	let entity = world.new_entity();
+	let entity = WORLD.new_entity();
 
 	let html_element = element.as_ref().clone();
 	#[cfg(debug_assertions)] html_element.set_attribute(wasm_bindgen::intern("data-entity"), &format!("{}", entity.0)).unwrap();
-	dom_element(&mut world, entity, &html_element);
-	world.storage_mut::<web_sys::HtmlElement>().add(entity, html_element);
+	dom_element(&WORLD, entity, &html_element);
+	WORLD.storage_mut::<web_sys::HtmlElement>().add(entity, html_element);
 
 	if TypeId::of::<web_sys::HtmlElement>() == TypeId::of::<T>() {
-		world.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>()]));
+		WORLD.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>()]));
 	} else {
-		world.storage_mut::<T>().add(entity, element.clone());
-		world.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>(), TypeId::of::<T>()]));
+		WORLD.storage_mut::<T>().add(entity, element.clone());
+		WORLD.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::HtmlElement>(), TypeId::of::<T>()]));
 	}
 
-	World::unmark_borrow_mut();
 	entity
 }
 
 pub fn svg_element<T: AsRef<web_sys::SvgElement> + 'static + Clone>(element: &T) -> Entity {
-	World::mark_borrow_mut();
-	let mut world = unsafe { &mut *WORLD.get() as &mut World };
-	let entity = world.new_entity();
+	let entity = WORLD.new_entity();
 
 	let svg_element = element.as_ref().clone();
 	#[cfg(debug_assertions)] svg_element.set_attribute(wasm_bindgen::intern("data-entity"), &format!("{}", entity.0)).unwrap();
-	dom_element(&mut world, entity, &svg_element);
-	world.storage_mut::<web_sys::SvgElement>().add(entity, svg_element);
+	dom_element(&WORLD, entity, &svg_element);
+	WORLD.storage_mut::<web_sys::SvgElement>().add(entity, svg_element);
 
 	if TypeId::of::<web_sys::SvgElement>() == TypeId::of::<T>() {
-		world.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>()]));
+		WORLD.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>()]));
 	} else {
-		world.storage_mut::<T>().add(entity, element.clone());
-		world.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>(), TypeId::of::<T>()]));
+		WORLD.storage_mut::<T>().add(entity, element.clone());
+		WORLD.storage_mut::<DomTypes>().add(entity, DomTypes(hset![TypeId::of::<web_sys::SvgElement>(), TypeId::of::<T>()]));
 	}
 
-	World::unmark_borrow_mut();
 	entity
 }
 

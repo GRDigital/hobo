@@ -52,8 +52,8 @@ use sugars::hash;
 // could? remove all *_mut elements and specify whether you want mutable or immutable component with the same trick as in Query
 
 // this is not necessary, but it makes it convenient to further remap to some OwningRef or whatever
-type StorageRef<'a, Component> = OwningRef<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, Ref<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;
-type StorageRefMut<'a, Component> = OwningRefMut<OwningHandle<Rc<RefCell<Box<(dyn storage::DynStorage + 'static)>>>, RefMut<'a, Box<dyn storage::DynStorage>>>, SimpleStorage<Component>>;
+type StorageRef<'a, Component> = OwningRef<RefMut<'a, Box<dyn storage::DynStorage>>, SimpleStorage<Component>>;
+type StorageRefMut<'a, Component> = OwningRefMut<RefMut<'a, Box<dyn storage::DynStorage>>, SimpleStorage<Component>>;
 
 /// Register a browser window to also receive styles, automatically called for the global `window` object with the name "default"
 pub fn register_window(window: &web_sys::Window, window_name: String) {
@@ -77,32 +77,26 @@ impl<T: 'static> T {
 
 /// Find all entities matching a query
 pub fn find<Q: query::Query>() -> Vec<Q::Fetch> {
-	World::mark_borrow_mut();
-	let world = unsafe { &mut *WORLD.get() as &mut World };
 	let mut entities = None;
-	Q::filter(world, &mut entities);
-	let res = entities.unwrap_or_default().into_iter().map(|entity| Q::fetch(world, entity)).collect::<Vec<_>>();
-	World::unmark_borrow_mut();
+	Q::filter(&WORLD, &mut entities);
+	let res = entities.unwrap_or_default().into_iter().map(|entity| Q::fetch(&WORLD, entity)).collect::<Vec<_>>();
 	res
 }
 
 /// Find one entity matching a query if there is one
 pub fn try_find_one<Q: query::Query>() -> Option<Q::Fetch> {
-	World::mark_borrow_mut();
-	let world = unsafe { &mut *WORLD.get() as &mut World };
 	let mut entities = None;
-	Q::filter(world, &mut entities);
-	let res = entities.unwrap_or_default().into_iter().next().map(|entity| Q::fetch(world, entity));
-	World::unmark_borrow_mut();
+	Q::filter(&WORLD, &mut entities);
+	let res = entities.unwrap_or_default().into_iter().next().map(|entity| Q::fetch(&WORLD, entity));
 	res
 }
 
 /// Find one entity matching a query, panic otherwise
 pub fn find_one<Q: query::Query>() -> Q::Fetch { try_find_one::<Q>().unwrap() }
 
-#[doc(hidden)]
-pub fn world() -> world::WorldMut {
-	World::mark_borrow_mut();
-	let world = unsafe { &mut *WORLD.get() as &mut World };
-	world::WorldMut(world)
-}
+// #[doc(hidden)]
+// pub fn world() -> world::WorldMut {
+//     World::mark_borrow_mut();
+//     let world = unsafe { &mut *WORLD.get() as &mut World };
+//     world::WorldMut(world)
+// }

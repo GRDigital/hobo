@@ -68,7 +68,7 @@ impl<Component: 'static> Query for &Component {
 	}
 
 	fn fetch(world: &World, entity: Entity) -> Self::Fetch {
-		let storage: StorageRef<Component> = OwningRef::new(OwningHandle::new(world.dyn_storage::<Component>()))
+		let storage: StorageRef<Component> = OwningRef::new(world.dyn_storage::<Component>())
 			.map(|x| x.as_any().downcast_ref().unwrap());
 
 		storage
@@ -83,7 +83,7 @@ impl<Component: 'static> Query for &mut Component {
 	fn filter(world: &World, entities: &mut Option<BTreeSet<Entity>>) { <&Component as Query>::filter(world, entities); }
 
 	fn fetch(world: &World, entity: Entity) -> Self::Fetch {
-		let storage: StorageRefMut<Component> = OwningRefMut::new(OwningHandle::new_mut(world.dyn_storage::<Component>()))
+		let storage: StorageRefMut<Component> = OwningRefMut::new(world.dyn_storage::<Component>())
 			.map_mut(|x| x.as_any_mut().downcast_mut().unwrap());
 
 		storage
