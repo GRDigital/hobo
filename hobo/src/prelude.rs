@@ -12,7 +12,6 @@ pub use crate::{
 	query::{Query, With},
 	resource::{DefaultResource, Resource},
 	signals_ext::{SignalExt2, SignalMapExt2, SignalVecExt2},
-	state,
 	storage::{DynStorage, Storage},
 	web_str, MarkClassString,
 };

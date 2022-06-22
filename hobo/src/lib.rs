@@ -14,7 +14,6 @@ mod racy_cell;
 /// resources are globally-accessible components
 pub mod resource;
 pub mod signals_ext;
-#[doc(hidden)] pub mod state;
 mod storage;
 mod style_storage;
 pub mod web_str;
