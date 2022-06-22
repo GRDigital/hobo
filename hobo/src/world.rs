@@ -3,34 +3,27 @@ use crate::prelude::*;
 use crate::{
 	create,
 	element::Classes,
-	racy_cell::RacyCell,
 	storage::{SimpleStorage, StorageGuard},
 	style_storage::{StyleStorage, STYLE_STORAGE},
 	StorageRef, StorageRefMut,
 };
 use once_cell::sync::Lazy;
-use owning_ref::{OwningHandle, OwningRef, OwningRefMut};
+use owning_ref::{OwningRef, OwningRefMut};
 use std::{
 	any::TypeId,
 	cell::RefCell,
 	collections::{BTreeSet, HashMap},
-	rc::Rc,
+	sync::atomic::{AtomicU64, Ordering},
 };
 use sugars::hash;
 
-type StorageRc = Rc<RefCell<Box<dyn DynStorage>>>;
-
-// super turbo unsafe and dangerous, in debug checked at runtime via a global scope pseudo-refcell refcount
-// worth it tho since it's being constantly hit and wrapping everything in RefCells introduces a nontrivial perf cost
-// but also convenience/efficiency cost since you don't actually get a reference from a RefCell
-#[cfg(debug_assertions)] pub(crate) static WORLD_BORROWED: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
-#[cfg(debug_assertions)] pub(crate) static WORLD_BORROWED_MUT: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
-pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
+pub(crate) static WORLD: Lazy<World> = Lazy::new(|| {
 	let mut world = World::default();
-	world.next_entity = 1;
+	world.next_entity = AtomicU64::new(1);
+	world.component_ownership.borrow_mut().insert(Entity::root(), BTreeSet::default());
 
 	{
-		fn update_classes(storage: &mut SimpleStorage<Classes>, world: &mut World, entity: Entity) {
+		fn update_classes(storage: &mut SimpleStorage<Classes>, world: &World, entity: Entity) {
 			use std::fmt::Write;
 
 			let mut res = String::new();
@@ -62,125 +55,90 @@ pub(crate) static WORLD: Lazy<RacyCell<World>> = Lazy::new(|| RacyCell::new({
 		classes.on_modified = Some(update_classes);
 	}
 
-	create::register_handlers(&mut world);
+	create::register_handlers(&world);
 
 	world
-}));
+});
 
-// @Awpteamoose: I think this could have all members as non-cells and the World itself can be in a cell
-// since in practice it turns out that WORLD isn't used, most methods are instead more conveniently called from AsEntity or smth
-// maybe World doesn't even have to be pub
+// @Awpteamoose: maybe World doesn't even have to be pub
 #[derive(Default)]
 pub struct World {
-	pub(crate) storages: HashMap<TypeId, StorageRc>,
+	pub(crate) storages: elsa::FrozenMap<TypeId, &'static RefCell<Box<dyn DynStorage>>>,
 	// this is used to remove components for when an entity has been removed
-	pub(crate) component_ownership: HashMap<Entity, BTreeSet<TypeId>>,
-	next_entity: u64,
-	alive_entities: BTreeSet<Entity>,
+	pub(crate) component_ownership: RefCell<HashMap<Entity, BTreeSet<TypeId>>>,
+	next_entity: AtomicU64,
 }
 
+// safe because js is single-threaded (for now)
+unsafe impl Send for World {}
+unsafe impl Sync for World {}
+
 impl World {
-	#[doc(hidden)]
-	#[inline]
-	pub fn is_marked_borrow_mut() -> bool {
-		#[cfg(debug_assertions)]
-		return WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed);
-
-		#[cfg(not(debug_assertions))]
-		return false;
-	}
-
-	#[track_caller]
-	#[inline]
-	pub(crate) fn mark_borrow() {
-		#[cfg(debug_assertions)] {
-			if WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to borrow World while it's mutably borrowed") }
-			WORLD_BORROWED.store(WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) + 1, std::sync::atomic::Ordering::Relaxed);
+	pub(crate) fn dyn_storage<Component: 'static>(&self) -> std::cell::Ref<'static, Box<dyn DynStorage>> {
+		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.borrow()) {
+			storage
+		} else {
+			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
+			let storage: &'static _ = Box::leak(Box::new(storage));
+			self.storages.insert(TypeId::of::<Component>(), storage);
+			storage.borrow()
 		}
 	}
 
-	#[track_caller]
-	#[inline]
-	pub(crate) fn unmark_borrow() {
-		#[cfg(debug_assertions)] {
-			if WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to return borrow World but it's mutably borrowed") }
-			if WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) == 0 { panic!("trying to return borrow World but it's not borrowed") }
-			WORLD_BORROWED.store(WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) - 1, std::sync::atomic::Ordering::Relaxed);
+	pub(crate) fn dyn_storage_mut<Component: 'static>(&self) -> std::cell::RefMut<'static, Box<dyn DynStorage>> {
+		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.borrow_mut()) {
+			storage
+		} else {
+			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
+			let storage: &'static _ = Box::leak(Box::new(storage));
+			self.storages.insert(TypeId::of::<Component>(), storage);
+			storage.borrow_mut()
 		}
 	}
 
-	#[doc(hidden)]
-	#[track_caller]
-	#[inline]
-	pub fn mark_borrow_mut() {
-		#[cfg(debug_assertions)] {
-			if WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) > 0 { panic!("trying to mutably borrow World while it's already got a borrow") }
-			if WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to mutably borrow World while it's mutably borrowed") }
-			WORLD_BORROWED_MUT.store(true, std::sync::atomic::Ordering::Relaxed);
-		}
-	}
-
-	#[doc(hidden)]
-	#[track_caller]
-	#[inline]
-	pub fn unmark_borrow_mut() {
-		#[cfg(debug_assertions)] {
-			if WORLD_BORROWED.load(std::sync::atomic::Ordering::Relaxed) > 0 { panic!("trying to return mutable borrow World but it's got a borrow") }
-			if !WORLD_BORROWED_MUT.load(std::sync::atomic::Ordering::Relaxed) { panic!("trying to return mutable borrow World but it's not mutably borrowed") }
-			WORLD_BORROWED_MUT.store(false, std::sync::atomic::Ordering::Relaxed);
-		}
-	}
-
-	pub(crate) fn dyn_storage<Component: 'static>(&mut self) -> Rc<RefCell<Box<dyn DynStorage>>> {
-		Rc::clone(self.storages
-			.entry(TypeId::of::<Component>())
-			.or_insert_with(|| Rc::new(RefCell::new(Box::new(SimpleStorage::<Component>::default())))))
-	}
-
-	pub fn storage_mut<Component: 'static>(&mut self) -> StorageGuard<Component, StorageRefMut<Component>> {
-		let storage = OwningRefMut::new(OwningHandle::new_mut(self.dyn_storage::<Component>()))
+	pub fn storage_mut<Component: 'static>(&self) -> StorageGuard<Component, StorageRefMut<Component>> {
+		let storage = OwningRefMut::new(self.dyn_storage_mut::<Component>())
 			.map_mut(|x| x.as_any_mut().downcast_mut().unwrap());
 		StorageGuard(self, Some(storage))
 	}
 
-	pub fn storage<Component: 'static>(&mut self) -> StorageRef<Component> {
-		OwningRef::new(OwningHandle::new(self.dyn_storage::<Component>()))
+	pub fn storage<Component: 'static>(&self) -> StorageRef<Component> {
+		OwningRef::new(self.dyn_storage::<Component>())
 			.map(|x| x.as_any().downcast_ref().unwrap())
 	}
 
-	pub fn register_resource<T: 'static>(&mut self, resource: T) { self.storage_mut().add(Entity::root(), resource); }
+	pub fn register_resource<T: 'static>(&self, resource: T) { self.storage_mut().add(Entity::root(), resource); }
 
-	// resources are just components attached to Entity(0, 0)
-	pub fn resource<T: 'static>(&mut self) -> OwningRef<StorageRef<T>, T> {
+	// resources are just components attached to Entity(0)
+	pub fn resource<T: 'static>(&self) -> OwningRef<StorageRef<T>, T> {
 		OwningRef::new(self.storage()).map(|x| x.get(Entity::root()).unwrap())
 	}
 
-	pub fn resource_mut<T: 'static>(&mut self) -> OwningRefMut<StorageGuard<T, StorageRefMut<T>>, T> {
+	pub fn resource_mut<T: 'static>(&self) -> OwningRefMut<StorageGuard<T, StorageRefMut<T>>, T> {
 		OwningRefMut::new(self.storage_mut()).map_mut(|x| x.get_mut(Entity::root()).unwrap())
 	}
 
-	pub fn resource_exists<T: 'static>(&mut self) -> bool {
+	pub fn resource_exists<T: 'static>(&self) -> bool {
 		self.storage::<T>().has(Entity::root())
 	}
 
-	pub fn try_resource<T: 'static>(&mut self) -> Option<OwningRef<StorageRef<T>, T>> {
+	pub fn try_resource<T: 'static>(&self) -> Option<OwningRef<StorageRef<T>, T>> {
 		if !self.storage::<T>().has(Entity::root()) { return None; }
 		Some(OwningRef::new(self.storage()).map(|x| x.get(Entity::root()).unwrap()))
 	}
 
-	pub fn try_resource_mut<T: 'static>(&mut self) -> Option<OwningRefMut<StorageGuard<T, StorageRefMut<T>>, T>> {
+	pub fn try_resource_mut<T: 'static>(&self) -> Option<OwningRefMut<StorageGuard<T, StorageRefMut<T>>, T>> {
 		if !self.storage::<T>().has(Entity::root()) { return None; }
 		Some(OwningRefMut::new(self.storage_mut()).map_mut(|x| x.get_mut(Entity::root()).unwrap()))
 	}
 
-	pub fn new_entity(&mut self) -> Entity {
-		let entity = Entity(self.next_entity);
-		self.next_entity += 1;
-		self.alive_entities.insert(entity);
+	pub fn new_entity(&self) -> Entity {
+		let entity = Entity(self.next_entity.fetch_add(1, Ordering::Relaxed));
+		self.component_ownership.borrow_mut().insert(entity, BTreeSet::default());
 		entity
 	}
 
-	pub fn remove_entity(&mut self, entity: impl AsEntity) {
+	pub fn remove_entity(&self, entity: impl AsEntity) {
 		let entity = entity.as_entity();
 		if self.is_dead(entity) {
 			log::warn!("remove entity already dead {:?}", entity);
@@ -192,8 +150,6 @@ impl World {
 			for child in children { self.remove_entity(child); }
 		}
 
-		self.alive_entities.remove(&entity);
-
 		let parent = self.storage::<Parent>().get(entity).copied();
 		if let Some(parent) = parent {
 			let mut children_store = self.storage_mut::<Children>();
@@ -203,31 +159,16 @@ impl World {
 			}
 		}
 
-		if let Some(component_ids) = self.component_ownership.remove(&entity) {
-			for component_id in component_ids {
-				let storage = Rc::clone(&self.storages[&component_id]);
-				let mut storage = storage.try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. remove");
-				storage.dyn_remove(entity);
-				storage.flush(self);
-			}
+		let components = self.component_ownership.borrow_mut().remove(&entity).unwrap();
+		for component_id in components {
+			let mut storage = self.storages.map_get(&component_id, |x| x.try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. remove")).unwrap();
+			storage.dyn_remove(entity);
+			storage.flush(self);
 		}
 	}
 
 	pub fn is_dead(&self, entity: impl AsEntity) -> bool {
 		let entity = entity.as_entity();
-		!self.alive_entities.contains(&entity)
+		!self.component_ownership.borrow().contains_key(&entity)
 	}
-}
-
-pub struct WorldMut(pub(crate) &'static mut World);
-impl AsRef<World> for WorldMut {
-	fn as_ref(&self) -> &World { &self.0 }
-}
-
-impl AsMut<World> for WorldMut {
-	fn as_mut(&mut self) -> &mut World { &mut self.0 }
-}
-
-impl Drop for WorldMut {
-	fn drop(&mut self) { World::unmark_borrow_mut(); }
 }

@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet};
 pub trait DynStorage: as_any::AsAny {
 	fn dyn_has(&self, entity: Entity) -> bool;
 	fn dyn_remove(&mut self, entity: Entity);
-	fn flush(&mut self, world: &mut World);
+	fn flush(&mut self, world: &World);
 }
 
 pub trait Storage<Component: 'static>: DynStorage {
@@ -29,9 +29,9 @@ pub struct SimpleStorage<Component: 'static> {
 	pub modified: HashSet<Entity>,
 	pub removed: HashSet<Entity>,
 
-	pub on_added: Option<fn(&mut SimpleStorage<Component>, &mut World, Entity)>,
-	pub on_modified: Option<fn(&mut SimpleStorage<Component>, &mut World, Entity)>,
-	pub on_removed: Option<fn(&mut SimpleStorage<Component>, &mut World, Entity, Component)>,
+	pub on_added: Option<fn(&mut SimpleStorage<Component>, &World, Entity)>,
+	pub on_modified: Option<fn(&mut SimpleStorage<Component>, &World, Entity)>,
+	pub on_removed: Option<fn(&mut SimpleStorage<Component>, &World, Entity, Component)>,
 }
 
 impl<Component> Default for SimpleStorage<Component> {
@@ -64,14 +64,15 @@ impl<Component: 'static> DynStorage for SimpleStorage<Component> {
 		}
 	}
 
-	fn flush(&mut self, world: &mut World) {
-		for &added in &self.added {
-			world.component_ownership.entry(added).or_default().insert(std::any::TypeId::of::<Component>());
+	fn flush(&mut self, world: &World) {
+		for added in &self.added {
+			world.component_ownership.borrow_mut().get_mut(added).unwrap().insert(std::any::TypeId::of::<Component>());
 		}
 
 		for removed in &self.removed {
-			if let Some(components) = world.component_ownership.get_mut(removed) {
-				components.remove(&std::any::TypeId::of::<Component>());
+			// won't be present if entity was deleted
+			if let Some(ownership) = world.component_ownership.borrow_mut().get_mut(removed) {
+				ownership.remove(&std::any::TypeId::of::<Component>());
 			}
 		}
 
@@ -151,7 +152,7 @@ impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 	}
 }
 
-pub struct StorageGuard<'a, Component: 'static, Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>>(pub &'a mut World, pub Option<Inner>);
+pub struct StorageGuard<'a, Component: 'static, Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>>(pub &'a World, pub Option<Inner>);
 unsafe impl<'a, Component: 'static, Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>> owning_ref::StableAddress for StorageGuard<'a, Component, Inner> {}
 
 impl<'a, Component, Inner> std::ops::Deref for StorageGuard<'a, Component, Inner> where

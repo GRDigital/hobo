@@ -1,4 +1,4 @@
-use crate::{prelude::*, RacyCell};
+use crate::{prelude::*, racy_cell::RacyCell};
 use once_cell::sync::Lazy;
 use std::collections::{HashMap, HashSet};
 use sugars::hmap;
@@ -69,7 +69,7 @@ impl StyleStorage {
 		let id = hash!(style);
 
 		// recover class name
-		let class = format!("s-{:x}", id);
+		let class = format!("s-{id:x}");
 
 		// check if style exists in cache, in which case it's already inserted - just return class name
 		if self.inserted_style_hashes.contains(&id) { return class; }

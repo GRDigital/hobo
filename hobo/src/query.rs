@@ -34,14 +34,15 @@ use std::collections::BTreeSet;
 pub trait Query {
 	type Fetch;
 
-	fn filter(world: &mut World, entities: &mut Option<BTreeSet<Entity>>) {}
-	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch;
+	// either populate `entities` if it's None or filter out all entities not satisfying the predicate (like having a particular component)
+	fn filter(world: &World, entities: &mut Option<BTreeSet<Entity>>) {}
+	fn fetch(world: &World, entity: Entity) -> Self::Fetch;
 }
 
 impl Query for Entity {
 	type Fetch = Entity;
 
-	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch { entity }
+	fn fetch(world: &World, entity: Entity) -> Self::Fetch { entity }
 }
 
 // same search as &Component, but fetch is a noop
@@ -49,15 +50,15 @@ pub struct With<Component: 'static>(std::marker::PhantomData<Component>);
 impl<Component: 'static> Query for With<Component> {
 	type Fetch = ();
 
-	fn filter(world: &mut World, entities: &mut Option<BTreeSet<Entity>>) { <&Component as Query>::filter(world, entities); }
+	fn filter(world: &World, entities: &mut Option<BTreeSet<Entity>>) { <&Component as Query>::filter(world, entities); }
 
-	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {}
+	fn fetch(world: &World, entity: Entity) -> Self::Fetch {}
 }
 
 impl<Component: 'static> Query for &Component {
 	type Fetch = OwningRef<Box<dyn owning_ref::Erased>, Component>;
 
-	fn filter(world: &mut World, entities: &mut Option<BTreeSet<Entity>>) {
+	fn filter(world: &World, entities: &mut Option<BTreeSet<Entity>>) {
 		let storage = world.storage::<Component>();
 		if let Some(entities) = entities {
 			entities.retain(|entity| storage.has(entity));
@@ -66,8 +67,8 @@ impl<Component: 'static> Query for &Component {
 		}
 	}
 
-	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {
-		let storage: StorageRef<Component> = OwningRef::new(OwningHandle::new(world.dyn_storage::<Component>()))
+	fn fetch(world: &World, entity: Entity) -> Self::Fetch {
+		let storage: StorageRef<Component> = OwningRef::new(world.dyn_storage::<Component>())
 			.map(|x| x.as_any().downcast_ref().unwrap());
 
 		storage
@@ -79,10 +80,10 @@ impl<Component: 'static> Query for &Component {
 impl<Component: 'static> Query for &mut Component {
 	type Fetch = OwningRefMut<Box<dyn owning_ref::Erased>, Component>;
 
-	fn filter(world: &mut World, entities: &mut Option<BTreeSet<Entity>>) { <&Component as Query>::filter(world, entities); }
+	fn filter(world: &World, entities: &mut Option<BTreeSet<Entity>>) { <&Component as Query>::filter(world, entities); }
 
-	fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {
-		let storage: StorageRefMut<Component> = OwningRefMut::new(OwningHandle::new_mut(world.dyn_storage::<Component>()))
+	fn fetch(world: &World, entity: Entity) -> Self::Fetch {
+		let storage: StorageRefMut<Component> = OwningRefMut::new(world.dyn_storage_mut::<Component>())
 			.map_mut(|x| x.as_any_mut().downcast_mut().unwrap());
 
 		storage
@@ -97,11 +98,11 @@ macro_rules! impl_for_tuples {
 		impl<$($old: Query,)* $curr: Query> Query for ($($old,)* $curr) {
 			type Fetch = ($($old::Fetch,)* $curr::Fetch);
 
-			fn filter(world: &mut World, entities: &mut Option<BTreeSet<Entity>>) {
+			fn filter(world: &World, entities: &mut Option<BTreeSet<Entity>>) {
 				$($old::filter(world, entities);)*
 				$curr::filter(world, entities);
 			}
-			fn fetch(world: &mut World, entity: Entity) -> Self::Fetch {
+			fn fetch(world: &World, entity: Entity) -> Self::Fetch {
 				($($old::fetch(world, entity),)* $curr::fetch(world, entity))
 			}
 		}
