@@ -28,7 +28,7 @@
 #![allow(unused_variables)]
 
 use crate::{prelude::*, StorageRef, StorageRefMut};
-use owning_ref::{OwningHandle, OwningRef, OwningRefMut};
+use owning_ref::{OwningRef, OwningRefMut};
 use std::collections::BTreeSet;
 
 pub trait Query {
