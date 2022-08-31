@@ -11,13 +11,13 @@ pub enum EventHandlerCallback {
 	TouchEvent(Closure<dyn FnMut(web_sys::TouchEvent) + 'static>),
 	WheelEvent(Closure<dyn FnMut(web_sys::WheelEvent) + 'static>),
 	UiEvent(Closure<dyn FnMut(web_sys::UiEvent) + 'static>),
+	DragEvent(Closure<dyn FnMut(web_sys::DragEvent) + 'static>),
 
 	// AnimationEvent
 	// AnimationPlaybackEvent
 	// DeviceMotionEvent
 	// DeviceOrientationEvent
 	// DeviceProximityEvent
-	// DragEvent
 	// ErrorEvent
 	// ExtendableEvent
 	// ExtendableMessageEvent
@@ -105,6 +105,7 @@ impl Drop for EventHandler {
 			EventHandlerCallback::TouchEvent(cb) => cb.as_ref().unchecked_ref(),
 			EventHandlerCallback::WheelEvent(cb) => cb.as_ref().unchecked_ref(),
 			EventHandlerCallback::UiEvent(cb) => cb.as_ref().unchecked_ref(),
+			EventHandlerCallback::DragEvent(cb) => cb.as_ref().unchecked_ref(),
 		});
 		if let Err(_e) = res {
 			// TODO?
@@ -183,4 +184,5 @@ generate_events! {
 	WheelEvent,    wheel,       on_wheel;
 	Event,         load,        on_load;
 	Event,         canplay,     on_can_play;
+	DragEvent,     drag,        on_drag;
 }
