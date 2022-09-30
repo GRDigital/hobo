@@ -49,6 +49,42 @@ use sugars::hash;
 // test shit ffs
 // could? remove all *_mut elements and specify whether you want mutable or immutable component with the same trick as in Query
 
+#[cfg(debug_assertions)]
+pub mod backtrace {
+	use super::*;
+	use std::{
+		collections::{HashMap, BTreeMap},
+		cell::RefCell,
+		panic::Location,
+	};
+	use once_cell::sync::Lazy;
+	use shrinkwraprs::Shrinkwrap;
+	
+	pub static STORAGE_MAP: Lazy<BacktraceStorage> = Lazy::new(Default::default);
+
+	#[repr(transparent)]
+	#[derive(Debug, Default)]
+	pub struct BacktraceStorage<'a>(pub RefCell<HashMap<TypeId, LocationMap<'a>>>);
+
+	unsafe impl Send for BacktraceStorage<'_> {}
+	unsafe impl Sync for BacktraceStorage<'_> {}
+
+	#[repr(transparent)]
+	#[derive(Debug, Default, Shrinkwrap)]
+	#[shrinkwrap(mutable)]
+	pub struct LocationMap<'a>(pub BTreeMap<Location<'a>, bool>);
+
+	impl<'a> std::fmt::Display for LocationMap<'a> {
+		fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+			for (location, mutable) in self.iter().rev() {
+				// pretty offset
+				writeln!(f, "{:>5} {}", if *mutable { "(mut)" } else { "" }, location)?;
+			};
+			Ok(())
+		}
+	}
+}
+
 // this is not necessary, but it makes it convenient to further remap to some OwningRef or whatever
 type StorageRef<'a, Component> = OwningRef<Ref<'a, Box<dyn storage::DynStorage>>, SimpleStorage<Component>>;
 type StorageRefMut<'a, Component> = OwningRefMut<RefMut<'a, Box<dyn storage::DynStorage>>, SimpleStorage<Component>>;
