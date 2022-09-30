@@ -154,12 +154,13 @@ impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 		self.data.get_mut(&entity).unwrap()
 	}
 }
-// add location make real struct
+
 pub struct StorageGuard<Component: 'static, Inner: std::ops::Deref<Target = SimpleStorage<Component>>> {
 	pub inner: Option<Inner>,
 	#[cfg(debug_assertions)]
 	pub location: std::panic::Location<'static>,
 }
+
 pub struct StorageGuardMut<'a, Component: 'static, Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>> {
 	pub world: &'a World,
 	pub inner: Option<Inner>,
