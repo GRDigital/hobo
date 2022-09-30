@@ -127,7 +127,7 @@ impl World {
 	#[track_caller]
 	pub(crate) fn dyn_storage_mut<Component: 'static>(&self) -> std::cell::RefMut<'static, Box<dyn DynStorage>> {
 		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.borrow_mut()) {
-			storage.unwrap()
+			storage
 		} else {
 			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
 			let storage: &'static _ = Box::leak(Box::new(storage));
