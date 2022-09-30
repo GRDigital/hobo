@@ -188,7 +188,6 @@ impl<Component, Inner> Drop for StorageGuard<Component, Inner> where
 		let StorageGuard { location, .. } = self;
 		crate::backtrace::STORAGE_MAP.0.borrow_mut()
 			.entry(std::any::TypeId::of::<Component>())
-			// .entry(type_name::<Component>().to_owned())
 			.and_modify(|map| { map.remove(location); });
 	}
 }

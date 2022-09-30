@@ -143,7 +143,6 @@ impl World {
 		#[cfg(debug_assertions)]
 		crate::backtrace::STORAGE_MAP.0.borrow_mut()
 			.entry(TypeId::of::<Component>())
-			// .entry(std::any::type_name::<Component>().to_owned())
 			.or_default()
 			.insert(*std::panic::Location::caller(), false);
 
@@ -162,7 +161,6 @@ impl World {
 		#[cfg(debug_assertions)]
 		crate::backtrace::STORAGE_MAP.0.borrow_mut()
 			.entry(TypeId::of::<Component>())
-			// .entry(std::any::type_name::<Component>().to_owned())
 			.or_default()
 			.insert(*std::panic::Location::caller(), true);
 
