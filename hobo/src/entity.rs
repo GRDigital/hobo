@@ -21,8 +21,7 @@ pub trait AsEntity {
 		if !storage.has(entity) {
 			return None;
 		}
-		let res = Some(OwningRef::new(storage).map(|x| x.get(entity).unwrap()));
-		res
+		Some(OwningRef::new(storage).map(|x| x.get(entity).unwrap()))
 	}
 	#[inline]
 	#[track_caller]
@@ -31,27 +30,23 @@ pub trait AsEntity {
 		if !WORLD.storage::<C>().has(entity) {
 			return None;
 		}
-		let res = Some(OwningRefMut::new(WORLD.storage_mut::<C>()).map_mut(|x| x.get_mut(entity).unwrap()));
-		res
+		Some(OwningRefMut::new(WORLD.storage_mut::<C>()).map_mut(|x| x.get_mut(entity).unwrap()))
 	}
 
 	#[inline]
 	#[track_caller]
 	fn get_cmp<'a, C: 'static>(&self) -> OwningRef<StorageGuard<C, StorageRef<'a, C>>, C> where Self: Sized {
-		let res = OwningRef::new(WORLD.storage::<C>()).try_map(|x| x.get(self).ok_or_else(|| type_name::<C>())).expect("entity does not have component");
-		res
+		OwningRef::new(WORLD.storage::<C>()).try_map(|x| x.get(self).ok_or_else(|| type_name::<C>())).expect("entity does not have component")
 	}
 	#[inline]
 	#[track_caller]
 	fn get_cmp_mut<'a, C: 'static>(&self) -> OwningRefMut<StorageGuardMut<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
-		let res = OwningRefMut::new(WORLD.storage_mut::<C>()).try_map_mut(|x| x.get_mut(self).ok_or_else(|| type_name::<C>())).expect("entity does not have component");
-		res
+		OwningRefMut::new(WORLD.storage_mut::<C>()).try_map_mut(|x| x.get_mut(self).ok_or_else(|| type_name::<C>())).expect("entity does not have component")
 	}
 	#[inline]
 	#[track_caller]
 	fn get_cmp_mut_or<'a, C: 'static>(&self, f: impl FnOnce() -> C) -> OwningRefMut<StorageGuardMut<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
-		let res = OwningRefMut::new(WORLD.storage_mut::<C>()).map_mut(move |x| x.get_mut_or(self, f));
-		res
+		OwningRefMut::new(WORLD.storage_mut::<C>()).map_mut(move |x| x.get_mut_or(self, f))
 	}
 	#[inline]
 	#[track_caller]
@@ -67,14 +62,12 @@ pub trait AsEntity {
 	fn find_in_ancestors<Q: query::Query>(&self) -> Vec<Q::Fetch> {
 		let mut entities = Some(Parent::ancestors(self.as_entity()).into_iter().collect());
 		Q::filter(&WORLD, &mut entities);
-		let res = entities.unwrap_or_default().into_iter().map(|entity| Q::fetch(&WORLD, entity)).collect::<Vec<_>>();
-		res
+		entities.unwrap_or_default().into_iter().map(|entity| Q::fetch(&WORLD, entity)).collect::<Vec<_>>()
 	}
 	fn try_find_first_in_ancestors<Q: query::Query>(&self) -> Option<Q::Fetch> {
 		let mut entities = Some(Parent::ancestors(self.as_entity()).into_iter().collect());
 		Q::filter(&WORLD, &mut entities);
-		let res = entities.unwrap_or_default().into_iter().next().map(|e| Q::fetch(&WORLD, e));
-		res
+		entities.unwrap_or_default().into_iter().next().map(|e| Q::fetch(&WORLD, e))
 	}
 	#[inline]
 	#[track_caller]
@@ -82,26 +75,22 @@ pub trait AsEntity {
 	fn find_in_descendants<Q: query::Query>(&self) -> Vec<Q::Fetch> {
 		let mut entities = Some(Children::descendants(self.as_entity()).into_iter().collect());
 		Q::filter(&WORLD, &mut entities);
-		let res = entities.unwrap_or_default().into_iter().map(|entity| Q::fetch(&WORLD, entity)).collect::<Vec<_>>();
-		res
+		entities.unwrap_or_default().into_iter().map(|entity| Q::fetch(&WORLD, entity)).collect::<Vec<_>>()
 	}
 	fn find_in_children<Q: query::Query>(&self) -> Vec<Q::Fetch> {
 		let mut entities = Some(self.as_entity().try_get_cmp::<Children>().map_or_else(default, |x| x.0.iter().copied().collect()));
 		Q::filter(&WORLD, &mut entities);
-		let res = entities.unwrap_or_default().into_iter().map(|entity| Q::fetch(&WORLD, entity)).collect::<Vec<_>>();
-		res
+		entities.unwrap_or_default().into_iter().map(|entity| Q::fetch(&WORLD, entity)).collect::<Vec<_>>()
 	}
 	fn try_find_first_in_descendants<Q: query::Query>(&self) -> Option<Q::Fetch> {
 		let mut entities = Some(Children::descendants(self.as_entity()).into_iter().collect());
 		Q::filter(&WORLD, &mut entities);
-		let res = entities.unwrap_or_default().into_iter().next().map(|e| Q::fetch(&WORLD, e));
-		res
+		entities.unwrap_or_default().into_iter().next().map(|e| Q::fetch(&WORLD, e))
 	}
 	fn try_find_first_in_children<Q: query::Query>(&self) -> Option<Q::Fetch> {
 		let mut entities = Some(self.as_entity().try_get_cmp::<Children>().map_or_else(default, |x| x.0.iter().copied().collect()));
 		Q::filter(&WORLD, &mut entities);
-		let res = entities.unwrap_or_default().into_iter().next().map(|e| Q::fetch(&WORLD, e));
-		res
+		entities.unwrap_or_default().into_iter().next().map(|e| Q::fetch(&WORLD, e))
 	}
 	#[inline]
 	#[track_caller]

@@ -222,7 +222,7 @@ impl<'a, Component, Inner> Drop for StorageGuardMut<'a, Component, Inner> where
 		let type_id = std::any::TypeId::of::<Component>();
 		let type_name = type_name::<Component>().to_owned();
 		crate::backtrace::STORAGE_MAP.0.borrow_mut()
-			.entry(type_id.clone())
+			.entry(type_id)
 			.and_modify(|map| { 
 				if map.len() > 1 {
 					panic!(

@@ -113,16 +113,14 @@ impl<T: 'static> T {
 pub fn find<Q: query::Query>() -> Vec<Q::Fetch> {
 	let mut entities = None;
 	Q::filter(&WORLD, &mut entities);
-	let res = entities.unwrap_or_default().into_iter().map(|entity| Q::fetch(&WORLD, entity)).collect::<Vec<_>>();
-	res
+	entities.unwrap_or_default().into_iter().map(|entity| Q::fetch(&WORLD, entity)).collect::<Vec<_>>()
 }
 
 /// Find one entity matching a query if there is one
 pub fn try_find_one<Q: query::Query>() -> Option<Q::Fetch> {
 	let mut entities = None;
 	Q::filter(&WORLD, &mut entities);
-	let res = entities.unwrap_or_default().into_iter().next().map(|entity| Q::fetch(&WORLD, entity));
-	res
+	entities.unwrap_or_default().into_iter().next().map(|entity| Q::fetch(&WORLD, entity))
 }
 
 /// Find one entity matching a query, panic otherwise
