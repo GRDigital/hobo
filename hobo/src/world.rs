@@ -74,6 +74,26 @@ unsafe impl Send for World {}
 unsafe impl Sync for World {}
 
 impl World {
+	#[cfg(debug_assertions)]
+	#[track_caller]
+	pub(crate) fn dyn_storage<Component: 'static>(&self) -> std::cell::Ref<'static, Box<dyn DynStorage>> {
+		let caller = std::panic::Location::caller();
+
+		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.try_borrow()) {
+			storage.unwrap_or_else(|e| panic!("'{e}': Immutably borrowed `{}` storage at `{caller}` while a mutable borrow to it already exists:\n\n{}\n",
+				std::any::type_name::<Component>(),
+				crate::backtrace::STORAGE_MAP.0.borrow()[&TypeId::of::<Component>()]
+			))
+		} else {
+			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
+			let storage: &'static _ = Box::leak(Box::new(storage));
+			self.storages.insert(TypeId::of::<Component>(), storage);
+			storage.borrow()
+		}
+	}
+
+	#[cfg(not(debug_assertions))]
+	#[track_caller]
 	pub(crate) fn dyn_storage<Component: 'static>(&self) -> std::cell::Ref<'static, Box<dyn DynStorage>> {
 		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.borrow()) {
 			storage
@@ -85,9 +105,16 @@ impl World {
 		}
 	}
 
+	#[cfg(debug_assertions)]
+	#[track_caller]
 	pub(crate) fn dyn_storage_mut<Component: 'static>(&self) -> std::cell::RefMut<'static, Box<dyn DynStorage>> {
-		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.borrow_mut()) {
-			storage
+		let caller = std::panic::Location::caller();
+
+		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.try_borrow_mut()) {
+			storage.unwrap_or_else(|e| panic!("'{e}': Mutably borrowed `{}` storage at `{caller}` while other borrows to it already exist:\n\n{}\n",
+				std::any::type_name::<Component>(),
+				crate::backtrace::STORAGE_MAP.0.borrow()[&TypeId::of::<Component>()]
+			))
 		} else {
 			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
 			let storage: &'static _ = Box::leak(Box::new(storage));
@@ -96,15 +123,58 @@ impl World {
 		}
 	}
 
-	pub fn storage_mut<Component: 'static>(&self) -> StorageGuard<Component, StorageRefMut<Component>> {
-		let storage = OwningRefMut::new(self.dyn_storage_mut::<Component>())
-			.map_mut(|x| x.as_any_mut().downcast_mut().unwrap());
-		StorageGuard(self, Some(storage))
+	#[cfg(not(debug_assertions))]
+	#[track_caller]
+	pub(crate) fn dyn_storage_mut<Component: 'static>(&self) -> std::cell::RefMut<'static, Box<dyn DynStorage>> {
+		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.borrow_mut()) {
+			storage.unwrap()
+		} else {
+			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
+			let storage: &'static _ = Box::leak(Box::new(storage));
+			self.storages.insert(TypeId::of::<Component>(), storage);
+			storage.borrow_mut()
+		}
 	}
 
-	pub fn storage<Component: 'static>(&self) -> StorageRef<Component> {
-		OwningRef::new(self.dyn_storage::<Component>())
-			.map(|x| x.as_any().downcast_ref().unwrap())
+	// INFO: Anything that calls storage or storage_mut should have track_caller.
+	// This is so that the StorageGuard can have accurate location from user-code in debug.
+	#[track_caller]
+	pub fn storage<Component: 'static>(&self) -> StorageGuard<Component, StorageRef<Component>> {
+		#[cfg(debug_assertions)]
+		crate::backtrace::STORAGE_MAP.0.borrow_mut()
+			.entry(TypeId::of::<Component>())
+			// .entry(std::any::type_name::<Component>().to_owned())
+			.or_default()
+			.insert(*std::panic::Location::caller(), false);
+
+		let storage = OwningRef::new(self.dyn_storage::<Component>())
+			.map(|x| x.as_any().downcast_ref().unwrap());
+
+		StorageGuard {
+			inner: Some(storage),
+			#[cfg(debug_assertions)]
+			location: *std::panic::Location::caller()
+		}
+	}
+
+	#[track_caller]
+	pub fn storage_mut<Component: 'static>(&self) -> StorageGuardMut<Component, StorageRefMut<Component>> {
+		#[cfg(debug_assertions)]
+		crate::backtrace::STORAGE_MAP.0.borrow_mut()
+			.entry(TypeId::of::<Component>())
+			// .entry(std::any::type_name::<Component>().to_owned())
+			.or_default()
+			.insert(*std::panic::Location::caller(), true);
+
+		let storage = OwningRefMut::new(self.dyn_storage_mut::<Component>())
+			.map_mut(|x| x.as_any_mut().downcast_mut().unwrap());
+
+		StorageGuardMut {
+			world: self,
+			inner: Some(storage),
+			#[cfg(debug_assertions)]
+			location: *std::panic::Location::caller()
+		}
 	}
 
 	#[track_caller]
