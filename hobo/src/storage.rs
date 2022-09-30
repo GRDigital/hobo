@@ -64,6 +64,9 @@ impl<Component: 'static> DynStorage for SimpleStorage<Component> {
 		}
 	}
 
+	/// On *storage drop* (not component), update component_ownership and trigger added/modified/removed.
+	///
+	/// We get storage -> we add/remove/modify a component -> storage gets dropped -> flush updates
 	fn flush(&mut self, world: &World) {
 		for added in &self.added {
 			world.component_ownership.borrow_mut().get_mut(added).unwrap().insert(std::any::TypeId::of::<Component>());
