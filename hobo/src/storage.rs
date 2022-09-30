@@ -186,10 +186,9 @@ impl<Component, Inner> Drop for StorageGuard<Component, Inner> where
 	Inner: std::ops::Deref<Target = SimpleStorage<Component>>,
 {
 	fn drop(&mut self) {
-		let StorageGuard { location, .. } = self;
 		crate::backtrace::STORAGE_MAP.0.borrow_mut()
 			.entry(std::any::TypeId::of::<Component>())
-			.and_modify(|map| { map.remove(location); });
+			.and_modify(|map| { map.remove(&self.location); });
 	}
 }
 
