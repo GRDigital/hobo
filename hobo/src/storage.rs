@@ -156,7 +156,7 @@ impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 }
 
 pub struct StorageGuard<Component: 'static, Inner: std::ops::Deref<Target = SimpleStorage<Component>>> {
-	pub inner: Option<Inner>,
+	pub inner: Inner,
 	#[cfg(debug_assertions)]
 	pub location: std::panic::Location<'static>,
 }
@@ -177,7 +177,7 @@ impl<Component, Inner> std::ops::Deref for StorageGuard<Component, Inner> where
 {
 	type Target = SimpleStorage<Component>;
 
-	fn deref(&self) -> &Self::Target { self.inner.as_ref().unwrap() }
+	fn deref(&self) -> &Self::Target { &self.inner }
 }
 
 #[cfg(debug_assertions)]

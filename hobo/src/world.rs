@@ -150,7 +150,7 @@ impl World {
 			.map(|x| x.as_any().downcast_ref().unwrap());
 
 		StorageGuard {
-			inner: Some(storage),
+			inner: storage,
 			#[cfg(debug_assertions)]
 			location: *std::panic::Location::caller()
 		}
