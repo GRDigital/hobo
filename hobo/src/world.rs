@@ -80,7 +80,7 @@ impl World {
 		let caller = std::panic::Location::caller();
 
 		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.try_borrow()) {
-			storage.unwrap_or_else(|e| panic!("'{e}': Immutably borrowed `{}` storage at `{caller}` while a mutable borrow to it already exists:\n\n{}\n",
+			storage.unwrap_or_else(|e| panic!("'{e}': Trying to immutably borrow `{}` storage at `{caller}` while a mutable borrow to it already exists:\n\n{}\n",
 				std::any::type_name::<Component>(),
 				crate::backtrace::STORAGE_MAP.0.borrow()[&TypeId::of::<Component>()]
 			))
@@ -111,7 +111,7 @@ impl World {
 		let caller = std::panic::Location::caller();
 
 		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.try_borrow_mut()) {
-			storage.unwrap_or_else(|e| panic!("'{e}': Mutably borrowed `{}` storage at `{caller}` while other borrows to it already exist:\n\n{}\n",
+			storage.unwrap_or_else(|e| panic!("'{e}': Trying to mutably borrow `{}` storage at `{caller}` while other borrows to it already exist:\n\n{}\n",
 				std::any::type_name::<Component>(),
 				crate::backtrace::STORAGE_MAP.0.borrow()[&TypeId::of::<Component>()]
 			))
