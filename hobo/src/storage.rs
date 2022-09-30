@@ -192,8 +192,9 @@ impl<Component, Inner> Drop for StorageGuard<Component, Inner> where
 			.entry(type_id)
 			.and_modify(|map| {
 				assert!(map.values().all(|mutable| !mutable), 
-					"Trying to drop immutably borrowed {} storage while a mutable borrow of it exists. {map:#?}
-					This is a bug in hobo, please report it at `https://github.com/GRDigital/hobo/issues`", 
+					"Trying to drop immutably borrowed {} storage while a mutable borrow of it exists.
+					\n{map}
+					\nThis is a bug in hobo, please report it at `https://github.com/GRDigital/hobo/issues`", 
 					std::any::type_name::<Component>().to_owned(),
 				);
 				map.remove(&self.location);
@@ -232,8 +233,9 @@ impl<'a, Component, Inner> Drop for StorageGuardMut<'a, Component, Inner> where
 			.entry(type_id)
 			.and_modify(|map| { 
 				assert!(map.len() <= 1, 
-					"Trying to drop mutably borrowed {} storage while more than 1 borrow of it exists. {map:#?}
-					This is a bug in hobo, please report it at `https://github.com/GRDigital/hobo/issues`", 
+					"Trying to drop mutably borrowed {} storage while more than 1 borrow of it exists.
+					\n{map}
+					\nThis is a bug in hobo, please report it at `https://github.com/GRDigital/hobo/issues`", 
 					std::any::type_name::<Component>().to_owned(),
 				);
 				map.remove(location);
