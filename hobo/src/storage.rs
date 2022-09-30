@@ -191,7 +191,7 @@ impl<Component, Inner> Drop for StorageGuard<Component, Inner> where
 		crate::backtrace::STORAGE_MAP.0.borrow_mut()
 			.entry(type_id)
 			.and_modify(|map| {
-				assert!(!map.values().any(|x| *x), 
+				assert!(map.values().all(|mutable| !mutable), 
 					"Trying to drop immutably borrowed {} storage while a mutable borrow of it exists. {:#?}
 					This is a bug in hobo, please report it at `https://github.com/GRDigital/hobo/issues`", 
 					std::any::type_name::<Component>().to_owned(),
