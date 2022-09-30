@@ -223,13 +223,11 @@ impl<'a, Component, Inner> Drop for StorageGuardMut<'a, Component, Inner> where
 		crate::backtrace::STORAGE_MAP.0.borrow_mut()
 			.entry(type_id)
 			.and_modify(|map| { 
-				if map.len() > 1 {
-					panic!(
-						"Trying to drop mutably borrowed {type_name} storage while more than 1 borrow of it exists. {:#?}
-						This is a bug in hobo, please report it at `https://github.com/GRDigital/hobo/issues`", 
-						crate::backtrace::STORAGE_MAP.0.borrow_mut().get(&type_id)
-					);
-				}
+				assert!(map.len() > 1, 
+					"Trying to drop mutably borrowed {type_name} storage while more than 1 borrow of it exists. {:#?}
+					This is a bug in hobo, please report it at `https://github.com/GRDigital/hobo/issues`", 
+					crate::backtrace::STORAGE_MAP.0.borrow_mut().get(&type_id)
+				);
 				map.remove(location);
 			});
 
