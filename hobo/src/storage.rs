@@ -1,5 +1,5 @@
 use crate::{prelude::default, AsEntity, Entity, World};
-use std::collections::{HashMap, HashSet};
+use std::{collections::{HashMap, HashSet}, any::type_name};
 
 pub trait DynStorage: as_any::AsAny {
 	fn dyn_has(&self, entity: Entity) -> bool;
@@ -151,34 +151,92 @@ impl<Component: 'static> Storage<Component> for SimpleStorage<Component> {
 		self.data.get_mut(&entity).unwrap()
 	}
 }
+// add location make real struct
+pub struct StorageGuard<Component: 'static, Inner: std::ops::Deref<Target = SimpleStorage<Component>>> {
+	pub inner: Option<Inner>,
+	#[cfg(debug_assertions)]
+	pub location: std::panic::Location<'static>,
+}
+pub struct StorageGuardMut<'a, Component: 'static, Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>> {
+	pub world: &'a World,
+	pub inner: Option<Inner>,
+	#[cfg(debug_assertions)]
+	pub location: std::panic::Location<'static>,
+}
 
-pub struct StorageGuard<'a, Component: 'static, Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>>(pub &'a World, pub Option<Inner>);
-unsafe impl<'a, Component: 'static, Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>> owning_ref::StableAddress for StorageGuard<'a, Component, Inner> {}
+unsafe impl<Component: 'static, Inner: std::ops::Deref<Target = SimpleStorage<Component>>> owning_ref::StableAddress for StorageGuard<Component, Inner> {}
+unsafe impl<'a, Component: 'static, Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>> owning_ref::StableAddress for StorageGuardMut<'a, Component, Inner> {}
 
-impl<'a, Component, Inner> std::ops::Deref for StorageGuard<'a, Component, Inner> where
+impl<Component, Inner> std::ops::Deref for StorageGuard<Component, Inner> where
+	Component: 'static,
+	Inner: std::ops::Deref<Target = SimpleStorage<Component>>,
+{
+	type Target = SimpleStorage<Component>;
+
+	fn deref(&self) -> &Self::Target { self.inner.as_ref().unwrap() }
+}
+
+#[cfg(debug_assertions)]
+impl<Component, Inner> Drop for StorageGuard<Component, Inner> where
+	Component: 'static,
+	Inner: std::ops::Deref<Target = SimpleStorage<Component>>,
+{
+	fn drop(&mut self) {
+		let StorageGuard { location, .. } = self;
+		crate::backtrace::STORAGE_MAP.0.borrow_mut()
+			.entry(std::any::TypeId::of::<Component>())
+			// .entry(type_name::<Component>().to_owned())
+			.and_modify(|map| { map.remove(location); });
+	}
+}
+
+impl<'a, Component, Inner> std::ops::Deref for StorageGuardMut<'a, Component, Inner> where
 	Component: 'static,
 	Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>,
 {
 	type Target = SimpleStorage<Component>;
 
-	fn deref(&self) -> &Self::Target { self.1.as_ref().unwrap() }
+	fn deref(&self) -> &Self::Target { self.inner.as_ref().unwrap() }
 }
 
-impl<'a, Component, Inner> std::ops::DerefMut for StorageGuard<'a, Component, Inner> where
+impl<'a, Component, Inner> std::ops::DerefMut for StorageGuardMut<'a, Component, Inner> where
 	Component: 'static,
 	Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>,
 {
-	fn deref_mut(&mut self) -> &mut Self::Target { self.1.as_mut().unwrap() }
+	fn deref_mut(&mut self) -> &mut Self::Target { self.inner.as_mut().unwrap() }
 }
 
 // dropping StorageGuard should trigger updates of relevant systems
 // right now it's pooling all entities that were involved in changes, additions or removals
-impl<'a, Component, Inner> Drop for StorageGuard<'a, Component, Inner> where
+impl<'a, Component, Inner> Drop for StorageGuardMut<'a, Component, Inner> where
 	Component: 'static,
 	Inner: std::ops::DerefMut<Target = SimpleStorage<Component>>,
 {
+	#[cfg(debug_assertions)]
 	fn drop(&mut self) {
-		let StorageGuard(world, inner) = self;
+		let StorageGuardMut { world, inner, location } = self;
+
+		let type_id = std::any::TypeId::of::<Component>();
+		let type_name = type_name::<Component>().to_owned();
+		crate::backtrace::STORAGE_MAP.0.borrow_mut()
+			.entry(type_id.clone())
+			.and_modify(|map| { 
+				if map.len() > 1 {
+					panic!(
+						"Trying to drop mutably borrowed {type_name} storage while more than 1 borrow of it exists? {:#?}", 
+						crate::backtrace::STORAGE_MAP.0.borrow_mut().get(&type_id)
+					);
+				}
+				map.remove(location);
+			});
+
+		let storage = &mut *inner.take().unwrap();
+		storage.flush(world);
+	}
+
+	#[cfg(not(debug_assertions))]
+	fn drop(&mut self) {
+		let StorageGuardMut { world, inner } = self;
 		let storage = &mut *inner.take().unwrap();
 		storage.flush(world);
 	}

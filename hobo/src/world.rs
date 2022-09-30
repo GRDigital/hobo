@@ -3,7 +3,7 @@ use crate::prelude::*;
 use crate::{
 	create,
 	element::Classes,
-	storage::{SimpleStorage, StorageGuard},
+	storage::{SimpleStorage, StorageGuard, StorageGuardMut},
 	style_storage::{StyleStorage, STYLE_STORAGE},
 	StorageRef, StorageRefMut,
 };
@@ -107,27 +107,33 @@ impl World {
 			.map(|x| x.as_any().downcast_ref().unwrap())
 	}
 
+	#[track_caller]
 	pub fn register_resource<T: 'static>(&self, resource: T) { self.storage_mut().add(Entity::root(), resource); }
 
-	// resources are just components attached to Entity(0)
-	pub fn resource<T: 'static>(&self) -> OwningRef<StorageRef<T>, T> {
+	/// Resources are just components attached to Entity(0)
+	#[track_caller]
+	pub fn resource<T: 'static>(&self) -> OwningRef<StorageGuard<T, StorageRef<T>>, T> {
 		OwningRef::new(self.storage()).map(|x| x.get(Entity::root()).unwrap())
 	}
 
-	pub fn resource_mut<T: 'static>(&self) -> OwningRefMut<StorageGuard<T, StorageRefMut<T>>, T> {
+	#[track_caller]
+	pub fn resource_mut<T: 'static>(&self) -> OwningRefMut<StorageGuardMut<T, StorageRefMut<T>>, T> {
 		OwningRefMut::new(self.storage_mut()).map_mut(|x| x.get_mut(Entity::root()).unwrap())
 	}
 
+	#[track_caller]
 	pub fn resource_exists<T: 'static>(&self) -> bool {
 		self.storage::<T>().has(Entity::root())
 	}
 
-	pub fn try_resource<T: 'static>(&self) -> Option<OwningRef<StorageRef<T>, T>> {
+	#[track_caller]
+	pub fn try_resource<T: 'static>(&self) -> Option<OwningRef<StorageGuard<T, StorageRef<T>>, T>> {
 		if !self.storage::<T>().has(Entity::root()) { return None; }
 		Some(OwningRef::new(self.storage()).map(|x| x.get(Entity::root()).unwrap()))
 	}
 
-	pub fn try_resource_mut<T: 'static>(&self) -> Option<OwningRefMut<StorageGuard<T, StorageRefMut<T>>, T>> {
+	#[track_caller]
+	pub fn try_resource_mut<T: 'static>(&self) -> Option<OwningRefMut<StorageGuardMut<T, StorageRefMut<T>>, T>> {
 		if !self.storage::<T>().has(Entity::root()) { return None; }
 		Some(OwningRefMut::new(self.storage_mut()).map_mut(|x| x.get_mut(Entity::root()).unwrap()))
 	}
@@ -138,6 +144,7 @@ impl World {
 		entity
 	}
 
+	#[track_caller]
 	pub fn remove_entity(&self, entity: impl AsEntity) {
 		let entity = entity.as_entity();
 		if self.is_dead(entity) {
