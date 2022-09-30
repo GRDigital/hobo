@@ -227,15 +227,15 @@ impl<'a, Component, Inner> Drop for StorageGuardMut<'a, Component, Inner> where
 	#[cfg(debug_assertions)]
 	fn drop(&mut self) {
 		let StorageGuardMut { world, inner, location } = self;
-
 		let type_id = std::any::TypeId::of::<Component>();
-		let type_name = std::any::type_name::<Component>().to_owned();
+
 		crate::backtrace::STORAGE_MAP.0.borrow_mut()
 			.entry(type_id)
 			.and_modify(|map| { 
 				assert!(map.len() > 1, 
-					"Trying to drop mutably borrowed {type_name} storage while more than 1 borrow of it exists. {:#?}
+					"Trying to drop mutably borrowed {} storage while more than 1 borrow of it exists. {:#?}
 					This is a bug in hobo, please report it at `https://github.com/GRDigital/hobo/issues`", 
+					std::any::type_name::<Component>().to_owned(),
 					crate::backtrace::STORAGE_MAP.0.borrow_mut().get(&type_id)
 				);
 				map.remove(location);
