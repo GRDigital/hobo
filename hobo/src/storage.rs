@@ -186,9 +186,19 @@ impl<Component, Inner> Drop for StorageGuard<Component, Inner> where
 	Inner: std::ops::Deref<Target = SimpleStorage<Component>>,
 {
 	fn drop(&mut self) {
+		let type_id = std::any::TypeId::of::<Component>();
+
 		crate::backtrace::STORAGE_MAP.0.borrow_mut()
-			.entry(std::any::TypeId::of::<Component>())
-			.and_modify(|map| { map.remove(&self.location); });
+			.entry(type_id)
+			.and_modify(|map| {
+				assert!(!map.values().any(|x| *x), 
+					"Trying to drop immutably borrowed {} storage while a mutable borrow of it exists. {:#?}
+					This is a bug in hobo, please report it at `https://github.com/GRDigital/hobo/issues`", 
+					std::any::type_name::<Component>().to_owned(),
+					crate::backtrace::STORAGE_MAP.0.borrow_mut().get(&type_id)
+				);
+				map.remove(&self.location);
+			});
 	}
 }
 
