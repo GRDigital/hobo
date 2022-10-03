@@ -157,6 +157,7 @@ macro_rules! generate_properties {
 	) => {
 		pub use Property::{$($named_name),*};
 
+		#[allow(clippy::derive_ord_xor_partial_ord)]
 		#[derive(Debug, PartialEq, Eq, Hash, Clone, strum::EnumDiscriminants, Ord)]
 		#[strum_discriminants(derive(PartialOrd))]
 		pub enum Property {

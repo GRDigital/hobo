@@ -3,7 +3,7 @@ use crate::prelude::*;
 use crate::{
 	create,
 	element::Classes,
-	storage::{SimpleStorage, StorageGuard},
+	storage::{SimpleStorage, StorageGuard, StorageGuardMut},
 	style_storage::{StyleStorage, STYLE_STORAGE},
 	StorageRef, StorageRefMut,
 };
@@ -74,6 +74,26 @@ unsafe impl Send for World {}
 unsafe impl Sync for World {}
 
 impl World {
+	#[cfg(debug_assertions)]
+	#[track_caller]
+	pub(crate) fn dyn_storage<Component: 'static>(&self) -> std::cell::Ref<'static, Box<dyn DynStorage>> {
+		let caller = std::panic::Location::caller();
+
+		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.try_borrow()) {
+			storage.unwrap_or_else(|e| panic!("'{e}': Trying to immutably borrow `{}` storage at `{caller}` while a mutable borrow to it already exists:\n\n{}\n",
+				std::any::type_name::<Component>(),
+				crate::backtrace::STORAGE_MAP.0.borrow()[&TypeId::of::<Component>()]
+			))
+		} else {
+			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
+			let storage: &'static _ = Box::leak(Box::new(storage));
+			self.storages.insert(TypeId::of::<Component>(), storage);
+			storage.borrow()
+		}
+	}
+
+	#[cfg(not(debug_assertions))]
+	#[track_caller]
 	pub(crate) fn dyn_storage<Component: 'static>(&self) -> std::cell::Ref<'static, Box<dyn DynStorage>> {
 		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.borrow()) {
 			storage
@@ -85,6 +105,26 @@ impl World {
 		}
 	}
 
+	#[cfg(debug_assertions)]
+	#[track_caller]
+	pub(crate) fn dyn_storage_mut<Component: 'static>(&self) -> std::cell::RefMut<'static, Box<dyn DynStorage>> {
+		let caller = std::panic::Location::caller();
+
+		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.try_borrow_mut()) {
+			storage.unwrap_or_else(|e| panic!("'{e}': Trying to mutably borrow `{}` storage at `{caller}` while other borrows to it already exist:\n\n{}\n",
+				std::any::type_name::<Component>(),
+				crate::backtrace::STORAGE_MAP.0.borrow()[&TypeId::of::<Component>()]
+			))
+		} else {
+			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
+			let storage: &'static _ = Box::leak(Box::new(storage));
+			self.storages.insert(TypeId::of::<Component>(), storage);
+			storage.borrow_mut()
+		}
+	}
+
+	#[cfg(not(debug_assertions))]
+	#[track_caller]
 	pub(crate) fn dyn_storage_mut<Component: 'static>(&self) -> std::cell::RefMut<'static, Box<dyn DynStorage>> {
 		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.borrow_mut()) {
 			storage
@@ -96,38 +136,72 @@ impl World {
 		}
 	}
 
-	pub fn storage_mut<Component: 'static>(&self) -> StorageGuard<Component, StorageRefMut<Component>> {
+	// INFO: Anything that calls storage or storage_mut should have track_caller.
+	// This is so that the StorageGuard can have accurate location from user-code in debug.
+	#[track_caller]
+	pub fn storage<Component: 'static>(&self) -> StorageGuard<Component, StorageRef<Component>> {
+		#[cfg(debug_assertions)]
+		crate::backtrace::STORAGE_MAP.0.borrow_mut()
+			.entry(TypeId::of::<Component>())
+			.or_default()
+			.insert(*std::panic::Location::caller(), false);
+
+		let storage = OwningRef::new(self.dyn_storage::<Component>())
+			.map(|x| x.as_any().downcast_ref().unwrap());
+
+		StorageGuard {
+			inner: storage,
+			#[cfg(debug_assertions)]
+			location: *std::panic::Location::caller()
+		}
+	}
+
+	#[track_caller]
+	pub fn storage_mut<Component: 'static>(&self) -> StorageGuardMut<Component, StorageRefMut<Component>> {
+		#[cfg(debug_assertions)]
+		crate::backtrace::STORAGE_MAP.0.borrow_mut()
+			.entry(TypeId::of::<Component>())
+			.or_default()
+			.insert(*std::panic::Location::caller(), true);
+
 		let storage = OwningRefMut::new(self.dyn_storage_mut::<Component>())
 			.map_mut(|x| x.as_any_mut().downcast_mut().unwrap());
-		StorageGuard(self, Some(storage))
+
+		StorageGuardMut {
+			world: self,
+			inner: Some(storage),
+			#[cfg(debug_assertions)]
+			location: *std::panic::Location::caller()
+		}
 	}
 
-	pub fn storage<Component: 'static>(&self) -> StorageRef<Component> {
-		OwningRef::new(self.dyn_storage::<Component>())
-			.map(|x| x.as_any().downcast_ref().unwrap())
-	}
-
+	#[track_caller]
 	pub fn register_resource<T: 'static>(&self, resource: T) { self.storage_mut().add(Entity::root(), resource); }
 
-	// resources are just components attached to Entity(0)
-	pub fn resource<T: 'static>(&self) -> OwningRef<StorageRef<T>, T> {
+	/// Resources are just components attached to Entity(0)
+	#[track_caller]
+	pub fn resource<T: 'static>(&self) -> OwningRef<StorageGuard<T, StorageRef<T>>, T> {
 		OwningRef::new(self.storage()).map(|x| x.get(Entity::root()).unwrap())
 	}
 
-	pub fn resource_mut<T: 'static>(&self) -> OwningRefMut<StorageGuard<T, StorageRefMut<T>>, T> {
+	#[track_caller]
+	pub fn resource_mut<T: 'static>(&self) -> OwningRefMut<StorageGuardMut<T, StorageRefMut<T>>, T> {
 		OwningRefMut::new(self.storage_mut()).map_mut(|x| x.get_mut(Entity::root()).unwrap())
 	}
 
+	#[track_caller]
 	pub fn resource_exists<T: 'static>(&self) -> bool {
 		self.storage::<T>().has(Entity::root())
 	}
 
-	pub fn try_resource<T: 'static>(&self) -> Option<OwningRef<StorageRef<T>, T>> {
+	#[track_caller]
+	pub fn try_resource<T: 'static>(&self) -> Option<OwningRef<StorageGuard<T, StorageRef<T>>, T>> {
 		if !self.storage::<T>().has(Entity::root()) { return None; }
 		Some(OwningRef::new(self.storage()).map(|x| x.get(Entity::root()).unwrap()))
 	}
 
-	pub fn try_resource_mut<T: 'static>(&self) -> Option<OwningRefMut<StorageGuard<T, StorageRefMut<T>>, T>> {
+	#[track_caller]
+	pub fn try_resource_mut<T: 'static>(&self) -> Option<OwningRefMut<StorageGuardMut<T, StorageRefMut<T>>, T>> {
 		if !self.storage::<T>().has(Entity::root()) { return None; }
 		Some(OwningRefMut::new(self.storage_mut()).map_mut(|x| x.get_mut(Entity::root()).unwrap()))
 	}
@@ -138,6 +212,7 @@ impl World {
 		entity
 	}
 
+	#[track_caller]
 	pub fn remove_entity(&self, entity: impl AsEntity) {
 		let entity = entity.as_entity();
 		if self.is_dead(entity) {
