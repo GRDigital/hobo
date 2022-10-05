@@ -9,7 +9,7 @@ pub struct StyleStorage {
 	/// Used for checking whether a style already exists for reuse.
 	///
 	/// The hash is css::Style + Ordinal number,
-	/// so the style is only reused only per "class position".
+	/// so the style is reused only per "class position".
 	///
 	/// See [fetch](Self::fetch) for both hashing and re-use checks. 
 	inserted_style_hashes: HashSet<u64>,
