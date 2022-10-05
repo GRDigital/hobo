@@ -128,7 +128,7 @@ impl StyleStorage {
 			// especially necessary for re-registering a previously closed window
 			let style_element = &self.style_elements.get("default").expect("no default window").1[default_window_style_index];
 			new_style_element.set_inner_html(&style_element.inner_html());
-			self.style_elements.entry(window_name.clone()).or_insert((dom.clone(), Vec::default())).1.push(new_style_element.unchecked_into());
+			self.style_elements.entry(window_name.clone()).or_insert((dom.clone(), Vec::new())).1.push(new_style_element.unchecked_into());
 		}
 	}
 }
