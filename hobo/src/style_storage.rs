@@ -1,14 +1,25 @@
 use crate::{prelude::*, racy_cell::RacyCell};
 use once_cell::sync::Lazy;
-use std::collections::{HashMap, HashSet};
+use std::{collections::{HashMap, HashSet, self, hash_map::DefaultHasher}, hash::{Hash, Hasher}};
 use sugars::hmap;
 pub use sugars::hash;
 
 #[derive(Default)]
 pub struct StyleStorage {
+	/// Used for checking whether a style already exists for reuse.
+	///
+	/// The hash is css::Style + Ordinal number,
+	/// so the style is only reused only per "class position".
+	///
+	/// See [fetch](Self::fetch) for both hashing and re-use checks. 
 	inserted_style_hashes: HashSet<u64>,
-	// list of <style> elements, prehaps in different windows
-	style_elements: HashMap<String, web_sys::Element>,
+
+	/// Map representing the <style> elements in each window.
+	///
+	/// * key:     `String`                         - identifier, usually the name of the window.
+	/// * value.0: `web_sys::Document`              - The main document of the window, to which head's <style> elements will be appended.
+	/// * value.1: `Vec<web_sys::HtmlStyleElement>` - The <style> elements in this window's head.
+	style_elements: HashMap<String, (web_sys::Document, Vec<web_sys::HtmlStyleElement>)>,
 }
 
 pub(crate) static STYLE_STORAGE: Lazy<RacyCell<StyleStorage>> = Lazy::new(|| RacyCell::new(StyleStorage {
@@ -18,7 +29,7 @@ pub(crate) static STYLE_STORAGE: Lazy<RacyCell<StyleStorage>> = Lazy::new(|| Rac
 		let head = dom.head().expect("dom has no head");
 		let element = dom.create_element(web_str::style()).expect("can't create style element");
 		head.append_child(&element).expect("can't append child");
-		element
+		(dom, vec![element.unchecked_into()])
 	}],
 }));
 
@@ -58,15 +69,18 @@ impl css::Style {
 // if yes, just returns the class name
 // if no, inserts it into <style> and then returns the class name
 impl StyleStorage {
-	pub fn fetch(&mut self, mut style: css::Style) -> String {
+	pub fn fetch(&mut self, mut style: css::Style, ordinal: usize) -> String {
 		// if stable sort used on properties before hashing, then order of declarations would be preserved
 		// but different elements that use the same properties in a different order would still reuse the same class
 		// in other words, if you're specifying the same property multiple times to override it - that should still work
 		// but the order of properties should no longer influence the hash result
 		style.sort_properties();
 
-		// u64 hash from style
-		let id = hash!(style);
+		// u64 hash from style + ordinal
+		let mut hasher = DefaultHasher::new();
+		style.hash(&mut hasher);
+		ordinal.hash(&mut hasher);
+		let id = hasher.finish();
 
 		// recover class name
 		let class = format!("s-{id:x}");
@@ -80,9 +94,18 @@ impl StyleStorage {
 		style.fixup_class_placeholders(&class);
 
 		let style_string = style.to_string();
-		for style_element in self.style_elements.values() {
+
+		// for each window
+		for (_, (dom, ordered_style_elements)) in self.style_elements.iter_mut() {
+			if ordered_style_elements.get(ordinal).is_none() {
+				let style_element = dom.create_element(web_str::style()).expect("can't create style element");
+				let head = dom.head().expect("dom has no head");
+				head.append_child(&style_element).expect("can't append child");
+				ordered_style_elements.push(style_element.unchecked_into());
+			}
+
 			// insert the stringified generated css into the style tag
-			style_element.append_with_str_1(&style_string).expect("can't append css string");
+			ordered_style_elements[ordinal].append_with_str_1(&style_string).expect("can't append css string");
 		}
 
 		class
@@ -95,11 +118,17 @@ impl StyleStorage {
 	pub fn register_window(&mut self, window: &web_sys::Window, window_name: String) {
 		let dom = window.document().expect("window has no dom");
 		let head = dom.head().expect("dom has no head");
-		let element = dom.create_element(web_str::style()).expect("can't create style element");
-		head.append_child(&element).expect("can't append child");
+		
+		// Re-create each existing <style> element from the default window into the new window
+		for default_window_style_index in 0..self.style_elements.get("default").expect("no default window").1.len() {
+			let new_style_element = dom.create_element(web_str::style()).expect("can't create style element");
+			head.append_child(&new_style_element).expect("can't append child");
 
-		// if re-registering a window, re-add the already existing style
-		element.set_inner_html(&self.style_elements.get("default").expect("no default element").inner_html());
-		self.style_elements.insert(window_name, element);
+			// re-add all the already existing styles,
+			// especially necessary for re-registering a previously closed window
+			let style_element = &self.style_elements.get("default").expect("no default window").1[default_window_style_index];
+			new_style_element.set_inner_html(&style_element.inner_html());
+			self.style_elements.entry(window_name.clone()).or_insert((dom.clone(), Vec::default())).1.push(new_style_element.unchecked_into());
+		}
 	}
 }
