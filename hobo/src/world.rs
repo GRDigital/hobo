@@ -35,8 +35,8 @@ pub(crate) static WORLD: Lazy<World> = Lazy::new(|| {
 				}
 
 				let style_storage = unsafe { &mut *STYLE_STORAGE.get() as &mut StyleStorage };
-				for style in classes.styles.values() {
-					write!(&mut res, "{} ", style_storage.fetch(style.clone())).unwrap();
+				for (style, ordinal) in classes.styles.values() {
+					write!(&mut res, "{} ", style_storage.fetch(style.clone(), *ordinal)).unwrap();
 				}
 			}
 

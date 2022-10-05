@@ -14,7 +14,16 @@ pub struct Element(pub Entity);
 #[derive(Default)]
 pub(crate) struct Classes {
 	pub(crate) marks: HashSet<TypeId>,
-	pub(crate) styles: HashMap<u64, css::Style>,
+
+	/// A HashMap of: 
+	///
+	/// * key:     `u64`        - Tag hash.
+	/// * value.0: `css::Style` - The style of the class.
+	/// * value.1: `usize`      - Ordinal number. 
+	///
+	/// For example, if `.class` was called 4 times on an element, the ordinal number of the last class would be 3 (the index).
+	/// This is used for precedence.
+	pub(crate) styles: HashMap<u64, (css::Style, usize)>,
 }
 
 #[derive(Default)]
@@ -109,7 +118,9 @@ pub trait AsElement: AsEntity + Sized {
 			hasher.finish()
 		};
 
-		self.get_cmp_mut_or_default::<Classes>().styles.insert(tag_hash, style.into());
+		let mut classes = self.get_cmp_mut_or_default::<Classes>();
+		let len = classes.styles.len();
+		classes.styles.insert(tag_hash, (style.into(), len));
 	}
 	// Cannot mix impl Into<css::Style> with generic type arguments
 	fn set_class_typed<Type: 'static>(&self, style: css::Style) {
