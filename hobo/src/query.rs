@@ -3,7 +3,7 @@
 //!
 //! ```
 //! struct Foo {
-//! 	// some fields
+//!     // some fields
 //! }
 //!
 //! // find the first (presumably only) entity with some component Foo
@@ -14,14 +14,14 @@
 //!
 //! ```
 //! struct Frobnicator {
-//! 	num_fraculations: u32,
-//! 	// other fields
+//!     num_fraculations: u32,
+//!     // other fields
 //! }
 //!
 //! // find all entities with a Frobnicator component and mutate it
 //! // perhaps as a result of some combined transformation
 //! for frobnicator in hobo::find::<&mut Frobnicator>() {
-//! 	frobnicator.num_fraculations += 1;
+//!     frobnicator.num_fraculations += 1;
 //! }
 //! ```
 

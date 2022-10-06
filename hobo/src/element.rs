@@ -15,11 +15,11 @@ pub struct Element(pub Entity);
 pub(crate) struct Classes {
 	pub(crate) marks: HashSet<TypeId>,
 
-	/// A HashMap of: 
+	/// A HashMap of:
 	///
 	/// * key:     `u64`        - Tag hash.
 	/// * value.0: `css::Style` - The style of the class.
-	/// * value.1: `usize`      - Ordinal number. 
+	/// * value.1: `usize`      - Ordinal number.
 	///
 	/// For example, if `.class` was called 4 times on an element, the ordinal number of the last class would be 3 (the index).
 	/// This is used for precedence.
@@ -74,7 +74,7 @@ pub trait AsElement: AsEntity + Sized {
 		if let (Some(parent_node), Some(child_node), shifted_sibling_node) = (
 			self.try_get_cmp::<web_sys::Node>(),
 			child.try_get_cmp::<web_sys::Node>(),
-			shifted_sibling.map(|x| x.try_get_cmp::<web_sys::Node>()).flatten(),
+			shifted_sibling.and_then(|x| x.try_get_cmp::<web_sys::Node>()),
 		) {
 			parent_node
 				.insert_before(&child_node, shifted_sibling_node.as_ref().map(|x| &**x as &web_sys::Node))

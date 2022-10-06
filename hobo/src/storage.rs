@@ -21,6 +21,7 @@ pub trait Storage<Component: 'static>: DynStorage {
 	fn get_mut_or_default(&mut self, entity: impl AsEntity) -> &mut Component where Component: Default { self.get_mut_or(entity, Component::default) }
 }
 
+#[allow(clippy::type_complexity)]
 pub struct SimpleStorage<Component: 'static> {
 	pub data: HashMap<Entity, Component>,
 	pub data_removed: HashMap<Entity, Component>,
@@ -191,10 +192,10 @@ impl<Component, Inner> Drop for StorageGuard<Component, Inner> where
 		crate::backtrace::STORAGE_MAP.0.borrow_mut()
 			.entry(type_id)
 			.and_modify(|map| {
-				assert!(map.values().all(|mutable| !mutable), 
+				assert!(map.values().all(|mutable| !mutable),
 					"Trying to drop immutably borrowed {} storage while a mutable borrow of it exists.
 					\n{map}
-					\nThis is a bug in hobo, please report it at `https://github.com/GRDigital/hobo/issues`", 
+					\nThis is a bug in hobo, please report it at `https://github.com/GRDigital/hobo/issues`",
 					std::any::type_name::<Component>().to_owned(),
 				);
 				map.remove(&self.location);
@@ -231,11 +232,11 @@ impl<'a, Component, Inner> Drop for StorageGuardMut<'a, Component, Inner> where
 
 		crate::backtrace::STORAGE_MAP.0.borrow_mut()
 			.entry(type_id)
-			.and_modify(|map| { 
-				assert!(map.len() <= 1, 
+			.and_modify(|map| {
+				assert!(map.len() <= 1,
 					"Trying to drop mutably borrowed {} storage while more than 1 borrow of it exists.
 					\n{map}
-					\nThis is a bug in hobo, please report it at `https://github.com/GRDigital/hobo/issues`", 
+					\nThis is a bug in hobo, please report it at `https://github.com/GRDigital/hobo/issues`",
 					std::any::type_name::<Component>().to_owned(),
 				);
 				map.remove(location);

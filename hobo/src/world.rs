@@ -18,8 +18,7 @@ use std::{
 use sugars::hash;
 
 pub(crate) static WORLD: Lazy<World> = Lazy::new(|| {
-	let mut world = World::default();
-	world.next_entity = AtomicU64::new(1);
+	let world = World { next_entity: AtomicU64::new(1), ..Default::default() };
 	world.component_ownership.borrow_mut().insert(Entity::root(), BTreeSet::default());
 
 	{
