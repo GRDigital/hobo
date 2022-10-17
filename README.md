@@ -18,17 +18,20 @@
 
 ### Sneak peek:
 ```rust,noplaypen
-fn counter() -> impl hobo::Element {
+pub use hobo::signals::signal::{Mutable, SignalExt};
+
+fn counter() -> impl hobo::AsElement {
     let counter = Mutable::new(0);
 
     e::div()
         .class((
-            css::display!(flex),
+			css::display!(flex),
+            css::flex_direction!(column),
             css::width!(400 px),
         ))
         .child(e::div()
             .text_signal(counter.signal().map(|value| {
-                format!("Counter value is: {}", value);
+                format!("Counter value is: {}", value)
             }))
         )
         .child(e::button()
