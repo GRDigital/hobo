@@ -45,5 +45,5 @@ let settings_container = e::div()
 
 let unrelated_display = e::div()
 	//etc
-	.text(hobo::find::<&SettingsData>().speed.to_string())
+	.text(hobo::find_one::<&SettingsData>().speed.to_string())
 ```
