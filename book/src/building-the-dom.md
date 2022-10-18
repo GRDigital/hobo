@@ -5,6 +5,8 @@ Assembling elements is usually done via function chaining, but every function ha
 Here's an example of a somewhat involved element:
 
 ```rust
+pub use hobo::{prelude::*, create as e};
+
 #[derive(hobo::Element)]
 pub struct Input {
 	element: e::Div,
@@ -14,7 +16,8 @@ pub struct Input {
 impl Input {
 	pub fn new(caption_text: &str, svg: Option<e::Svg>) -> Self {
 		let input = e::input()
-			.attr(web_str::r#type(), web_str::text())
+			// shortcut for .attr(web_str::r#type(), web_str::text())
+			.type_text()
 			.class(css::class! {
 				// some style
 			});
