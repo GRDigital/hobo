@@ -1,13 +1,16 @@
 # Events
 
-There is a simple way to fire and respond to events.
+There is a simple way to fire and respond to global events.
 
 ```rust,noplaypen
+pub use hobo::{
+	prelude::*,
+	create as e,
+};
+
 struct MyEvent(u64);
 
-// -- snip --
-
-fn make_foo() -> impl hobo::Element {
+fn make_foo() -> impl hobo::AsElement {
 	e::div()
 		// etc children and styles
 		.component(hobo::events::on(move |&MyEvent(x)| {
