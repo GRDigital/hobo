@@ -53,4 +53,22 @@ hobo::create::div()
 	))
 ```
 
-> **Chaining vs non-chaining syntax:** `.style()` is the chaining syntax, `.set_style()` is the non-chaining alternative. Similarly, `.class()` and `.set_class()`. More about chaining vs non-chaining syntax in [Building the DOM](../building-the-dom.md#chaining-vs-non-chaining-syntax).
+Property tuple example:
+
+```rust,noplaypen
+	hobo::create::div()
+		.style((
+			// Shortcut for same width and height
+			css::size!(12 px),
+			css::Display::Flex,
+		))
+```
+
+If only a single property is used, one can ommit the tuple:
+
+```rust,noplaypen
+	hobo::create::div()
+		.class(css::Display::Flex)
+```
+
+> **Chaining vs non-chaining syntax:** `.style()` is the chaining syntax, `.set_style()` is the non-chaining alternative. Similarly, `.class()` and `.set_class()`. More about chaining vs non-chaining syntax in [Building the DOM](./building-the-dom.md#chaining-vs-non-chaining-syntax).
