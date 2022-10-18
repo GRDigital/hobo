@@ -14,7 +14,6 @@
 	- [@-rules](styling/at-rules.md)
 	- [Colors](styling/colors.md)
 	- [Every way to make a class](styling/every-way-to-make-a-class.md)
-	- [Precedence gotchas due to class reuse](styling/precedence-gotchas.md)
 - [Managing state and relations with Components](state.md)
 	- [Queries](state/queries.md)
 	- [Signals](state/signals.md)
