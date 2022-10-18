@@ -3,7 +3,11 @@
 Here's a basic counter component:
 
 ```rust,noplaypen
-use hobo::{prelude::*, create as e};
+pub use hobo::{
+	prelude::*, 
+	create as e,
+	signals::signal::{Mutable, SignalExt}
+}
 
 // <div class="s-f4d1763947b5e1ff">
 //   <div>Counter value is: 0</div>
@@ -11,7 +15,7 @@ use hobo::{prelude::*, create as e};
 //   <button>decrement</button>
 // </div>
 
-fn counter() -> impl hobo::Element {
+fn counter() -> impl hobo::AsElement {
 	let counter_value = Mutable::new(0_i32);
 
 	e::div()
