@@ -8,6 +8,7 @@
 	- [Children and Parent](basic-concepts/children-and-parent.md)
 	- [Removing and replacing elements](basic-concepts/removing-and-replacing-elements.md)
 	- [DOM Events and EventHandlerCallback](basic-concepts/dom-events.md)
+	- [Borrowing and Storage](basic-concepts/borrowing-and-storage.md)
 - [Styling](styling.md)
 	- [Selector](styling/selector.md)
 	- [Property](styling/property.md)
