@@ -2,6 +2,8 @@
 
 Hobo has some useful reactivity facilities. The core of this is `futures_signals::signal::Mutable`, from which signals are created, check the [futures-signals](https://docs.rs/futures-signals/0.3) documentation for details on how to do that.
 
+Hobo re-exports `futures_signals` as `hobo::signals`.
+
 * `text_signal`/`set_text_signal` - calls `set_text` whenever the signal value changes
 * `child_signal`/`add_child_signal` - initially creates an empty `div`, then calls `.replace_with` every time the signal value changes
 * `class_signal`/`set_class_signal` and `class_typed_signal`/`set_class_typed_signal` and `class_tagged_signal`/`set_class_tagged_signal` - calls `set_class_tagged` whenever the signal value changes
