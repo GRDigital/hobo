@@ -14,12 +14,12 @@ Conditional property inclusion could be expressed as different `Vec<css::Propert
 
 ```rust,noplaypen
 (
-	css::display!(flex),
-	if active {
-		vec![css::background_color!(0x00_00_FF_FF)],
-	} else {
-		vec![],
-	},
+    css::display!(flex),
+    if active {
+        vec![css::background_color!(0x00_00_FF_FF)],
+    } else {
+        vec![],
+    },
 )
 ```
 
@@ -27,7 +27,7 @@ Or alternatively, by leveraging `FnOnce`
 
 ```rust,noplaypen
 (
-	css::display!(flex),
-	move |props| if active { props.push(css::background_color!(0x00_00_FF_FF)); },
+    css::display!(flex),
+    move |props| if active { props.push(css::background_color!(0x00_00_FF_FF)); },
 )
 ```

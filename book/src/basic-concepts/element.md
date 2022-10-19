@@ -5,14 +5,14 @@ Anything implementing `hobo::Element` is considered a hobo component. It is deri
 ```rust
 #[derive(hobo::Element)]
 struct Foo {
-	element: e::Div,
+    element: e::Div,
 }
 
 // also ok
 #[derive(hobo::Element)]
 enum Bar {
-	Foo(Foo),
-	Div(e::Div),
+    Foo(Foo),
+    Div(e::Div),
 }
 ```
 

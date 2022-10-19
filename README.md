@@ -19,28 +19,28 @@
 ### Sneak peek:
 ```rust,noplaypen
 pub use hobo::{
-	prelude::*,
-	create as e,
-	signals::signal::{Mutable, SignalExt}
+    prelude::*,
+    create as e,
+    signals::signal::{Mutable, SignalExt}
 };
 
 fn counter() -> impl hobo::AsElement {
-	let counter = Mutable::new(0);
+    let counter = Mutable::new(0);
 
-	e::div()
-		.class((
-			css::display!(flex),
-			css::flex_direction!(column),
-			css::width!(400 px),
-		))
-		.child(e::div()
-			.text_signal(counter.signal().map(|value| {
-				format!("Counter value is: {}", value)
-			}))
-		)
-		.child(e::button()
-			.text("increment")
-			.on_click(move |_| *counter.lock_mut() += 1)
-		)
+    e::div()
+        .class((
+            css::display!(flex),
+            css::flex_direction!(column),
+            css::width!(400 px),
+        ))
+        .child(e::div()
+            .text_signal(counter.signal().map(|value| {
+                format!("Counter value is: {}", value)
+            }))
+        )
+        .child(e::button()
+            .text("increment")
+            .on_click(move |_| *counter.lock_mut() += 1)
+        )
 }
 ```

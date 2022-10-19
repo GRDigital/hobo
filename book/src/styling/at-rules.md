@@ -9,9 +9,9 @@ It looks something like this:
 
 ```rust
 @font-face {
-	src: vec![("https://fonts.gstatic.com/.../....woff2".into(), Some(Format::Woff2))],
-	font_family: "Encode Sans".into(),
-	font_weight: (Weight::Number(400), None),
+    src: vec![("https://fonts.gstatic.com/.../....woff2".into(), Some(Format::Woff2))],
+    font_family: "Encode Sans".into(),
+    font_weight: (Weight::Number(400), None),
 }
 ```
 
@@ -29,17 +29,17 @@ So these two would be equivalent:
 
 ```rust
 @media All && MaxWidth(css::unit!(1023 px)) {
-	html {
-		css::background_color!(rgb 0xFF_00_00),
-	}
+    html {
+        css::background_color!(rgb 0xFF_00_00),
+    }
 }
 ```
 
 ```css
 @media all and (max-width: 1023px) {
-	html {
-		background-color: #FF0000;
-	}
+    html {
+        background-color: #FF0000;
+    }
 }
 ```
 

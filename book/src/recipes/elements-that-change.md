@@ -6,9 +6,9 @@ However, most modifications can often be expressed with signals, with some child
 
 ```rust,noplaypen
 .class_typed_signal::<Theme, _, _>(theme.signal().map(|theme| {
-	match theme {
-		Theme::Light => css::background_color!(css::color::WHITE),
-		Theme::Dark => css::background_color!(css::color::BLACK),
-	}
+    match theme {
+        Theme::Light => css::background_color!(css::color::WHITE),
+        Theme::Dark => css::background_color!(css::color::BLACK),
+    }
 }))
 ```

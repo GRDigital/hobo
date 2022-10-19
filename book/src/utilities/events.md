@@ -4,18 +4,18 @@ There is a simple way to fire and respond to global events.
 
 ```rust,noplaypen
 pub use hobo::{
-	prelude::*,
-	create as e,
+    prelude::*,
+    create as e,
 };
 
 struct MyEvent(u64);
 
 fn make_foo() -> impl hobo::AsElement {
-	e::div()
-		// etc children and styles
-		.component(hobo::events::on(move |&MyEvent(x)| {
-			// do something with x
-		}))
+    e::div()
+        // etc children and styles
+        .component(hobo::events::on(move |&MyEvent(x)| {
+            // do something with x
+        }))
 }
 
 // -- snip --

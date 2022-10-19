@@ -13,22 +13,22 @@ Here's an example of how this affects hobo:
 // src\example_file.rs
 
 mod example_module {
-	pub use hobo::{prelude::*, create as e};
+    pub use hobo::{prelude::*, create as e};
 
-	struct Foo;
+    struct Foo;
 
-	pub fn test() -> impl hobo::AsElement {
-		e::div()
-			.component(Foo)
-			.with(|&element| {
-				// Ok
-				let foo1 = element.get_cmp::<Foo>();
-				// Still ok
-				let foo2 = element.get_cmp::<Foo>();
-				// Panic!
-				let foo3 = element.get_cmp_mut::<Foo>();
-			})
-	}
+    pub fn test() -> impl hobo::AsElement {
+        e::div()
+            .component(Foo)
+            .with(|&element| {
+                // Ok
+                let foo1 = element.get_cmp::<Foo>();
+                // Still ok
+                let foo2 = element.get_cmp::<Foo>();
+                // Panic!
+                let foo3 = element.get_cmp_mut::<Foo>();
+            })
+    }
 }
 ```
 
@@ -57,12 +57,12 @@ You can clone the value for reference if you don't need to know what it is after
 struct Foo;
 
 pub fn test() -> impl hobo::AsElement {
-	e::div()
-		.component(Foo)
-		.with(|&element| {
-			let foo1 = element.get_cmp::<Foo>().clone();
-			let foo3 = element.get_cmp_mut::<Foo>();
-		})
+    e::div()
+        .component(Foo)
+        .with(|&element| {
+            let foo1 = element.get_cmp::<Foo>().clone();
+            let foo3 = element.get_cmp_mut::<Foo>();
+        })
 }
 ```
 
@@ -72,17 +72,17 @@ Or, you can drop the guard, ensuring that no references conflict.
 struct Foo;
 
 pub fn test() -> impl hobo::AsElement {
-	e::div()
-		.component(Foo)
-		.with(|&element| {
-			{
-				let foo1 = element.get_cmp::<Foo>();
-			}
-			
-			let foo2 = element.get_cmp_mut::<Foo>();
-			std::mem::drop(foo2);
+    e::div()
+        .component(Foo)
+        .with(|&element| {
+            {
+                let foo1 = element.get_cmp::<Foo>();
+            }
+            
+            let foo2 = element.get_cmp_mut::<Foo>();
+            std::mem::drop(foo2);
 
-			let foo3 = element.get_cmp::<Foo>();
-		})
+            let foo3 = element.get_cmp::<Foo>();
+        })
 }
 ```
