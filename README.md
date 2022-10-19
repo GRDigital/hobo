@@ -3,8 +3,8 @@
 <a href="https://crates.io/crates/hobo"><img alt="Crate Info" src="https://img.shields.io/crates/v/hobo.svg"/></a>
 <a href="https://docs.rs/hobo/"><img alt="API Docs" src="https://img.shields.io/badge/docs.rs-hobo-yellow"/></a>
 
-**hobo** is an opinionated, batteries-included Rust frontend framework. Works on **stable Rust**.
-**STILL WIP** although used in production by [GR Digital](https://grdigital.co.uk/).
+**hobo** is an opinionated, batteries-included Rust frontend framework. Works on **stable Rust**.    
+**STILL WIP** although used in production by [GR Digital](https://grdigital.co.uk/).    
 [Check out the Book](https://grdigital.github.io/hobo/index.html)!
 
 ### Notable features:
