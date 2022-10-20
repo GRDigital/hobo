@@ -8,12 +8,12 @@ let some_div: hobo::create::Div = hobo::create::div();
 
 **Element** has methods that aren't available on regular entities.
 
-## `hobo::Element` and `hobo::AsEntity`
+## `hobo::AsElement` and `hobo::AsEntity`
 
 Sometimes it's useful to have custom types so you can have some special capabilities on your **Entities** or **Elements**.
 
 ```rust,noplaypen
-#[derive(hobo::Element, Clone, Copy /* etc */)]
+#[derive(hobo::AsElement, Clone, Copy /* etc */)]
 struct Checkbox(hobo::create::Div);
 
 // just an example of why you might want to do this
@@ -30,17 +30,17 @@ impl Checkbox {
 }
 ```
 
-The `hobo::Element` derive macro expects either a tuple struct or a regular struct where the **Entity** field is named `element` e.g.
+The `hobo::AsElement` derive macro expects either a tuple struct or a regular struct where the **Entity** field is named `element` e.g.
 
 ```rust,noplaypen
-#[derive(hobo::Element, Clone, Copy /* etc */)]
+#[derive(hobo::AsElement, Clone, Copy /* etc */)]
 struct CustomSelect {
 	element: hobo::create::Select,
 	// etc
 }
 ```
 
-## `SomeElement` and type erasure
+## `Element` and type erasure
 
 It's often useful to mix different types of **Elements**, for example:
 
@@ -54,20 +54,20 @@ fn content() -> impl hobo::Element {
 }
 ```
 
-This won't compile, but the distinction between types in this case isn't useful. So we can erase the concrete types and get the general `SomeElement`:
+This won't compile, but the distinction between types in this case isn't useful. So we can erase the concrete types and get the general `Element`:
 
 ```rust,noplaypen
 fn content() -> impl hobo::Element {
 	match tab {
-		Tab::Main => main_page().erase(), // hobo::SomeElement
-		Tab::Blogpost => article().erase(), // hobo::SomeElement
+		Tab::Main => main_page().erase(), // hobo::Element
+		Tab::Blogpost => article().erase(), // hobo::Element
 		// etc
 	}
 }
 ```
 
-If you have a regular **Entity** or something that at least implements `hobo::AsEntity` - you can recover **Element** capabilities by just constructing a `SomeElement`:
+If you have a regular **Entity** or something that at least implements `hobo::AsEntity` - you can recover **Element** capabilities by just constructing a `Element`:
 
 ```rust,noplaypen
-let elem = hobo::SomeElement(some_entity);
+let elem = hobo::Element(some_entity);
 ```
