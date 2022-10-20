@@ -1,6 +1,6 @@
 # Borrowing and Storage
 
-Components for entites are stored in a simple map - `HashMap<Entity, Component>` (see, `hobo::storage`).
+Components for entities are stored in a simple map - `HashMap<Entity, Component>` (see, `hobo::storage`).
 
 (This also makes searching for components via `hobo::find_one` *very* cheap).
 
@@ -38,7 +38,8 @@ This can be a bit tricky to debug in Wasm, which is why when compiling in debug 
 hobo will display the following helpful message in the browser's console if a borrow-related runtime panic is encountered:
 
 ```
-panicked at ''already borrowed': Trying to mutably borrow `example_module::Foo` storage at `src\example_file.rs:16:50` while other borrows to it already exist:
+panicked at ''already borrowed': Trying to mutably borrow `example_module::Foo`    
+storage at `src\example_file.rs:16:50` while other borrows to it already exist:
 
 (mut) src\example_file.rs:16:50
       src\example_flib.rs:14:50
@@ -46,43 +47,60 @@ panicked at ''already borrowed': Trying to mutably borrow `example_module::Foo` 
 ```
 This will list **only** the currently active borrows, as well as the mutable one, in order of access.
 
-Every type we store as a component will have it's own storage, so it is fine to mutable borrows of different types.
+(Every type we store as a component will have it's own storage, so it's fine to mutably borrow storages of different types.)
 
-The way to circumvent this would be similar to how one would for any other ownership issue:
+As an example of where this could arise as an issue, imagine the following situation:
 
-You can clone the value for reference if you don't need to know what it is after mutation:
+We want to replace an element with a new one, using some data we stored in it.
 
 ```rust,noplaypen
-#[derive(Clone)]
-struct Foo;
+struct SomeData {
+    big_data: u64,
+};
 
-pub fn test() -> impl hobo::AsElement {
-    e::div()
-        .component(Foo)
-        .with(|&element| {
-            let foo1 = element.get_cmp::<Foo>().clone();
-            let foo3 = element.get_cmp_mut::<Foo>();
-        })
+pub fn update_element(old_element: impl hobo::AsElement + Copy) {
+    let some_data = old_element.get_cmp::<SomeData>();
+
+    let new_element = e::div().process_data_and_change_element(some_data);
+    
+    // Runtime panic!
+    old_element.replace_with(new_element);
 }
 ```
 
-Or, you can drop the guard, ensuring that no references conflict.
+This will panic at runtime - this is because when we delete the old element (via replace)
+we need to mutably borrow the storage to all of it's components, in order to delete them too.
+However, we are already holding a reference to one of the components.
+
+The way to circumvent this would be similar to how one would for any other ownership issue:
+
+You can drop the guard, ensuring that no references conflict:
 
 ```rust,noplaypen
-struct Foo;
+pub fn update_element(old_element: impl hobo::AsElement + Copy) {
+    let some_data = old_element.get_cmp::<SomeData>();
 
-pub fn test() -> impl hobo::AsElement {
-    e::div()
-        .component(Foo)
-        .with(|&element| {
-            {
-                let foo1 = element.get_cmp::<Foo>();
-            }
-            
-            let foo2 = element.get_cmp_mut::<Foo>();
-            std::mem::drop(foo2);
+    let new_element = e::div().process_data_and_change_element(some_data);
+    
+    drop(some_data);
 
-            let foo3 = element.get_cmp::<Foo>();
-        })
+    old_element.replace_with(new_element);
+}
+```
+
+Or, you can clone the value for reference, if you don't need to know what it is after mutation:
+
+```rust,noplaypen
+#[derive(Clone)]
+struct SomeData {
+    big_data: u64,
+};
+
+pub fn update_element(element: impl hobo::AsElement + Copy) {
+    let some_data = old_element.get_cmp::<SomeData>().clone();
+
+    let new_element = e::div().process_data_and_change_element(some_data);
+    
+    old_element.replace_with(new_element);
 }
 ```
