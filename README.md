@@ -35,7 +35,7 @@ fn counter() -> impl hobo::AsElement {
         ))
         .child(e::div()
             .text_signal(counter.signal().map(|value| {
-                format!("Counter value is: {}", value)
+                format!("Counter value is: {value}")
             }))
         )
         .child(e::button()
