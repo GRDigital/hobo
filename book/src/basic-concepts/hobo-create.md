@@ -76,8 +76,11 @@ This pattern is often useful when using queries to find elements, as queries oft
 
 ```rust,noplaypen
 let (entity, _) = hobo::find_ond::<Entity, With<ComponentFoo>>();
-// We know that this enetity is a Div we've made, but we need e.g. it's type to be a Div, not Entity
-let element = hobo::create::Div(entity);
+// We know that this entity is an Input element we've made,
+// but we need it's type to be an Input, not Entity,
+// to e.g. access it's value via the get/set_value methods
+let input_element = hobo::create::Input(entity);
+let input_value = input_element.get_value();
 ```
-One can think of it almost as casting - we're fetching an entity which we, as the writer,
-know is a Div - however, we need to specify that type in code, or need Element capabilities, etc.
+
+One can think of it almost as casting - we're fetching an entity which we, as the writer, know is an Input - however, we need to "cast" this Entity to an Input type in order to access Input capabilities.
