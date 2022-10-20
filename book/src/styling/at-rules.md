@@ -43,4 +43,4 @@ So these two would be equivalent:
 }
 ```
 
-Support for `@keyframes` and `@page` is planned, but meanwhile the escape hatch raw string syntax can be used if really necessary.
+Support for `@keyframes` and `@page` is planned.
