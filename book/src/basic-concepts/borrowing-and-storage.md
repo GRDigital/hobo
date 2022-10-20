@@ -4,8 +4,7 @@ Components for entities are stored in a simple map - `HashMap<Entity, Component>
 
 (This also makes searching for components via `hobo::find_one` *very* cheap).
 
-Rust's ownership rules ensure that a mutable borrow is exclusive, which means that we cannot have mutable references 
-to components while immutable ones exists (or vice-versa).
+Rust's ownership rules ensure that a mutable borrow is exclusive, which means that we cannot have mutable references to components while immutable ones exists (or vice-versa).
 
 Here's an example of how this affects hobo:
 
@@ -34,8 +33,7 @@ mod example_module {
 
 This, of course, also applies to queries/find/etc.
 
-This can be a bit tricky to debug in Wasm, which is why when compiling in debug mode, 
-hobo will display the following helpful message in the browser's console if a borrow-related runtime panic is encountered:
+This can be a bit tricky to debug in Wasm, which is why when compiling in debug mode, hobo will display the following helpful message in the browser's console if a borrow-related runtime panic is encountered:
 
 ```
 panicked at ''already borrowed': Trying to mutably borrow `example_module::Foo`    
@@ -68,8 +66,7 @@ pub fn update_element(old_element: impl hobo::AsElement + Copy) {
 }
 ```
 
-This will panic at runtime - this is because when we delete the old element (via replace)
-we need to mutably borrow the storage to all of it's components, in order to delete them too.
+This will panic at runtime - this is because when we delete the old element (via replace) we need to mutably borrow the storage to all of it's components, in order to delete them too.
 However, we are already holding a reference to one of the components.
 
 The way to circumvent this would be similar to how one would for any other ownership issue:
