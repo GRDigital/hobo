@@ -1,6 +1,6 @@
 # `hobo::create`
 
-This module has a `snake_case` function which returns a corresponding `PascalCase` concrete type that implements **Element**.
+This module has a `snake_case` function which returns a corresponding `PascalCase` concrete type that implements **AsElement**.
 
 ```rust,noplaypen
 let some_div: hobo::create::Div = hobo::create::div();
@@ -45,7 +45,7 @@ struct CustomSelect {
 It's often useful to mix different types of **Elements**, for example:
 
 ```rust,noplaypen
-fn content() -> impl hobo::Element {
+fn content() -> impl hobo::AsElement {
 	match tab {
 		Tab::Main => main_page(), // hobo::create::Div
 		Tab::Blogpost => article(), // hobo::create::Article
