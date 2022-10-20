@@ -71,3 +71,13 @@ If you have a regular **Entity** or something that at least implements `hobo::As
 ```rust,noplaypen
 let elem = hobo::Element(some_entity);
 ```
+
+This pattern is often useful when using queries to find elements, as queries often return entities (more on them in [queries](../state/queries.md))
+
+```rust,noplaypen
+let (entity, _) = hobo::find_ond::<Entity, With<ComponentFoo>>();
+// We know that this enetity is a Div we've made, but we need e.g. it's type to be a Div, not Entity
+let element = hobo::create::Div(entity);
+```
+One can think of it almost as casting - we're fetching an entity which we, as the writer,
+know is a Div - however, we need to specify that type in code, or need Element capabilities, etc.
