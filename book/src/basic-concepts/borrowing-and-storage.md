@@ -1,11 +1,10 @@
 # Borrowing and Storage
 
-Components for entities are stored in a simple map - `HashMap<Entity, Component>` (see, `hobo::storage`).
+Components for entities are stored in a simple map - `HashMap<Entity, Component>` (see, `hobo::storage::SimpleStorage`).
 
 (This also makes searching for components via `hobo::find_one` *very* cheap).
 
 Rust's ownership rules ensure that a mutable borrow is exclusive, which means that we cannot have mutable references to components while immutable ones exists (or vice-versa).
-
 Here's an example of how this affects hobo:
 
 ```rust,noplaypen
@@ -43,7 +42,7 @@ storage at `src\example_file.rs:16:50` while other borrows to it already exist:
       src\example_flib.rs:14:50
       src\example_flib.rs:12:50
 ```
-This will list **only** the currently active borrows, as well as the mutable one, in order of access.
+This will list **only** the currently active borrows, as well as the mutable one, descending in order of access.
 
 (Every type we store as a component will have it's own storage, so it's fine to mutably borrow storages of different types.)
 
