@@ -59,7 +59,7 @@ struct SomeData {
 pub fn update_element(old_element: impl hobo::AsElement + Copy) {
     let some_data = old_element.get_cmp::<SomeData>();
 
-    let new_element = e::div().process_data_and_change_element(some_data);
+    let new_element = process_data_and_return_div(some_data);
     
     // Runtime panic!
     old_element.replace_with(new_element);
@@ -77,7 +77,7 @@ You can drop the guard, ensuring that no references conflict:
 pub fn update_element(old_element: impl hobo::AsElement + Copy) {
     let some_data = old_element.get_cmp::<SomeData>();
 
-    let new_element = e::div().process_data_and_change_element(some_data);
+    let new_element = process_data_and_return_div(some_data);
     
     drop(some_data);
 
@@ -96,7 +96,7 @@ struct SomeData {
 pub fn update_element(element: impl hobo::AsElement + Copy) {
     let some_data = old_element.get_cmp::<SomeData>().clone();
 
-    let new_element = e::div().process_data_and_change_element(some_data);
+    let new_element = process_data_and_return_div(some_data);
     
     old_element.replace_with(new_element);
 }
