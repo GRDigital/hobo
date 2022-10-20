@@ -4,7 +4,7 @@ Right now hobo only supports `@font-face` and a subset of `@media`
 
 # `@font-face`
 
-The block following `@font-face` is passed as initialization for `css::font_face::FontFace`. Check out the [docs](https://docs.rs/hobo_css/0.1/hobo_css/font_face/struct.FontFace.html).    
+The block following `@font-face` is passed as initialization for `css::font_face::FontFace`. Check out the [docs](https://docs.rs/hobo_css/latest/hobo_css/font_face/struct.FontFace.html).    
 It looks something like this:
 
 ```rust
