@@ -35,18 +35,18 @@ use hobo::create as e;
 struct Flexible;
 
 e::div()
-    .class(css::display!(flex))
+    .class((css::display!(flex), css::background_color!(css::color::RED)))
     .class_typed::<Flexible>((
         css::flex_direction!(row),
         css::width!(100 px),
     ))
-    .on_click(|&element| {
+    .with(|&element| element.add_on_click(move |_| {
         element
             .set_class_typed::<Flexible>((
-                css::flex_direction!(row),
-                css::width!(100 px),
+                css::flex_direction!(column),
+                css::height!(100 px),
             ))
-    })
+    }))
 ```
 
 * `.set_class_tagged::<Tag: Hash>(tag, style)` - Similar to `.set_class_tagged`, but uses an instance of a type rather than `Type`. The regular `.class()` method uses this internally with just an incrementing `u64` for a tag.
