@@ -3,11 +3,11 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Precedence gotchas due to class reuse - hobo book</title>
+        <title>Borrowing and Storage - hobo book</title>
 
 
         <!-- Custom HTML head -->
-
+        
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="hobo is a Rust frontend framework">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> hobo</a></li><li class="chapter-item expanded "><a href="../getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../basic-concepts.html"><strong aria-hidden="true">3.</strong> Core Concepts</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../basic-concepts/entities-components-resources.html"><strong aria-hidden="true">3.1.</strong> Entities, Components (and Resources)</a></li><li class="chapter-item expanded "><a href="../basic-concepts/hobo-components.html"><strong aria-hidden="true">3.2.</strong> hobo::components</a></li><li class="chapter-item expanded "><a href="../basic-concepts/children-and-parent.html"><strong aria-hidden="true">3.3.</strong> Children and Parent</a></li><li class="chapter-item expanded "><a href="../basic-concepts/removing-and-replacing-elements.html"><strong aria-hidden="true">3.4.</strong> Removing and replacing elements</a></li><li class="chapter-item expanded "><a href="../basic-concepts/dom-events.html"><strong aria-hidden="true">3.5.</strong> DOM Events and EventHandlerCallback</a></li></ol></li><li class="chapter-item expanded "><a href="../styling.html"><strong aria-hidden="true">4.</strong> Styling</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../styling/selector.html"><strong aria-hidden="true">4.1.</strong> Selector</a></li><li class="chapter-item expanded "><a href="../styling/property.html"><strong aria-hidden="true">4.2.</strong> Property</a></li><li class="chapter-item expanded "><a href="../styling/at-rules.html"><strong aria-hidden="true">4.3.</strong> @-rules</a></li><li class="chapter-item expanded "><a href="../styling/colors.html"><strong aria-hidden="true">4.4.</strong> Colors</a></li><li class="chapter-item expanded "><a href="../styling/every-way-to-make-a-class.html"><strong aria-hidden="true">4.5.</strong> Every way to make a class</a></li><li class="chapter-item expanded "><a href="../styling/precedence-gotchas.html" class="active"><strong aria-hidden="true">4.6.</strong> Precedence gotchas due to class reuse</a></li></ol></li><li class="chapter-item expanded "><a href="../state.html"><strong aria-hidden="true">5.</strong> Managing state and relations with Components</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../state/queries.html"><strong aria-hidden="true">5.1.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../state/signals.html"><strong aria-hidden="true">5.2.</strong> Signals</a></li></ol></li><li class="chapter-item expanded "><a href="../building-the-dom.html"><strong aria-hidden="true">6.</strong> Building the DOM</a></li><li class="chapter-item expanded "><a href="../utilities.html"><strong aria-hidden="true">7.</strong> Other utilities</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../utilities/web_str.html"><strong aria-hidden="true">7.1.</strong> web_str</a></li><li class="chapter-item expanded "><a href="../utilities/events.html"><strong aria-hidden="true">7.2.</strong> Events</a></li></ol></li><li class="chapter-item expanded "><a href="../recipes.html"><strong aria-hidden="true">8.</strong> Recipes</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../recipes/logging.html"><strong aria-hidden="true">8.1.</strong> Logging</a></li><li class="chapter-item expanded "><a href="../recipes/elements-that-change.html"><strong aria-hidden="true">8.2.</strong> Elements that change</a></li><li class="chapter-item expanded "><a href="../recipes/svgs.html"><strong aria-hidden="true">8.3.</strong> SVGs</a></li><li class="chapter-item expanded "><a href="../recipes/async-and-is-dead.html"><strong aria-hidden="true">8.4.</strong> Async and .is_dead()</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> hobo</a></li><li class="chapter-item expanded "><a href="../getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../basic-concepts.html"><strong aria-hidden="true">3.</strong> Core Concepts</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../basic-concepts/entities-components-resources.html"><strong aria-hidden="true">3.1.</strong> Entities, Components (and Resources)</a></li><li class="chapter-item expanded "><a href="../basic-concepts/hobo-create.html"><strong aria-hidden="true">3.2.</strong> hobo::create</a></li><li class="chapter-item expanded "><a href="../basic-concepts/children-and-parent.html"><strong aria-hidden="true">3.3.</strong> Children and Parent</a></li><li class="chapter-item expanded "><a href="../basic-concepts/removing-and-replacing-elements.html"><strong aria-hidden="true">3.4.</strong> Removing and replacing elements</a></li><li class="chapter-item expanded "><a href="../basic-concepts/dom-events.html"><strong aria-hidden="true">3.5.</strong> DOM Events and EventHandlerCallback</a></li><li class="chapter-item expanded "><a href="../basic-concepts/borrowing-and-storage.html" class="active"><strong aria-hidden="true">3.6.</strong> Borrowing and Storage</a></li></ol></li><li class="chapter-item expanded "><a href="../styling.html"><strong aria-hidden="true">4.</strong> Styling</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../styling/selector.html"><strong aria-hidden="true">4.1.</strong> Selector</a></li><li class="chapter-item expanded "><a href="../styling/property.html"><strong aria-hidden="true">4.2.</strong> Property</a></li><li class="chapter-item expanded "><a href="../styling/at-rules.html"><strong aria-hidden="true">4.3.</strong> @-rules</a></li><li class="chapter-item expanded "><a href="../styling/colors.html"><strong aria-hidden="true">4.4.</strong> Colors</a></li><li class="chapter-item expanded "><a href="../styling/every-way-to-make-a-class.html"><strong aria-hidden="true">4.5.</strong> Every way to make a class</a></li></ol></li><li class="chapter-item expanded "><a href="../state.html"><strong aria-hidden="true">5.</strong> Managing state and relations with Components</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../state/queries.html"><strong aria-hidden="true">5.1.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../state/signals.html"><strong aria-hidden="true">5.2.</strong> Signals</a></li></ol></li><li class="chapter-item expanded "><a href="../building-the-dom.html"><strong aria-hidden="true">6.</strong> Building the DOM</a></li><li class="chapter-item expanded "><a href="../utilities.html"><strong aria-hidden="true">7.</strong> Other utilities</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../utilities/web_str.html"><strong aria-hidden="true">7.1.</strong> web_str</a></li><li class="chapter-item expanded "><a href="../utilities/events.html"><strong aria-hidden="true">7.2.</strong> Events</a></li></ol></li><li class="chapter-item expanded "><a href="../recipes.html"><strong aria-hidden="true">8.</strong> Recipes</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../recipes/logging.html"><strong aria-hidden="true">8.1.</strong> Logging</a></li><li class="chapter-item expanded "><a href="../recipes/elements-that-change.html"><strong aria-hidden="true">8.2.</strong> Elements that change</a></li><li class="chapter-item expanded "><a href="../recipes/svgs.html"><strong aria-hidden="true">8.3.</strong> SVGs</a></li><li class="chapter-item expanded "><a href="../recipes/async-and-is-dead.html"><strong aria-hidden="true">8.4.</strong> Async and .is_dead()</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -89,7 +89,7 @@
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                <div id="menu-bar-hover-placeholder"></div>
+                                <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky bordered">
                     <div class="left-buttons">
                         <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
@@ -142,48 +142,96 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="precedence-gotchas-due-to-class-reuse"><a class="header" href="#precedence-gotchas-due-to-class-reuse">Precedence gotchas due to class reuse</a></h1>
-<p>Due to the order of classes creation, a line that you write later might have higher precedence than a line that you write earlier, perhaps accidentally.</p>
-<pre><code class="language-rust noplaypen">use hobo::components as cmp;
+                        <h1 id="borrowing-and-storage"><a class="header" href="#borrowing-and-storage">Borrowing and Storage</a></h1>
+<p>Components for entities are stored in a simple map - <code>HashMap&lt;Entity, Component&gt;</code> (see, <code>hobo::storage::SimpleStorage</code>).</p>
+<p>(This also makes searching for components via <code>hobo::find_one</code> <em>very</em> cheap).</p>
+<p>Rust's ownership rules ensure that a mutable borrow is exclusive, which means that we cannot have mutable references to components while immutable ones exists (or vice-versa).
+Here's an example of how this affects hobo:</p>
+<pre><code class="language-rust noplaypen">// src\example_file.rs
 
-cmp::div()
-	.class(css::display!(none));
+mod example_module {
+    pub use hobo::{prelude::*, create as e};
 
-// -- snip --
+    struct Foo;
 
-let element = cmp::div();
-element
-	.class(css::display!(flex))
-	.on_click(move |_| {
-		// this won't actually change anything because `css::display!(none)`
-		// class is generated first
-		// the classname is reused here, then `css::display!(flex)` class is
-		// generated later and has higher precedence
-		element.class(css::display!(none));
-	})
+    pub fn test() -&gt; impl hobo::AsElement {
+        e::div()
+            .component(Foo)
+            .with(|&amp;element| {
+                // Ok
+                let foo1 = element.get_cmp::&lt;Foo&gt;();
+                // Still ok
+                let foo2 = element.get_cmp::&lt;Foo&gt;();
+                // Panic!
+                let foo3 = element.get_cmp_mut::&lt;Foo&gt;();
+            })
+    }
+}
 </code></pre>
-<p>The workaround is to either use <code>.style</code> (that has the highest precedence) or to change the style to prevent class reuse. Of course, you can increase specificity by repeating the same class selector</p>
-<pre><code class="language-rust noplaypen">let element = cmp::div();
-element
-	.class(css::display!(flex))
-	.on_click(move |_| {
-		element.class(css::style!(
-			.&amp;.&amp; {
-				css::display!(none),
-			}
-		));
-	})
+<p>This, of course, also applies to queries/find/etc.</p>
+<p>This can be a bit tricky to debug in Wasm, which is why when compiling in debug mode, hobo will display the following helpful message in the browser's console if a borrow-related runtime panic is encountered:</p>
+<pre><code>panicked at ''already borrowed': Trying to mutably borrow `example_module::Foo`    
+storage at `src\example_file.rs:16:50` while other borrows to it already exist:
+
+(mut) src\example_file.rs:16:50
+      src\example_flib.rs:14:50
+      src\example_flib.rs:12:50
+</code></pre>
+<p>This will list <strong>only</strong> the currently active borrows, as well as the mutable one, descending in order of access.</p>
+<p>(Every type we store as a component will have it's own storage, so it's fine to mutably borrow storages of different types.)</p>
+<p>As an example of where this could arise as an issue, imagine the following situation:</p>
+<p>We want to replace an element with a new one, using some data we stored in it.</p>
+<pre><code class="language-rust noplaypen">struct SomeData {
+    big_data: u64,
+};
+
+pub fn update_element(old_element: impl hobo::AsElement + Copy) {
+    let some_data = old_element.get_cmp::&lt;SomeData&gt;();
+
+    let new_element = process_data_and_return_div(some_data);
+    
+    // Runtime panic!
+    old_element.replace_with(new_element);
+}
+</code></pre>
+<p>This will panic at runtime - this is because when we delete the old element (via replace) we need to mutably borrow the storage to all of it's components, in order to delete them too.
+However, we are already holding a reference to one of the components.</p>
+<p>The way to circumvent this would be similar to how one would for any other ownership issue:</p>
+<p>You can drop the guard, ensuring that no references conflict:</p>
+<pre><code class="language-rust noplaypen">pub fn update_element(old_element: impl hobo::AsElement + Copy) {
+    let some_data = old_element.get_cmp::&lt;SomeData&gt;();
+
+    let new_element = process_data_and_return_div(some_data);
+    
+    drop(some_data);
+
+    old_element.replace_with(new_element);
+}
+</code></pre>
+<p>Or, you can clone the value:</p>
+<pre><code class="language-rust noplaypen">#[derive(Clone)]
+struct SomeData {
+    big_data: u64,
+};
+
+pub fn update_element(element: impl hobo::AsElement + Copy) {
+    let some_data = old_element.get_cmp::&lt;SomeData&gt;().clone();
+
+    let new_element = process_data_and_return_div(&amp;some_data);
+    
+    old_element.replace_with(new_element);
+}
 </code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../styling/every-way-to-make-a-class.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../basic-concepts/dom-events.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../state.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../styling.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -193,11 +241,11 @@ element
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../styling/every-way-to-make-a-class.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../basic-concepts/dom-events.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../state.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../styling.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
