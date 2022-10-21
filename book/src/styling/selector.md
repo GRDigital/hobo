@@ -21,17 +21,17 @@ use hobo::create as e;
 struct ButtonMarker;
 
 e::div()
-	.class(css::style!(
-		.& >> .[ButtonMarker] {
-			css::cursor!(pointer),
-		}
-	))
-	.child(e::div()
-		.mark::<ButtonMarker>()
-		.text("button 1")
-	)
-	.child(e::div()
-		.mark::<ButtonMarker>()
-		.text("button 2")
-	)
+    .class(css::style!(
+        .& >> .[ButtonMarker] {
+            css::cursor!(pointer),
+        }
+    ))
+    .child(e::div()
+        .mark::<ButtonMarker>()
+        .text("button 1")
+    )
+    .child(e::div()
+        .mark::<ButtonMarker>()
+        .text("button 2")
+    )
 ```

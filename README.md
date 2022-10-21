@@ -4,7 +4,7 @@
 <a href="https://docs.rs/hobo/"><img alt="API Docs" src="https://img.shields.io/badge/docs.rs-hobo-yellow"/></a>
 
 **hobo** is an opinionated, batteries-included Rust frontend framework. Works on **stable Rust**.    
-**STILL WIP** although used in production by [GR Digital](https://grdigital.co.uk/)    
+**STILL WIP** although used in production by [GR Digital](https://grdigital.co.uk/).    
 [Check out the Book](https://grdigital.github.io/hobo/index.html)!
 
 ### Notable features:
@@ -18,17 +18,24 @@
 
 ### Sneak peek:
 ```rust,noplaypen
-fn counter() -> impl hobo::Element {
+pub use hobo::{
+    prelude::*,
+    create as e,
+    signals::signal::{Mutable, SignalExt}
+};
+
+fn counter() -> impl hobo::AsElement {
     let counter = Mutable::new(0);
 
     e::div()
         .class((
             css::display!(flex),
+            css::flex_direction!(column),
             css::width!(400 px),
         ))
         .child(e::div()
             .text_signal(counter.signal().map(|value| {
-                format!("Counter value is: {}", value);
+                format!("Counter value is: {value}")
             }))
         )
         .child(e::button()

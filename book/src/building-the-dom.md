@@ -5,43 +5,46 @@ Assembling elements is usually done via function chaining, but every function ha
 Here's an example of a somewhat involved element:
 
 ```rust
+pub use hobo::{prelude::*, create as e};
+
 #[derive(hobo::Element)]
 pub struct Input {
-	element: e::Div,
-	pub input: e::Input,
+    element: e::Div,
+    pub input: e::Input,
 }
 
 impl Input {
-	pub fn new(caption_text: &str, svg: Option<e::Svg>) -> Self {
-		let input = e::input()
-			.attr(web_str::r#type(), web_str::text())
-			.class(css::class! {
-				// some style
-			});
+    pub fn new(caption_text: &str, svg: Option<e::Svg>) -> Self {
+        let input = e::input()
+            // shortcut for .attr(web_str::r#type(), web_str::text())
+            .type_text()
+            .class(css::class! {
+                // some style
+            });
 
-		let caption_text = e::div()
-			.text(caption_text)
-			.class(css::class! {
-				// some style
-			});
+        let caption_text = e::div()
+            .text(caption_text)
+            .class(css::class! {
+                // some style
+            });
 
-		let mut element = e::div()
-			.class(css::style! {
-				// some style
-			})
-			.child(input)
-			.child(caption_text);
+        let mut element = e::div()
+            .class(css::style! {
+                // some style
+            })
+            .child(input)
+            .child(caption_text);
 
-		if let Some(svg) = svg {
-			element.add_child(
-				svg.class(css::class! {
-					// some style
-				})
-			);
-		}
+        if let Some(svg) = svg {
+            element.add_child(
+                svg.class(css::class! {
+                    // some style
+                })
+            );
+        }
 
-		Self { element, input }
-	}
+        Self { element, input }
+    }
 }
 ```
 

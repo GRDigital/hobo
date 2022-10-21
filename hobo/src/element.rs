@@ -122,8 +122,7 @@ pub trait AsElement: AsEntity + Sized {
 		let len = classes.styles.len();
 		classes.styles.insert(tag_hash, (style.into(), len));
 	}
-	// Cannot mix impl Into<css::Style> with generic type arguments
-	fn set_class_typed<Type: 'static>(&self, style: css::Style) {
+	fn set_class_typed<Type: 'static>(&self, style: impl Into<css::Style>) {
 		self.set_class_tagged(TypeId::of::<Type>(), style)
 	}
 	fn set_class(&self, style: impl Into<css::Style>) { self.set_class_tagged(0u64, style); }
@@ -133,7 +132,7 @@ pub trait AsElement: AsEntity + Sized {
 	}
 	fn class(self, style: impl Into<css::Style>) -> Self { self.add_class(style); self }
 	fn class_tagged<Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<css::Style>) -> Self { self.set_class_tagged(tag, style); self }
-	fn class_typed<Type: 'static>(self, style: css::Style) -> Self { self.set_class_typed::<Type>(style); self }
+	fn class_typed<Type: 'static>(self, style: impl Into<css::Style>) -> Self { self.set_class_typed::<Type>(style); self }
 
 	fn set_class_signal<S, I>(&self, signal: S) where
 		I: Into<css::Style>,

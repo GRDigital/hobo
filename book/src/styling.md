@@ -9,48 +9,66 @@ For example, here's a style:
 
 ```rust,noplaypen
 hobo::create::div()
-	.class(css::style!(
-		.& {
-			css::height!(393 px),
-			css::Display::Flex, // can also be `css::display!(flex)`
-			css::AlignItems::Center,
-			css::Position::Relative,
-		}
+    .class(css::style!(
+        .& {
+            css::height!(393 px),
+            css::Display::Flex, // can also be `css::display!(flex)`
+            css::AlignItems::Center,
+            css::Position::Relative,
+        }
 
-		.& > svg {
-			css::width!(12 px),
-			css::height!(100%),
-			css::Cursor::Pointer,
-			css::flex_shrink!(0),
-			css::UserSelect::None,
-		}
+        .& > svg {
+            css::width!(12 px),
+            css::height!(100%),
+            css::Cursor::Pointer,
+            css::flex_shrink!(0),
+            css::UserSelect::None,
+        }
 
-		.& > :not(:nth_child(0, 1)) { // nth_child will convert to An+B syntax
-			css::z_index!(200),
-		}
+        .& > :not(:nth_child(0, 1)) { // nth_child will convert to An+B syntax
+            css::z_index!(200),
+        }
 
-		.& > div:not(:nth_child(0, 1)) {
-			css::width!(17.5%),
-			css::height!(100%),
-			css::Display::Flex,
-			css::AlignItems::Center,
-		}
+        .& > div:not(:nth_child(0, 1)) {
+            css::width!(17.5%),
+            css::height!(100%),
+            css::Display::Flex,
+            css::AlignItems::Center,
+        }
 
-		// doubling up on the class name increases specificity
-		.&.& > :nth_child(0, 5) { 
-			css::width!(30%),
-		}
+        // doubling up on the class name increases specificity
+        .&.& > :nth_child(0, 5) { 
+            css::width!(30%),
+        }
 
-		.& > *:nth_child(0, 3) > img,
-		.& > *:nth_child(0, 4) > img,
-		.& > svg:last_child {
-			css::TransformFunction::TranslateX(css::unit!(50%)),
-		}
+        .& > *:nth_child(0, 3) > img,
+        .& > *:nth_child(0, 4) > img,
+        .& > svg:last_child {
+            css::TransformFunction::TranslateX(css::unit!(50%)),
+        }
 
-		.& >> img { // this is same as `.& img` selector in css
-			css::height!(100%),
-		}
-	))
+        .& >> img { // this is same as `.& img` selector in css
+            css::height!(100%),
+        }
+    ))
 ```
 
-> **Chaining vs non-chaining syntax:** `.style()` is the chaining syntax, `.set_style()` is the non-chaining alternative. Similarly, `.class()` and `.set_class()`. More about chaining vs non-chaining syntax in [Building the DOM](../building-the-dom.md#chaining-vs-non-chaining-syntax).
+Property tuple example:
+
+```rust,noplaypen
+    hobo::create::div()
+        .style((
+            // Shortcut for same width and height
+            css::size!(12 px),
+            css::Display::Flex,
+        ))
+```
+
+If only a single property is used, one can ommit the tuple:
+
+```rust,noplaypen
+    hobo::create::div()
+        .class(css::Display::Flex)
+```
+
+> **Chaining vs non-chaining syntax:** `.style()` is the chaining syntax, `.set_style()` is the non-chaining alternative. Similarly, `.class()` and `.set_class()`. More about chaining vs non-chaining syntax in [Building the DOM](./building-the-dom.md#chaining-vs-non-chaining-syntax).

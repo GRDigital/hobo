@@ -4,7 +4,7 @@ Most simple event handlers, like clicks or hovers, usually just modify either st
 
 ```rust
 e!((*foo) move || {
-	foo.set_inner_text("wooo");
+    foo.set_inner_text("wooo");
 })
 ```
 
@@ -12,11 +12,11 @@ would turn into something like
 
 ```rust
 {
-	// this clone is only of an html element reference,
-	// it doesn't actually clone the element
-	let foo = foo.raw_element().clone();
-	move || {
-		foo.set_inner_text("wooo");
-	}
+    // this clone is only of an html element reference,
+    // it doesn't actually clone the element
+    let foo = foo.raw_element().clone();
+    move || {
+        foo.set_inner_text("wooo");
+    }
 }
 ```

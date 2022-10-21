@@ -4,25 +4,25 @@ Queries allow finding individual **Entities** or collections of **Entities**. Be
 
 ```rust,noplaypen
 struct Foo {
-	// some fields
+    // some fields
 }
 
 // find the first (presumably only) entity with some component Foo
 let (entity, _) = hobo::find_one::<(Entity, With<Foo>)>();
-let element = SomeElement(entity);
+let element = hobo::Element(entity);
 element.set_text("This entity has Foo");
 ```
 
 ```rust,noplaypen
 struct Frobnicator {
-	num_fraculations: u32,
-	// other fields
+    num_fraculations: u32,
+    // other fields
 }
 
 // find all entities with a Frobnicator component and mutate it
 // perhaps as a result of some combined transformation
 for frobnicator in hobo::find::<&mut Frobnicator>() {
-	frobnicator.num_fraculations += 1;
+    frobnicator.num_fraculations += 1;
 }
 ```
 
@@ -34,16 +34,16 @@ Queries are also often useful to establish relations with distant **Elements**. 
 use hobo::create as e;
 
 struct SettingsData {
-	speed: f32,
+    speed: f32,
 }
 
 let settings_container = e::div()
-	// etc
-	.component(SettingsData { speed: 0.35 })
+    // etc
+    .component(SettingsData { speed: 0.35 })
 
 // -- snip --
 
 let unrelated_display = e::div()
-	//etc
-	.text(hobo::find::<&SettingsData>().speed.to_string())
+    //etc
+    .text(hobo::find_one::<&SettingsData>().speed.to_string())
 ```

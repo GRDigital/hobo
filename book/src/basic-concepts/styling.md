@@ -11,47 +11,47 @@ For example, here's a style:
 
 ```rust
 e::div()
-	.class(css::style!(
-		.& {
-			css::height!(393 px),
-			css::Display::Flex,
-			css::AlignItems::Center,
-			css::Position::Relative,
-		}
+    .class(css::style!(
+        .& {
+            css::height!(393 px),
+            css::Display::Flex,
+            css::AlignItems::Center,
+            css::Position::Relative,
+        }
 
-		.& > svg {
-			css::width!(12 px),
-			css::height!(100%),
-			css::Cursor::Pointer,
-			css::flex_shrink!(0),
-			css::UserSelect::None,
-		}
+        .& > svg {
+            css::width!(12 px),
+            css::height!(100%),
+            css::Cursor::Pointer,
+            css::flex_shrink!(0),
+            css::UserSelect::None,
+        }
 
-		.& > :not(:nth_child(1)) {
-			css::z_index!(200),
-		}
+        .& > :not(:nth_child(1)) {
+            css::z_index!(200),
+        }
 
-		.& > div:not(:nth_child(1)) {
-			css::width!(17.5%),
-			css::height!(100%),
-			css::Display::Flex,
-			css::AlignItems::Center,
-		}
+        .& > div:not(:nth_child(1)) {
+            css::width!(17.5%),
+            css::height!(100%),
+            css::Display::Flex,
+            css::AlignItems::Center,
+        }
 
-		.&.& > :nth_child(5) {
-			css::width!(30%),
-		}
+        .&.& > :nth_child(5) {
+            css::width!(30%),
+        }
 
-		.& > *:nth_child(3) > img,
-		.& > *:nth_child(4) > img,
-		.& > svg:last_child {
-			css::Transform::Some(vec![css::TransformFunction::ScaleX((-1.).into())])
-		}
+        .& > *:nth_child(3) > img,
+        .& > *:nth_child(4) > img,
+        .& > svg:last_child {
+            css::Transform::Some(vec![css::TransformFunction::ScaleX((-1.).into())])
+        }
 
-		.& >> img {
-			css::height!(100%),
-		}
-	))
+        .& >> img {
+            css::height!(100%),
+        }
+    ))
 ```
 
 > **Chaining vs non-chaining syntax:** `.style()` is the chaining syntax, `.set_style()` is the non-chaining alternative. Similarly, `.class()` and `.set_class()`. More about chaining vs non-chaining syntax in [Building the DOM](../building-the-dom.md#chaining-vs-non-chaining-syntax).

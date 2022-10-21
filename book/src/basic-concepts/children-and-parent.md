@@ -8,11 +8,11 @@ Usually you won't have to care about it since `.add_child()` (and the like) and 
 
 ```rust,noplaypen
 let children = foo.get_cmp::<hobo::Children>()
-	.iter()
-	.map(|entity| hobo::SomeElement(entity));
+    .iter()
+    .map(|entity| hobo::SomeElement(entity));
 
 for child in children {
-	child.set_text("hello from hobo!");
+    child.set_text("hello from hobo!");
 }
 ```
 
