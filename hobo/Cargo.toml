@@ -1,6 +1,6 @@
 [package]
 name = "hobo"
-version = "0.2.2"
+version = "0.3.0"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/grdigital/hobo"
@@ -14,8 +14,8 @@ discard = "1"
 elsa = "1"
 extend = "1"
 futures-signals = "0.3"
-hobo_css = { path = "../hobo_css", version = "=0.2.2" }
-hobo_derive = { path = "../hobo_derive", version = "=0.2.2" }
+hobo_css = { path = "../hobo_css", version = "=0.3.0" }
+hobo_derive = { path = "../hobo_derive", version = "=0.3.0" }
 js-sys = "0.3"
 log = "0.4"
 num-traits = "0.2"
