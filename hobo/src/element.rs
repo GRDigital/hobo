@@ -132,7 +132,7 @@ pub trait AsElement: AsEntity + Sized {
 	}
 	fn class(self, style: impl Into<css::Style>) -> Self { self.add_class(style); self }
 	fn class_tagged<Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<css::Style>) -> Self { self.set_class_tagged(tag, style); self }
-	fn class_typed<Type: 'static>(self, style: css::Style) -> Self { self.set_class_typed::<Type>(style); self }
+	fn class_typed<Type: 'static>(self, style: impl Into<css::Style>) -> Self { self.set_class_typed::<Type>(style); self }
 
 	fn set_class_signal<S, I>(&self, signal: S) where
 		I: Into<css::Style>,
