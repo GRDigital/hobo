@@ -35,18 +35,18 @@ use hobo::create as e;
 struct Flexible;
 
 e::div()
-	.class(css::display!(flex))
-	.class_typed::<Flexible>((
-		css::flex_direction!(row),
-		css::width!(100 px),
-	))
-	.on_click(|&element| {
-		element
-			.set_class_typed::<Flexible>((
-				css::flex_direction!(row),
-				css::width!(100 px),
-			))
-	})
+    .class(css::display!(flex))
+    .class_typed::<Flexible>((
+        css::flex_direction!(row),
+        css::width!(100 px),
+    ))
+    .on_click(|&element| {
+        element
+            .set_class_typed::<Flexible>((
+                css::flex_direction!(row),
+                css::width!(100 px),
+            ))
+    })
 ```
 
 * `.set_class_tagged::<Tag: Hash>(tag, style)` - Similar to `.set_class_tagged`, but uses an instance of a type rather than `Type`. The regular `.class()` method uses this internally with just an incrementing `u64` for a tag.
@@ -55,18 +55,18 @@ e::div()
 use hobo::create as e;
 
 e::div()
-	.class(css::display!(flex))
-	.class_tagged("Flexible", (
-		css::flex_direction!(row),
-		css::width!(100 px),
-	))
-	.on_click(|&element| {
-		element
-			.set_class_tagged("Flexible", (
-				css::flex_direction!(column),
-				css::height!(100 px),
-			))
-	})
+    .class(css::display!(flex))
+    .class_tagged("Flexible", (
+        css::flex_direction!(row),
+        css::width!(100 px),
+    ))
+    .on_click(|&element| {
+        element
+            .set_class_tagged("Flexible", (
+                css::flex_direction!(column),
+                css::height!(100 px),
+            ))
+    })
 ```
 
 Prefer using this over `.set_class_typed` if your tag is computed at runtime.
@@ -75,18 +75,18 @@ Prefer using this over `.set_class_typed` if your tag is computed at runtime.
 
 ```rust,noplaypen
 enum Theme {
-	Light,
-	Dark,
+    Light,
+    Dark,
 }
 
 let theme = Mutable::new(Theme::Light);
 
 e::div()
-	.class_typed_signal::<Theme, _, _>(theme.signal().map(|theme| {
-		match theme {
-			Theme::Light => css::background_color!(css::color::WHITE),
-			Theme::Dark => css::background_color!(css::color::BLACK),
-		}
-	}))
-	.component(theme)
+    .class_typed_signal::<Theme, _, _>(theme.signal().map(|theme| {
+        match theme {
+            Theme::Light => css::background_color!(css::color::WHITE),
+            Theme::Dark => css::background_color!(css::color::BLACK),
+        }
+    }))
+    .component(theme)
 ```
