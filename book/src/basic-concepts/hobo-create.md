@@ -59,8 +59,8 @@ This won't compile, but the distinction between types in this case isn't useful.
 ```rust,noplaypen
 fn content() -> impl hobo::Element {
 	match tab {
-		Tab::Main => main_page().erase(), // hobo::Element
-		Tab::Blogpost => article().erase(), // hobo::Element
+		Tab::Main => main_page().as_element(), // hobo::Element
+		Tab::Blogpost => article().as_element(), // hobo::Element
 		// etc
 	}
 }
