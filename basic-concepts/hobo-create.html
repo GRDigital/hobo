@@ -185,8 +185,8 @@ struct CustomSelect {
 <p>This won't compile, but the distinction between types in this case isn't useful. So we can erase the concrete types and get the general <code>Element</code>:</p>
 <pre><code class="language-rust noplaypen">fn content() -&gt; impl hobo::Element {
 	match tab {
-		Tab::Main =&gt; main_page().erase(), // hobo::Element
-		Tab::Blogpost =&gt; article().erase(), // hobo::Element
+		Tab::Main =&gt; main_page().as_element(), // hobo::Element
+		Tab::Blogpost =&gt; article().as_element(), // hobo::Element
 		// etc
 	}
 }
