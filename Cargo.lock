@@ -165,7 +165,7 @@ checksum = "2540771e65fc8cb83cd6e8a237f70c319bd5c29f78ed1084ba5d50eeac86f7f9"
 
 [[package]]
 name = "hobo"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "as-any",
  "console_error_panic_hook",
@@ -198,7 +198,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_css"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "extend",
  "hobo_css_macros",
@@ -211,7 +211,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_css_macros"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "derive_utils",
  "heck",
@@ -227,7 +227,7 @@ dependencies = [
 
 [[package]]
 name = "hobo_derive"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "derive_utils",
  "proc-macro-crate",
@@ -436,9 +436,9 @@ dependencies = [
 
 [[package]]
 name = "roxmltree"
-version = "0.15.1"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b9de9831a129b122e7e61f242db509fa9d0838008bf0b29bb0624669edfe48a"
+checksum = "fb6d47b59770b0ae88c7f270c68502832ec14d8c7ab5f7a584f204bb76dbfd8e"
 dependencies = [
  "xmlparser",
 ]
