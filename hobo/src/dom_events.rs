@@ -12,6 +12,7 @@ pub enum EventHandlerCallback {
 	WheelEvent(Closure<dyn FnMut(web_sys::WheelEvent) + 'static>),
 	UiEvent(Closure<dyn FnMut(web_sys::UiEvent) + 'static>),
 	DragEvent(Closure<dyn FnMut(web_sys::DragEvent) + 'static>),
+	SubmitEvent(Closure<dyn FnMut(web_sys::SubmitEvent) + 'static>),
 
 	// AnimationEvent
 	// AnimationPlaybackEvent
@@ -106,6 +107,7 @@ impl Drop for EventHandler {
 			EventHandlerCallback::WheelEvent(cb) => cb.as_ref().unchecked_ref(),
 			EventHandlerCallback::UiEvent(cb) => cb.as_ref().unchecked_ref(),
 			EventHandlerCallback::DragEvent(cb) => cb.as_ref().unchecked_ref(),
+			EventHandlerCallback::SubmitEvent(cb) => cb.as_ref().unchecked_ref(),
 		});
 		if let Err(_e) = res {
 			// TODO?
@@ -185,4 +187,5 @@ generate_events! {
 	Event,         load,        on_load;
 	Event,         canplay,     on_can_play;
 	DragEvent,     drag,        on_drag;
+	SubmitEvent,   submit,      on_submit;
 }
