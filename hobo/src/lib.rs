@@ -59,7 +59,7 @@ pub mod backtrace {
 	};
 	use once_cell::sync::Lazy;
 	use shrinkwraprs::Shrinkwrap;
-	
+
 	pub static STORAGE_MAP: Lazy<BacktraceStorage> = Lazy::new(Default::default);
 
 	#[repr(transparent)]
