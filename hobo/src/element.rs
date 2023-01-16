@@ -26,6 +26,13 @@ pub(crate) struct Classes {
 	pub(crate) styles: HashMap<u64, (css::Style, usize)>,
 }
 
+#[cfg(feature = "experimental")]
+pub struct InDom;
+
+#[cfg(feature = "experimental")]
+#[derive(Default)]
+struct OnDomAttachCbs(Vec<Box<dyn FnOnce() + Send + Sync + 'static>>);
+
 #[derive(Default)]
 struct SignalHandlesCollection(Vec<discard::DiscardOnDrop<futures_signals::CancelableFutureHandle>>);
 
@@ -41,7 +48,27 @@ pub trait AsElement: AsEntity + Sized {
 		if let (Some(parent_node), Some(child_node)) = (self.try_get_cmp::<web_sys::Node>(), child.try_get_cmp::<web_sys::Node>()) {
 			parent_node.append_child(&child_node).expect("can't append child");
 		}
+
+		#[cfg(feature = "experimental")]
+		if !child.has_cmp::<InDom>() {
+			if self.has_cmp::<InDom>() {
+				child.add_component(InDom);
+				if let Some(mut callbacks) = child.try_get_cmp_mut::<OnDomAttachCbs>() {
+					for cb in std::mem::take(&mut callbacks.0) { cb(); }
+					child.remove_cmp::<OnDomAttachCbs>();
+				}
+			} else if let Some(mut callbacks) = child.try_get_cmp_mut::<OnDomAttachCbs>() {
+				self.get_cmp_mut_or_default::<OnDomAttachCbs>().0.append(&mut callbacks.0);
+			}
+		}
 	}
+	#[cfg(feature = "experimental")]
+	fn add_on_dom_attach(&self, cb: impl FnOnce() + Send + Sync + 'static) {
+		if self.has_cmp::<InDom>() { cb(); return; }
+		self.get_cmp_mut_or_default::<OnDomAttachCbs>().0.push(Box::new(cb));
+	}
+	#[cfg(feature = "experimental")]
+	fn on_dom_attach(self, cb: impl FnOnce() + Send + Sync + 'static) -> Self { self.add_on_dom_attach(cb); self }
 	fn child(self, child: impl AsElement) -> Self { self.add_child(child); self }
 	fn with_child<T: AsElement>(self, f: impl FnOnce(&Self) -> T) -> Self { let c = f(&self); self.child(c) }
 	fn add_children<Item: AsElement>(&self, children: impl IntoIterator<Item = Item>) { for child in children.into_iter() { self.add_child(child); } }

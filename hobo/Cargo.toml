@@ -39,6 +39,9 @@ log = "0.4"
 stats_alloc = "0.1"
 wasm-bindgen-test = "0.3"
 
+[features]
+experimental = []
+
 [dependencies.web-sys]
 version = "0.3"
 features = [
