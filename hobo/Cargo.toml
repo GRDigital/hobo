@@ -178,6 +178,8 @@ features = [
 	"UiEvent",
 	"DragEvent",
 	"SubmitEvent",
+	"InputEvent",
+	"AnimationEvent",
 	"RadioNodeList",
 	"Window",
 	"Document",

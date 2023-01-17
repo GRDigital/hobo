@@ -2,113 +2,16 @@
 
 use crate::{prelude::*, AsEntity, AsElement};
 
-/// An enum for different event types
-pub enum EventHandlerCallback {
-	MouseEvent(Closure<dyn FnMut(web_sys::MouseEvent) + 'static>),
-	KeyboardEvent(Closure<dyn FnMut(web_sys::KeyboardEvent) + 'static>),
-	Event(Closure<dyn FnMut(web_sys::Event) + 'static>),
-	FocusEvent(Closure<dyn FnMut(web_sys::FocusEvent) + 'static>),
-	TouchEvent(Closure<dyn FnMut(web_sys::TouchEvent) + 'static>),
-	WheelEvent(Closure<dyn FnMut(web_sys::WheelEvent) + 'static>),
-	UiEvent(Closure<dyn FnMut(web_sys::UiEvent) + 'static>),
-	DragEvent(Closure<dyn FnMut(web_sys::DragEvent) + 'static>),
-	SubmitEvent(Closure<dyn FnMut(web_sys::SubmitEvent) + 'static>),
-
-	// AnimationEvent
-	// AnimationPlaybackEvent
-	// DeviceMotionEvent
-	// DeviceOrientationEvent
-	// DeviceProximityEvent
-	// ErrorEvent
-	// ExtendableEvent
-	// ExtendableMessageEvent
-	// FetchEvent
-	// AudioProcessingEvent
-	// FontFaceSetLoadEvent
-	// GamepadAxisMoveEvent
-	// GamepadButtonEvent
-	// GamepadEvent
-	// GpuUncapturedErrorEvent
-	// HashChangeEvent
-	// IdbVersionChangeEvent
-	// ImageCaptureErrorEvent
-	// InputEvent
-	// BeforeUnloadEvent
-	// MediaEncryptedEvent
-	// MediaKeyError
-	// MediaKeyMessageEvent
-	// MediaQueryListEvent
-	// MediaRecorderErrorEvent
-	// MediaStreamEvent
-	// MediaStreamTrackEvent
-	// MessageEvent
-	// MidiConnectionEvent
-	// MidiMessageEvent
-	// BlobEvent
-	// MutationEvent
-	// NotificationEvent
-	// OfflineAudioCompletionEvent
-	// PageTransitionEvent
-	// PaymentMethodChangeEvent
-	// PaymentRequestUpdateEvent
-	// PointerEvent
-	// PopStateEvent
-	// ClipboardEvent
-	// PopupBlockedEvent
-	// PresentationConnectionAvailableEvent
-	// PresentationConnectionCloseEvent
-	// ProgressEvent
-	// PromiseRejectionEvent
-	// PushEvent
-	// RtcDataChannelEvent
-	// RtcPeerConnectionIceEvent
-	// RtcTrackEvent
-	// RtcdtmfToneChangeEvent
-	// CloseEvent
-	// ScrollAreaEvent
-	// SecurityPolicyViolationEvent
-	// SpeechRecognitionError
-	// SpeechRecognitionEvent
-	// SpeechSynthesisErrorEvent
-	// SpeechSynthesisEvent
-	// StorageEvent
-	// TcpServerSocketEvent
-	// TcpSocketErrorEvent
-	// TcpSocketEvent
-	// CompositionEvent
-	// TimeEvent
-	// TrackEvent
-	// TransitionEvent
-	// UserProximityEvent
-	// WebGlContextEvent
-	// XrInputSourceEvent
-	// XrInputSourcesChangeEvent
-	// CustomEvent
-	// XrReferenceSpaceEvent
-	// XrSessionEvent
-	// DeviceLightEvent
-}
-
 /// A dom event subscription, that will unsubscribe from dom when dropped
 pub struct EventHandler {
 	target: web_sys::EventTarget,
 	name: &'static str,
-	cb: EventHandlerCallback,
+	cb: Box<dyn std::convert::AsRef<JsValue>>,
 }
 
 impl Drop for EventHandler {
 	fn drop(&mut self) {
-		let res = self.target.remove_event_listener_with_callback(self.name, match &self.cb {
-			EventHandlerCallback::MouseEvent(cb) => cb.as_ref().unchecked_ref(),
-			EventHandlerCallback::KeyboardEvent(cb) => cb.as_ref().unchecked_ref(),
-			EventHandlerCallback::Event(cb) => cb.as_ref().unchecked_ref(),
-			EventHandlerCallback::FocusEvent(cb) => cb.as_ref().unchecked_ref(),
-			EventHandlerCallback::TouchEvent(cb) => cb.as_ref().unchecked_ref(),
-			EventHandlerCallback::WheelEvent(cb) => cb.as_ref().unchecked_ref(),
-			EventHandlerCallback::UiEvent(cb) => cb.as_ref().unchecked_ref(),
-			EventHandlerCallback::DragEvent(cb) => cb.as_ref().unchecked_ref(),
-			EventHandlerCallback::SubmitEvent(cb) => cb.as_ref().unchecked_ref(),
-		});
+		let res = self.target.remove_event_listener_with_callback(self.name, (*self.cb).as_ref().unchecked_ref());
 		if let Err(_e) = res {
 			// TODO?
 			// log::warn!("remove_event_listener_with_callback failed with error: {}", serde_json::to_string_pretty(&e.into_serde::<serde_json::Value>().unwrap()).unwrap());
@@ -130,7 +33,7 @@ macro_rules! generate_events {
 					EventHandler {
 						target: self.clone(),
 						name: web_str::$name(),
-						cb: EventHandlerCallback::$event_kind(handler),
+						cb: Box::new(handler),
 					}
 				}
 			}
@@ -162,30 +65,106 @@ macro_rules! generate_events {
 }
 
 generate_events! {
-	MouseEvent,    click,       on_click;
-	MouseEvent,    contextmenu, on_context_menu;
-	MouseEvent,    dblclick,    on_dbl_click;
-	MouseEvent,    mousedown,   on_mouse_down;
-	MouseEvent,    mouseenter,  on_mouse_enter;
-	MouseEvent,    mouseleave,  on_mouse_leave;
-	MouseEvent,    mousemove,   on_mouse_move;
-	MouseEvent,    mouseover,   on_mouse_over;
-	MouseEvent,    mouseout,    on_mouse_out;
-	MouseEvent,    mouseup,     on_mouse_up;
-	KeyboardEvent, keydown,     on_key_down;
-	KeyboardEvent, keyup,       on_key_up;
-	Event,         change,      on_change;
-	UiEvent,       scroll,      on_scroll;
-	UiEvent,       resize,      on_resize;
-	FocusEvent,    blur,        on_blur;
-	FocusEvent,    focus,       on_focus;
-	TouchEvent,    touchstart,  on_touch_start;
-	TouchEvent,    touchend,    on_touch_end;
-	TouchEvent,    touchmove,   on_touch_move;
-	TouchEvent,    touchcancel, on_touch_cancel;
-	WheelEvent,    wheel,       on_wheel;
-	Event,         load,        on_load;
-	Event,         canplay,     on_can_play;
-	DragEvent,     drag,        on_drag;
-	SubmitEvent,   submit,      on_submit;
+	MouseEvent,     click,              on_click;
+	MouseEvent,     contextmenu,        on_context_menu;
+	MouseEvent,     dblclick,           on_dbl_click;
+	MouseEvent,     mousedown,          on_mouse_down;
+	MouseEvent,     mouseenter,         on_mouse_enter;
+	MouseEvent,     mouseleave,         on_mouse_leave;
+	MouseEvent,     mousemove,          on_mouse_move;
+	MouseEvent,     mouseover,          on_mouse_over;
+	MouseEvent,     mouseout,           on_mouse_out;
+	MouseEvent,     mouseup,            on_mouse_up;
+	KeyboardEvent,  keydown,            on_key_down;
+	KeyboardEvent,  keyup,              on_key_up;
+	Event,          change,             on_change;
+	UiEvent,        scroll,             on_scroll;
+	UiEvent,        resize,             on_resize;
+	FocusEvent,     blur,               on_blur;
+	FocusEvent,     focus,              on_focus;
+	TouchEvent,     touchstart,         on_touch_start;
+	TouchEvent,     touchend,           on_touch_end;
+	TouchEvent,     touchmove,          on_touch_move;
+	TouchEvent,     touchcancel,        on_touch_cancel;
+	WheelEvent,     wheel,              on_wheel;
+	Event,          load,               on_load;
+	Event,          canplay,            on_can_play;
+	DragEvent,      drag,               on_drag;
+	SubmitEvent,    submit,             on_submit;
+	InputEvent,     input,              on_input;
+	AnimationEvent, animationcancel,    on_animation_cancel;
+	AnimationEvent, animationend,       on_animation_end;
+	AnimationEvent, animationiteration, on_animation_iteration;
+	AnimationEvent, animationstart,     on_animation_start;
 }
+
+// DeviceMotionEvent
+// DeviceOrientationEvent
+// DeviceProximityEvent
+// ErrorEvent
+// ExtendableEvent
+// ExtendableMessageEvent
+// FetchEvent
+// AudioProcessingEvent
+// FontFaceSetLoadEvent
+// GamepadAxisMoveEvent
+// GamepadButtonEvent
+// GamepadEvent
+// GpuUncapturedErrorEvent
+// HashChangeEvent
+// IdbVersionChangeEvent
+// ImageCaptureErrorEvent
+// BeforeUnloadEvent
+// MediaEncryptedEvent
+// MediaKeyError
+// MediaKeyMessageEvent
+// MediaQueryListEvent
+// MediaRecorderErrorEvent
+// MediaStreamEvent
+// MediaStreamTrackEvent
+// MessageEvent
+// MidiConnectionEvent
+// MidiMessageEvent
+// BlobEvent
+// MutationEvent
+// NotificationEvent
+// OfflineAudioCompletionEvent
+// PageTransitionEvent
+// PaymentMethodChangeEvent
+// PaymentRequestUpdateEvent
+// PointerEvent
+// PopStateEvent
+// ClipboardEvent
+// PopupBlockedEvent
+// PresentationConnectionAvailableEvent
+// PresentationConnectionCloseEvent
+// ProgressEvent
+// PromiseRejectionEvent
+// PushEvent
+// RtcDataChannelEvent
+// RtcPeerConnectionIceEvent
+// RtcTrackEvent
+// RtcdtmfToneChangeEvent
+// CloseEvent
+// ScrollAreaEvent
+// SecurityPolicyViolationEvent
+// SpeechRecognitionError
+// SpeechRecognitionEvent
+// SpeechSynthesisErrorEvent
+// SpeechSynthesisEvent
+// StorageEvent
+// TcpServerSocketEvent
+// TcpSocketErrorEvent
+// TcpSocketEvent
+// CompositionEvent
+// TimeEvent
+// TrackEvent
+// TransitionEvent
+// UserProximityEvent
+// WebGlContextEvent
+// XrInputSourceEvent
+// XrInputSourcesChangeEvent
+// CustomEvent
+// XrReferenceSpaceEvent
+// XrSessionEvent
+// DeviceLightEvent

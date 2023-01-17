@@ -83,5 +83,6 @@ intern_strings! {
 	mouseleave; mousemove; mouseover; mouseout; mouseup;
 	change; keydown; keyup; scroll; resize; blur; focus;
 	touchstart; touchend; touchmove; touchcancel; wheel;
-	load; canplay; drag; submit;
+	load; canplay; drag; submit; input; animationcancel; animationend;
+	animationiteration; animationstart;
 }
