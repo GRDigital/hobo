@@ -38,9 +38,26 @@ struct SignalHandlesCollection(Vec<discard::DiscardOnDrop<futures_signals::Cance
 
 /// Marker trait for an entity that has `web_sys::Node`, `web_sys::Element`, `web_sys::EventTarget` and one of `web_sys::HtmlElement` or `web_sys::SvgElement` as attached components
 pub trait AsElement: AsEntity + Sized {
-	fn add_child(&self, child: impl AsElement) {
+	#[cfg(feature = "experimental")]
+	const MARK: Option<std::any::TypeId> = None;
+
+	#[cfg(all(debug_assertions, feature = "experimental"))]
+	const TYPE: Option<&'static str> = None;
+
+	fn add_child<T: AsElement>(&self, child: T) {
 		if self.is_dead() { log::warn!("add_child parent dead {:?}", self.as_entity()); return; }
 		if child.is_dead() { log::warn!("add_child child dead {:?}", child.as_entity()); return; }
+
+		#[cfg(feature = "experimental")]
+		if let Some(mark) = T::MARK {
+			child.get_cmp_mut_or_default::<Classes>().marks.insert(mark);
+		}
+
+		#[cfg(all(debug_assertions, feature = "experimental"))]
+		if let Some(type_id) = T::TYPE {
+			child.set_attr("data-type", type_id);
+		}
+
 		self.get_cmp_mut_or_default::<Children>().push(child.as_entity());
 		child.get_cmp_mut_or_default::<Parent>().0 = self.as_entity();
 
@@ -89,9 +106,20 @@ pub trait AsElement: AsEntity + Sized {
 	}
 
 	/// add a child at an index, useful to update tables without regenerating the whole container element
-	fn add_child_at(&self, at_index: usize, child: impl AsElement) {
+	fn add_child_at<T: AsElement>(&self, at_index: usize, child: T) {
 		if self.is_dead() { log::warn!("add_child_at parent dead {:?}", self.as_entity()); return; }
 		if child.is_dead() { log::warn!("add_child_at child dead {:?}", child.as_entity()); return; }
+
+		#[cfg(feature = "experimental")]
+		if let Some(mark) = T::MARK {
+			child.get_cmp_mut_or_default::<Classes>().marks.insert(mark);
+		}
+
+		#[cfg(all(debug_assertions, feature = "experimental"))]
+		if let Some(type_id) = T::TYPE {
+			child.set_attr("data-type", type_id);
+		}
+
 		let mut children = self.get_cmp_mut_or_default::<Children>();
 		let shifted_sibling = children.get(at_index).copied();
 		children.insert(at_index, child.as_entity());
@@ -358,6 +386,16 @@ pub trait AsElement: AsEntity + Sized {
 	fn replace_with<T: AsElement>(&self, other: T) -> T {
 		let other_entity = other.as_entity();
 		if self.is_dead() { log::warn!("replace_with dead {:?}", self.as_entity()); return other; }
+
+		#[cfg(feature = "experimental")]
+		if let Some(mark) = T::MARK {
+			other.get_cmp_mut_or_default::<Classes>().marks.insert(mark);
+		}
+
+		#[cfg(all(debug_assertions, feature = "experimental"))]
+		if let Some(type_id) = T::TYPE {
+			other.set_attr("data-type", type_id);
+		}
 
 		if let (Some(this), Some(other)) = (self.try_get_cmp::<web_sys::Element>(), other_entity.try_get_cmp::<web_sys::Node>()) {
 			this.replace_with_with_node_1(&other).unwrap();
