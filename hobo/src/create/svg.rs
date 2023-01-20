@@ -126,6 +126,6 @@ impl Svg {
 		width: impl num_traits::Num + std::string::ToString,
 		height: impl num_traits::Num + std::string::ToString,
 	) {
-		self.attr(web_str::viewBox(), format!("{} {} {} {}", min_x.to_string(), min_y.to_string(), width.to_string(), height.to_string()));
+		self.set_attr(web_str::viewBox(), format!("{} {} {} {}", min_x.to_string(), min_y.to_string(), width.to_string(), height.to_string()));
 	}
 }

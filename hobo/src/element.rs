@@ -36,27 +36,10 @@ struct OnDomAttachCbs(Vec<Box<dyn FnOnce() + Send + Sync + 'static>>);
 #[derive(Default)]
 struct SignalHandlesCollection(Vec<discard::DiscardOnDrop<futures_signals::CancelableFutureHandle>>);
 
-/// Marker trait for an entity that has `web_sys::Node`, `web_sys::Element`, `web_sys::EventTarget` and one of `web_sys::HtmlElement` or `web_sys::SvgElement` as attached components
-pub trait AsElement: AsEntity + Sized {
-	#[cfg(feature = "experimental")]
-	const MARK: Option<fn() -> std::any::TypeId> = None;
-
-	#[cfg(all(debug_assertions, feature = "experimental"))]
-	const TYPE: Option<fn() -> &'static str> = None;
-
-	fn add_child<T: AsElement>(&self, child: T) {
+impl Element {
+	fn add_child(self, child: Element) {
 		if self.is_dead() { log::warn!("add_child parent dead {:?}", self.as_entity()); return; }
 		if child.is_dead() { log::warn!("add_child child dead {:?}", child.as_entity()); return; }
-
-		#[cfg(feature = "experimental")]
-		if let Some(mark) = T::MARK {
-			child.get_cmp_mut_or_default::<Classes>().marks.insert(mark());
-		}
-
-		#[cfg(all(debug_assertions, feature = "experimental"))]
-		if let Some(type_id) = T::TYPE {
-			child.set_attr("data-type", type_id());
-		}
 
 		self.get_cmp_mut_or_default::<Children>().push(child.as_entity());
 		child.get_cmp_mut_or_default::<Parent>().0 = self.as_entity();
@@ -85,10 +68,7 @@ pub trait AsElement: AsEntity + Sized {
 			}
 		}
 	}
-	fn child(self, child: impl AsElement) -> Self { self.add_child(child); self }
-	fn with_child<T: AsElement>(self, f: impl FnOnce(&Self) -> T) -> Self { let c = f(&self); self.child(c) }
-	fn add_children<Item: AsElement>(&self, children: impl IntoIterator<Item = Item>) { for child in children.into_iter() { self.add_child(child); } }
-	fn children<Item: AsElement>(self, children: impl IntoIterator<Item = Item>) -> Self { self.add_children(children); self }
+
 	fn leave_parent(self) {
 		if self.is_dead() { log::warn!("leave_parent child dead {:?}", self.as_entity()); return; }
 		let parent = self.get_cmp::<Parent>().0;
@@ -105,20 +85,9 @@ pub trait AsElement: AsEntity + Sized {
 		}
 	}
 
-	/// add a child at an index, useful to update tables without regenerating the whole container element
-	fn add_child_at<T: AsElement>(&self, at_index: usize, child: T) {
+	fn add_child_at(self, at_index: usize, child: Element) {
 		if self.is_dead() { log::warn!("add_child_at parent dead {:?}", self.as_entity()); return; }
 		if child.is_dead() { log::warn!("add_child_at child dead {:?}", child.as_entity()); return; }
-
-		#[cfg(feature = "experimental")]
-		if let Some(mark) = T::MARK {
-			child.get_cmp_mut_or_default::<Classes>().marks.insert(mark());
-		}
-
-		#[cfg(all(debug_assertions, feature = "experimental"))]
-		if let Some(type_id) = T::TYPE {
-			child.set_attr("data-type", type_id());
-		}
 
 		let mut children = self.get_cmp_mut_or_default::<Children>();
 		let shifted_sibling = children.get(at_index).copied();
@@ -136,10 +105,8 @@ pub trait AsElement: AsEntity + Sized {
 		}
 	}
 
-	// be mindful about holding child references with this one
-	fn add_child_signal<S, E>(&self, signal: S) where
-		E: AsElement,
-		S: Signal<Item = E> + 'static,
+	fn add_child_signal<S>(self, signal: S) where
+		S: Signal<Item = Element> + 'static,
 	{
 		// placeholder at first
 		let mut child = crate::create::div().class(crate::css::Display::None).as_element();
@@ -154,6 +121,74 @@ pub trait AsElement: AsEntity + Sized {
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
+
+	fn replace_with(self, other: Element) {
+		let other_entity = other.as_entity();
+		if self.is_dead() { log::warn!("replace_with dead {:?}", self.as_entity()); return; }
+
+		if let (Some(this), Some(other)) = (self.try_get_cmp::<web_sys::Element>(), other_entity.try_get_cmp::<web_sys::Node>()) {
+			this.replace_with_with_node_1(&other).unwrap();
+		} else {
+			let self_has = if self.has_cmp::<web_sys::Node>() { "has" } else { "doesn't have" };
+			let other_has = if other.has_cmp::<web_sys::Node>() { "has" } else { "doesn't have" };
+			log::warn!("trying to replace_with, but self {self_has} web_sys::Node and other {other_has} web_sys::Node");
+		}
+
+		// Fix up reference in parent
+		if let Some(parent) = self.try_get_cmp::<Parent>().map(|x| x.0) {
+			if parent.is_dead() { log::warn!("replace_with parent dead {:?}", parent); return; }
+			let mut children = parent.get_cmp_mut::<Children>();
+			let position = children.0.iter().position(|&x| x == self.as_entity()).expect("entity claims to be a child while missing in parent");
+			children.0[position] = other.as_entity();
+			other_entity.get_cmp_mut_or_default::<Parent>().0 = parent;
+		}
+
+		self.remove();
+	}
+}
+
+/// Marker trait for an entity that has `web_sys::Node`, `web_sys::Element`, `web_sys::EventTarget` and one of `web_sys::HtmlElement` or `web_sys::SvgElement` as attached components
+pub trait AsElement: AsEntity + Sized {
+	#[cfg(feature = "experimental")]
+	const MARK: Option<fn() -> std::any::TypeId> = None;
+
+	#[cfg(all(debug_assertions, feature = "experimental"))]
+	const TYPE: Option<fn() -> &'static str> = None;
+
+	fn add_child<T: AsElement>(&self, child: T) {
+		#[cfg(feature = "experimental")]
+		if let Some(mark) = T::MARK { child.get_cmp_mut_or_default::<Classes>().marks.insert(mark()); }
+
+		#[cfg(all(debug_assertions, feature = "experimental"))]
+		if let Some(type_id) = T::TYPE { child.set_attr("data-type", type_id()); }
+
+		Element::add_child(self.as_element(), child.as_element());
+	}
+	#[must_use] fn child(self, child: impl AsElement) -> Self { self.add_child(child); self }
+	#[must_use] fn with_child<T: AsElement>(self, f: impl FnOnce(&Self) -> T) -> Self { let c = f(&self); self.child(c) }
+	fn add_children<Item: AsElement>(&self, children: impl IntoIterator<Item = Item>) { for child in children.into_iter() { self.add_child(child); } }
+	#[must_use] fn children<Item: AsElement>(self, children: impl IntoIterator<Item = Item>) -> Self { self.add_children(children); self }
+	fn leave_parent(self) { Element::leave_parent(self.as_element()) }
+
+	/// add a child at an index, useful to update tables without regenerating the whole container element
+	fn add_child_at<T: AsElement>(&self, at_index: usize, child: T) {
+		#[cfg(feature = "experimental")]
+		if let Some(mark) = T::MARK { child.get_cmp_mut_or_default::<Classes>().marks.insert(mark()); }
+
+		#[cfg(all(debug_assertions, feature = "experimental"))]
+		if let Some(type_id) = T::TYPE { child.set_attr("data-type", type_id()); }
+
+		Element::add_child_at(self.as_element(), at_index, child.as_element());
+	}
+
+	// be mindful about holding child references with this one
+	fn add_child_signal<S, E>(&self, signal: S) where
+		E: AsElement,
+		S: Signal<Item = E> + 'static,
+	{
+		Element::add_child_signal(self.as_element(), signal.map(|x| x.as_element()));
+	}
+	#[must_use]
 	fn child_signal<S, E>(self, signal: S) -> Self where
 		E: AsElement,
 		S: Signal<Item = E> + 'static,
@@ -182,9 +217,9 @@ pub trait AsElement: AsEntity + Sized {
 		let id = self.try_get_cmp::<Classes>().map(|x| x.styles.len() as u64).unwrap_or(0);
 		self.set_class_tagged(id, style);
 	}
-	fn class(self, style: impl Into<css::Style>) -> Self { self.add_class(style); self }
-	fn class_tagged<Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<css::Style>) -> Self { self.set_class_tagged(tag, style); self }
-	fn class_typed<Type: 'static>(self, style: impl Into<css::Style>) -> Self { self.set_class_typed::<Type>(style); self }
+	#[must_use] fn class(self, style: impl Into<css::Style>) -> Self { self.add_class(style); self }
+	#[must_use] fn class_tagged<Tag: std::hash::Hash + 'static>(self, tag: Tag, style: impl Into<css::Style>) -> Self { self.set_class_tagged(tag, style); self }
+	#[must_use] fn class_typed<Type: 'static>(self, style: impl Into<css::Style>) -> Self { self.set_class_typed::<Type>(style); self }
 
 	fn set_class_signal<S, I>(&self, signal: S) where
 		I: Into<css::Style>,
@@ -200,6 +235,7 @@ pub trait AsElement: AsEntity + Sized {
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
+	#[must_use]
 	fn class_signal<S, I>(self, signal: S) -> Self where
 		I: Into<css::Style>,
 		S: Signal<Item = I> + 'static,
@@ -220,6 +256,7 @@ pub trait AsElement: AsEntity + Sized {
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
+	#[must_use]
 	fn class_typed_signal<Type, S, I>(self, signal: S) -> Self where
 		Type: 'static,
 		I: Into<css::Style>,
@@ -241,6 +278,7 @@ pub trait AsElement: AsEntity + Sized {
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
+	#[must_use]
 	fn class_tagged_signal<Tag, S, I>(self, tag: Tag, signal: S) -> Self where
 		Tag: std::hash::Hash + Copy + 'static,
 		I: Into<css::Style>,
@@ -253,9 +291,9 @@ pub trait AsElement: AsEntity + Sized {
 		let value = value.into();
 		self.get_cmp::<web_sys::Element>().set_attribute(&key, &value).unwrap_or_else(|_| panic!("can't set attribute {} to {}", key, value));
 	}
-	fn attr<'k, 'v>(self, key: impl Into<Cow<'k, str>>, value: impl Into<Cow<'v, str>>) -> Self { self.set_attr(key, value); self }
+	#[must_use] fn attr<'k, 'v>(self, key: impl Into<Cow<'k, str>>, value: impl Into<Cow<'v, str>>) -> Self { self.set_attr(key, value); self }
 	fn set_bool_attr<'k>(&self, key: impl Into<Cow<'k, str>>, value: bool) { if value { self.set_attr(key, "") } else { self.remove_attr(key) } }
-	fn bool_attr<'k>(self, key: impl Into<Cow<'k, str>>, value: bool) -> Self { self.set_bool_attr(key, value); self }
+	#[must_use] fn bool_attr<'k>(self, key: impl Into<Cow<'k, str>>, value: bool) -> Self { self.set_bool_attr(key, value); self }
 	fn remove_attr<'k>(&self, key: impl Into<Cow<'k, str>>) {
 		if self.is_dead() { log::warn!("remove_attr dead {:?}", self.as_entity()); return; }
 		self.get_cmp::<web_sys::Element>().remove_attribute(&key.into()).expect("can't remove attribute");
@@ -277,6 +315,7 @@ pub trait AsElement: AsEntity + Sized {
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
+	#[must_use]
 	fn attr_signal<'k, 'v, S, K, V>(self, attr: K, signal: S) -> Self where
 		K: Into<Cow<'k, str>>,
 		V: Into<Cow<'v, str>>,
@@ -298,6 +337,7 @@ pub trait AsElement: AsEntity + Sized {
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
+	#[must_use]
 	fn bool_attr_signal<'k, S, K>(self, attr: K, signal: S) -> Self where
 		K: Into<Cow<'k, str>>,
 		S: Signal<Item = bool> + 'static,
@@ -307,7 +347,7 @@ pub trait AsElement: AsEntity + Sized {
 		if self.is_dead() { log::warn!("set_text dead entity {:?}", self.as_entity()); return; }
 		self.get_cmp::<web_sys::Node>().set_text_content(Some(&text.into()));
 	}
-	fn text<'a>(self, x: impl Into<std::borrow::Cow<'a, str>>) -> Self { self.set_text(x); self }
+	#[must_use] fn text<'a>(self, x: impl Into<std::borrow::Cow<'a, str>>) -> Self { self.set_text(x); self }
 
 	fn set_text_signal<'a, S, I>(&self, signal: S) where
 		I: Into<Cow<'a, str>>,
@@ -323,6 +363,7 @@ pub trait AsElement: AsEntity + Sized {
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
+	#[must_use]
 	fn text_signal<'a, S, I>(self, x: S) -> Self where
 		I: Into<Cow<'a, str>>,
 		S: Signal<Item = I> + 'static,
@@ -333,7 +374,7 @@ pub trait AsElement: AsEntity + Sized {
 		style.append_property(&mut props);
 		self.set_attr(web_str::style(), props.iter().map(std::string::ToString::to_string).collect::<String>());
 	}
-	fn style(self, style: impl AppendProperty) -> Self { self.set_style(style); self }
+	#[must_use] fn style(self, style: impl AppendProperty) -> Self { self.set_style(style); self }
 	fn remove_style(&self) { self.remove_attr(web_str::style()); }
 
 	fn set_style_signal<S, I>(&self, signal: S) where
@@ -350,6 +391,7 @@ pub trait AsElement: AsEntity + Sized {
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
+	#[must_use]
 	fn style_signal<S, I>(self, signal: S) -> Self where
 		I: AppendProperty,
 		S: Signal<Item = I> + 'static,
@@ -365,6 +407,7 @@ pub trait AsElement: AsEntity + Sized {
 		self.get_cmp_mut_or_default::<Classes>().marks.remove(&TypeId::of::<T>());
 		self
 	}
+	#[must_use]
 	fn mark_signal<T: 'static, S>(self, signal: S) -> Self where
 		S: Signal<Item = bool> + 'static,
 	{
@@ -380,41 +423,17 @@ pub trait AsElement: AsEntity + Sized {
 		self
 	}
 
-	fn with_component<T: 'static>(self, f: impl FnOnce(&Self) -> T) -> Self { self.add_component(f(&self)); self }
+	#[must_use] fn with_component<T: 'static>(self, f: impl FnOnce(&Self) -> T) -> Self { self.add_component(f(&self)); self }
 
 	// can't steal components because handlers would get invalidated
 	fn replace_with<T: AsElement>(&self, other: T) -> T {
-		let other_entity = other.as_entity();
-		if self.is_dead() { log::warn!("replace_with dead {:?}", self.as_entity()); return other; }
-
 		#[cfg(feature = "experimental")]
-		if let Some(mark) = T::MARK {
-			other.get_cmp_mut_or_default::<Classes>().marks.insert(mark());
-		}
+		if let Some(mark) = T::MARK { other.get_cmp_mut_or_default::<Classes>().marks.insert(mark()); }
 
 		#[cfg(all(debug_assertions, feature = "experimental"))]
-		if let Some(type_id) = T::TYPE {
-			other.set_attr("data-type", type_id());
-		}
+		if let Some(type_id) = T::TYPE { other.set_attr("data-type", type_id()); }
 
-		if let (Some(this), Some(other)) = (self.try_get_cmp::<web_sys::Element>(), other_entity.try_get_cmp::<web_sys::Node>()) {
-			this.replace_with_with_node_1(&other).unwrap();
-		} else {
-			let self_has = if self.has_cmp::<web_sys::Node>() { "has" } else { "doesn't have" };
-			let other_has = if other.has_cmp::<web_sys::Node>() { "has" } else { "doesn't have" };
-			log::warn!("trying to replace_with, but self {self_has} web_sys::Node and other {other_has} web_sys::Node");
-		}
-
-		// Fix up reference in parent
-		if let Some(parent) = self.try_get_cmp::<Parent>().map(|x| x.0) {
-			if parent.is_dead() { log::warn!("replace_with parent dead {:?}", parent); return other; }
-			let mut children = parent.get_cmp_mut::<Children>();
-			let position = children.0.iter().position(|&x| x == self.as_entity()).expect("entity claims to be a child while missing in parent");
-			children.0[position] = other.as_entity();
-			other_entity.get_cmp_mut_or_default::<Parent>().0 = parent;
-		}
-
-		self.remove();
+		Element::replace_with(self.as_element(), other.as_element());
 		other
 	}
 
