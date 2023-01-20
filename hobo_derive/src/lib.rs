@@ -86,9 +86,9 @@ pub fn derive_element(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 		(quote! {
 			#as_entity
 			impl #impl_generics #crate_name::AsElement for #name #ty_generics #where_clause {
-				const MARK: Option<::std::any::TypeId> = Some(::std::any::TypeId::of::<Self>());
+				const MARK: Option<fn() -> ::std::any::TypeId> = Some(::std::any::TypeId::of::<Self>);
 				#[cfg(debug_assertions)]
-				const TYPE: Option<&'static str> = Some(::std::any::type_name::<Self>());
+				const TYPE: Option<fn() -> &'static str> = Some(::std::any::type_name::<Self>);
 			}
 		}).into()
 	}

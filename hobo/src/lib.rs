@@ -1,5 +1,3 @@
-#![cfg_attr(feature = "experimental", feature(const_type_id, const_type_name))]
-
 /// methods to create HTML Elements as well as their types
 pub mod create;
 pub mod dom_events;
