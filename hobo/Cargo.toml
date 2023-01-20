@@ -31,6 +31,7 @@ strum = { version = "0.24", features = ["derive"] }
 sugars = "3"
 wasm-bindgen = { version = "0.2", features = ["serde-serialize", "strict-macro", "enable-interning"] }
 wasm-bindgen-futures = "0.4"
+ahash = { version = "0.8", features = ["std", "compile-time-rng"], default-features = false }
 
 [dev-dependencies]
 console_error_panic_hook = "0.1"

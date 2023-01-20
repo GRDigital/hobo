@@ -1,6 +1,6 @@
 use crate::{prelude::*, racy_cell::RacyCell};
 use once_cell::sync::Lazy;
-use std::{collections::{HashMap, HashSet, hash_map::DefaultHasher}, hash::{Hash, Hasher}};
+use std::{collections::{HashMap, BTreeSet}, hash::{Hash, Hasher}};
 use sugars::hmap;
 pub use sugars::hash;
 
@@ -11,8 +11,8 @@ pub struct StyleStorage {
 	/// The hash is css::Style + Ordinal number,
 	/// so the style is reused only per "class position".
 	///
-	/// See [fetch](Self::fetch) for both hashing and re-use checks. 
-	inserted_style_hashes: HashSet<u64>,
+	/// See [fetch](Self::fetch) for both hashing and re-use checks.
+	inserted_style_hashes: BTreeSet<u64>,
 
 	/// Map representing the <style> elements in each window.
 	///
@@ -23,7 +23,7 @@ pub struct StyleStorage {
 }
 
 pub(crate) static STYLE_STORAGE: Lazy<RacyCell<StyleStorage>> = Lazy::new(|| RacyCell::new(StyleStorage {
-	inserted_style_hashes: HashSet::new(),
+	inserted_style_hashes: BTreeSet::new(),
 	style_elements: hmap!["default".to_owned() => {
 		let dom = web_sys::window().expect("no window").document().expect("no document");
 		let head = dom.head().expect("dom has no head");
@@ -77,7 +77,7 @@ impl StyleStorage {
 		style.sort_properties();
 
 		// u64 hash from style + ordinal
-		let mut hasher = DefaultHasher::new();
+		let mut hasher = ahash::AHasher::default();
 		style.hash(&mut hasher);
 		ordinal.hash(&mut hasher);
 		let id = hasher.finish();
@@ -118,7 +118,7 @@ impl StyleStorage {
 	pub fn register_window(&mut self, window: &web_sys::Window, window_name: String) {
 		let dom = window.document().expect("window has no dom");
 		let head = dom.head().expect("dom has no head");
-		
+
 		// Re-create each existing <style> element from the default window into the new window
 		for default_window_style_index in 0..self.style_elements.get("default").expect("no default window").1.len() {
 			let new_style_element = dom.create_element(web_str::style()).expect("can't create style element");
