@@ -58,8 +58,8 @@ macro_rules! generate_events {
 		)+
 
 		pub mod impls {$(
-			pub use super::[<$name:camel>];
-			pub use super::[<Raw $name:camel>];
+			pub use super::[<$name:camel>] as _;
+			pub use super::[<Raw $name:camel>] as _;
 		)+}
 	}};
 }
