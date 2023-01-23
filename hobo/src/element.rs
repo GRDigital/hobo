@@ -37,6 +37,7 @@ struct OnDomAttachCbs(Vec<Box<dyn FnOnce() + Send + Sync + 'static>>);
 struct SignalHandlesCollection(Vec<discard::DiscardOnDrop<futures_signals::CancelableFutureHandle>>);
 
 impl Element {
+	#[track_caller]
 	fn add_child(self, child: Element) {
 		if self.is_dead() { log::warn!("add_child parent dead {:?}", self.as_entity()); return; }
 		if child.is_dead() { log::warn!("add_child child dead {:?}", child.as_entity()); return; }
@@ -46,6 +47,11 @@ impl Element {
 
 		if let (Some(parent_node), Some(child_node)) = (self.try_get_cmp::<web_sys::Node>(), child.try_get_cmp::<web_sys::Node>()) {
 			parent_node.append_child(&child_node).expect("can't append child");
+
+			#[cfg(debug_assertions)] {
+				let caller = std::panic::Location::caller();
+				js_sys::Reflect::set(&child_node, &wasm_bindgen::JsValue::from_str("location"), &wasm_bindgen::JsValue::from_str(&format!("{}:{}", caller.file(), caller.line()))).ok();
+			}
 		} else {
 			let parent_has = if self.has_cmp::<web_sys::Node>() { "has" } else { "doesn't have" };
 			let child_has = if child.has_cmp::<web_sys::Node>() { "has" } else { "doesn't have" };
@@ -85,6 +91,7 @@ impl Element {
 		}
 	}
 
+	#[track_caller]
 	fn add_child_at(self, at_index: usize, child: Element) {
 		if self.is_dead() { log::warn!("add_child_at parent dead {:?}", self.as_entity()); return; }
 		if child.is_dead() { log::warn!("add_child_at child dead {:?}", child.as_entity()); return; }
@@ -102,9 +109,16 @@ impl Element {
 			parent_node
 				.insert_before(&child_node, shifted_sibling_node.as_ref().map(|x| &**x as &web_sys::Node))
 				.expect("can't append child");
+
+
+			#[cfg(debug_assertions)] {
+				let caller = std::panic::Location::caller();
+				js_sys::Reflect::set(&child_node, &wasm_bindgen::JsValue::from_str("location"), &wasm_bindgen::JsValue::from_str(&format!("{}:{}", caller.file(), caller.line()))).ok();
+			}
 		}
 	}
 
+	#[track_caller]
 	fn add_child_signal<S>(self, signal: S) where
 		S: Signal<Item = Element> + 'static,
 	{
@@ -122,12 +136,18 @@ impl Element {
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
 	}
 
+	#[track_caller]
 	fn replace_with(self, other: Element) {
 		let other_entity = other.as_entity();
 		if self.is_dead() { log::warn!("replace_with dead {:?}", self.as_entity()); return; }
 
 		if let (Some(this), Some(other)) = (self.try_get_cmp::<web_sys::Element>(), other_entity.try_get_cmp::<web_sys::Node>()) {
 			this.replace_with_with_node_1(&other).unwrap();
+
+			#[cfg(debug_assertions)] {
+				let caller = std::panic::Location::caller();
+				js_sys::Reflect::set(&other, &wasm_bindgen::JsValue::from_str("location"), &wasm_bindgen::JsValue::from_str(&format!("{}:{}", caller.file(), caller.line()))).ok();
+			}
 		} else {
 			let self_has = if self.has_cmp::<web_sys::Node>() { "has" } else { "doesn't have" };
 			let other_has = if other.has_cmp::<web_sys::Node>() { "has" } else { "doesn't have" };
@@ -155,6 +175,7 @@ pub trait AsElement: AsEntity + Sized {
 	#[cfg(all(debug_assertions, feature = "experimental"))]
 	const TYPE: Option<fn() -> &'static str> = None;
 
+	#[track_caller]
 	fn add_child<T: AsElement>(&self, child: T) {
 		#[cfg(feature = "experimental")]
 		if let Some(mark) = T::MARK { child.get_cmp_mut_or_default::<Classes>().marks.insert(mark()); }
@@ -164,13 +185,14 @@ pub trait AsElement: AsEntity + Sized {
 
 		Element::add_child(self.as_element(), child.as_element());
 	}
-	#[must_use] fn child(self, child: impl AsElement) -> Self { self.add_child(child); self }
-	#[must_use] fn with_child<T: AsElement>(self, f: impl FnOnce(&Self) -> T) -> Self { let c = f(&self); self.child(c) }
-	fn add_children<Item: AsElement>(&self, children: impl IntoIterator<Item = Item>) { for child in children.into_iter() { self.add_child(child); } }
-	#[must_use] fn children<Item: AsElement>(self, children: impl IntoIterator<Item = Item>) -> Self { self.add_children(children); self }
+	#[track_caller] #[must_use] fn child(self, child: impl AsElement) -> Self { self.add_child(child); self }
+	#[track_caller] #[must_use] fn with_child<T: AsElement>(self, f: impl FnOnce(&Self) -> T) -> Self { let c = f(&self); self.child(c) }
+	#[track_caller] fn add_children<Item: AsElement>(&self, children: impl IntoIterator<Item = Item>) { for child in children.into_iter() { self.add_child(child); } }
+	#[track_caller] #[must_use] fn children<Item: AsElement>(self, children: impl IntoIterator<Item = Item>) -> Self { self.add_children(children); self }
 	fn leave_parent(self) { Element::leave_parent(self.as_element()) }
 
 	/// add a child at an index, useful to update tables without regenerating the whole container element
+	#[track_caller]
 	fn add_child_at<T: AsElement>(&self, at_index: usize, child: T) {
 		#[cfg(feature = "experimental")]
 		if let Some(mark) = T::MARK { child.get_cmp_mut_or_default::<Classes>().marks.insert(mark()); }
@@ -182,12 +204,14 @@ pub trait AsElement: AsEntity + Sized {
 	}
 
 	// be mindful about holding child references with this one
+	#[track_caller]
 	fn add_child_signal<S, E>(&self, signal: S) where
 		E: AsElement,
 		S: Signal<Item = E> + 'static,
 	{
 		Element::add_child_signal(self.as_element(), signal.map(|x| x.as_element()));
 	}
+	#[track_caller]
 	#[must_use]
 	fn child_signal<S, E>(self, signal: S) -> Self where
 		E: AsElement,
@@ -426,6 +450,7 @@ pub trait AsElement: AsEntity + Sized {
 	#[must_use] fn with_component<T: 'static>(self, f: impl FnOnce(&Self) -> T) -> Self { self.add_component(f(&self)); self }
 
 	// can't steal components because handlers would get invalidated
+	#[track_caller]
 	fn replace_with<T: AsElement>(&self, other: T) -> T {
 		#[cfg(feature = "experimental")]
 		if let Some(mark) = T::MARK { other.get_cmp_mut_or_default::<Classes>().marks.insert(mark()); }
