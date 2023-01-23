@@ -47,15 +47,15 @@ impl Element {
 
 		if let (Some(parent_node), Some(child_node)) = (self.try_get_cmp::<web_sys::Node>(), child.try_get_cmp::<web_sys::Node>()) {
 			parent_node.append_child(&child_node).expect("can't append child");
-
-			#[cfg(debug_assertions)] {
-				let caller = std::panic::Location::caller();
-				js_sys::Reflect::set(&child_node, &wasm_bindgen::JsValue::from_str("location"), &wasm_bindgen::JsValue::from_str(&format!("{}:{}", caller.file(), caller.line()))).ok();
-			}
 		} else {
 			let parent_has = if self.has_cmp::<web_sys::Node>() { "has" } else { "doesn't have" };
 			let child_has = if child.has_cmp::<web_sys::Node>() { "has" } else { "doesn't have" };
 			log::warn!("trying to add_child, but child {child_has} web_sys::Node and parent {parent_has} web_sys::Node");
+		}
+
+		#[cfg(debug_assertions)] {
+			let caller = std::panic::Location::caller();
+			child.set_attr("data-location", &format!("{}:{}", caller.file(), caller.line()));
 		}
 
 		// HACK: this is not very good because,
@@ -113,7 +113,7 @@ impl Element {
 
 			#[cfg(debug_assertions)] {
 				let caller = std::panic::Location::caller();
-				js_sys::Reflect::set(&child_node, &wasm_bindgen::JsValue::from_str("location"), &wasm_bindgen::JsValue::from_str(&format!("{}:{}", caller.file(), caller.line()))).ok();
+				child.set_attr("data-location", &format!("{}:{}", caller.file(), caller.line()));
 			}
 		}
 	}
@@ -143,15 +143,15 @@ impl Element {
 
 		if let (Some(this), Some(other)) = (self.try_get_cmp::<web_sys::Element>(), other_entity.try_get_cmp::<web_sys::Node>()) {
 			this.replace_with_with_node_1(&other).unwrap();
-
-			#[cfg(debug_assertions)] {
-				let caller = std::panic::Location::caller();
-				js_sys::Reflect::set(&other, &wasm_bindgen::JsValue::from_str("location"), &wasm_bindgen::JsValue::from_str(&format!("{}:{}", caller.file(), caller.line()))).ok();
-			}
 		} else {
 			let self_has = if self.has_cmp::<web_sys::Node>() { "has" } else { "doesn't have" };
 			let other_has = if other.has_cmp::<web_sys::Node>() { "has" } else { "doesn't have" };
 			log::warn!("trying to replace_with, but self {self_has} web_sys::Node and other {other_has} web_sys::Node");
+		}
+
+		#[cfg(debug_assertions)] {
+			let caller = std::panic::Location::caller();
+			other.set_attr("data-location", &format!("{}:{}", caller.file(), caller.line()));
 		}
 
 		// Fix up reference in parent
