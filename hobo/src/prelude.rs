@@ -3,7 +3,7 @@
 
 pub(crate) use crate::world::{World, WORLD};
 pub use crate::{
-	create::html::{StringValue, BasicAttrs},
+	create::html::{StringValue, BasicAttrs, Placeholder},
 	css::{self, AppendProperty, F32},
 	dom_events::impls::*,
 	element::{AsElement, Element},

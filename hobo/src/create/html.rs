@@ -60,9 +60,6 @@ impl Input {
 	#[must_use] #[inline] pub fn type_url(self) -> Self { self.set_type_url(); self }
 	#[inline] pub fn set_type_url(&self) { self.set_attr(web_str::r#type(), web_str::url()); }
 
-	#[must_use] #[inline] pub fn placeholder<'a>(self, placeholder: impl Into<Cow<'a, str>>) -> Self { self.set_placeholder(placeholder); self }
-	#[inline] pub fn set_placeholder<'a>(&self, placeholder: impl Into<Cow<'a, str>>) { self.set_attr(web_str::placeholder(), placeholder); }
-
 	#[inline] pub fn get_checked(&self) -> bool { self.get_cmp::<web_sys::HtmlInputElement>().checked() }
 }
 
@@ -81,6 +78,19 @@ impl StringValue for Input {
 impl StringValue for Textarea {
 	#[inline] fn get_value(&self) -> String { self.get_cmp::<web_sys::HtmlTextAreaElement>().value() }
 	#[inline] fn set_value(&self, x: &str) { self.get_cmp::<web_sys::HtmlTextAreaElement>().set_value(x) }
+}
+
+pub trait Placeholder: AsElement {
+	#[must_use] #[inline] fn placeholder<'a>(self, placeholder: impl Into<Cow<'a, str>>) -> Self where Self: Sized { self.set_placeholder(placeholder); self }
+	fn set_placeholder<'a>(&self, placeholder: impl Into<Cow<'a, str>>);
+}
+
+impl Placeholder for Input {
+	#[inline] fn set_placeholder<'a>(&self, placeholder: impl Into<Cow<'a, str>>) { self.set_attr(web_str::placeholder(), placeholder); }
+}
+
+impl Placeholder for Textarea {
+	#[inline] fn set_placeholder<'a>(&self, placeholder: impl Into<Cow<'a, str>>) { self.set_attr(web_str::placeholder(), placeholder); }
 }
 
 impl Select {
