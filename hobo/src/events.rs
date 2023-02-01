@@ -3,7 +3,7 @@ use slotmap::DenseSlotMap;
 use std::{
 	any::{Any, TypeId},
 	cell::RefCell,
-	collections::HashMap,
+	collections::{HashMap, HashSet},
 	rc::Weak,
 };
 use once_cell::sync::Lazy;
@@ -15,6 +15,7 @@ type SubFn = Box<dyn FnMut(&dyn Any)>;
 #[derive(Default)]
 struct Events {
 	subscribers: RefCell<HashMap<TypeId, DenseSlotMap<SubKey, SubFn>>>,
+	remove_requests: RefCell<HashMap<TypeId, HashSet<SubKey>>>,
 }
 
 static EVENTS: Lazy<Events> = Lazy::new(Default::default);
@@ -33,8 +34,13 @@ unsafe impl Sync for Events {}
 // TODO: nested subscribtions etc?
 impl Events {
 	fn fire<E: Any>(&self, e: &E) {
-		for subscriber in self.subscribers.borrow_mut().entry(TypeId::of::<E>()).or_default().values_mut() {
+		let mut subscribers = self.subscribers.borrow_mut();
+		let id = TypeId::of::<E>();
+		for subscriber in subscribers.entry(id).or_default().values_mut() {
 			subscriber(e);
+		}
+		for key in self.remove_requests.borrow_mut().entry(id).or_default().drain() {
+			subscribers.get_mut(&id).unwrap().remove(key);
 		}
 	}
 
@@ -56,7 +62,11 @@ impl Events {
 	}
 
 	fn unsubscribe(&self, info: SubInfo) {
-		self.subscribers.borrow_mut().entry(info.typeid).or_default().remove(info.key);
+		if let Ok(mut subscribers) = self.subscribers.try_borrow_mut() {
+			subscribers.entry(info.typeid).or_default().remove(info.key);
+		} else {
+			self.remove_requests.borrow_mut().entry(info.typeid).or_default().insert(info.key);
+		}
 	}
 }
 
