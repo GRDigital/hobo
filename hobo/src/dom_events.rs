@@ -96,6 +96,7 @@ generate_events! {
 	AnimationEvent, animationend,       on_animation_end;
 	AnimationEvent, animationiteration, on_animation_iteration;
 	AnimationEvent, animationstart,     on_animation_start;
+	PopStateEvent,  popstate,           on_pop_state;
 }
 
 // DeviceMotionEvent
@@ -133,7 +134,6 @@ generate_events! {
 // PaymentMethodChangeEvent
 // PaymentRequestUpdateEvent
 // PointerEvent
-// PopStateEvent
 // ClipboardEvent
 // PopupBlockedEvent
 // PresentationConnectionAvailableEvent

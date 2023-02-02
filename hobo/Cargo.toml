@@ -181,6 +181,7 @@ features = [
 	"SubmitEvent",
 	"InputEvent",
 	"AnimationEvent",
+	"PopStateEvent",
 	"RadioNodeList",
 	"Window",
 	"Document",

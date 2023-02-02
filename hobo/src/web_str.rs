@@ -84,5 +84,5 @@ intern_strings! {
 	change; keydown; keyup; scroll; resize; blur; focus;
 	touchstart; touchend; touchmove; touchcancel; wheel;
 	load; canplay; drag; submit; input; animationcancel; animationend;
-	animationiteration; animationstart;
+	animationiteration; animationstart; popstate;
 }
