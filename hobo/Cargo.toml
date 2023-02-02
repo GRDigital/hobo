@@ -182,6 +182,7 @@ features = [
 	"InputEvent",
 	"AnimationEvent",
 	"PopStateEvent",
+	"HashChangeEvent",
 	"RadioNodeList",
 	"Window",
 	"Document",
