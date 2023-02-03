@@ -130,7 +130,7 @@ impl Element {
 			child.replace_with(new_child);
 			child = new_child;
 			std::future::ready(())
-		}), || {});
+		}), Default::default);
 
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
@@ -254,7 +254,7 @@ pub trait AsElement: AsEntity + Sized {
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |class| {
 			Element(entity).set_class(class);
 			std::future::ready(())
-		}), || {});
+		}), Default::default);
 
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
@@ -275,7 +275,7 @@ pub trait AsElement: AsEntity + Sized {
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |class| {
 			Element(entity).set_class_typed::<Type>(class.into());
 			std::future::ready(())
-		}), || {});
+		}), Default::default);
 
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
@@ -297,7 +297,7 @@ pub trait AsElement: AsEntity + Sized {
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |class| {
 			Element(entity).set_class_tagged(tag, class);
 			std::future::ready(())
-		}), || {});
+		}), Default::default);
 
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
@@ -334,7 +334,7 @@ pub trait AsElement: AsEntity + Sized {
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |v| {
 			Element(entity).set_attr(&attr, v);
 			std::future::ready(())
-		}), || {});
+		}), Default::default);
 
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
@@ -356,7 +356,7 @@ pub trait AsElement: AsEntity + Sized {
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |v| {
 			Element(entity).set_bool_attr(&attr, v);
 			std::future::ready(())
-		}), || {});
+		}), Default::default);
 
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
@@ -382,7 +382,7 @@ pub trait AsElement: AsEntity + Sized {
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |text| {
 			Element(entity).set_text(text);
 			std::future::ready(())
-		}), || {});
+		}), Default::default);
 
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
@@ -410,7 +410,7 @@ pub trait AsElement: AsEntity + Sized {
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |style| {
 			Element(entity).set_style(style);
 			std::future::ready(())
-		}), || {});
+		}), Default::default);
 
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
@@ -440,7 +440,7 @@ pub trait AsElement: AsEntity + Sized {
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |enabled| {
 			if enabled { Element(entity).mark::<T>(); } else { Element(entity).unmark::<T>(); }
 			std::future::ready(())
-		}), || {});
+		}), Default::default);
 
 		wasm_bindgen_futures::spawn_local(fut);
 		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);

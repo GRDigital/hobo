@@ -18,7 +18,7 @@ impl<T: Signal + 'static> SignalExt2 for T {
 		F: FnMut(Self::Item) + 'static,
 		Self: Sized,
 	{
-		let (handle, fut) = futures_signals::cancelable_future(self.for_each(move |x| { callback(x); async move {} }), || {});
+		let (handle, fut) = futures_signals::cancelable_future(self.for_each(move |x| { callback(x); std::future::ready(()) }), Default::default);
 		spawn(fut);
 		handle
 	}
@@ -35,7 +35,7 @@ impl<T: SignalMap + 'static> SignalMapExt2 for T {
 		F: FnMut(MapDiff<Self::Key, Self::Value>) + 'static,
 		Self: Sized,
 	{
-		let (handle, fut) = futures_signals::cancelable_future(self.for_each(move |x| { callback(x); async move {} }), || {});
+		let (handle, fut) = futures_signals::cancelable_future(self.for_each(move |x| { callback(x); std::future::ready(()) }), Default::default);
 		spawn(fut);
 		handle
 	}
@@ -52,7 +52,7 @@ impl<T: SignalVec + 'static> SignalVecExt2 for T {
 		F: FnMut(VecDiff<Self::Item>) + 'static,
 		Self: Sized,
 	{
-		let (handle, fut) = futures_signals::cancelable_future(self.for_each(move |x| { callback(x); async move {} }), || {});
+		let (handle, fut) = futures_signals::cancelable_future(self.for_each(move |x| { callback(x); std::future::ready(()) }), Default::default);
 		spawn(fut);
 		handle
 	}
