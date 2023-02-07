@@ -45,6 +45,13 @@ impl Query for Entity {
 	fn fetch(world: &World, entity: Entity) -> Self::Fetch { entity }
 }
 
+impl Query for Element {
+	type Fetch = Element;
+
+	fn filter(world: &World, entities: &mut Option<BTreeSet<Entity>>) { <&web_sys::Element as Query>::filter(world, entities); }
+	fn fetch(world: &World, entity: Entity) -> Self::Fetch { Element(entity) }
+}
+
 // same search as &Component, but fetch is a noop
 pub struct With<Component: 'static>(std::marker::PhantomData<Component>);
 impl<Component: 'static> Query for With<Component> {
