@@ -306,6 +306,7 @@ generate_properties! {
 		Float,
 		Clear,
 		AspectRatio,
+		OverflowAnchor,
 	),
 	// different properties that take the same argument
 	named => (
@@ -403,6 +404,7 @@ crate::macros::easy_enum! {overflow-x visible hidden scroll auto}
 crate::macros::easy_enum! {overflow-y visible hidden scroll auto}
 crate::macros::easy_enum! {float none left right inline-start inline-end}
 crate::macros::easy_enum! {clear none left right inline-start inline-end both}
+crate::macros::easy_enum! {overflow-anchor auto none}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, PartialOrd, Ord)]
 pub enum UserSelect {
