@@ -234,8 +234,6 @@ dependencies = [
  "once_cell",
  "owning_ref",
  "paste",
- "roxmltree",
- "serde_json",
  "shrinkwraprs",
  "slotmap",
  "smart-default",
@@ -252,7 +250,6 @@ dependencies = [
 name = "hobo_css"
 version = "0.3.0"
 dependencies = [
- "extend",
  "hobo_css_macros",
  "num-traits",
  "ordered-float",
@@ -270,7 +267,6 @@ dependencies = [
  "itertools 0.10.5",
  "proc-macro-crate",
  "proc-macro-error",
- "proc-macro-hack",
  "proc-macro2",
  "proc-quote",
  "quote",
@@ -283,7 +279,6 @@ version = "0.3.0"
 dependencies = [
  "derive_utils",
  "proc-macro-crate",
- "proc-macro-error",
  "proc-macro2",
  "proc-quote",
  "quote",
@@ -490,15 +485,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbe448f377a7d6961e30f5955f9b8d106c3f5e449d493ee1b125c1d43c2b5179"
 dependencies = [
  "proc-macro2",
-]
-
-[[package]]
-name = "roxmltree"
-version = "0.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "461c9b944cd1481b793aeef26d1008b5d1fdeb00e01296cb4ff08aed511c7383"
-dependencies = [
- "xmlparser",
 ]
 
 [[package]]
@@ -800,9 +786,3 @@ dependencies = [
  "js-sys",
  "wasm-bindgen",
 ]
-
-[[package]]
-name = "xmlparser"
-version = "0.13.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d25c75bf9ea12c4040a97f829154768bbbce366287e2dc044af160cd79a13fd"

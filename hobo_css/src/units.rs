@@ -10,7 +10,7 @@ pub enum Operator {
 	#[strum(to_string = "-")] Minus,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, SmartDefault, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Default, PartialOrd, Ord)]
 pub enum Unit {
 	#[default]
 	Zero,

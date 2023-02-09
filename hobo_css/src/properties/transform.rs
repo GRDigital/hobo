@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, PartialEq, Eq, Hash, SmartDefault, Clone, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, Hash, Default, Clone, PartialOrd, Ord)]
 pub enum TransformOrigin {
 	#[default]
 	None,
@@ -23,7 +23,7 @@ impl std::fmt::Display for TransformOrigin {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, SmartDefault, Clone, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, Hash, Default, Clone, PartialOrd, Ord)]
 pub enum Transform {
 	#[default]
 	None,

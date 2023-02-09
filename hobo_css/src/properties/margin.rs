@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, Hash, Default, Clone, PartialOrd, Ord)]
 pub enum Margin {
 	#[default]
 	None,

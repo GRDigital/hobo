@@ -116,7 +116,7 @@ impl std::fmt::Display for Source {
 	}
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, SmartDefault)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Default)]
 pub struct FontFace {
 	pub family: String,
 	pub src: Vec<Source>,

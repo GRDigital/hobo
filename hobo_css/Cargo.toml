@@ -11,7 +11,6 @@ readme = "../README.md"
 [dependencies]
 # dyn-clone = "1"
 # dyn_partial_eq = "0.1"
-extend = "1"
 hobo_css_macros = { path = "../hobo_css_macros", version = "=0.3.0" }
 num-traits = "0.2"
 ordered-float = { version = "3", default-features = false }

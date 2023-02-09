@@ -1,7 +1,7 @@
 use crate::{append_property::AppendProperty, prelude::*, Property};
 use num_traits::cast::AsPrimitive;
 
-#[derive(Debug, PartialEq, Eq, Hash, smart_default::SmartDefault, Clone, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, Hash, Default, Clone, PartialOrd, Ord)]
 pub enum Filter {
 	#[default]
 	None,

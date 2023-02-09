@@ -2,7 +2,6 @@ use derive_utils::quick_derive as enum_derive;
 use proc_macro2::{Span, TokenStream};
 use proc_quote::quote;
 use quote::ToTokens;
-// use proc_macro_error::proc_macro_error;
 
 fn crate_name() -> TokenStream {
 	match proc_macro_crate::crate_name("hobo") {
@@ -10,25 +9,6 @@ fn crate_name() -> TokenStream {
 		Ok(proc_macro_crate::FoundCrate::Name(x)) => { let hobo = syn::Ident::new(&x, Span::call_site()); quote! { ::#hobo } },
 	}
 }
-
-// #[proc_macro_error]
-// #[proc_macro_attribute]
-// pub fn trick(_: proc_macro::TokenStream, item: proc_macro::TokenStream) -> proc_macro::TokenStream {
-//     let syn::ImplItemMethod { attrs, vis, defaultness, mut sig, block } = syn::parse_macro_input!(item as syn::ImplItemMethod);
-//     sig.output = syn::parse_quote!(-> ::std::rc::Rc<::std::cell::RefCell<Self>>);
-//     (quote! {
-//         #(#attrs)* #vis #defaultness #sig {
-//             let mut this: ::std::rc::Rc<::std::mem::MaybeUninit<::std::cell::RefCell<Self>>> = ::std::rc::Rc::new(::std::mem::MaybeUninit::uninit());
-//             let new_this = #block;
-//             unsafe {
-//                 let raw_uninit = ::std::rc::Rc::into_raw(this) as *mut ::std::mem::MaybeUninit<_>;
-//                 let raw_init = (&mut *raw_uninit).as_mut_ptr();
-//                 ::std::ptr::write(raw_init, ::std::cell::RefCell::new(new_this));
-//                 ::std::rc::Rc::from_raw(raw_init)
-//             }
-//         }
-//     }).into()
-// }
 
 #[proc_macro_derive(AsEntity)]
 pub fn derive_as_entity(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
