@@ -12,7 +12,7 @@ pub use crate::{
 	query::{Query, With},
 	resource::{DefaultResource, Resource},
 	signals_ext::{SignalExt2, SignalMapExt2, SignalVecExt2},
-	storage::{DynStorage, Storage},
+	storage::{DynStorage, Storage, StorageGuard, SimpleStorage},
 	web_str, MarkClassString,
 };
 #[doc(hidden)] pub use wasm_bindgen::prelude::*;
