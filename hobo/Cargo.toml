@@ -45,6 +45,7 @@ features = [
 	"RadioNodeList",
 	"File",
 	"FileList",
+	"Url", "MediaSource","Blob",
 	"HtmlCollection",
 
 	"MouseEvent", "KeyboardEvent", "TouchEvent",
