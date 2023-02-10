@@ -119,7 +119,28 @@ pub trait AsEntity {
 		self.get_cmp_mut_or_default::<FutureHandlesCollection>().0.push(handle);
 	}
 
+	#[track_caller]
+	fn spawn_complain<T, E: std::error::Error>(&self, f: impl std::future::Future<Output = Result<T, E>> + 'static) {
+		use futures::FutureExt;
+
+		let caller = std::panic::Location::caller();
+		let (handle, fut) = futures_signals::cancelable_future(f.map(|res| if let Err(e) = res {
+			let lvl = log::Level::Error;
+			if lvl <= log::STATIC_MAX_LEVEL && lvl <= log::max_level() {
+				log::__private_api_log(
+					log::__log_format_args!("{:?}", e),
+					lvl,
+					&(log::__log_module_path!(), log::__log_module_path!(), caller.file(), caller.line()),
+					log::__private_api::Option::None,
+				);
+			}
+		}), Default::default);
+		wasm_bindgen_futures::spawn_local(fut);
+		self.get_cmp_mut_or_default::<FutureHandlesCollection>().0.push(handle);
+	}
+
 	fn spawn_in<F: FnOnce(&Self) -> Fut, Fut: std::future::Future<Output = ()> + 'static>(self, f: F) -> Self where Self: Sized { self.spawn(f(&self)); self }
+	fn spawn_complain_in<F: FnOnce(&Self) -> Fut, Fut: std::future::Future<Output = Result<T, E>> + 'static, T, E: std::error::Error>(self, f: F) -> Self where Self: Sized { self.spawn_complain(f(&self)); self }
 }
 
 impl AsEntity for Entity {

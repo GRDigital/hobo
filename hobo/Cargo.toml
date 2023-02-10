@@ -9,10 +9,12 @@ authors = ["GR Digital <contact@grdigital.co.uk>"]
 readme = "../README.md"
 
 [dependencies]
+ahash = { version = "0.8", features = ["std", "compile-time-rng"], default-features = false }
 as-any = "0.3"
 discard = "1"
 elsa = "1"
 extend = "1"
+futures = "0.3"
 futures-signals = "0.3"
 hobo_css = { path = "../hobo_css", version = "=0.3.0" }
 hobo_derive = { path = "../hobo_derive", version = "=0.3.0" }
@@ -29,16 +31,12 @@ strum = { version = "0.24", features = ["derive"] }
 sugars = "3"
 wasm-bindgen = { version = "0.2", features = ["serde-serialize", "strict-macro", "enable-interning"] }
 wasm-bindgen-futures = "0.4"
-ahash = { version = "0.8", features = ["std", "compile-time-rng"], default-features = false }
 
 [dev-dependencies]
 console_error_panic_hook = "0.1"
 console_log = "0.2"
 stats_alloc = "0.1"
 wasm-bindgen-test = "0.3"
-
-[features]
-experimental = ["hobo_derive/experimental"]
 
 [dependencies.web-sys]
 version = "0.3"
@@ -80,3 +78,6 @@ features = [
 	"SvgStopElement", "SvgSwitchElement", "SvgSymbolElement", "SvgTextElement", "SvgTextPathElement",
 	"SvgTitleElement", "SvgtSpanElement", "SvgUseElement", "SvgViewElement",
 ]
+
+[features]
+experimental = ["hobo_derive/experimental"]
