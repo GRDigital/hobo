@@ -7,6 +7,9 @@ use std::any::type_name;
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Entity(pub(crate) u64);
 
+#[derive(Default)]
+struct FutureHandlesCollection(Vec<discard::DiscardOnDrop<futures_signals::CancelableFutureHandle>>);
+
 impl Entity {
 	pub(crate) fn root() -> Self { Self(0) }
 }
@@ -35,22 +38,22 @@ pub trait AsEntity {
 
 	#[inline]
 	#[track_caller]
-	fn get_cmp<'a, C: 'static>(&self) -> OwningRef<StorageGuard<C, StorageRef<'a, C>>, C> where Self: Sized {
-		OwningRef::new(WORLD.storage::<C>()).try_map(|x| x.get(self).ok_or_else(|| type_name::<C>())).expect("entity does not have component")
+	fn get_cmp<'a, C: 'static>(&self) -> OwningRef<StorageGuard<C, StorageRef<'a, C>>, C> {
+		OwningRef::new(WORLD.storage::<C>()).try_map(|x| x.get(self.as_entity()).ok_or_else(|| type_name::<C>())).expect("entity does not have component")
 	}
 	#[inline]
 	#[track_caller]
-	fn get_cmp_mut<'a, C: 'static>(&self) -> OwningRefMut<StorageGuardMut<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
-		OwningRefMut::new(WORLD.storage_mut::<C>()).try_map_mut(|x| x.get_mut(self).ok_or_else(|| type_name::<C>())).expect("entity does not have component")
+	fn get_cmp_mut<'a, C: 'static>(&self) -> OwningRefMut<StorageGuardMut<'a, C, StorageRefMut<'a, C>>, C> {
+		OwningRefMut::new(WORLD.storage_mut::<C>()).try_map_mut(|x| x.get_mut(self.as_entity()).ok_or_else(|| type_name::<C>())).expect("entity does not have component")
 	}
 	#[inline]
 	#[track_caller]
-	fn get_cmp_mut_or<'a, C: 'static>(&self, f: impl FnOnce() -> C) -> OwningRefMut<StorageGuardMut<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
-		OwningRefMut::new(WORLD.storage_mut::<C>()).map_mut(move |x| x.get_mut_or(self, f))
+	fn get_cmp_mut_or<'a, C: 'static>(&self, f: impl FnOnce() -> C) -> OwningRefMut<StorageGuardMut<'a, C, StorageRefMut<'a, C>>, C> {
+		OwningRefMut::new(WORLD.storage_mut::<C>()).map_mut(move |x| x.get_mut_or(self.as_entity(), f))
 	}
 	#[inline]
 	#[track_caller]
-	fn get_cmp_mut_or_default<'a, C: 'static + Default>(&self) -> OwningRefMut<StorageGuardMut<'a, C, StorageRefMut<'a, C>>, C> where Self: Sized {
+	fn get_cmp_mut_or_default<'a, C: 'static + Default>(&self) -> OwningRefMut<StorageGuardMut<'a, C, StorageRefMut<'a, C>>, C> {
 		self.get_cmp_mut_or(Default::default)
 	}
 
@@ -109,6 +112,14 @@ pub trait AsEntity {
 	fn component<T: 'static>(self, component: T) -> Self where Self: Sized { self.add_component(component); self }
 	#[inline] fn has_cmp<C: 'static>(&self) -> bool where Self: Sized { WORLD.storage::<C>().has(self.as_entity()) }
 	#[inline] fn is_dead(&self)  -> bool { WORLD.is_dead(self.as_entity()) }
+
+	fn spawn(&self, f: impl std::future::Future<Output = ()> + 'static) {
+		let (handle, fut) = futures_signals::cancelable_future(f, Default::default);
+		wasm_bindgen_futures::spawn_local(fut);
+		self.get_cmp_mut_or_default::<FutureHandlesCollection>().0.push(handle);
+	}
+
+	fn spawn_in<F: FnOnce(&Self) -> Fut, Fut: std::future::Future<Output = ()> + 'static>(self, f: F) -> Self where Self: Sized { self.spawn(f(&self)); self }
 }
 
 impl AsEntity for Entity {
