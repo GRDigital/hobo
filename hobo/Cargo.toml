@@ -14,7 +14,6 @@ as-any = "0.3"
 discard = "1"
 elsa = "1"
 extend = "1"
-futures = "0.3"
 futures-signals = "0.3"
 hobo_css = { path = "../hobo_css", version = "=0.3.0" }
 hobo_derive = { path = "../hobo_derive", version = "=0.3.0" }
