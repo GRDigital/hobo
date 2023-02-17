@@ -28,6 +28,12 @@ pub trait Resource: 'static {
 	fn try_resource_mut<'a>() -> Option<OwningRefMut<StorageGuardMut<'a, Self, StorageRefMut<'a, Self>>, Self>> where Self: Sized {
 		World::try_resource_mut::<Self>(&WORLD)
 	}
+
+	#[inline]
+	#[track_caller]
+	fn remove_resource() where Self: Sized {
+		World::remove_resource::<Self>(&WORLD)
+	}
 }
 impl<T: 'static + Sized> Resource for T {}
 

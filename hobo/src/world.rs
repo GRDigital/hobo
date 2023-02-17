@@ -205,6 +205,11 @@ impl World {
 		Some(OwningRefMut::new(self.storage_mut()).map_mut(|x| x.get_mut(Entity::root()).unwrap()))
 	}
 
+	#[track_caller]
+	pub fn remove_resource<T: 'static>(&self) {
+		self.storage_mut::<T>().remove(Entity::root());
+	}
+
 	pub fn new_entity(&self) -> Entity {
 		let entity = Entity(self.next_entity.fetch_add(1, Ordering::Relaxed));
 		self.component_ownership.borrow_mut().insert(entity, BTreeSet::default());
