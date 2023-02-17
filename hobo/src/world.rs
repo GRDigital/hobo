@@ -3,7 +3,7 @@ use crate::prelude::*;
 use crate::{
 	create,
 	element::Classes,
-	storage::{SimpleStorage, StorageGuard, StorageGuardMut},
+	storage::{Storage, StorageGuard, StorageGuardMut},
 	style_storage::{StyleStorage, STYLE_STORAGE},
 	StorageRef, StorageRefMut,
 };
@@ -22,7 +22,7 @@ pub(crate) static WORLD: Lazy<World> = Lazy::new(|| {
 	world.component_ownership.borrow_mut().insert(Entity::root(), BTreeSet::default());
 
 	{
-		fn update_classes(storage: &mut SimpleStorage<Classes>, world: &World, entity: Entity) {
+		fn update_classes(storage: &mut Storage<Classes>, entity: Entity) {
 			use std::fmt::Write;
 
 			let mut res = String::new();
@@ -39,7 +39,7 @@ pub(crate) static WORLD: Lazy<World> = Lazy::new(|| {
 				}
 			}
 
-			let elements = world.storage::<web_sys::Element>();
+			let elements = WORLD.storage::<web_sys::Element>();
 			let element = elements.get(entity).unwrap();
 			let res = res.trim();
 			if res.is_empty() {
@@ -84,7 +84,7 @@ impl World {
 				crate::backtrace::STORAGE_MAP.0.borrow()[&TypeId::of::<Component>()]
 			))
 		} else {
-			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
+			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(Storage::<Component>::default()));
 			let storage: &'static _ = Box::leak(Box::new(storage));
 			self.storages.insert(TypeId::of::<Component>(), storage);
 			storage.borrow()
@@ -97,7 +97,7 @@ impl World {
 		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.borrow()) {
 			storage
 		} else {
-			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
+			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(Storage::<Component>::default()));
 			let storage: &'static _ = Box::leak(Box::new(storage));
 			self.storages.insert(TypeId::of::<Component>(), storage);
 			storage.borrow()
@@ -115,7 +115,7 @@ impl World {
 				crate::backtrace::STORAGE_MAP.0.borrow()[&TypeId::of::<Component>()]
 			))
 		} else {
-			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
+			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(Storage::<Component>::default()));
 			let storage: &'static _ = Box::leak(Box::new(storage));
 			self.storages.insert(TypeId::of::<Component>(), storage);
 			storage.borrow_mut()
@@ -167,7 +167,6 @@ impl World {
 			.map_mut(|x| x.as_any_mut().downcast_mut().unwrap());
 
 		StorageGuardMut {
-			world: self,
 			inner: Some(storage),
 			#[cfg(debug_assertions)]
 			location: *std::panic::Location::caller()
@@ -242,7 +241,7 @@ impl World {
 		for component_id in components {
 			let mut storage = self.storages.map_get(&component_id, |x| x.try_borrow_mut().expect("remove_entity storages -> storage.try_borrow_mut .. remove")).unwrap();
 			storage.dyn_remove(entity);
-			storage.flush(self);
+			storage.flush();
 		}
 	}
 

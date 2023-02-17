@@ -87,8 +87,8 @@ pub mod backtrace {
 }
 
 // this is not necessary, but it makes it convenient to further remap to some OwningRef or whatever
-pub type StorageRef<'a, Component> = OwningRef<Ref<'a, Box<dyn storage::DynStorage>>, SimpleStorage<Component>>;
-pub type StorageRefMut<'a, Component> = OwningRefMut<RefMut<'a, Box<dyn storage::DynStorage>>, SimpleStorage<Component>>;
+pub type StorageRef<'a, Component> = OwningRef<Ref<'a, Box<dyn storage::DynStorage>>, Storage<Component>>;
+pub type StorageRefMut<'a, Component> = OwningRefMut<RefMut<'a, Box<dyn storage::DynStorage>>, Storage<Component>>;
 
 /// Register a browser window to also receive styles, automatically called for the global `window` object with the name "default"
 pub fn register_window(window: &web_sys::Window, window_name: String) {

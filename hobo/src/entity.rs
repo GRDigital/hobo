@@ -29,7 +29,7 @@ pub trait AsEntity {
 	}
 	#[inline]
 	#[track_caller]
-	fn try_get_cmp_mut<'a, C: 'static>(&self) -> Option<OwningRefMut<StorageGuardMut<'a, C, StorageRefMut<'a, C>>, C>> where Self: Sized {
+	fn try_get_cmp_mut<'a, C: 'static>(&self) -> Option<OwningRefMut<StorageGuardMut<C, StorageRefMut<'a, C>>, C>> where Self: Sized {
 		let entity = self.as_entity();
 		if !WORLD.storage::<C>().has(entity) {
 			return None;
@@ -44,17 +44,17 @@ pub trait AsEntity {
 	}
 	#[inline]
 	#[track_caller]
-	fn get_cmp_mut<'a, C: 'static>(&self) -> OwningRefMut<StorageGuardMut<'a, C, StorageRefMut<'a, C>>, C> {
+	fn get_cmp_mut<'a, C: 'static>(&self) -> OwningRefMut<StorageGuardMut<C, StorageRefMut<'a, C>>, C> {
 		OwningRefMut::new(WORLD.storage_mut::<C>()).try_map_mut(|x| x.get_mut(self.as_entity()).ok_or_else(|| type_name::<C>())).expect("entity does not have component")
 	}
 	#[inline]
 	#[track_caller]
-	fn get_cmp_mut_or<'a, C: 'static>(&self, f: impl FnOnce() -> C) -> OwningRefMut<StorageGuardMut<'a, C, StorageRefMut<'a, C>>, C> {
+	fn get_cmp_mut_or<'a, C: 'static>(&self, f: impl FnOnce() -> C) -> OwningRefMut<StorageGuardMut<C, StorageRefMut<'a, C>>, C> {
 		OwningRefMut::new(WORLD.storage_mut::<C>()).map_mut(move |x| x.get_mut_or(self.as_entity(), f))
 	}
 	#[inline]
 	#[track_caller]
-	fn get_cmp_mut_or_default<'a, C: 'static + Default>(&self) -> OwningRefMut<StorageGuardMut<'a, C, StorageRefMut<'a, C>>, C> {
+	fn get_cmp_mut_or_default<'a, C: 'static + Default>(&self) -> OwningRefMut<StorageGuardMut<C, StorageRefMut<'a, C>>, C> {
 		self.get_cmp_mut_or(Default::default)
 	}
 

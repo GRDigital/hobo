@@ -3,7 +3,7 @@
 pub mod svg;
 pub mod html;
 
-use crate::{prelude::*, storage::Storage, AsEntity, AsElement, Entity, World};
+use crate::{prelude::*, AsEntity, AsElement, Entity, World};
 use std::{any::TypeId, collections::HashSet};
 use sugars::*;
 
@@ -23,19 +23,17 @@ pub fn dom_element<T, E>(world: &World, entity: T, element: &E) where
 struct DomTypes(HashSet<TypeId>);
 
 pub fn register_handlers(world: &World) {
-	world.storage_mut::<web_sys::Element>().on_removed = Some(move |_, world, entity, element| {
-		world.storage_mut::<web_sys::Node>().remove(entity);
-		world.storage_mut::<web_sys::EventTarget>().remove(entity);
-		world.storage_mut::<DomTypes>().remove(entity);
-		world.storage_mut::<Vec<crate::dom_events::EventHandler>>().remove(entity);
+	world.storage_mut::<web_sys::Element>().on_removed = Some(move |_, entity, element| {
+		WORLD.storage_mut::<web_sys::Node>().remove(entity);
+		WORLD.storage_mut::<web_sys::EventTarget>().remove(entity);
+		WORLD.storage_mut::<DomTypes>().remove(entity);
+		WORLD.storage_mut::<Vec<crate::dom_events::EventHandler>>().remove(entity);
 		element.remove();
 	});
 
-	world.storage_mut::<DomTypes>().on_removed = Some(move |_, world, entity, dom_types| {
+	world.storage_mut::<DomTypes>().on_removed = Some(move |_, entity, dom_types| {
 		for t in dom_types.0 {
-			// TODO: WARNING: this won't run handlers watching it
-			// which isn't a problem for now
-			world.storages.map_get(&t, |x| x.borrow_mut()).unwrap().dyn_remove(entity);
+			WORLD.storages.map_get(&t, |x| x.borrow_mut()).unwrap().dyn_remove(entity);
 		}
 	});
 }

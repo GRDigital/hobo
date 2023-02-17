@@ -11,7 +11,7 @@ use std::{
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, AsElement)]
 pub struct Element(pub Entity);
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub(crate) struct Classes {
 	pub(crate) marks: HashSet<TypeId>,
 

@@ -14,7 +14,7 @@ pub trait Resource: 'static {
 	}
 	#[inline]
 	#[track_caller]
-	fn resource_mut<'a>() -> OwningRefMut<StorageGuardMut<'a, Self, StorageRefMut<'a, Self>>, Self> where Self: Sized {
+	fn resource_mut<'a>() -> OwningRefMut<StorageGuardMut<Self, StorageRefMut<'a, Self>>, Self> where Self: Sized {
 		World::resource_mut::<Self>(&WORLD)
 	}
 
@@ -25,7 +25,7 @@ pub trait Resource: 'static {
 	}
 	#[inline]
 	#[track_caller]
-	fn try_resource_mut<'a>() -> Option<OwningRefMut<StorageGuardMut<'a, Self, StorageRefMut<'a, Self>>, Self>> where Self: Sized {
+	fn try_resource_mut<'a>() -> Option<OwningRefMut<StorageGuardMut<Self, StorageRefMut<'a, Self>>, Self>> where Self: Sized {
 		World::try_resource_mut::<Self>(&WORLD)
 	}
 
@@ -48,7 +48,7 @@ pub trait DefaultResource: Default + 'static {
 	}
 	#[inline]
 	#[track_caller]
-	fn resource_mut_or_default<'a>() -> OwningRefMut<StorageGuardMut<'a, Self, StorageRefMut<'a, Self>>, Self> where Self: Sized {
+	fn resource_mut_or_default<'a>() -> OwningRefMut<StorageGuardMut<Self, StorageRefMut<'a, Self>>, Self> where Self: Sized {
 		if !World::resource_exists::<Self>(&WORLD) {
 			World::register_resource(&WORLD, Self::default());
 		}
