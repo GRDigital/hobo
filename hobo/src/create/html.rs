@@ -1,4 +1,5 @@
 use std::borrow::Cow;
+use futures_signals::signal::Signal;
 use super::*;
 
 pub trait BasicAttrs: AsElement {
@@ -100,6 +101,16 @@ impl Select {
 impl Img {
 	#[inline] pub fn src<'a>(self, url: impl Into<Cow<'a, str>>) -> Self { self.attr(web_str::src(), url) }
 	#[inline] pub fn set_src<'a>(&self, url: impl Into<Cow<'a, str>>) { self.set_attr(web_str::src(), url) }
+
+	#[must_use]
+	pub fn src_signal<'v, S, V>(self, signal: S) -> Self where
+		V: Into<Cow<'v, str>>,
+		S: Signal<Item = V> + 'static,
+	{ self.set_src_signal(signal); self }
+	pub fn set_src_signal<'v, S, V>(&self, signal: S) where
+		V: Into<Cow<'v, str>>,
+		S: Signal<Item = V> + 'static,
+	{ self.set_attr_signal(web_str::src(), signal); }
 }
 
 impl Script {
