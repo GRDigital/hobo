@@ -33,7 +33,6 @@ use std::{
 	any::TypeId,
 	cell::{Ref, RefMut},
 };
-use storage::*;
 use style_storage::{StyleStorage, STYLE_STORAGE};
 use sugars::hash;
 #[doc(hidden)] pub use world::World;

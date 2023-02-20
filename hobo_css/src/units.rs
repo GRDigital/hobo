@@ -1,7 +1,5 @@
 use num_traits::cast::AsPrimitive;
 
-use crate::prelude::*;
-
 pub type F32 = ordered_float::NotNan<f32>;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display, PartialOrd, Ord)]
@@ -108,7 +106,7 @@ impl std::ops::Sub for Unit {
 #[rustfmt::skip]
 #[macro_export]
 macro_rules! unit {
-	(0)                                             => { $crate::units::Unit::Zero    };
+	(0)                                             => { $crate::units::Unit::Zero          };
 
 	($e:literal $(px)?)                             => { $crate::units::Unit::px($e)        };
 	($e:literal ms)                                 => { $crate::units::Unit::dur($e)       };
