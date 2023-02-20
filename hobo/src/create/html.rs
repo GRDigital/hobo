@@ -15,9 +15,6 @@ impl<T: AsElement> BasicAttrs for T {}
 impl A {
 	#[must_use] #[inline] pub fn href<'a>(self, href: impl Into<Cow<'a, str>>) -> Self { self.set_href(href); self }
 	#[inline] pub fn set_href<'a>(self, href: impl Into<Cow<'a, str>>) { self.set_attr(web_str::href(), href); }
-
-	#[must_use] #[inline] pub fn untrusted<'a>(self) -> Self { self.set_untrusted(); self }
-	#[inline] pub fn set_untrusted<'a>(self) { self.attr(web_str::target(), web_str::_blank()).set_attr(web_str::rel(), "noopener noreferrer"); }
 }
 
 impl Input {
