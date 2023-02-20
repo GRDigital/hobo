@@ -128,7 +128,7 @@ impl World {
 		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.borrow_mut()) {
 			storage
 		} else {
-			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(SimpleStorage::<Component>::default()));
+			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(Storage::<Component>::default()));
 			let storage: &'static _ = Box::leak(Box::new(storage));
 			self.storages.insert(TypeId::of::<Component>(), storage);
 			storage.borrow_mut()
