@@ -98,6 +98,7 @@ generate_events! {
 	AnimationEvent,  animationstart,     on_animation_start;
 	PopStateEvent,   popstate,           on_pop_state;
 	HashChangeEvent, hashchange,         on_hash_change;
+	ClipboardEvent,  paste,              on_paste;
 }
 
 // DeviceMotionEvent

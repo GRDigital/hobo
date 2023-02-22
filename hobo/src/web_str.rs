@@ -85,4 +85,5 @@ intern_strings! {
 	touchstart; touchend; touchmove; touchcancel; wheel;
 	load; canplay; drag; submit; input; animationcancel; animationend;
 	animationiteration; animationstart; popstate; hashchange;
+	paste;
 }

@@ -50,6 +50,7 @@ features = [
 	"MouseEvent", "KeyboardEvent", "TouchEvent",
 	"FocusEvent", "WheelEvent", "DragEvent", "SubmitEvent",
 	"InputEvent", "AnimationEvent", "PopStateEvent", "HashChangeEvent",
+	"ClipboardEvent",
 
 	"HtmlHtmlElement", "HtmlBaseElement", "HtmlHeadElement", "HtmlLinkElement", "HtmlMetaElement",
 	"HtmlStyleElement", "HtmlTitleElement", "HtmlBodyElement", "HtmlElement", "HtmlHeadingElement",
