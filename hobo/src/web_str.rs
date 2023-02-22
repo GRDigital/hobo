@@ -71,6 +71,7 @@ intern_strings! {
 	date; datetime_local; time;
 	tel;
 	url;
+	maxlength;
 	_blank; rel; noopener;
 	viewBox; d; cx; cy; r; x; y; x1; x2; y1; y2; path_length; points;
 	transform;
