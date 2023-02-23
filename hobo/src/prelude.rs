@@ -5,7 +5,7 @@ pub(crate) use crate::world::{World, WORLD};
 pub use crate::{
 	create::html::{StringValue, BasicAttrs, Placeholder},
 	css::{self, AppendProperty, F32},
-	dom_events::impls::*,
+	dom_events::{RawDomEvents, DomEvents},
 	element::{AsElement, Element},
 	entity::{AsEntity, Entity},
 	hierarchy::{Children, Parent},

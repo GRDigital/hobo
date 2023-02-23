@@ -21,46 +21,36 @@ impl Drop for EventHandler {
 
 macro_rules! generate_events {
 	($($event_kind:ident, $name:ident, $f:ident);+$(;)*) => {paste::item!{
-		$(
-			pub trait [<Raw $name:camel>] {
-				fn $f(&self, f: impl FnMut(web_sys::$event_kind) + 'static) -> EventHandler;
-			}
-
-			impl [<Raw $name:camel>] for web_sys::EventTarget {
-				fn $f(&self, mut f: impl FnMut(web_sys::$event_kind) + 'static) -> EventHandler {
-					let handler = Closure::wrap(Box::new(move |e| f(e)) as Box<dyn FnMut(web_sys::$event_kind) + 'static>);
-					self.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).expect("can't add event listener");
-					EventHandler {
-						target: self.clone(),
-						name: web_str::$name(),
-						cb: Box::new(handler),
-					}
+		#[extend::ext(name = RawDomEvents)]
+		pub impl web_sys::EventTarget {$(
+			fn $f(&self, f: impl FnMut(web_sys::$event_kind) + 'static) -> EventHandler {
+				let handler = Closure::wrap(Box::new(f) as Box<dyn FnMut(web_sys::$event_kind) + 'static>);
+				self.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).expect("can't add event listener");
+				EventHandler {
+					target: self.clone(),
+					name: web_str::$name(),
+					cb: Box::new(handler),
 				}
 			}
-
-			pub trait [<$name:camel>]: AsElement {
-				fn [<add_ $f>](&self, f: impl FnMut(web_sys::$event_kind) + 'static) {
-					let entity = self.as_entity();
-					if entity.is_dead() { log::warn!("callback handler entity dead {:?}", entity); return; }
-					let target = entity.get_cmp::<web_sys::EventTarget>();
-					entity.get_cmp_mut_or_default::<Vec<EventHandler>>().push(target.$f(f));
-				}
-
-				fn $f(self, f: impl FnMut(web_sys::$event_kind) + 'static) -> Self where Self: Sized { self.[<add_ $f>](f); self }
-				fn [<with_ $f>](self, mut f: impl FnMut(&Self, web_sys::$event_kind) + 'static) -> Self where Self: Sized + Clone + 'static {
-					let self_clone = self.clone();
-					self.[<add_ $f>](move |event| f(&self_clone, event));
-					self
-				}
-			}
-
-			impl<T: AsElement> [<$name:camel>] for T {}
-		)+
-
-		pub mod impls {$(
-			pub use super::[<$name:camel>] as _;
-			pub use super::[<Raw $name:camel>] as _;
 		)+}
+
+		pub trait DomEvents: AsElement {$(
+			fn [<add_ $f>](&self, f: impl FnMut(web_sys::$event_kind) + 'static) {
+				let entity = self.as_entity();
+				if entity.is_dead() { log::warn!("callback handler entity dead {:?}", entity); return; }
+				let target = entity.get_cmp::<web_sys::EventTarget>();
+				entity.get_cmp_mut_or_default::<Vec<EventHandler>>().push(target.$f(f));
+			}
+
+			fn $f(self, f: impl FnMut(web_sys::$event_kind) + 'static) -> Self where Self: Sized { self.[<add_ $f>](f); self }
+			fn [<with_ $f>](self, mut f: impl FnMut(&Self, web_sys::$event_kind) + 'static) -> Self where Self: Sized + Clone + 'static {
+				let self_clone = self.clone();
+				self.[<add_ $f>](move |event| f(&self_clone, event));
+				self
+			}
+		)+}
+
+		impl<T: AsElement> DomEvents for T {}
 	}};
 }
 
@@ -101,7 +91,7 @@ generate_events! {
 	HashChangeEvent, hashchange,         on_hash_change;
 }
 
-//TODO: Temp Hack!!
+//TODO: Temp Hack!! look for a way to not require copypasting
 #[cfg(web_sys_unstable_apis)]
 generate_events! {
 	MouseEvent,      click,              on_click;
@@ -138,8 +128,11 @@ generate_events! {
 	PopStateEvent,   popstate,           on_pop_state;
 	HashChangeEvent, hashchange,         on_hash_change;
 
+	ClipboardEvent, cut, on_cut;
+	ClipboardEvent, copy, on_copy;
 	ClipboardEvent, paste, on_paste;
 }
+
 // DeviceMotionEvent
 // DeviceOrientationEvent
 // DeviceProximityEvent
@@ -173,7 +166,6 @@ generate_events! {
 // PaymentMethodChangeEvent
 // PaymentRequestUpdateEvent
 // PointerEvent
-// ClipboardEvent
 // PopupBlockedEvent
 // PresentationConnectionAvailableEvent
 // PresentationConnectionCloseEvent
