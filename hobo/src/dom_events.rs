@@ -64,6 +64,7 @@ macro_rules! generate_events {
 	}};
 }
 
+#[cfg(not(web_sys_unstable_apis))]
 generate_events! {
 	MouseEvent,      click,              on_click;
 	MouseEvent,      contextmenu,        on_context_menu;
@@ -98,9 +99,47 @@ generate_events! {
 	AnimationEvent,  animationstart,     on_animation_start;
 	PopStateEvent,   popstate,           on_pop_state;
 	HashChangeEvent, hashchange,         on_hash_change;
-	ClipboardEvent,  paste,              on_paste;
 }
 
+//TODO: Temp Hack!!
+#[cfg(web_sys_unstable_apis)]
+generate_events! {
+	MouseEvent,      click,              on_click;
+	MouseEvent,      contextmenu,        on_context_menu;
+	MouseEvent,      dblclick,           on_dbl_click;
+	MouseEvent,      mousedown,          on_mouse_down;
+	MouseEvent,      mouseenter,         on_mouse_enter;
+	MouseEvent,      mouseleave,         on_mouse_leave;
+	MouseEvent,      mousemove,          on_mouse_move;
+	MouseEvent,      mouseover,          on_mouse_over;
+	MouseEvent,      mouseout,           on_mouse_out;
+	MouseEvent,      mouseup,            on_mouse_up;
+	KeyboardEvent,   keydown,            on_key_down;
+	KeyboardEvent,   keyup,              on_key_up;
+	Event,           change,             on_change;
+	Event,           scroll,             on_scroll;
+	UiEvent,         resize,             on_resize;
+	FocusEvent,      blur,               on_blur;
+	FocusEvent,      focus,              on_focus;
+	TouchEvent,      touchstart,         on_touch_start;
+	TouchEvent,      touchend,           on_touch_end;
+	TouchEvent,      touchmove,          on_touch_move;
+	TouchEvent,      touchcancel,        on_touch_cancel;
+	WheelEvent,      wheel,              on_wheel;
+	Event,           load,               on_load;
+	Event,           canplay,            on_can_play;
+	DragEvent,       drag,               on_drag;
+	SubmitEvent,     submit,             on_submit;
+	InputEvent,      input,              on_input;
+	AnimationEvent,  animationcancel,    on_animation_cancel;
+	AnimationEvent,  animationend,       on_animation_end;
+	AnimationEvent,  animationiteration, on_animation_iteration;
+	AnimationEvent,  animationstart,     on_animation_start;
+	PopStateEvent,   popstate,           on_pop_state;
+	HashChangeEvent, hashchange,         on_hash_change;
+
+	ClipboardEvent, paste, on_paste;
+}
 // DeviceMotionEvent
 // DeviceOrientationEvent
 // DeviceProximityEvent
