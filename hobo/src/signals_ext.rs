@@ -11,6 +11,9 @@ pub trait SignalExt2: Signal {
 	fn subscribe<F>(self, callback: F) -> DiscardOnDrop<CancelableFutureHandle> where
 		F: FnMut(Self::Item) + 'static,
 		Self: Sized;
+
+	// fn spawn(self) -> DiscardOnDrop<CancelableFutureHandle> where
+	//     Self: Sized;
 }
 
 impl<T: Signal + 'static> SignalExt2 for T {
@@ -22,6 +25,14 @@ impl<T: Signal + 'static> SignalExt2 for T {
 		spawn(fut);
 		handle
 	}
+
+	// fn spawn(self) -> DiscardOnDrop<CancelableFutureHandle> where
+	//     Self: Sized,
+	// {
+	//     let (handle, fut) = futures_signals::cancelable_future(self.for_each(move |_| std::future::ready(())), Default::default);
+	//     spawn(fut);
+	//     handle
+	// }
 }
 
 pub trait SignalMapExt2: SignalMap {
