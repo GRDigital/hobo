@@ -40,10 +40,18 @@ impl Parse for Selector {
 						abort!(input.parse::<TokenTree>().unwrap(), "unknown token for a class")
 					}
 				} else if input.peek(syn::token::Bracket) {
-					// literal attribute
-					let content = { let content; syn::bracketed!(content in input); content.parse::<syn::Ident>()? };
-					let content_str = content.to_string();
-					quote! { .attribute(#content_str.into()) }
+					let content; syn::bracketed!(content in input);
+					let maybe_ident = content.fork();
+					if maybe_ident.parse::<syn::Ident>().is_ok() && maybe_ident.is_empty() {
+						// literal attribute
+						let content = content.parse::<syn::Ident>()?;
+						let content_str = content.to_string();
+						quote! { .attribute(#content_str.into()) }
+					} else {
+						// attribute expr
+						let content = content.parse::<syn::Expr>()?;
+						quote! { .attribute(#content.into()) }
+					}
 				} else if input.parse::<Token![#]>().is_ok() {
 					// id expr
 					let content = { let content; syn::parenthesized!(content in input); content.parse::<syn::Expr>()? };
