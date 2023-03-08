@@ -42,7 +42,7 @@ intern_strings! {
 	placeholder;
 	src;
 	href;
-	disabled; selected;
+	active; enabled; disabled; selected;
 	hidden;
 	beforebegin; afterbegin; beforeend; afterend;
 	checkbox; radio;
