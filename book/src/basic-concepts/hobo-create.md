@@ -80,7 +80,7 @@ let (entity, _) = hobo::find_ond::<Entity, With<ComponentFoo>>();
 // but we need it's type to be an Input, not Entity,
 // to e.g. access it's value via the get/set_value methods
 let input_element = hobo::create::Input(entity);
-let input_value = input_element.get_value();
+let input_value = input_element.value();
 ```
 
 One can think of it almost as casting - we're fetching an entity which we, as the writer, know is an Input - however, we need to "cast" this Entity to an Input type in order to access Input capabilities.

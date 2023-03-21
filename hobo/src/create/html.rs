@@ -67,17 +67,17 @@ impl Input {
 pub trait StringValue: AsElement {
 	fn value_attr<'a>(self, value: impl Into<Cow<'a, str>>) -> Self where Self: Sized { self.set_value_attr(value); self }
 	fn set_value_attr<'a>(&self, value: impl Into<Cow<'a, str>>) { self.set_attr(web_str::value(), value) }
-	fn get_value(&self) -> String;
+	fn value(&self) -> String;
 	fn set_value(&self, x: &str);
 }
 
 impl StringValue for Input {
-	#[inline] fn get_value(&self) -> String { self.get_cmp::<web_sys::HtmlInputElement>().value() }
+	#[inline] fn value(&self) -> String { self.get_cmp::<web_sys::HtmlInputElement>().value() }
 	#[inline] fn set_value(&self, x: &str) { self.get_cmp::<web_sys::HtmlInputElement>().set_value(x) }
 }
 
 impl StringValue for Textarea {
-	#[inline] fn get_value(&self) -> String { self.get_cmp::<web_sys::HtmlTextAreaElement>().value() }
+	#[inline] fn value(&self) -> String { self.get_cmp::<web_sys::HtmlTextAreaElement>().value() }
 	#[inline] fn set_value(&self, x: &str) { self.get_cmp::<web_sys::HtmlTextAreaElement>().set_value(x) }
 }
 
