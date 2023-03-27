@@ -55,7 +55,7 @@ impl Parse for Selector {
 			while input.parse::<Token![,]>().is_err() && !input.is_empty() {
 				stream.extend(std::iter::once(input.parse::<TokenTree>()?));
 			}
-			punct.push(syn::parse_macro_input::parse::<Query>(stream.into())?);
+			punct.push(syn::parse::<Query>(stream.into())?);
 		}
 		Ok(Self(punct))
 	}

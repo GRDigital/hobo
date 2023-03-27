@@ -12,7 +12,7 @@ readme = "../README.md"
 proc-macro = true
 
 [dependencies]
-derive_utils = "0.12"
+derive_utils = "0.13"
 heck = "0.4"
 itertools = "0.10"
 proc-macro-crate = "1"
@@ -20,4 +20,4 @@ proc-macro-error = "1"
 proc-macro2 = "1"
 proc-quote = "0.4"
 quote = "1"
-syn = "1"
+syn = "2"
