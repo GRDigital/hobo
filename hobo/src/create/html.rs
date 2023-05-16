@@ -15,6 +15,9 @@ impl<T: AsElement> BasicAttrs for T {}
 impl A {
 	#[must_use] #[inline] pub fn href<'a>(self, href: impl Into<Cow<'a, str>>) -> Self { self.set_href(href); self }
 	#[inline] pub fn set_href<'a>(self, href: impl Into<Cow<'a, str>>) { self.set_attr(web_str::href(), href); }
+
+	#[must_use] #[inline] pub fn download<'a>(self, filename: impl Into<Cow<'a, str>>) -> Self { self.set_download(filename); self }
+	#[inline] pub fn set_download<'a>(self, filename: impl Into<Cow<'a, str>>) { self.set_attr(web_str::download(), filename); }
 }
 
 impl Input {
