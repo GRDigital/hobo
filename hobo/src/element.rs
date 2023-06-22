@@ -462,6 +462,12 @@ pub trait AsElement: AsEntity + Sized {
 		other
 	}
 
+	fn parent(&self) -> Element {
+		let parent = self.get_cmp::<Parent>().0;
+		debug_assert!(parent.try_get_cmp::<web_sys::HtmlElement>().is_some());
+		Element(parent)
+	}
+
 	#[cfg(feature = "experimental")]
 	fn add_on_dom_attach(&self, cb: impl FnOnce() + Send + Sync + 'static) {
 		if self.has_cmp::<InDom>() { cb(); return; }
