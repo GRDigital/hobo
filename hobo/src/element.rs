@@ -309,6 +309,11 @@ pub trait AsElement: AsEntity + Sized {
 		S: Signal<Item = I> + 'static,
 	{ self.set_class_tagged_signal::<Tag, S, I>(tag, signal); self }
 
+	fn get_attr<'k>(&self, key: impl Into<Cow<'k, str>>) -> Option<String> {
+		if self.is_dead() { log::warn!("get_attr dead {:?}", self.as_entity()); return None; }
+		let key = key.into();
+		self.get_cmp::<web_sys::Element>().get_attribute(&key)
+	}
 	fn set_attr<'k, 'v>(&self, key: impl Into<Cow<'k, str>>, value: impl Into<Cow<'v, str>>) {
 		if self.is_dead() { log::warn!("set_attr dead {:?}", self.as_entity()); return; }
 		let key = key.into();
