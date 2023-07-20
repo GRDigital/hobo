@@ -36,6 +36,45 @@ struct OnDomAttachCbs(Vec<Box<dyn FnOnce() + Send + Sync + 'static>>);
 #[derive(Default)]
 struct SignalHandlesCollection(Vec<discard::DiscardOnDrop<futures_signals::CancelableFutureHandle>>);
 
+#[cfg(debug_assertions)]
+pub struct Complainer(i32, Closure<dyn Fn()>);
+
+#[cfg(debug_assertions)]
+impl Complainer {
+	pub fn new(entity: Entity) -> Self {
+		let f = Closure::wrap(Box::new(move || {
+			// taken from console_error_panic_hook
+			// unfortunately, we can't build PanicInfo to use their hook soooo just ctrlc ctrlv time
+			#[wasm_bindgen]
+			extern {
+				#[wasm_bindgen(js_namespace = console)]
+				fn error(msg: String);
+
+				type Error;
+
+				#[wasm_bindgen(constructor)]
+				fn new() -> Error;
+
+				#[wasm_bindgen(structural, method, getter)]
+				fn stack(error: &Error) -> String;
+			}
+
+			// we can't get location here because location is set in .add_child
+			log::warn!("[Complainer] Element {} wasn't parented in 1 sec, it's probably a bug\n\nStack:\n\n{}", entity.0, Error::new().stack());
+		}) as Box<dyn Fn()>);
+		let id = web_sys::window().unwrap().set_interval_with_callback_and_timeout_and_arguments_0(f.as_ref().unchecked_ref(), 1000).unwrap();
+
+		Complainer(id, f)
+	}
+}
+
+#[cfg(debug_assertions)]
+impl Drop for Complainer {
+	fn drop(&mut self) {
+		web_sys::window().unwrap().clear_interval_with_handle(self.0);
+	}
+}
+
 impl Element {
 	#[track_caller]
 	fn add_child(self, child: Element) {
@@ -73,6 +112,9 @@ impl Element {
 				self.get_cmp_mut_or_default::<OnDomAttachCbs>().0.append(&mut callbacks.0);
 			}
 		}
+
+		#[cfg(debug_assertions)]
+		child.remove_cmp::<Complainer>();
 	}
 
 	fn leave_parent(self) {
@@ -118,6 +160,7 @@ impl Element {
 		}
 	}
 
+	// this track_caller doesn't work exactly how I'd want, the `data-location` attr for the child is set to the `.replace_with` line
 	#[track_caller]
 	fn add_child_signal<S>(self, signal: S) where
 		S: Signal<Item = Element> + 'static,
@@ -161,6 +204,9 @@ impl Element {
 			let position = children.0.iter().position(|&x| x == self.as_entity()).expect("entity claims to be a child while missing in parent");
 			children.0[position] = other.as_entity();
 			other_entity.get_cmp_mut_or_default::<Parent>().0 = parent;
+
+			#[cfg(debug_assertions)]
+			other.remove_cmp::<Complainer>();
 		}
 
 		self.remove();
