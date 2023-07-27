@@ -1,2 +1,3 @@
 [workspace]
 members = ["hobo", "hobo_css", "hobo_css_macros", "hobo_derive"]
+resolver = "2"
