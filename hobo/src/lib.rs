@@ -24,7 +24,7 @@ use crate::prelude::*;
 #[doc(hidden)] pub use discard;
 pub use element::{AsElement, Element};
 pub use entity::AsEntity;
-pub use futures_signals as signals;
+pub use futures_signals::{self, signal, signal_map, signal_vec};
 pub use hobo_css as css;
 use owning_ref::{OwningRef, OwningRefMut};
 #[doc(hidden)] pub use paste;
