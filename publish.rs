@@ -1,9 +1,8 @@
-//# command-macros = { version = "*", features = ["nightly"] }
+//# execute = "*"
 
-#![feature(proc_macro_hygiene)]
-use command_macros::command as cmd;
 use std::thread::sleep;
 use std::time::Duration;
+use execute::command as cmd;
 
 fn main() {
 	assert!(cmd!(cargo publish).current_dir("hobo_derive").status().unwrap().success());
