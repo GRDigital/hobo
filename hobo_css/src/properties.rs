@@ -307,6 +307,7 @@ generate_properties! {
 		Clear,
 		AspectRatio,
 		OverflowAnchor,
+		ScrollbarGutter,
 	),
 	// different properties that take the same argument
 	named => (
@@ -405,6 +406,7 @@ crate::macros::easy_enum! {overflow-y visible hidden scroll auto}
 crate::macros::easy_enum! {float none left right inline-start inline-end}
 crate::macros::easy_enum! {clear none left right inline-start inline-end both}
 crate::macros::easy_enum! {overflow-anchor auto none}
+crate::macros::easy_enum! {scrollbar-gutter auto stable}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, PartialOrd, Ord)]
 pub enum UserSelect {

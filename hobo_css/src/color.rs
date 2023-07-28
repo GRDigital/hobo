@@ -9,6 +9,11 @@ impl Color {
 		Self { r, g, b, a }
 	}
 
+	pub const fn to_hex(self) -> u32 {
+		let Self { r, g, b, a } = self;
+		u32::from_be_bytes([r, g, b, a])
+	}
+
 	pub const fn r(mut self, x: u8) -> Self { self.r = x; self }
 	pub const fn g(mut self, x: u8) -> Self { self.g = x; self }
 	pub const fn b(mut self, x: u8) -> Self { self.b = x; self }
