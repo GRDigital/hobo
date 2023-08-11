@@ -2,7 +2,7 @@
 #[macro_use] mod margin;
 #[macro_use] mod padding;
 #[macro_use] mod dimensions;
-#[macro_use] mod position;
+#[macro_use] mod position_props;
 #[macro_use] mod text;
 #[macro_use] mod border;
 #[macro_use] mod background;
@@ -12,11 +12,9 @@
 #[macro_use] mod filter;
 #[macro_use] mod grid;
 #[macro_use] mod clip_path;
-#[macro_use] mod appearance;
 
 use crate::prelude::*;
 pub use animation::*;
-pub use appearance::*;
 pub use background::*;
 pub use border::*;
 pub use clip_path::*;
@@ -26,7 +24,7 @@ pub use flex::*;
 pub use grid::*;
 pub use margin::*;
 pub use padding::*;
-pub use position::*;
+pub use position_props::*;
 pub use svg::*;
 pub use text::*;
 pub use transform::*;
@@ -155,21 +153,12 @@ macro_rules! generate_properties {
 		stutter => ($($stutter_name:ident),*$(,)?),
 		named => ($($css_name:expr => $named_name:ident($named_type:ty)),*$(,)?),
 	) => {
-		pub use Property::{$($named_name),*};
-
-		#[allow(clippy::derive_ord_xor_partial_ord)]
-		#[derive(Debug, PartialEq, Eq, Hash, Clone, strum::EnumDiscriminants, Ord)]
-		#[strum_discriminants(derive(PartialOrd))]
+		#[derive(Debug, PartialEq, Eq, Hash, Clone, strum::EnumDiscriminants)]
+		#[strum_discriminants(derive(PartialOrd, Ord))]
 		pub enum Property {
 			Raw(String),
 			$($stutter_name($stutter_name),)*
 			$($named_name($named_type)),*
-		}
-
-		impl std::cmp::PartialOrd for Property {
-			fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-				PropertyDiscriminants::from(self).partial_cmp(&PropertyDiscriminants::from(other))
-			}
 		}
 
 		impl std::fmt::Display for Property {
@@ -217,26 +206,22 @@ generate_properties! {
 		WritingMode,
 		HangingPunctuation,
 		Hyphens,
-		TextAlign,
-		TextAlignLast,
-		TextJustify,
-		FontStretch,
-		UserSelect,
-		ScrollBehavior,
-		PointerEvents,
-		TouchAction,
 		Resize,
 		ObjectFit,
 		ListStyleType, ListStyleImage, ListStylePosition,
 
 		BreakAfter, BreakBefore, BreakInside,
 
-		FontVariant,
-		WordBreak,
-		WordWrap,
-		FontStyle,
+		TextAlign, TextAlignLast, TextJustify,
+		TextTransform, TextShadow, TextOverflow, TextAnchor,
+		TextDecorationStyle, TextDecorationLine, TextRendering,
+
+		FontStretch, FontVariant, FontStyle, FontWeight,
+		FontSize, FontKerning, FontFamily,
+
+		WordBreak, WordWrap,
+		OverflowWrap, OverflowAnchor,
 		TransformStyle,
-		BackgroundBlendMode,
 		MixBlendMode,
 		Isolation,
 		CaptionSide,
@@ -244,38 +229,25 @@ generate_properties! {
 		TableLayout,
 		BorderCollapse,
 		All,
-		FontWeight,
-		FontSize,
-		BackgroundRepeat,
-		BackgroundAttachment,
-		Cursor,
-		TextTransform,
-		TextShadow,
-		FontKerning,
-		FontFamily,
 		WordSpacing,
-		TextOverflow,
 		VerticalAlign,
 		LineHeight,
 		LetterSpacing,
 		TabSize,
 		BoxDecorationBreak,
-		OutlineWidth,
-		OutlineStyle,
+		OutlineWidth, OutlineStyle,
 		Content,
 		Opacity,
 		Perspective,
 		BackfaceVisibility,
-		TextDecorationStyle,
-		TextDecorationLine,
-		TextRendering,
 		VectorEffect,
 		AlignmentBaseline,
 		DominantBaseline,
-		TextAnchor,
 		StrokeLinecap,
-		BackgroundImage,
-		BackgroundSize,
+
+		BackgroundImage, BackgroundSize,
+		BackgroundRepeat, BackgroundAttachment,
+		BackgroundBlendMode, BackgroundOrigin, BackgroundClip,
 
 		AnimationDirection, AnimationFillMode, AnimationIterationCount,
 		AnimationName, AnimationPlayState, AnimationTimingFunction,
@@ -290,23 +262,17 @@ generate_properties! {
 		BorderImageSource, BorderImageSlice, BorderImageWidth,
 		BorderImageOutset, BorderImageRepeat,
 
+		ScrollBehavior, PointerEvents, UserSelect, TouchAction, Cursor,
+
 		ClipPath,
-		BackgroundOrigin,
-		BackgroundClip,
 		GridAutoFlow,
-		RowGap,
-		ColumnGap,
-		GridGap,
-		OverflowWrap,
+		RowGap, ColumnGap, GridGap,
 		BoxShadow,
 		TransformOrigin,
 		Appearance,
-		MaskImage,
-		MaskSize,
-		Float,
-		Clear,
+		MaskImage, MaskSize,
+		Float, Clear,
 		AspectRatio,
-		OverflowAnchor,
 		ScrollbarGutter,
 	),
 	// different properties that take the same argument
@@ -379,10 +345,22 @@ generate_properties! {
 	),
 }
 
+impl std::cmp::PartialOrd for Property {
+	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+		PropertyDiscriminants::from(self).partial_cmp(&PropertyDiscriminants::from(other))
+	}
+}
+
+impl std::cmp::Ord for Property {
+	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+		PropertyDiscriminants::from(self).cmp(&PropertyDiscriminants::from(other))
+	}
+}
+
 crate::macros::easy_enum! {box-sizing content-box border-box}
 crate::macros::easy_enum! {visibility visible hidden collapse}
 crate::macros::easy_enum! {display block none inline inline-block flex inline-flex grid inline-grid flow-root contents table table-row table-row-group table-header-group table-footer-group table-cell table-column-group table-column table-caption list-item}
-// crate::macros::easy_enum! {user-select auto none text all}
+crate::macros::easy_enum! {-*-user-select auto none text all}
 crate::macros::easy_enum! {scroll-behavior auto smooth}
 crate::macros::easy_enum! {pointer-events auto none}
 crate::macros::easy_enum! {touch-action auto none manipulation}
@@ -407,40 +385,7 @@ crate::macros::easy_enum! {float none left right inline-start inline-end}
 crate::macros::easy_enum! {clear none left right inline-start inline-end both}
 crate::macros::easy_enum! {overflow-anchor auto none}
 crate::macros::easy_enum! {scrollbar-gutter auto stable}
+crate::macros::easy_enum! {-*-appearance auto none}
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, PartialOrd, Ord)]
-pub enum UserSelect {
-	Initial,
-	Inherit,
-	Unset,
-	Auto,
-	None,
-	Text,
-	All,
-}
-
-#[rustfmt::skip]
-impl std::fmt::Display for UserSelect {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self {
-			Self::Initial => "user-select:initial;-webkit-user-select:initial;-moz-user-select:initial;".fmt(f),
-			Self::Inherit => "user-select:inherit;-webkit-user-select:inherit;-moz-user-select:inherit;".fmt(f),
-			Self::Unset   => "user-select:unset;-webkit-user-select:unset;-moz-user-select:unset;".fmt(f),
-			Self::Auto    => "user-select:auto;-webkit-user-select:auto;-moz-user-select:auto;".fmt(f),
-			Self::None    => "user-select:none;-webkit-user-select:none;-moz-user-select:none;".fmt(f),
-			Self::Text    => "user-select:text;-webkit-user-select:text;-moz-user-select:text;".fmt(f),
-			Self::All     => "user-select:all;-webkit-user-select:all;-moz-user-select:all;".fmt(f),
-		}
-	}
-}
-
-#[macro_export]
-macro_rules! user_select {
-	(initial) => {$crate::Property::UserSelect($crate::UserSelect::Initial)};
-	(inherit) => {$crate::Property::UserSelect($crate::UserSelect::Inherit)};
-	(unset)   => {$crate::Property::UserSelect($crate::UserSelect::Unset)};
-	(auto)    => {$crate::Property::UserSelect($crate::UserSelect::Auto)};
-	(none)    => {$crate::Property::UserSelect($crate::UserSelect::None)};
-	(text)    => {$crate::Property::UserSelect($crate::UserSelect::Text)};
-	(all)     => {$crate::Property::UserSelect($crate::UserSelect::All)};
-}
+crate::macros::easy_join!(overflow, (overflow_x, overflow_y), (visible, hidden, scroll, auto));
+// crate::macros::easy_join!(size, (width, height), (auto, [unit]));

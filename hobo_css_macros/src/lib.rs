@@ -18,6 +18,7 @@ impl Parse for HyphenatedName {
 
 #[proc_macro] pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream { easy_enum::easy_enum(input) }
 #[proc_macro] pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream { easy_enum::easy_color(input) }
+#[proc_macro] pub fn easy_join(input: proc_macro::TokenStream) -> proc_macro::TokenStream { easy_enum::easy_join(input) }
 
 #[proc_macro_error]
 #[proc_macro]
@@ -50,7 +51,22 @@ pub fn unit_value_macro(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 
 	let test_fn_name = quote::format_ident!("{}_initial_inherit_unset", macro_name);
 
+	let funs = ["px", "pct", "em", "rem", "vh", "vw", "vmin", "vmax", "fr", "dur"].iter().map(|fname| {
+		let fname = proc_macro2::Ident::new(fname, Span::call_site());
+		quote! {#[inline] pub fn #fname(x: impl ::num_traits::cast::AsPrimitive<f32>) -> crate::Property { crate::Property::#property_name(crate::UnitValue::Unit(crate::Unit::#fname(x))) }}
+	});
+
 	(quote! {
+		pub mod #macro_name {
+			pub const initial: crate::Property = crate::Property::#property_name(crate::UnitValue::Initial);
+			pub const inherit: crate::Property = crate::Property::#property_name(crate::UnitValue::Inherit);
+			pub const unset: crate::Property = crate::Property::#property_name(crate::UnitValue::Unset);
+
+			#[inline] pub fn zero() -> crate::Property { crate::Property::#property_name(crate::UnitValue::Unit(crate::Unit::Zero)) }
+			#(#funs)*
+			#[inline] pub fn unit(x: crate::Unit) -> crate::Property { crate::Property::#property_name(crate::UnitValue::Unit(x)) }
+		}
+
 		#[macro_export]
 		macro_rules! #macro_name {
 			(initial)     => {$crate::Property::#property_name($crate::UnitValue::Initial)};

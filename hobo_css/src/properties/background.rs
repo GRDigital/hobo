@@ -3,6 +3,7 @@ crate::macros::easy_enum! {background-attachment scroll fixed local}
 crate::macros::easy_enum! {background-size auto cover contain [unit]}
 crate::macros::easy_enum! {background-origin border-box padding-box content-box}
 crate::macros::easy_enum! {background-clip border-box padding-box content-box text}
+crate::macros::easy_enum! {-*-mask-size auto cover contain}
 crate::macros::easy_color! {background-color}
 crate::macros::unit_value_macro! {background_position_x BackgroundPositionX}
 crate::macros::unit_value_macro! {background_position_y BackgroundPositionY}
@@ -77,38 +78,4 @@ impl std::fmt::Display for MaskImage {
 			},
 		}
 	}
-}
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, PartialOrd, Ord)]
-pub enum MaskSize {
-	Initial,
-	Inherit,
-	Unset,
-	Auto,
-	Cover,
-	Contain,
-}
-
-#[rustfmt::skip]
-impl std::fmt::Display for MaskSize {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self {
-			Self::Initial => "mask-size:initial;-webkit-mask-size:initial;".fmt(f),
-			Self::Inherit => "mask-size:inherit;-webkit-mask-size:inherit;".fmt(f),
-			Self::Unset   => "mask-size:unset;-webkit-mask-size:unset;".fmt(f),
-			Self::Auto    => "mask-size:auto;-webkit-mask-size:auto;".fmt(f),
-			Self::Cover   => "mask-size:cover;-webkit-mask-size:cover;".fmt(f),
-			Self::Contain => "mask-size:contain;-webkit-mask-size:contain;".fmt(f),
-		}
-	}
-}
-
-#[macro_export]
-macro_rules! mask_size {
-	(initial) => {$crate::Property::MaskSize($crate::MaskSize::Initial)};
-	(inherit) => {$crate::Property::MaskSize($crate::MaskSize::Inherit)};
-	(unset)   => {$crate::Property::MaskSize($crate::MaskSize::Unset)};
-	(auto)    => {$crate::Property::MaskSize($crate::MaskSize::Auto)};
-	(cover)   => {$crate::Property::MaskSize($crate::MaskSize::Cover)};
-	(contain) => {$crate::Property::MaskSize($crate::MaskSize::Contain)};
 }

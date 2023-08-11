@@ -3,6 +3,7 @@ use crate::prelude::*;
 crate::macros::easy_enum! {row-gap normal [unit]}
 crate::macros::easy_enum! {column-gap normal [unit]}
 crate::macros::easy_enum! {grid-gap normal [unit]}
+crate::macros::easy_join! {gap, (row_gap, column_gap), (normal, [unit])}
 
 /*
 css::grid!(
