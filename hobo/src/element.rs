@@ -166,7 +166,7 @@ impl Element {
 		S: Signal<Item = Element> + 'static,
 	{
 		// placeholder at first
-		let mut child = crate::create::div().class(crate::css::Display::None).as_element();
+		let mut child = crate::create::div().class(crate::css::display::none).as_element();
 		self.add_child(child);
 		let (handle, fut) = futures_signals::cancelable_future(signal.for_each(move |new_child| {
 			let new_child = new_child.as_element();

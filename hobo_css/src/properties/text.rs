@@ -37,8 +37,8 @@ crate::macros::easy_enum! {overflow-wrap normal break-word anywhere}
 crate::macros::easy_enum! {font-weight normal bold bolder lighter [number]}
 crate::macros::easy_color! {color}
 crate::macros::easy_color! {text-decoration-color}
-crate::macros::unit_value_macro! {text_indent TextIndent}
-crate::macros::unit_value_macro! {outline_offset OutlineOffset}
+crate::macros::unit_value_macro! {text_indent}
+crate::macros::unit_value_macro! {outline_offset}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum FontFamily {

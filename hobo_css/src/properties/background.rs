@@ -5,8 +5,8 @@ crate::macros::easy_enum! {background-origin border-box padding-box content-box}
 crate::macros::easy_enum! {background-clip border-box padding-box content-box text}
 crate::macros::easy_enum! {-*-mask-size auto cover contain}
 crate::macros::easy_color! {background-color}
-crate::macros::unit_value_macro! {background_position_x BackgroundPositionX}
-crate::macros::unit_value_macro! {background_position_y BackgroundPositionY}
+crate::macros::unit_value_macro! {background_position_x}
+crate::macros::unit_value_macro! {background_position_y}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum BackgroundImage {

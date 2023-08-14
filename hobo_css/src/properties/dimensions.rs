@@ -10,15 +10,6 @@ pub enum Dimension {
 	Inherit,
 	Unset,
 	Some(Unit),
-}
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
-pub enum DimensionExtremity {
-	Auto,
-	Initial,
-	Inherit,
-	Unset,
-	Some(Unit),
 	None,
 	MaxContent,
 	MinContent,
@@ -33,24 +24,89 @@ impl std::fmt::Display for Dimension {
 			Self::Inherit    => "inherit".fmt(f),
 			Self::Unset      => "unset".fmt(f),
 			Self::Some(unit) => unit.fmt(f),
-		}
-	}
-}
-
-#[rustfmt::skip]
-impl std::fmt::Display for DimensionExtremity {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self {
-			Self::Auto       => "auto".fmt(f),
-			Self::Initial    => "initial".fmt(f),
-			Self::Inherit    => "inherit".fmt(f),
-			Self::Unset      => "unset".fmt(f),
-			Self::Some(unit) => unit.fmt(f),
 			Self::None       => "none".fmt(f),
 			Self::MaxContent => "max-content".fmt(f),
 			Self::MinContent => "min-content".fmt(f),
 		}
 	}
+}
+
+pub struct width;
+impl width {
+	insert_enumlike![crate::Property::Width,
+		(initial, Dimension::Initial),
+		(inherit, Dimension::Inherit),
+		(unset, Dimension::Unset),
+		(auto, Dimension::Auto),
+		(min_content, Dimension::MinContent),
+		(max_content, Dimension::MaxContent),
+	];
+	insert_unitlike!(crate::Property::Width, Dimension::Some);
+}
+
+pub struct height;
+impl height {
+	insert_enumlike![crate::Property::Height,
+		(initial, Dimension::Initial),
+		(inherit, Dimension::Inherit),
+		(unset, Dimension::Unset),
+		(auto, Dimension::Auto),
+		(min_content, Dimension::MinContent),
+		(max_content, Dimension::MaxContent),
+	];
+	insert_unitlike!(crate::Property::Height, Dimension::Some);
+}
+
+pub struct min_width;
+impl min_width {
+	insert_enumlike![crate::Property::MinWidth,
+		(initial, Dimension::Initial),
+		(inherit, Dimension::Inherit),
+		(unset, Dimension::Unset),
+		(auto, Dimension::Auto),
+		(min_content, Dimension::MinContent),
+		(max_content, Dimension::MaxContent),
+	];
+	insert_unitlike!(crate::Property::MinWidth, Dimension::Some);
+}
+
+pub struct min_height;
+impl min_height {
+	insert_enumlike![crate::Property::MinHeight,
+		(initial, Dimension::Initial),
+		(inherit, Dimension::Inherit),
+		(unset, Dimension::Unset),
+		(auto, Dimension::Auto),
+		(min_content, Dimension::MinContent),
+		(max_content, Dimension::MaxContent),
+	];
+	insert_unitlike!(crate::Property::MinHeight, Dimension::Some);
+}
+
+pub struct max_width;
+impl max_width {
+	insert_enumlike![crate::Property::MaxWidth,
+		(initial, Dimension::Initial),
+		(inherit, Dimension::Inherit),
+		(unset, Dimension::Unset),
+		(none, Dimension::None),
+		(min_content, Dimension::MinContent),
+		(max_content, Dimension::MaxContent),
+	];
+	insert_unitlike!(crate::Property::MaxWidth, Dimension::Some);
+}
+
+pub struct max_height;
+impl max_height {
+	insert_enumlike![crate::Property::MaxHeight,
+		(initial, Dimension::Initial),
+		(inherit, Dimension::Inherit),
+		(unset, Dimension::Unset),
+		(none, Dimension::None),
+		(min_content, Dimension::MinContent),
+		(max_content, Dimension::MaxContent),
+	];
+	insert_unitlike!(crate::Property::MaxHeight, Dimension::Some);
 }
 
 #[rustfmt::skip]
@@ -71,14 +127,14 @@ macro_rules! __dimension {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __dimension_extremity {
-	($kind:ident, auto)        => {$crate::Property::$kind($crate::DimensionExtremity::Auto)};
-	($kind:ident, initial)     => {$crate::Property::$kind($crate::DimensionExtremity::Initial)};
-	($kind:ident, inherit)     => {$crate::Property::$kind($crate::DimensionExtremity::Inherit)};
-	($kind:ident, unset)       => {$crate::Property::$kind($crate::DimensionExtremity::Unset)};
-	($kind:ident, none)        => {$crate::Property::$kind($crate::DimensionExtremity::None)};
-	($kind:ident, max-content) => {$crate::Property::$kind($crate::DimensionExtremity::MaxContent)};
-	($kind:ident, min-content) => {$crate::Property::$kind($crate::DimensionExtremity::MinContent)};
-	($kind:ident, $($val:tt)+) => {$crate::Property::$kind($crate::DimensionExtremity::Some($crate::unit!($($val)+)))};
+	($kind:ident, auto)        => {$crate::Property::$kind($crate::Dimension::Auto)};
+	($kind:ident, initial)     => {$crate::Property::$kind($crate::Dimension::Initial)};
+	($kind:ident, inherit)     => {$crate::Property::$kind($crate::Dimension::Inherit)};
+	($kind:ident, unset)       => {$crate::Property::$kind($crate::Dimension::Unset)};
+	($kind:ident, none)        => {$crate::Property::$kind($crate::Dimension::None)};
+	($kind:ident, max-content) => {$crate::Property::$kind($crate::Dimension::MaxContent)};
+	($kind:ident, min-content) => {$crate::Property::$kind($crate::Dimension::MinContent)};
+	($kind:ident, $($val:tt)+) => {$crate::Property::$kind($crate::Dimension::Some($crate::unit!($($val)+)))};
 }
 
 #[macro_export] macro_rules! min_width { ($($tt:tt)+) => { $crate::__dimension_extremity!(MinWidth, $($tt)+)} }

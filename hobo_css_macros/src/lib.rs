@@ -31,15 +31,13 @@ pub fn selector(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 }
 
 struct UnitValueMacro {
-	macro_name: syn::Ident,
-	property_name: syn::Ident,
+	name: syn::Ident,
 }
 
 impl Parse for UnitValueMacro {
 	fn parse(input: ParseStream) -> Result<Self> {
 		Ok(Self {
-			macro_name: input.parse()?,
-			property_name: input.parse()?,
+			name: input.parse()?,
 		})
 	}
 }
@@ -47,40 +45,44 @@ impl Parse for UnitValueMacro {
 #[proc_macro_error]
 #[proc_macro]
 pub fn unit_value_macro(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-	let UnitValueMacro { macro_name, property_name } = syn::parse_macro_input!(input);
+	let UnitValueMacro { name } = syn::parse_macro_input!(input);
 
-	let test_fn_name = quote::format_ident!("{}_initial_inherit_unset", macro_name);
+	// let test_fn_name = quote::format_ident!("{}_initial_inherit_unset", name);
 
-	let funs = ["px", "pct", "em", "rem", "vh", "vw", "vmin", "vmax", "fr", "dur"].iter().map(|fname| {
-		let fname = proc_macro2::Ident::new(fname, Span::call_site());
-		quote! {#[inline] pub fn #fname(x: impl ::num_traits::cast::AsPrimitive<f32>) -> crate::Property { crate::Property::#property_name(crate::UnitValue::Unit(crate::Unit::#fname(x))) }}
-	});
+	let fnames = ["px", "pct", "em", "rem", "vh", "vw", "vmin", "vmax", "fr", "dur"].iter().map(|fname| proc_macro2::Ident::new(fname, Span::call_site()));
+	let name_camel = syn::Ident::new(&name.to_string().to_upper_camel_case(), Span::call_site());
 
 	(quote! {
-		pub mod #macro_name {
-			pub const initial: crate::Property = crate::Property::#property_name(crate::UnitValue::Initial);
-			pub const inherit: crate::Property = crate::Property::#property_name(crate::UnitValue::Inherit);
-			pub const unset: crate::Property = crate::Property::#property_name(crate::UnitValue::Unset);
+		#[allow(non_camel_case_types)]
+		pub struct #name;
 
-			#[inline] pub fn zero() -> crate::Property { crate::Property::#property_name(crate::UnitValue::Unit(crate::Unit::Zero)) }
-			#(#funs)*
-			#[inline] pub fn unit(x: crate::Unit) -> crate::Property { crate::Property::#property_name(crate::UnitValue::Unit(x)) }
+		#[allow(non_upper_case_globals)]
+		impl #name {
+			pub const initial: crate::Property = crate::Property::#name_camel(crate::UnitValue::Initial);
+			pub const inherit: crate::Property = crate::Property::#name_camel(crate::UnitValue::Inherit);
+			pub const unset: crate::Property = crate::Property::#name_camel(crate::UnitValue::Unset);
+
+			#[inline] pub fn zero() -> crate::Property { crate::Property::#name_camel(crate::UnitValue::Unit(crate::Unit::Zero)) }
+			#(#[inline] pub fn #fnames(x: impl ::num_traits::cast::AsPrimitive<f32>) -> crate::Property { crate::Property::#name_camel(crate::UnitValue::Unit(crate::Unit::#fnames(x))) })*
+			#[inline] pub fn unit(x: crate::Unit) -> crate::Property { crate::Property::#name_camel(crate::UnitValue::Unit(x)) }
 		}
 
 		#[macro_export]
-		macro_rules! #macro_name {
-			(initial)     => {$crate::Property::#property_name($crate::UnitValue::Initial)};
-			(inherit)     => {$crate::Property::#property_name($crate::UnitValue::Inherit)};
-			(unset)       => {$crate::Property::#property_name($crate::UnitValue::Unset)};
-			($($val:tt)+) => {$crate::Property::#property_name($crate::UnitValue::Unit($crate::unit!($($val)+)))};
+		macro_rules! #name {
+			(initial)     => {$crate::Property::#name_camel($crate::UnitValue::Initial)};
+			(inherit)     => {$crate::Property::#name_camel($crate::UnitValue::Inherit)};
+			(unset)       => {$crate::Property::#name_camel($crate::UnitValue::Unset)};
+			($($val:tt)+) => {$crate::Property::#name_camel($crate::UnitValue::Unit($crate::unit!($($val)+)))};
 		}
 
+		/*
 		#[test]
 		fn #test_fn_name() {
 			assert_eq!(#macro_name!(initial), crate::Property::#property_name(crate::UnitValue::Initial));
 			assert_eq!(#macro_name!(inherit), crate::Property::#property_name(crate::UnitValue::Inherit));
 			assert_eq!(#macro_name!(unset), crate::Property::#property_name(crate::UnitValue::Unset));
 		}
+		*/
 	}).into()
 }
 

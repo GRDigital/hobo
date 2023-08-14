@@ -1,3 +1,31 @@
+#![allow(non_camel_case_types)]
+
+macro_rules! insert_enumlike {
+	($prop:path,) => {};
+	($prop:path, ($from:ident, $to:expr), $($rest:tt)*) => {
+		#[allow(non_upper_case_globals)]
+		pub const $from: crate::Property = $prop($to);
+		insert_enumlike!($prop, $($rest)*);
+	};
+}
+
+macro_rules! insert_unitlike {
+	($prop:path, $val:path) => {
+		#[inline] pub fn zero() -> crate::Property { $prop($val(crate::Unit::Zero)) }
+		#[inline] pub fn px(  x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::px(x))) }
+		#[inline] pub fn pct( x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::pct(x))) }
+		#[inline] pub fn em(  x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::em(x))) }
+		#[inline] pub fn rem( x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::rem(x))) }
+		#[inline] pub fn vw(  x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::vw(x))) }
+		#[inline] pub fn vh(  x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::vh(x))) }
+		#[inline] pub fn vmin(x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::vmin(x))) }
+		#[inline] pub fn vmax(x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::vmax(x))) }
+		#[inline] pub fn fr(  x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::fr(x))) }
+		#[inline] pub fn dur( x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::dur(x))) }
+		#[inline] pub fn unit(x: crate::Unit                            ) -> crate::Property { $prop($val(x)) }
+	};
+}
+
 #[macro_use] mod flex;
 #[macro_use] mod margin;
 #[macro_use] mod padding;
@@ -152,12 +180,12 @@ macro_rules! generate_properties {
 	(
 		stutter => ($($stutter_name:ident),*$(,)?),
 		named => ($($css_name:expr => $named_name:ident($named_type:ty)),*$(,)?),
-	) => {
+	) => {paste::paste!{
 		#[derive(Debug, PartialEq, Eq, Hash, Clone, strum::EnumDiscriminants)]
 		#[strum_discriminants(derive(PartialOrd, Ord))]
 		pub enum Property {
 			Raw(String),
-			$($stutter_name($stutter_name),)*
+			$([<$stutter_name:camel>]($stutter_name),)*
 			$($named_name($named_type)),*
 		}
 
@@ -166,114 +194,141 @@ macro_rules! generate_properties {
 				match self {
 					Self::Raw(x) => x.fmt(f),
 					$(Self::$named_name(x) => write!(f, "{}:{};", $css_name, x),)*
-					$(Self::$stutter_name(x) => x.fmt(f)),*
+					$(Self::[<$stutter_name:camel>](x) => x.fmt(f)),*
 				}
 			}
 		}
 
 		$(
 			impl From<$stutter_name> for Property {
-				fn from(x: $stutter_name) -> Self { Self::$stutter_name(x) }
+				fn from(x: $stutter_name) -> Self { Self::[<$stutter_name:camel>](x) }
 			}
 
 			impl crate::AppendProperty for $stutter_name {
-				fn append_property(self, decls: &mut Vec<Property>) { decls.push(Property::$stutter_name(self)); }
+				fn append_property(self, decls: &mut Vec<Property>) { decls.push(Property::[<$stutter_name:camel>](self)); }
 			}
 		)*
-	};
+	}};
 }
 
-// rather than having this huge enum, it might be possible fo just having a Vec of `Box<Display>` or `Box<Property>` with `Property` being a trait
+// textshadow
+// fontfamily
+// backgroundimage
+// transform
+// filter
+// borderimagesource
+// clippath
+// gridautoflow
+// boxshadow
+// transformorigin
+// maskimage
+
+// @Awpteamoose: I'm choosing to implement macroless syntax as inherent impl methods on types returning Self
+// rather than a mod with smth like `enum Property` and free fns that return Property
+// because a mod is completely sealed, while types are extensible (e.g. with extensions traits)
+// so one could theoretically do smth like `css::width::columns(4)` and have some complex logic inside
+// that would also sum up gaps between columns or smth
+//
+// the type names generated are snake case because it's 1) closer to css 2) easier to read 3) requires fewer shift presses to type
+// it is possible to have type names as camelcase and then just alias them in snake case
+// but using enum variants is still annoying because you can't also alias enum variants
+//
+// theoretically it *is* possible to extend mods
+// you could define your own mod and import everything from the mod you're extending and then write new fns/etc
+// e.g. instead of css::size you can `mod size { use css::size::*; ... }` then `mod css { use css::{all but size}; use size; }`
+//
+// also, rather than having this huge enum, it might be possible fo just having a Vec of `Box<Display>` or `Box<Property>` with `Property` being a trait
+// the benefits are unclear
 generate_properties! {
 	// different properties that have specific to them arguments
 	// basis/grow/shrink/order kind of take the same, but basis and shrink are 1 by default while others are 0 so /shrug
 	stutter => (
-		FlexWrap, FlexDirection,
-		JustifyContent, AlignItems, AlignContent, AlignSelf,
-		JustifyItems, JustifySelf,
-		FlexBasis, FlexGrow, FlexShrink,
+		flex_wrap, flex_direction,
+		justify_content, align_items, align_content, align_self,
+		justify_items, justify_self,
+		flex_basis, flex_grow, flex_shrink,
 
-		Order,
-		Position,
-		Display,
-		BoxSizing,
-		Visibility,
-		ZIndex,
-		OverflowX, OverflowY,
-		Direction,
-		UnicodeBidi,
-		WhiteSpace,
-		WritingMode,
-		HangingPunctuation,
-		Hyphens,
-		Resize,
-		ObjectFit,
-		ListStyleType, ListStyleImage, ListStylePosition,
+		order,
+		position,
+		display,
+		box_sizing,
+		visibility,
+		z_index,
+		overflow_x, overflow_y,
+		direction,
+		unicode_bidi,
+		white_space,
+		writing_mode,
+		hanging_punctuation,
+		hyphens,
+		resize,
+		object_fit,
+		list_style_type, list_style_image, list_style_position,
 
-		BreakAfter, BreakBefore, BreakInside,
+		break_after, break_before, break_inside,
 
-		TextAlign, TextAlignLast, TextJustify,
-		TextTransform, TextShadow, TextOverflow, TextAnchor,
-		TextDecorationStyle, TextDecorationLine, TextRendering,
+		text_align, text_align_last, text_justify,
+		text_transform, TextShadow, text_overflow, text_anchor,
+		text_decoration_style, text_decoration_line, text_rendering,
 
-		FontStretch, FontVariant, FontStyle, FontWeight,
-		FontSize, FontKerning, FontFamily,
+		font_stretch, font_variant, font_style, font_weight,
+		font_size, font_kerning, FontFamily,
 
-		WordBreak, WordWrap,
-		OverflowWrap, OverflowAnchor,
-		TransformStyle,
-		MixBlendMode,
-		Isolation,
-		CaptionSide,
-		EmptyCells,
-		TableLayout,
-		BorderCollapse,
-		All,
-		WordSpacing,
-		VerticalAlign,
-		LineHeight,
-		LetterSpacing,
-		TabSize,
-		BoxDecorationBreak,
-		OutlineWidth, OutlineStyle,
-		Content,
-		Opacity,
-		Perspective,
-		BackfaceVisibility,
-		VectorEffect,
-		AlignmentBaseline,
-		DominantBaseline,
-		StrokeLinecap,
+		word_break, word_wrap,
+		overflow_wrap, overflow_anchor,
+		transform_style,
+		mix_blend_mode,
+		isolation,
+		caption_side,
+		empty_cells,
+		table_layout,
+		border_collapse,
+		all,
+		word_spacing,
+		vertical_align,
+		line_height,
+		letter_spacing,
+		tab_size,
+		box_decoration_break,
+		outline_width, outline_style,
+		content,
+		opacity,
+		perspective,
+		backface_visibility,
+		vector_effect,
+		alignment_baseline,
+		dominant_baseline,
+		stroke_linecap,
 
-		BackgroundImage, BackgroundSize,
-		BackgroundRepeat, BackgroundAttachment,
-		BackgroundBlendMode, BackgroundOrigin, BackgroundClip,
+		BackgroundImage, background_size,
+		background_repeat, background_attachment,
+		background_blend_mode, background_origin, background_clip,
 
-		AnimationDirection, AnimationFillMode, AnimationIterationCount,
-		AnimationName, AnimationPlayState, AnimationTimingFunction,
-		AnimationDuration, AnimationDelay,
+		animation_direction, animation_fill_mode, animation_iteration_count,
+		animation_name, animation_play_state, animation_timing_function,
+		animation_duration, animation_delay,
 
-		TransitionProperty, TransitionTimingFunction,
-		TransitionDuration, TransitionDelay,
+		transition_property, transition_timing_function,
+		transition_duration, transition_delay,
 
 		Transform,
 		Filter,
 
-		BorderImageSource, BorderImageSlice, BorderImageWidth,
-		BorderImageOutset, BorderImageRepeat,
+		BorderImageSource, border_image_slice, border_image_width,
+		border_image_outset, border_image_repeat,
 
-		ScrollBehavior, PointerEvents, UserSelect, TouchAction, Cursor,
+		scroll_behavior, pointer_events, user_select, touch_action, cursor,
 
 		ClipPath,
 		GridAutoFlow,
-		RowGap, ColumnGap, GridGap,
+		row_gap, column_gap, grid_gap,
 		BoxShadow,
 		TransformOrigin,
-		Appearance,
-		MaskImage, MaskSize,
-		Float, Clear,
-		AspectRatio,
-		ScrollbarGutter,
+		appearance,
+		MaskImage, mask_size,
+		float, clear,
+		aspect_ratio,
+		scrollbar_gutter,
 	),
 	// different properties that take the same argument
 	named => (
@@ -287,17 +342,17 @@ generate_properties! {
 		"padding-top" => PaddingTop(UnitValue),
 		"padding-bottom" => PaddingBottom(UnitValue),
 
-		"width" => Width(DimensionExtremity),
-		"height" => Height(DimensionExtremity),
-		"min-width" => MinWidth(DimensionExtremity),
-		"max-width" => MaxWidth(DimensionExtremity),
-		"min-height" => MinHeight(DimensionExtremity),
-		"max-height" => MaxHeight(DimensionExtremity),
+		"width" => Width(Dimension),
+		"height" => Height(Dimension),
+		"min-width" => MinWidth(Dimension),
+		"max-width" => MaxWidth(Dimension),
+		"min-height" => MinHeight(Dimension),
+		"max-height" => MaxHeight(Dimension),
 
-		"top" => Top(Dimension),
-		"right" => Right(Dimension),
-		"left" => Left(Dimension),
-		"bottom" => Bottom(Dimension),
+		"top" => Top(PositionOffset),
+		"right" => Right(PositionOffset),
+		"left" => Left(PositionOffset),
+		"bottom" => Bottom(PositionOffset),
 
 		"border-left-color" => BorderLeftColor(ColorValue),
 		"border-right-color" => BorderRightColor(ColorValue),
@@ -388,4 +443,4 @@ crate::macros::easy_enum! {scrollbar-gutter auto stable}
 crate::macros::easy_enum! {-*-appearance auto none}
 
 crate::macros::easy_join!(overflow, (overflow_x, overflow_y), (visible, hidden, scroll, auto));
-// crate::macros::easy_join!(size, (width, height), (auto, [unit]));
+crate::macros::easy_join!(size, (width, height), (auto, [unit]));

@@ -206,10 +206,10 @@ crate::macros::easy_color! {border_bottom_color}
 	]
 }}
 
-crate::macros::unit_value_macro! {border_top_left_radius BorderTopLeftRadius}
-crate::macros::unit_value_macro! {border_top_right_radius BorderTopRightRadius}
-crate::macros::unit_value_macro! {border_bottom_left_radius BorderBottomLeftRadius}
-crate::macros::unit_value_macro! {border_bottom_right_radius BorderBottomRightRadius}
+crate::macros::unit_value_macro! {border_top_left_radius}
+crate::macros::unit_value_macro! {border_top_right_radius}
+crate::macros::unit_value_macro! {border_bottom_left_radius}
+crate::macros::unit_value_macro! {border_bottom_right_radius}
 #[macro_export] macro_rules! border_radius {($($tt:tt)+) => {
 	vec![
 		$crate::border_top_left_radius!($($tt)+),

@@ -5,7 +5,7 @@ crate::macros::easy_enum! {text-anchor start middle end}
 crate::macros::easy_enum! {stroke-linecap butt round square}
 crate::macros::easy_color! {fill}
 crate::macros::easy_color! {stroke}
-crate::macros::unit_value_macro! {stroke_width StrokeWidth}
+crate::macros::unit_value_macro! {stroke_width}
 
 #[test]
 fn svg_test() {
