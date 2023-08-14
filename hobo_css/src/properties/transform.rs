@@ -18,7 +18,7 @@ impl std::fmt::Display for TransformOrigin {
 			Self::Initial           => "transform-origin:initial;".fmt(f),
 			Self::Inherit           => "transform-origin:inherit;".fmt(f),
 			Self::Unset             => "transform-origin:unset;".fmt(f),
-			Self::Some(top, bottom) => write!(f, "transform-origin:{} {};", top, bottom),
+			Self::Some(top, bottom) => write!(f, "transform-origin:{top} {bottom};"),
 		}
 	}
 }
@@ -44,9 +44,9 @@ impl std::fmt::Display for Transform {
 			Self::Some(fns)  => {
 				"transform:".fmt(f)?;
 				if let Some((first, rest)) = fns.split_first() {
-					write!(f, "{}", first)?;
+					write!(f, "{first}")?;
 					for func in rest {
-						write!(f, " {}", func)?;
+						write!(f, " {func}")?;
 					}
 				}
 				";".fmt(f)
@@ -102,21 +102,21 @@ impl crate::AppendProperty for TransformFunction {
 impl std::fmt::Display for TransformFunction {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Matrix(a1, b1, a2, b2, a3, b3) => write!(f, "matrix({}, {}, {}, {}, {}, {})", a1, b1, a2, b2, a3, b3),
-			Self::Matrix3d(a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3, a4, b4, c4, d4) => write!(f, "matrix3d({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})", a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3, a4, b4, c4, d4),
-			Self::TranslateX(x) => write!(f, "translateX({})", x),
-			Self::TranslateY(x) => write!(f, "translateY({})", x),
-			Self::TranslateZ(x) => write!(f, "translateZ({})", x),
-			Self::ScaleX(x) => write!(f, "scaleX({})", x),
-			Self::ScaleY(x) => write!(f, "scaleY({})", x),
-			Self::ScaleZ(x) => write!(f, "scaleZ({})", x),
-			Self::RotateX(x) => write!(f, "rotateX({}deg)", x),
-			Self::RotateY(x) => write!(f, "rotateY({}deg)", x),
-			Self::RotateZ(x) => write!(f, "rotateZ({}deg)", x),
-			Self::SkewX(x) => write!(f, "skewX({})", x),
-			Self::SkewY(x) => write!(f, "skewY({})", x),
-			Self::SkewZ(x) => write!(f, "skewZ({})", x),
-			Self::Perspective(x) => write!(f, "perspective({})", x),
+			Self::Matrix(a1, b1, a2, b2, a3, b3) => write!(f, "matrix({a1}, {b1}, {a2}, {b2}, {a3}, {b3})"),
+			Self::Matrix3d(a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3, a4, b4, c4, d4) => write!(f, "matrix3d({a1}, {b1}, {c1}, {d1}, {a2}, {b2}, {c2}, {d2}, {a3}, {b3}, {c3}, {d3}, {a4}, {b4}, {c4}, {d4})"),
+			Self::TranslateX(x) => write!(f, "translateX({x})"),
+			Self::TranslateY(x) => write!(f, "translateY({x})"),
+			Self::TranslateZ(x) => write!(f, "translateZ({x})"),
+			Self::ScaleX(x) => write!(f, "scaleX({x})"),
+			Self::ScaleY(x) => write!(f, "scaleY({x})"),
+			Self::ScaleZ(x) => write!(f, "scaleZ({x})"),
+			Self::RotateX(x) => write!(f, "rotateX({x}deg)"),
+			Self::RotateY(x) => write!(f, "rotateY({x}deg)"),
+			Self::RotateZ(x) => write!(f, "rotateZ({x}deg)"),
+			Self::SkewX(x) => write!(f, "skewX({x})"),
+			Self::SkewY(x) => write!(f, "skewY({x})"),
+			Self::SkewZ(x) => write!(f, "skewZ({x})"),
+			Self::Perspective(x) => write!(f, "perspective({x})"),
 		}
 	}
 }

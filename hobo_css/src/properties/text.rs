@@ -41,26 +41,30 @@ crate::macros::unit_value_macro! {text_indent}
 crate::macros::unit_value_macro! {outline_offset}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
-pub enum FontFamily {
-	Initial,
-	Inherit,
-	Unset,
+pub enum font_family {
+	initial,
+	inherit,
+	unset,
 	Some(Vec<String>),
 }
 
+impl font_family {
+	#[inline] pub fn str(x: impl Into<String>) -> Self { Self::Some(vec![x.into()]) }
+}
+
 #[rustfmt::skip]
-impl std::fmt::Display for FontFamily {
+impl std::fmt::Display for font_family {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Initial => "font-family:initial;".fmt(f),
-			Self::Inherit => "font-family:inherit;".fmt(f),
-			Self::Unset   => "font-family:unset;".fmt(f),
+			Self::initial => "font-family:initial;".fmt(f),
+			Self::inherit => "font-family:inherit;".fmt(f),
+			Self::unset   => "font-family:unset;".fmt(f),
 			Self::Some(fonts) => {
 				"font-family:".fmt(f)?;
 				if let Some((first, rest)) = fonts.split_first() {
-					write!(f, r#""{}""#, first)?;
+					write!(f, r#""{first}""#)?;
 					for font in rest {
-						write!(f, r#","{}""#, font)?;
+						write!(f, r#","{font}""#)?;
 					}
 				}
 				";".fmt(f)
@@ -71,10 +75,10 @@ impl std::fmt::Display for FontFamily {
 
 #[macro_export]
 macro_rules! font_family {
-	(initial)         => {$crate::Property::FontFamily($crate::FontFamily::Initial)};
-	(inherit)         => {$crate::Property::FontFamily($crate::FontFamily::Inherit)};
-	(unset)           => {$crate::Property::FontFamily($crate::FontFamily::Unset)};
-	($($font:expr),+) => {$crate::Property::FontFamily($crate::FontFamily::Some(vec![$($font.into()),+]))};
+	(initial)         => {$crate::Property::FontFamily($crate::font_family::initial)};
+	(inherit)         => {$crate::Property::FontFamily($crate::font_family::inherit)};
+	(unset)           => {$crate::Property::FontFamily($crate::font_family::unset)};
+	($($font:expr),+) => {$crate::Property::FontFamily($crate::font_family::Some(vec![$($font.into()),+]))};
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord, SmartDefault)]
@@ -95,31 +99,37 @@ impl std::fmt::Display for TextShadowEffect {
 
 impl crate::AppendProperty for TextShadowEffect {
 	fn append_property(self, properties: &mut Vec<crate::Property>) {
-		TextShadow::Some(vec![self]).append_property(properties)
+		text_shadow::Some(vec![self]).append_property(properties)
 	}
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
-pub enum TextShadow {
-	Initial,
-	Inherit,
-	Unset,
+pub enum text_shadow {
+	initial,
+	inherit,
+	unset,
 	Some(Vec<TextShadowEffect>),
 }
 
+impl text_shadow {
+	pub fn effect(color: impl Into<Color>, offset_x: Unit, offset_y: Unit, blur_radius: Unit) -> Self {
+		Self::Some(vec![TextShadowEffect { color: color.into(), offset_x, offset_y, blur_radius }])
+	}
+}
+
 #[rustfmt::skip]
-impl std::fmt::Display for TextShadow {
+impl std::fmt::Display for text_shadow {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Initial => "text-shadow:initial;".fmt(f),
-			Self::Inherit => "text-shadow:inherit;".fmt(f),
-			Self::Unset   => "text-shadow:unset;".fmt(f),
+			Self::initial => "text-shadow:initial;".fmt(f),
+			Self::inherit => "text-shadow:inherit;".fmt(f),
+			Self::unset   => "text-shadow:unset;".fmt(f),
 			Self::Some(effects) => {
 				"text-shadow:".fmt(f)?;
 				if let Some((first, rest)) = effects.split_first() {
-					write!(f, r#"{}"#, first)?;
+					write!(f, r#"{first}"#)?;
 					for effect in rest {
-						write!(f, r#",{}"#, effect)?;
+						write!(f, r#",{effect}"#)?;
 					}
 				}
 				";".fmt(f)

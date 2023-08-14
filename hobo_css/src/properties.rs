@@ -27,8 +27,8 @@ macro_rules! insert_unitlike {
 }
 
 #[macro_use] mod flex;
-#[macro_use] mod margin;
-#[macro_use] mod padding;
+#[macro_use] mod margin_props;
+#[macro_use] mod padding_props;
 #[macro_use] mod dimensions;
 #[macro_use] mod position_props;
 #[macro_use] mod text;
@@ -50,8 +50,8 @@ pub use dimensions::*;
 pub use filter::*;
 pub use flex::*;
 pub use grid::*;
-pub use margin::*;
-pub use padding::*;
+pub use margin_props::*;
+pub use padding_props::*;
 pub use position_props::*;
 pub use svg::*;
 pub use text::*;
@@ -211,9 +211,6 @@ macro_rules! generate_properties {
 	}};
 }
 
-// textshadow
-// fontfamily
-// backgroundimage
 // transform
 // filter
 // borderimagesource
@@ -221,7 +218,6 @@ macro_rules! generate_properties {
 // gridautoflow
 // boxshadow
 // transformorigin
-// maskimage
 
 // @Awpteamoose: I'm choosing to implement macroless syntax as inherent impl methods on types returning Self
 // rather than a mod with smth like `enum Property` and free fns that return Property
@@ -268,11 +264,11 @@ generate_properties! {
 		break_after, break_before, break_inside,
 
 		text_align, text_align_last, text_justify,
-		text_transform, TextShadow, text_overflow, text_anchor,
+		text_transform, text_shadow, text_overflow, text_anchor,
 		text_decoration_style, text_decoration_line, text_rendering,
 
 		font_stretch, font_variant, font_style, font_weight,
-		font_size, font_kerning, FontFamily,
+		font_size, font_kerning, font_family,
 
 		word_break, word_wrap,
 		overflow_wrap, overflow_anchor,
@@ -300,7 +296,7 @@ generate_properties! {
 		dominant_baseline,
 		stroke_linecap,
 
-		BackgroundImage, background_size,
+		background_image, background_size,
 		background_repeat, background_attachment,
 		background_blend_mode, background_origin, background_clip,
 
@@ -325,7 +321,7 @@ generate_properties! {
 		BoxShadow,
 		TransformOrigin,
 		appearance,
-		MaskImage, mask_size,
+		mask_image, mask_size,
 		float, clear,
 		aspect_ratio,
 		scrollbar_gutter,

@@ -43,18 +43,18 @@ impl std::fmt::Display for ClipPath {
 			Self::Initial => "-webkit-clip-path:initial;clip-path:initial;".fmt(f),
 			Self::Inherit => "-webkit-clip-path:inherit;clip-path:inherit;".fmt(f),
 			Self::Unset => "-webkit-clip-path:unset;clip-path:unset;".fmt(f),
-			Self::Url(x) => write!(f, r#"-webkit-clip-path:url("{0}");clip-path:url("{0}");"#, x),
+			Self::Url(x) => write!(f, r#"-webkit-clip-path:url("{x}");clip-path:url("{x}");"#),
 			Self::Shape(shapes) => {
 				if let Some((first, rest)) = shapes.split_first() {
 					"-webkit-clip-path:".fmt(f)?;
 					first.fmt(f)?;
 					for shape in rest {
-						write!(f, " {}", shape)?;
+						write!(f, " {shape}")?;
 					}
 					";clip-path:".fmt(f)?;
 					first.fmt(f)?;
 					for shape in rest {
-						write!(f, " {}", shape)?;
+						write!(f, " {shape}")?;
 					}
 					";".fmt(f)?;
 				}

@@ -29,9 +29,9 @@ impl std::fmt::Display for BorderImageSource {
 			Self::Some(images) => {
 				"border-image-source:".fmt(f)?;
 				if let Some((first, rest)) = images.split_first() {
-					write!(f, "{}", first)?;
+					write!(f, "{first}")?;
 					for image in rest {
-						write!(f, ",{}", image)?;
+						write!(f, ",{image}")?;
 					}
 				}
 				";".fmt(f)
@@ -124,9 +124,9 @@ impl std::fmt::Display for BoxShadow {
 			Self::Some(effects) => {
 				"box-shadow:".fmt(f)?;
 				if let Some((first, rest)) = effects.split_first() {
-					write!(f, "{}", first)?;
+					write!(f, "{first}")?;
 					for effect in rest {
-						write!(f, ",{}", effect)?;
+						write!(f, ",{effect}")?;
 					}
 				}
 				";".fmt(f)

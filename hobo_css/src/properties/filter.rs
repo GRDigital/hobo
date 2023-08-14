@@ -20,9 +20,9 @@ impl std::fmt::Display for Filter {
 			Self::Some(fns)  => {
 				"filter:".fmt(f)?;
 				if let Some((first, rest)) = fns.split_first() {
-					write!(f, "{}", first)?;
+					write!(f, "{first}")?;
 					for func in rest {
-						write!(f, " {}", func)?;
+						write!(f, " {func}")?;
 					}
 				}
 				";".fmt(f)
@@ -67,17 +67,17 @@ impl AppendProperty for FilterFunction {
 impl std::fmt::Display for FilterFunction {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Blur(x)                                     => write!(f, "blur({}px)", x),
-			Self::Brightness(x)                               => write!(f, "brightness({})", x),
-			Self::Contrast(x)                                 => write!(f, "contrast({})", x),
-			Self::DropShadow(h_shadow, v_shadow, blur, color) => write!(f, "drop-shadow({} {} {} {})", h_shadow, v_shadow, blur, color.unwrap_or_else(|| crate::Color::from_hex(0x00_00_00_00))),
-			Self::Grayscale(x)                                => write!(f, "grayscale({})", x),
-			Self::HueRotate(x)                                => write!(f, "hue-rotate({}deg)", x),
-			Self::Invert(x)                                   => write!(f, "invert({})", x),
-			Self::Opacity(x)                                  => write!(f, "opacity({})", x),
-			Self::Saturate(x)                                 => write!(f, "saturate({})", x),
-			Self::Sepia(x)                                    => write!(f, "sepia({})", x),
-			Self::Url(x)                                      => write!(f, r#"url("{}")"#, x),
+			Self::Blur(x)                                     => write!(f, "blur({x}px)"),
+			Self::Brightness(x)                               => write!(f, "brightness({x})"),
+			Self::Contrast(x)                                 => write!(f, "contrast({x})"),
+			Self::DropShadow(h_shadow, v_shadow, blur, color) => write!(f, "drop-shadow({h_shadow} {v_shadow} {blur} {})", color.unwrap_or_else(|| crate::Color::from_hex(0x00_00_00_00))),
+			Self::Grayscale(x)                                => write!(f, "grayscale({x})"),
+			Self::HueRotate(x)                                => write!(f, "hue-rotate({x}deg)"),
+			Self::Invert(x)                                   => write!(f, "invert({x})"),
+			Self::Opacity(x)                                  => write!(f, "opacity({x})"),
+			Self::Saturate(x)                                 => write!(f, "saturate({x})"),
+			Self::Sepia(x)                                    => write!(f, "sepia({x})"),
+			Self::Url(x)                                      => write!(f, r#"url("{x}")"#),
 		}
 	}
 }

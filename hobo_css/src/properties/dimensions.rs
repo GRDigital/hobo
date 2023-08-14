@@ -31,57 +31,23 @@ impl std::fmt::Display for Dimension {
 	}
 }
 
-pub struct width;
-impl width {
-	insert_enumlike![crate::Property::Width,
-		(initial, Dimension::Initial),
-		(inherit, Dimension::Inherit),
-		(unset, Dimension::Unset),
-		(auto, Dimension::Auto),
-		(min_content, Dimension::MinContent),
-		(max_content, Dimension::MaxContent),
-	];
-	insert_unitlike!(crate::Property::Width, Dimension::Some);
+macro_rules! decl_dimensions {
+	($($dims:ident),*) => {paste::paste!{$(
+		pub struct $dims;
+		impl $dims {
+			insert_enumlike![crate::Property::[<$dims:camel>],
+				(initial, Dimension::Initial),
+				(inherit, Dimension::Inherit),
+				(unset, Dimension::Unset),
+				(auto, Dimension::Auto),
+				(min_content, Dimension::MinContent),
+				(max_content, Dimension::MaxContent),
+			];
+			insert_unitlike!(crate::Property::[<$dims:camel>], Dimension::Some);
+		}
+	)*}};
 }
-
-pub struct height;
-impl height {
-	insert_enumlike![crate::Property::Height,
-		(initial, Dimension::Initial),
-		(inherit, Dimension::Inherit),
-		(unset, Dimension::Unset),
-		(auto, Dimension::Auto),
-		(min_content, Dimension::MinContent),
-		(max_content, Dimension::MaxContent),
-	];
-	insert_unitlike!(crate::Property::Height, Dimension::Some);
-}
-
-pub struct min_width;
-impl min_width {
-	insert_enumlike![crate::Property::MinWidth,
-		(initial, Dimension::Initial),
-		(inherit, Dimension::Inherit),
-		(unset, Dimension::Unset),
-		(auto, Dimension::Auto),
-		(min_content, Dimension::MinContent),
-		(max_content, Dimension::MaxContent),
-	];
-	insert_unitlike!(crate::Property::MinWidth, Dimension::Some);
-}
-
-pub struct min_height;
-impl min_height {
-	insert_enumlike![crate::Property::MinHeight,
-		(initial, Dimension::Initial),
-		(inherit, Dimension::Inherit),
-		(unset, Dimension::Unset),
-		(auto, Dimension::Auto),
-		(min_content, Dimension::MinContent),
-		(max_content, Dimension::MaxContent),
-	];
-	insert_unitlike!(crate::Property::MinHeight, Dimension::Some);
-}
+decl_dimensions![width, height, min_width, min_height];
 
 pub struct max_width;
 impl max_width {

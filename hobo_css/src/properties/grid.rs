@@ -31,7 +31,7 @@ impl std::fmt::Display for GridSpan {
 			Self::Initial => "initial".fmt(f),
 			Self::Inherit => "inherit".fmt(f),
 			Self::Unset => "unset".fmt(f),
-			Self::Span(x) => write!(f, "span {}", x),
+			Self::Span(x) => write!(f, "span {x}"),
 			Self::Absolute(x) => x.fmt(f),
 		}
 	}
@@ -106,7 +106,7 @@ impl std::fmt::Display for GridRepeat {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		write!(f, "repeat({},", self.number)?;
 		for value in &self.values {
-			write!(f, " {}", value)?;
+			write!(f, " {value}")?;
 		}
 		")".fmt(f)
 	}
@@ -131,9 +131,9 @@ impl std::fmt::Display for GridTemplate {
 			Self::None        => "none".fmt(f),
 			Self::Some(values)     => {
 				if let Some((first, rest)) = values.split_first() {
-					write!(f, "{}", first)?;
+					write!(f, "{first}")?;
 					for value in rest {
-						write!(f, " {}", value)?;
+						write!(f, " {value}")?;
 					}
 				}
 				Ok(())
@@ -177,9 +177,9 @@ impl std::fmt::Display for GridAuto {
 			Self::Auto    => "auto".fmt(f),
 			Self::Some(units) => {
 				if let Some((first, rest)) = units.split_first() {
-					write!(f, "{}", first)?;
+					write!(f, "{first}")?;
 					for unit in rest {
-						write!(f, " {}", unit)?;
+						write!(f, " {unit}")?;
 					}
 				}
 				Ok(())

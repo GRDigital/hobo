@@ -23,6 +23,22 @@ impl std::fmt::Display for PositionOffset {
 	}
 }
 
+macro_rules! decl_offsets {
+	($($sides:ident),*) => {paste::paste!{$(
+		pub struct $sides;
+		impl $sides {
+			insert_enumlike![crate::Property::[<$sides:camel>],
+				(initial, PositionOffset::Initial),
+				(inherit, PositionOffset::Inherit),
+				(unset, PositionOffset::Unset),
+				(auto, PositionOffset::Auto),
+			];
+			insert_unitlike!(crate::Property::[<$sides:camel>], PositionOffset::Some);
+		}
+	)*}};
+}
+decl_offsets![left, right, top, bottom];
+
 #[rustfmt::skip]
 #[macro_export]
 #[doc(hidden)]

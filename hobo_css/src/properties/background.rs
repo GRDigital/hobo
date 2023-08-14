@@ -9,31 +9,32 @@ crate::macros::unit_value_macro! {background_position_x}
 crate::macros::unit_value_macro! {background_position_y}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
-pub enum BackgroundImage {
-	None,
-	Initial,
-	Inherit,
-	Unset,
+pub enum background_image {
+	none,
+	initial,
+	inherit,
+	unset,
 	Some(Vec<crate::Image>),
 }
 
-impl BackgroundImage {
+impl background_image {
 	pub fn single(x: crate::Image) -> Self { Self::Some(vec![x]) }
+	pub fn url(x: impl Into<String>) -> Self { Self::Some(vec![crate::Image::Url(x.into())]) }
 }
 
-impl std::fmt::Display for BackgroundImage {
+impl std::fmt::Display for background_image {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None    => "background-image:none;".fmt(f),
-			Self::Initial => "background-image:initial;".fmt(f),
-			Self::Inherit => "background-image:inherit;".fmt(f),
-			Self::Unset   => "background-image:unset;".fmt(f),
+			Self::none    => "background-image:none;".fmt(f),
+			Self::initial => "background-image:initial;".fmt(f),
+			Self::inherit => "background-image:inherit;".fmt(f),
+			Self::unset   => "background-image:unset;".fmt(f),
 			Self::Some(images) => {
 				"background-image:".fmt(f)?;
 				if let Some((first, rest)) = images.split_first() {
-					write!(f, "{}", first)?;
+					write!(f, "{first}")?;
 					for image in rest {
-						write!(f, ",{}", image)?;
+						write!(f, ",{image}")?;
 					}
 				}
 				";".fmt(f)
@@ -43,31 +44,32 @@ impl std::fmt::Display for BackgroundImage {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
-pub enum MaskImage {
-	None,
-	Initial,
-	Inherit,
-	Unset,
+pub enum mask_image {
+	none,
+	initial,
+	inherit,
+	unset,
 	Some(Vec<crate::Image>),
 }
 
-impl MaskImage {
+impl mask_image {
 	pub fn single(x: crate::Image) -> Self { Self::Some(vec![x]) }
+	pub fn url(x: impl Into<String>) -> Self { Self::Some(vec![crate::Image::Url(x.into())]) }
 }
 
-impl std::fmt::Display for MaskImage {
+impl std::fmt::Display for mask_image {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None    => "mask-image:none;-webkit-mask-image:none;".fmt(f),
-			Self::Initial => "mask-image:initial;-webkit-mask-image:initial;".fmt(f),
-			Self::Inherit => "mask-image:inherit;-webkit-mask-image:inherit;".fmt(f),
-			Self::Unset   => "mask-image:unset;-webkit-mask-image:unset;".fmt(f),
+			Self::none    => "mask-image:none;-webkit-mask-image:none;".fmt(f),
+			Self::initial => "mask-image:initial;-webkit-mask-image:initial;".fmt(f),
+			Self::inherit => "mask-image:inherit;-webkit-mask-image:inherit;".fmt(f),
+			Self::unset   => "mask-image:unset;-webkit-mask-image:unset;".fmt(f),
 			Self::Some(images) => {
 				let write = |f: &mut std::fmt::Formatter<'_>| -> std::fmt::Result {
 					if let Some((first, rest)) = images.split_first() {
-						write!(f, "{}", first)?;
+						write!(f, "{first}")?;
 						for image in rest {
-							write!(f, ",{}", image)?;
+							write!(f, ",{image}")?;
 						}
 					}
 
