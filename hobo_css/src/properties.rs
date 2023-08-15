@@ -212,17 +212,6 @@ macro_rules! generate_properties {
 	}};
 }
 
-// TODO: Vec<crate::Image> as input to easy_enum?
-// solves borderimagesource, background image, mask image
-//
-// maybe easy_enum option for Vec<T>
-// solves transform, filter, boxshadow
-
-// difficult:
-// transform
-// filter
-// clippath
-//
 // @Awpteamoose: I'm choosing to implement macroless syntax as inherent impl methods on types returning Self
 // rather than a mod with smth like `enum Property` and free fns that return Property
 // because a mod is completely sealed, while types are extensible (e.g. with extensions traits)

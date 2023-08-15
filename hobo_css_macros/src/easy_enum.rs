@@ -147,7 +147,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		Value::Raw => quote! {($str:expr) => { $crate::#property_snek::Raw($str.into()) };},
 		Value::Number => quote! {($num:expr) => { $crate::#property_snek::Number($num) };},
 		Value::Float => quote! {($num:expr) => { $crate::#property_snek::Number(unsafe { $crate::units::F32::new_unchecked($num as _) }) };},
-		Value::Color => quote! {},
+		Value::Color => quote! { /* unimplemented */ },
 	});
 
 	let fn_values = input.values.iter().map(|value| match value {
@@ -155,6 +155,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		Value::Unit => {
 			let fnames = ["px", "pct", "em", "rem", "vh", "vw", "vmin", "vmax", "fr", "dur"].iter().map(|fname| proc_macro2::Ident::new(fname, Span::call_site()));
 			quote! {
+				#[allow(non_upper_case_globals)]
 				pub const zero: Self = Self::Some(crate::Unit::Zero);
 				#(#[inline] pub fn #fnames(x: impl ::num_traits::cast::AsPrimitive<f32>) -> Self { Self::Some(crate::Unit::#fnames(x)) })*
 				#[inline] pub fn unit(x: crate::Unit) -> Self { Self::Some(x) }
