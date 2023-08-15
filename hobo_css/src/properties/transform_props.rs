@@ -12,7 +12,7 @@ pub enum transform_origin {
 
 impl transform_origin {
 	/// x and y offset as css percentage
-	pub fn offset(x: impl num_traits::AsPrimitive<f32>, y: impl num_traits::AsPrimitive<f32>) -> Self { Self::offset_unit(Unit::pct(x.as_()), Unit::pct(y.as_())) }
+	pub fn offset(x: impl num_traits::AsPrimitive<f32>, y: impl num_traits::AsPrimitive<f32>) -> Self { Self::offset_unit(Unit::pct(x.as_() * 100.), Unit::pct(y.as_() * 100.)) }
 	pub fn offset_px(x: impl num_traits::AsPrimitive<f32>, y: impl num_traits::AsPrimitive<f32>) -> Self { Self::offset_unit(Unit::px(x), Unit::px(y)) }
 }
 
@@ -40,13 +40,13 @@ pub enum transform {
 }
 
 impl transform {
-	pub fn translate_x(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_x(Unit::pct(x.as_()))]) }
+	pub fn translate_x(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_x(Unit::pct(x.as_() * 100.))]) }
 	pub fn translate_x_px(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_x(Unit::px(x))]) }
 
-	pub fn translate_y(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_y(Unit::pct(x.as_()))]) }
+	pub fn translate_y(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_y(Unit::pct(x.as_() * 100.))]) }
 	pub fn translate_y_px(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_y(Unit::px(x))]) }
 
-	pub fn translate_xy(x: impl num_traits::AsPrimitive<f32>, y: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_x(Unit::pct(x.as_())), TransformFunction::translate_y(Unit::pct(y.as_()))]) }
+	pub fn translate_xy(x: impl num_traits::AsPrimitive<f32>, y: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_x(Unit::pct(x.as_() * 100.)), TransformFunction::translate_y(Unit::pct(y.as_() * 100.))]) }
 	pub fn translate_xy_px(x: impl num_traits::AsPrimitive<f32>, y: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_x(Unit::px(x)), TransformFunction::translate_y(Unit::px(y))]) }
 
 	pub fn scale_xy(x: impl num_traits::AsPrimitive<f32>, y: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::scale_x(x.as_()), TransformFunction::scale_y(y.as_())]) }

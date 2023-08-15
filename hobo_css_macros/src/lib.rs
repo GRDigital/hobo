@@ -49,7 +49,7 @@ pub fn unit_value_macro(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 
 	// let test_fn_name = quote::format_ident!("{}_initial_inherit_unset", name);
 
-	let fnames = ["px", "pct", "em", "rem", "vh", "vw", "vmin", "vmax", "fr", "dur"].iter().map(|fname| proc_macro2::Ident::new(fname, Span::call_site()));
+	let fnames = ["px", "em", "rem", "vh", "vw", "vmin", "vmax", "fr", "dur"].iter().map(|fname| proc_macro2::Ident::new(fname, Span::call_site()));
 	let name_camel = syn::Ident::new(&name.to_string().to_upper_camel_case(), Span::call_site());
 
 	(quote! {
@@ -64,6 +64,7 @@ pub fn unit_value_macro(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 			pub const zero: crate::Property = crate::Property::#name_camel(crate::UnitValue::Unit(crate::Unit::Zero));
 
 			#(#[inline] pub fn #fnames(x: impl ::num_traits::cast::AsPrimitive<f32>) -> crate::Property { crate::Property::#name_camel(crate::UnitValue::Unit(crate::Unit::#fnames(x))) })*
+			#[inline] pub fn pct(x: impl ::num_traits::cast::AsPrimitive<f32>) -> crate::Property { crate::Property::#name_camel(crate::UnitValue::Unit(crate::Unit::pct(::num_traits::cast::AsPrimitive::<f32>::as_(x) * 100.))) }
 			#[inline] pub fn unit(x: crate::Unit) -> crate::Property { crate::Property::#name_camel(crate::UnitValue::Unit(x)) }
 		}
 

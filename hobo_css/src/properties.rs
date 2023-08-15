@@ -14,7 +14,7 @@ macro_rules! insert_unitlike {
 		#[allow(non_upper_case_globals)]
 		pub const zero: crate::Property = $prop($val(crate::Unit::Zero));
 		#[inline] pub fn px(  x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::px(x))) }
-		#[inline] pub fn pct( x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::pct(x))) }
+		#[inline] pub fn pct( x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::pct(x.as_() * 100.))) }
 		#[inline] pub fn em(  x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::em(x))) }
 		#[inline] pub fn rem( x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::rem(x))) }
 		#[inline] pub fn vw(  x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::vw(x))) }
