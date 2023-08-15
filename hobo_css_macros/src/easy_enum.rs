@@ -93,7 +93,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 			}, Span::call_site());
 			quote! {#value_snek}
 		},
-		Value::Unit => quote! {Some(crate::units::Unit), zero},
+		Value::Unit => quote! {Some(crate::units::Unit)},
 		Value::String => quote! {String(String)},
 		Value::Raw => quote! {Raw(String)},
 		Value::Number => quote! {Number(i32)},
@@ -119,13 +119,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 			formatted => {
 				let css_format_string = if input.prefixed { format!("{prop_name}:{{x}};-webkit-{prop_name}:{{x}};-moz-{prop_name}:{{x}};") } else { format!("{prop_name}:{{x}};") };
 				match formatted {
-					Value::Unit => {
-						let css_zero_string = if input.prefixed { format!("{prop_name}:0;-webkit-{prop_name}:0;-moz-{prop_name}:0;") } else { format!("{prop_name}:0;") };
-						quote! {
-							Self::Some(x) => write!(f, #css_format_string),
-							Self::zero => write!(f, #css_zero_string),
-						}
-					},
+					Value::Unit => quote! {Self::Some(x) => write!(f, #css_format_string)},
 					Value::String => quote! {Self::String(x) => write!(f, #css_format_string)},
 					Value::Raw => quote! {Self::Raw(x)    => write!(f, #css_format_string)},
 					Value::Number | Value::Float => quote! {Self::Number(x) => write!(f, #css_format_string)},
@@ -161,7 +155,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		Value::Unit => {
 			let fnames = ["px", "pct", "em", "rem", "vh", "vw", "vmin", "vmax", "fr", "dur"].iter().map(|fname| proc_macro2::Ident::new(fname, Span::call_site()));
 			quote! {
-				// #[inline] pub fn zero(decls: &mut Vec<crate::Property>) { crate::AppendProperty::append_property(Self::Some(crate::Unit::Zero), decls) }
+				pub const zero: Self = Self::Some(crate::Unit::Zero);
 				#(#[inline] pub fn #fnames(x: impl ::num_traits::cast::AsPrimitive<f32>) -> Self { Self::Some(crate::Unit::#fnames(x)) })*
 				#[inline] pub fn unit(x: crate::Unit) -> Self { Self::Some(x) }
 			}
