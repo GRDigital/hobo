@@ -75,6 +75,8 @@ impl max_height {
 	insert_unitlike!(crate::Property::MaxHeight, Dimension::Some);
 }
 
+crate::macros::easy_join!(size, (width, height), (auto, max-content, min-content, [unit]));
+
 #[rustfmt::skip]
 #[macro_export]
 #[doc(hidden)]

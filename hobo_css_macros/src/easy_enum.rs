@@ -114,7 +114,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 				}, Span::call_site());
 				let prop_value = &value.0;
 				let css_string = if input.prefixed { format!("{prop_name}:{prop_value};-webkit-{prop_name}:{prop_value};-moz-{prop_name}:{prop_value};") } else { format!("{prop_name}:{prop_value};") };
-				quote! {Self::#value_snek => write!(f, #css_string)}
+				quote! {Self::#value_snek => #css_string.fmt(f)}
 			},
 			formatted => {
 				let css_format_string = if input.prefixed { format!("{prop_name}:{{x}};-webkit-{prop_name}:{{x}};-moz-{prop_name}:{{x}};") } else { format!("{prop_name}:{{x}};") };

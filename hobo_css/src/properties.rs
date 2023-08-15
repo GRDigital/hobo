@@ -432,4 +432,3 @@ crate::macros::easy_enum! {scrollbar-gutter auto stable}
 crate::macros::easy_enum! {-*-appearance auto none}
 
 crate::macros::easy_join!(overflow, (overflow_x, overflow_y), (visible, hidden, scroll, auto));
-crate::macros::easy_join!(size, (width, height), (auto, max-content, min-content, [unit]));
