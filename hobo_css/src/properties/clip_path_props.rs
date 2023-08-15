@@ -27,24 +27,29 @@ impl std::fmt::Display for ClipPathShape {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
-pub enum ClipPath {
-	None,
-	Initial,
-	Inherit,
-	Unset,
-	Url(String),
-	Shape(Vec<ClipPathShape>),
+pub enum clip_path {
+	none,
+	initial,
+	inherit,
+	unset,
+	url(String),
+	shapes(Vec<ClipPathShape>),
 }
 
-impl std::fmt::Display for ClipPath {
+impl clip_path {
+	pub fn url(x: impl Into<String>) -> Self { Self::url(x.into()) }
+	pub fn shape(x: ClipPathShape) -> Self { Self::shapes(vec![x]) }
+}
+
+impl std::fmt::Display for clip_path {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None => "-webkit-clip-path:none;clip-path:none;".fmt(f),
-			Self::Initial => "-webkit-clip-path:initial;clip-path:initial;".fmt(f),
-			Self::Inherit => "-webkit-clip-path:inherit;clip-path:inherit;".fmt(f),
-			Self::Unset => "-webkit-clip-path:unset;clip-path:unset;".fmt(f),
-			Self::Url(x) => write!(f, r#"-webkit-clip-path:url("{x}");clip-path:url("{x}");"#),
-			Self::Shape(shapes) => {
+			Self::none => "-webkit-clip-path:none;clip-path:none;".fmt(f),
+			Self::initial => "-webkit-clip-path:initial;clip-path:initial;".fmt(f),
+			Self::inherit => "-webkit-clip-path:inherit;clip-path:inherit;".fmt(f),
+			Self::unset => "-webkit-clip-path:unset;clip-path:unset;".fmt(f),
+			Self::url(x) => write!(f, r#"-webkit-clip-path:url("{x}");clip-path:url("{x}");"#),
+			Self::shapes(shapes) => {
 				if let Some((first, rest)) = shapes.split_first() {
 					"-webkit-clip-path:".fmt(f)?;
 					first.fmt(f)?;

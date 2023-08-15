@@ -38,40 +38,40 @@ impl std::fmt::Display for GridSpan {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, PartialOrd, Ord)]
-pub enum GridAutoFlow {
-	Inherit,
-	Initial,
-	Unset,
-	Row,
-	Column,
-	RowDense,
-	ColumnDense,
+pub enum grid_auto_flow {
+	inherit,
+	initial,
+	unset,
+	row,
+	column,
+	row_dense,
+	column_dense,
 }
 
 #[rustfmt::skip]
-impl std::fmt::Display for GridAutoFlow {
+impl std::fmt::Display for grid_auto_flow {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Inherit     => "grid-auto-flow:inherit;".fmt(f),
-			Self::Initial     => "grid-auto-flow:initial;".fmt(f),
-			Self::Unset       => "grid-auto-flow:unset;".fmt(f),
-			Self::Row         => "grid-auto-flow:row;".fmt(f),
-			Self::Column      => "grid-auto-flow:column;".fmt(f),
-			Self::RowDense    => "grid-auto-flow:row dense;".fmt(f),
-			Self::ColumnDense => "grid-auto-flow:column dense;".fmt(f),
+			Self::inherit     => "grid-auto-flow:inherit;".fmt(f),
+			Self::initial     => "grid-auto-flow:initial;".fmt(f),
+			Self::unset       => "grid-auto-flow:unset;".fmt(f),
+			Self::row         => "grid-auto-flow:row;".fmt(f),
+			Self::column      => "grid-auto-flow:column;".fmt(f),
+			Self::row_dense    => "grid-auto-flow:row dense;".fmt(f),
+			Self::column_dense => "grid-auto-flow:column dense;".fmt(f),
 		}
 	}
 }
 
 #[macro_export]
 macro_rules! grid_auto_flow {
-	(inherit)      => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::Inherit)};
-	(initial)      => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::Initial)};
-	(unset)        => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::Unset)};
-	(row)          => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::Row)};
-	(column)       => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::Column)};
-	(row dense)    => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::RowDense)};
-	(column dense) => {$crate::Property::GridAutoFlow($crate::GridAutoFlow::ColumnDense)};
+	(inherit)      => {$crate::Property::GridAutoFlow($crate::grid_auto_flow::inherit)};
+	(initial)      => {$crate::Property::GridAutoFlow($crate::grid_auto_flow::initial)};
+	(unset)        => {$crate::Property::GridAutoFlow($crate::grid_auto_flow::unset)};
+	(row)          => {$crate::Property::GridAutoFlow($crate::grid_auto_flow::row)};
+	(column)       => {$crate::Property::GridAutoFlow($crate::grid_auto_flow::column)};
+	(row dense)    => {$crate::Property::GridAutoFlow($crate::grid_auto_flow::row_dense)};
+	(column dense) => {$crate::Property::GridAutoFlow($crate::grid_auto_flow::column_dense)};
 }
 
 // what follows is not a great bunch of structs and macros, but it covers basic grid usage

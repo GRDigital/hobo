@@ -2,30 +2,46 @@ use crate::{append_property::AppendProperty, prelude::*, Property};
 use num_traits::cast::AsPrimitive;
 
 #[derive(Debug, PartialEq, Eq, Hash, Default, Clone, PartialOrd, Ord)]
-pub enum Filter {
+pub enum filter {
 	#[default]
-	None,
-	Initial,
-	Inherit,
-	Some(Vec<FilterFunction>),
+	none,
+	initial,
+	inherit,
+	multiple(Vec<FilterFunction>),
+}
+
+impl filter {
+	pub fn blur(x: i32) -> Self { Self::multiple(vec![FilterFunction::blur(x)]) }
+	pub fn brightness(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![FilterFunction::brightness(x)]) }
+	pub fn contrast(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![FilterFunction::contrast(x)]) }
+	pub fn drop_shadow(h_shadow: Unit, v_shadow: Unit, blur: Unit, color: Option<crate::Color>) -> Self { Self::multiple(vec![FilterFunction::drop_shadow(h_shadow, v_shadow, blur, color)]) }
+	pub fn grayscale(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![FilterFunction::grayscale(x)]) }
+	pub fn hue_rotate(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![FilterFunction::hue_rotate(x)]) }
+	pub fn invert(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![FilterFunction::invert(x)]) }
+	pub fn opacity(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![FilterFunction::opacity(x)]) }
+	pub fn saturate(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![FilterFunction::saturate(x)]) }
+	pub fn sepia(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![FilterFunction::sepia(x)]) }
+	pub fn url(x: impl Into<String>) -> Self { Self::multiple(vec![FilterFunction::url(x)]) }
 }
 
 #[rustfmt::skip]
-impl std::fmt::Display for Filter {
+impl std::fmt::Display for filter {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None       => "filter:none;".fmt(f),
-			Self::Initial    => "filter:initial;".fmt(f),
-			Self::Inherit    => "filter:inherit;".fmt(f),
-			Self::Some(fns)  => {
-				"filter:".fmt(f)?;
-				if let Some((first, rest)) = fns.split_first() {
-					write!(f, "{first}")?;
-					for func in rest {
-						write!(f, " {func}")?;
+			Self::none       => "filter:none;-webkit-filter:none;".fmt(f),
+			Self::initial    => "filter:initial;-webkit-filter:initial;".fmt(f),
+			Self::inherit    => "filter:inherit;-webkit-filter:inherit;".fmt(f),
+			Self::multiple(functions)  => {
+				let write = |f: &mut std::fmt::Formatter<'_>| -> std::fmt::Result {
+					if let Some((first, rest)) = functions.split_first() {
+						write!(f, "{first}")?;
+						for func in rest { write!(f, ",{func}")?; }
 					}
-				}
-				";".fmt(f)
+
+					Ok(())
+				};
+				"filter:".fmt(f)?; write(f)?; ";".fmt(f)?;
+				"-webkit-filter:".fmt(f)?; write(f)?; ";".fmt(f)
 			},
 		}
 	}
@@ -61,7 +77,7 @@ impl FilterFunction {
 }
 
 impl AppendProperty for FilterFunction {
-	fn append_property(self, props: &mut Vec<Property>) { Filter::Some(vec![self]).append_property(props) }
+	fn append_property(self, props: &mut Vec<Property>) { filter::multiple(vec![self]).append_property(props) }
 }
 
 impl std::fmt::Display for FilterFunction {

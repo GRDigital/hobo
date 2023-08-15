@@ -33,6 +33,7 @@ enum Value {
 	Number,
 	Float,
 	Raw,
+	Color,
 }
 
 impl Parse for Value {
@@ -43,6 +44,7 @@ impl Parse for Value {
 			syn::custom_keyword!(number);
 			syn::custom_keyword!(float);
 			syn::custom_keyword!(raw);
+			syn::custom_keyword!(color);
 
 			let content;
 			syn::bracketed!(content in input);
@@ -54,6 +56,8 @@ impl Parse for Value {
 				return Ok(Self::Number);
 			} else if content.parse::<float>().is_ok() {
 				return Ok(Self::Float);
+			} else if content.parse::<color>().is_ok() {
+				return Ok(Self::Color);
 			} else if content.parse::<raw>().is_ok() {
 				return Ok(Self::Raw);
 			}
@@ -89,11 +93,12 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 			}, Span::call_site());
 			quote! {#value_snek}
 		},
-		Value::Unit => quote! {Some(crate::units::Unit)},
+		Value::Unit => quote! {Some(crate::units::Unit), zero},
 		Value::String => quote! {String(String)},
 		Value::Raw => quote! {Raw(String)},
 		Value::Number => quote! {Number(i32)},
 		Value::Float => quote! {Number(crate::units::F32)},
+		Value::Color => quote! {Color(crate::Color)},
 	});
 
 	let display_lines = input.values.iter().map(|value| {
@@ -114,12 +119,18 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 			formatted => {
 				let css_format_string = if input.prefixed { format!("{prop_name}:{{x}};-webkit-{prop_name}:{{x}};-moz-{prop_name}:{{x}};") } else { format!("{prop_name}:{{x}};") };
 				match formatted {
-					Value::Unit   => quote! {Self::Some(x)   => write!(f, #css_format_string)},
+					Value::Unit => {
+						let css_zero_string = if input.prefixed { format!("{prop_name}:0;-webkit-{prop_name}:0;-moz-{prop_name}:0;") } else { format!("{prop_name}:0;") };
+						quote! {
+							Self::Some(x) => write!(f, #css_format_string),
+							Self::zero => write!(f, #css_zero_string),
+						}
+					},
 					Value::String => quote! {Self::String(x) => write!(f, #css_format_string)},
-					Value::Raw    => quote! {Self::Raw(x)    => write!(f, #css_format_string)},
-					Value::Number |
-					Value::Float  => quote! {Self::Number(x) => write!(f, #css_format_string)},
-					_ => unreachable!(),
+					Value::Raw => quote! {Self::Raw(x)    => write!(f, #css_format_string)},
+					Value::Number | Value::Float => quote! {Self::Number(x) => write!(f, #css_format_string)},
+					Value::Color => quote! {Self::Color(x) => write!(f, #css_format_string)},
+					Value::EnumVariant(_) => unreachable!(),
 				}
 			}
 		}
@@ -142,6 +153,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		Value::Raw => quote! {($str:expr) => { $crate::#property_snek::Raw($str.into()) };},
 		Value::Number => quote! {($num:expr) => { $crate::#property_snek::Number($num) };},
 		Value::Float => quote! {($num:expr) => { $crate::#property_snek::Number(unsafe { $crate::units::F32::new_unchecked($num as _) }) };},
+		Value::Color => quote! {},
 	});
 
 	let fn_values = input.values.iter().map(|value| match value {
@@ -149,7 +161,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		Value::Unit => {
 			let fnames = ["px", "pct", "em", "rem", "vh", "vw", "vmin", "vmax", "fr", "dur"].iter().map(|fname| proc_macro2::Ident::new(fname, Span::call_site()));
 			quote! {
-				#[inline] pub fn zero() -> Self { Self::Some(crate::Unit::Zero) }
+				// #[inline] pub fn zero(decls: &mut Vec<crate::Property>) { crate::AppendProperty::append_property(Self::Some(crate::Unit::Zero), decls) }
 				#(#[inline] pub fn #fnames(x: impl ::num_traits::cast::AsPrimitive<f32>) -> Self { Self::Some(crate::Unit::#fnames(x)) })*
 				#[inline] pub fn unit(x: crate::Unit) -> Self { Self::Some(x) }
 			}
@@ -158,6 +170,12 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		Value::Raw => quote! {#[inline] pub fn raw(x: impl ::std::convert::Into<String>) -> Self { Self::Raw(::std::convert::Into::into(x)) }},
 		Value::Number => quote! {#[inline] pub fn val(x: impl ::num_traits::cast::AsPrimitive<i32>) -> Self { Self::Number(::num_traits::cast::AsPrimitive::<i32>::as_(x)) }},
 		Value::Float => quote! {#[inline] pub fn val(x: impl ::num_traits::cast::AsPrimitive<f32>) -> Self { Self::Number(unsafe { crate::units::F32::new_unchecked(::num_traits::cast::AsPrimitive::<f32>::as_(x)) }) }},
+		Value::Color => quote! {
+			#[inline] pub fn none() -> Self { Self::Color(crate::Color { r: 0, g: 0, b: 0, a: 0 }) }
+			#[inline] pub fn gray(c: u8) -> Self { Self::Color(crate::Color { r: c, g: c, b: c, a: 0xFF }) }
+			#[inline] pub fn rgb(x: impl ::num_traits::cast::AsPrimitive<u32>) -> Self { Self::Color((::num_traits::cast::AsPrimitive::<u32>::as_(x) << 8 | 0xFF).into()) }
+			#[inline] pub fn rgba(x: impl Into<crate::Color>) -> Self { Self::Color(x.into()) }
+		},
 	});
 
 	let res = quote!(
@@ -238,7 +256,7 @@ pub fn easy_join(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 				"Self" => "Self_",
 				x => x,
 			}, Span::call_site());
-			quote! { pub fn #value_snek(decls: &mut Vec<crate::Property>) { crate::AppendProperty::append_property((#(super::#props::#value_snek),*), decls) } }
+			quote! { #[inline] pub fn #value_snek(decls: &mut Vec<crate::Property>) { crate::AppendProperty::append_property((#(super::#props::#value_snek),*), decls) } }
 		},
 		Value::Unit => {
 			let funs = ["px", "pct", "em", "rem", "vh", "vw", "vmin", "vmax", "fr", "dur"].iter().map(|fname| {
@@ -246,7 +264,7 @@ pub fn easy_join(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 				quote! {#[inline] pub fn #fname(x: impl ::num_traits::cast::AsPrimitive<f32>) -> impl crate::AppendProperty { (#(super::#props::#fname(x)),*) }}
 			});
 			quote! {
-				#[inline] pub fn zero() -> impl crate::AppendProperty { (#(super::#props::zero()),*) }
+				#[inline] pub fn zero(decls: &mut Vec<crate::Property>) { crate::AppendProperty::append_property((#(super::#props::zero),*), decls) }
 				#(#funs)*
 				#[inline] pub fn unit(x: crate::Unit) -> impl crate::AppendProperty { (#(super::#props::unit(x.clone())),*) }
 			}
@@ -255,6 +273,12 @@ pub fn easy_join(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		Value::Raw => quote! {#[inline] pub fn raw(x: impl ::std::convert::Into<String>) -> impl crate::AppendProperty { let x = x.into(); (#(super::#props::raw(x.clone())),*) }},
 		Value::Number => quote! {#[inline] pub fn val(x: impl ::num_traits::cast::AsPrimitive<i32>) -> impl crate::AppendProperty { (#(super::#props::val(x)),*) }},
 		Value::Float => quote! {#[inline] pub fn val(x: impl ::num_traits::cast::AsPrimitive<f32>) -> impl crate::AppendProperty { (#(super::#props::val(x)),*) }},
+		Value::Color => quote! {
+			#[inline] pub fn none(decls: &mut Vec<crate::Property>) { crate::AppendProperty::append_property((#(super::#props::none),*), decls) }
+			#[inline] pub fn gray(c: u8) -> impl crate::AppendProperty { (#(super::#props::gray(c)),*) }
+			#[inline] pub fn rgb(x: impl ::num_traits::cast::AsPrimitive<u32>) -> impl crate::AppendProperty { (#(super::#props::rgb(x)),*) }
+			#[inline] pub fn rgba(x: impl Into<crate::Color>) -> impl crate::AppendProperty { let x = x.into(); (#(super::#props::rgba(x)),*) }
+		},
 	});
 
 	let res = quote! { pub mod #name { #(#items)* } };
@@ -275,8 +299,22 @@ pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let result_inherit = format!("{}:inherit;", property.to_kebab_case());
 	let result_unset = format!("{}:unset;", property.to_kebab_case());
 
-	// TODO: macroless
 	let res = quote!(
+		#[allow(non_camel_case_types)]
+		pub struct #property_snek;
+
+		#[allow(non_upper_case_globals)]
+		impl #property_snek {
+			pub const initial: crate::Property = crate::Property::#property_camel(crate::ColorValue::Initial);
+			pub const inherit: crate::Property = crate::Property::#property_camel(crate::ColorValue::Inherit);
+			pub const unset: crate::Property = crate::Property::#property_camel(crate::ColorValue::Unset);
+			pub const none: crate::Property = crate::Property::#property_camel(crate::ColorValue::Rgba(crate::Color { r: 0, g: 0, b: 0, a: 0 }));
+
+			#[inline] pub fn gray(c: u8) -> crate::Property { crate::Property::#property_camel(crate::ColorValue::Rgba(crate::Color { r: c, g: c, b: c, a: 0xFF })) }
+			#[inline] pub fn rgb(x: impl ::num_traits::cast::AsPrimitive<u32>) -> crate::Property { crate::Property::#property_camel(crate::ColorValue::Rgba((::num_traits::cast::AsPrimitive::<u32>::as_(x) << 8 | 0xFF).into())) }
+			#[inline] pub fn rgba(x: impl Into<crate::Color>) -> crate::Property { crate::Property::#property_camel(crate::ColorValue::Rgba(x.into())) }
+		}
+
 		#[macro_export]
 		macro_rules! #property_snek {
 			(initial)       => {$crate::Property::#property_camel($crate::ColorValue::Initial)};

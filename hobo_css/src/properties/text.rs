@@ -6,7 +6,7 @@ crate::macros::easy_enum! {unicode-bidi normal embed bidi-override isolate isola
 crate::macros::easy_enum! {white-space normal nowrap pre pre-line pre-wrap}
 crate::macros::easy_enum! {writing-mode horizontal-tb vertical-rl vertical-lr}
 crate::macros::easy_enum! {hanging-punctuation none first last allow-end force-end}
-crate::macros::easy_enum! {hyphens manual none auto}
+crate::macros::easy_enum! {-*-hyphens manual none auto}
 crate::macros::easy_enum! {text-align left right center justify}
 crate::macros::easy_enum! {text-align-last left right center justify start end}
 crate::macros::easy_enum! {text-justify auto inter-word inter-character none}
@@ -83,7 +83,7 @@ macro_rules! font_family {
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord, SmartDefault)]
 pub struct TextShadowEffect {
-	#[default(crate::color::BLACK)]
+	#[default(crate::colors::BLACK)]
 	pub color: Color,
 	pub offset_x: Unit,
 	pub offset_y: Unit,
@@ -112,8 +112,8 @@ pub enum text_shadow {
 }
 
 impl text_shadow {
-	pub fn effect(color: impl Into<Color>, offset_x: Unit, offset_y: Unit, blur_radius: Unit) -> Self {
-		Self::Some(vec![TextShadowEffect { color: color.into(), offset_x, offset_y, blur_radius }])
+	pub fn effect(shadow_color: impl Into<Color>, offset_x: Unit, offset_y: Unit, blur_radius: Unit) -> Self {
+		Self::Some(vec![TextShadowEffect { color: shadow_color.into(), offset_x, offset_y, blur_radius }])
 	}
 }
 

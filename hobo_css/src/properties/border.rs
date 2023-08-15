@@ -11,21 +11,26 @@ crate::macros::easy_enum! {border-image-repeat stretch repeat round space}
 crate::macros::easy_color! {outline-color}
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
-pub enum BorderImageSource {
-	None,
-	Initial,
-	Inherit,
-	Unset,
+pub enum border_image_source {
+	none,
+	initial,
+	inherit,
+	unset,
 	Some(Vec<crate::Image>),
 }
 
-impl std::fmt::Display for BorderImageSource {
+impl border_image_source {
+	pub fn single(x: crate::Image) -> Self { Self::Some(vec![x]) }
+	pub fn url(x: impl Into<String>) -> Self { Self::Some(vec![crate::Image::Url(x.into())]) }
+}
+
+impl std::fmt::Display for border_image_source {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None    => "border-image-source:none;".fmt(f),
-			Self::Initial => "border-image-source:initial;".fmt(f),
-			Self::Inherit => "border-image-source:inherit;".fmt(f),
-			Self::Unset   => "border-image-source:unset;".fmt(f),
+			Self::none    => "border-image-source:none;".fmt(f),
+			Self::initial => "border-image-source:initial;".fmt(f),
+			Self::inherit => "border-image-source:inherit;".fmt(f),
+			Self::unset   => "border-image-source:unset;".fmt(f),
 			Self::Some(images) => {
 				"border-image-source:".fmt(f)?;
 				if let Some((first, rest)) = images.split_first() {
@@ -102,25 +107,25 @@ impl std::fmt::Display for BoxShadowEffect {
 }
 
 impl AppendProperty for BoxShadowEffect {
-	fn append_property(self, props: &mut Vec<Property>) { BoxShadow::Some(vec![self]).append_property(props) }
+	fn append_property(self, props: &mut Vec<Property>) { box_shadow::Some(vec![self]).append_property(props) }
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
-pub enum BoxShadow {
-	None,
-	Initial,
-	Inherit,
-	Unset,
+pub enum box_shadow {
+	none,
+	initial,
+	inherit,
+	unset,
 	Some(Vec<BoxShadowEffect>),
 }
 
-impl std::fmt::Display for BoxShadow {
+impl std::fmt::Display for box_shadow {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None    => "box-shadow:none;".fmt(f),
-			Self::Initial => "box-shadow:initial;".fmt(f),
-			Self::Inherit => "box-shadow:inherit;".fmt(f),
-			Self::Unset   => "box-shadow:unset;".fmt(f),
+			Self::none    => "box-shadow:none;".fmt(f),
+			Self::initial => "box-shadow:initial;".fmt(f),
+			Self::inherit => "box-shadow:inherit;".fmt(f),
+			Self::unset   => "box-shadow:unset;".fmt(f),
 			Self::Some(effects) => {
 				"box-shadow:".fmt(f)?;
 				if let Some((first, rest)) = effects.split_first() {
@@ -134,6 +139,65 @@ impl std::fmt::Display for BoxShadow {
 		}
 	}
 }
+
+macro_rules! decl_border {
+	($($sides:ident),*) => {paste::paste!{$(
+		pub struct [<border_ $sides _width>];
+		impl [<border_ $sides _width>] {
+			insert_enumlike![crate::Property::[<Border $sides:camel Width>],
+				(initial, BorderWidth::Initial),
+				(inherit, BorderWidth::Inherit),
+				(unset, BorderWidth::Unset),
+				(medium, BorderWidth::Medium),
+				(thin, BorderWidth::Thin),
+				(thick, BorderWidth::Thick),
+			];
+			insert_unitlike!(crate::Property::[<Border $sides:camel Width>], BorderWidth::Some);
+		}
+
+		pub struct [<border_ $sides _style>];
+		impl [<border_ $sides _style>] {
+			insert_enumlike![crate::Property::[<Border $sides:camel Style>],
+				(initial, BorderStyle::Initial),
+				(inherit, BorderStyle::Inherit),
+				(unset, BorderStyle::Unset),
+				(none, BorderStyle::None),
+				(hidden, BorderStyle::Hidden),
+				(dotted, BorderStyle::Dotted),
+				(dashed, BorderStyle::Dashed),
+				(solid, BorderStyle::Solid),
+				(double, BorderStyle::Double),
+				(groove, BorderStyle::Groove),
+				(ridge, BorderStyle::Ridge),
+				(inset, BorderStyle::Inset),
+				(outset, BorderStyle::Outset),
+			];
+		}
+
+		/*
+		pub struct [<border_ $sides _color>];
+		impl [<border_ $sides _color>] {
+			insert_enumlike![crate::Property::[<Border $sides:camel Color>],
+				(initial, BorderColor::Initial),
+				(inherit, BorderColor::Inherit),
+				(unset, BorderColor::Unset),
+			];
+			insert_unitlike!(crate::Property::[<Border $sides:camel Color>], BorderColor::Some);
+		}
+		*/
+	)*}};
+}
+decl_border![left, right, top, bottom];
+crate::macros::easy_join!(border_horizontal_width, (border_left_width, border_right_width), (medium, thin, thick, [unit]));
+crate::macros::easy_join!(border_vertical_width, (border_top_width, border_bottom_width), (medium, thin, thick, [unit]));
+crate::macros::easy_join!(border_width, (border_horizontal_width, border_vertical_width), (medium, thin, thick, [unit]));
+crate::macros::easy_join!(border_horizontal_style, (border_left_style, border_right_style), (none, hidden, dotted, dashed, solid, double, groove, ridge, inset, outset));
+crate::macros::easy_join!(border_vertical_style, (border_top_style, border_bottom_style), (none, hidden, dotted, dashed, solid, double, groove, ridge, inset, outset));
+crate::macros::easy_join!(border_style, (border_horizontal_style, border_vertical_style), (none, hidden, dotted, dashed, solid, double, groove, ridge, inset, outset));
+crate::macros::easy_join!(border_horizontal_color, (border_left_color, border_right_color), ([color]));
+crate::macros::easy_join!(border_vertical_color, (border_top_color, border_bottom_color), ([color]));
+crate::macros::easy_join!(border_color, (border_horizontal_color, border_vertical_color), ([color]));
+crate::macros::easy_join!(border_radius, (border_top_left_radius, border_top_right_radius, border_bottom_left_radius, border_bottom_right_radius), ([unit]));
 
 #[rustfmt::skip]
 #[macro_export]

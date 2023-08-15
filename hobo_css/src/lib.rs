@@ -5,12 +5,12 @@ pub mod prelude;
 #[macro_use] pub mod selector;
 mod append_property;
 /// Css named colors
-pub mod color;
+pub mod colors;
 pub mod font_face;
 pub mod media;
 
 pub use append_property::AppendProperty;
-pub use color::Color;
+pub use colors::Color;
 pub use hobo_css_macros as macros;
 pub use macros::AppendProperty;
 #[doc(hidden)] pub use paste;

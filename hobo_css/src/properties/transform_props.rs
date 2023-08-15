@@ -1,47 +1,66 @@
 use crate::prelude::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Default, Clone, PartialOrd, Ord)]
-pub enum TransformOrigin {
+pub enum transform_origin {
 	#[default]
-	None,
-	Initial,
-	Inherit,
-	Unset,
-	Some(Unit, Unit),
+	none,
+	initial,
+	inherit,
+	unset,
+	offset_unit(Unit, Unit),
+}
+
+impl transform_origin {
+	/// x and y offset as css percentage
+	pub fn offset(x: impl num_traits::AsPrimitive<f32>, y: impl num_traits::AsPrimitive<f32>) -> Self { Self::offset_unit(Unit::pct(x.as_()), Unit::pct(y.as_())) }
+	pub fn offset_px(x: impl num_traits::AsPrimitive<f32>, y: impl num_traits::AsPrimitive<f32>) -> Self { Self::offset_unit(Unit::px(x), Unit::px(y)) }
 }
 
 #[rustfmt::skip]
-impl std::fmt::Display for TransformOrigin {
+impl std::fmt::Display for transform_origin {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None              => "transform-origin:none;".fmt(f),
-			Self::Initial           => "transform-origin:initial;".fmt(f),
-			Self::Inherit           => "transform-origin:inherit;".fmt(f),
-			Self::Unset             => "transform-origin:unset;".fmt(f),
-			Self::Some(top, bottom) => write!(f, "transform-origin:{top} {bottom};"),
+			Self::none              => "transform-origin:none;".fmt(f),
+			Self::initial           => "transform-origin:initial;".fmt(f),
+			Self::inherit           => "transform-origin:inherit;".fmt(f),
+			Self::unset             => "transform-origin:unset;".fmt(f),
+			Self::offset_unit(x, y) => write!(f, "transform-origin:{x} {y};"),
 		}
 	}
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Default, Clone, PartialOrd, Ord)]
-pub enum Transform {
+pub enum transform {
 	#[default]
-	None,
-	Initial,
-	Inherit,
-	Unset,
-	Some(Vec<TransformFunction>),
+	none,
+	initial,
+	inherit,
+	unset,
+	multiple(Vec<TransformFunction>),
+}
+
+impl transform {
+	pub fn translate_x(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_x(Unit::pct(x.as_()))]) }
+	pub fn translate_x_px(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_x(Unit::px(x))]) }
+
+	pub fn translate_y(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_y(Unit::pct(x.as_()))]) }
+	pub fn translate_y_px(x: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_y(Unit::px(x))]) }
+
+	pub fn translate_xy(x: impl num_traits::AsPrimitive<f32>, y: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_x(Unit::pct(x.as_())), TransformFunction::translate_y(Unit::pct(y.as_()))]) }
+	pub fn translate_xy_px(x: impl num_traits::AsPrimitive<f32>, y: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::translate_x(Unit::px(x)), TransformFunction::translate_y(Unit::px(y))]) }
+
+	pub fn scale_xy(x: impl num_traits::AsPrimitive<f32>, y: impl num_traits::AsPrimitive<f32>) -> Self { Self::multiple(vec![TransformFunction::scale_x(x.as_()), TransformFunction::scale_y(y.as_())]) }
 }
 
 #[rustfmt::skip]
-impl std::fmt::Display for Transform {
+impl std::fmt::Display for transform {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::None       => "transform:none;".fmt(f),
-			Self::Initial    => "transform:initial;".fmt(f),
-			Self::Inherit    => "transform:inherit;".fmt(f),
-			Self::Unset      => "transform:unset;".fmt(f),
-			Self::Some(fns)  => {
+			Self::none       => "transform:none;".fmt(f),
+			Self::initial    => "transform:initial;".fmt(f),
+			Self::inherit    => "transform:inherit;".fmt(f),
+			Self::unset      => "transform:unset;".fmt(f),
+			Self::multiple(fns)  => {
 				"transform:".fmt(f)?;
 				if let Some((first, rest)) = fns.split_first() {
 					write!(f, "{first}")?;
@@ -95,7 +114,7 @@ impl TransformFunction {
 
 impl crate::AppendProperty for TransformFunction {
 	fn append_property(self, properties: &mut Vec<crate::Property>) {
-		Transform::Some(vec![self]).append_property(properties)
+		transform::multiple(vec![self]).append_property(properties)
 	}
 }
 

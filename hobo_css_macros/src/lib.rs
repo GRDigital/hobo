@@ -61,8 +61,8 @@ pub fn unit_value_macro(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 			pub const initial: crate::Property = crate::Property::#name_camel(crate::UnitValue::Initial);
 			pub const inherit: crate::Property = crate::Property::#name_camel(crate::UnitValue::Inherit);
 			pub const unset: crate::Property = crate::Property::#name_camel(crate::UnitValue::Unset);
+			pub const zero: crate::Property = crate::Property::#name_camel(crate::UnitValue::Unit(crate::Unit::Zero));
 
-			#[inline] pub fn zero() -> crate::Property { crate::Property::#name_camel(crate::UnitValue::Unit(crate::Unit::Zero)) }
 			#(#[inline] pub fn #fnames(x: impl ::num_traits::cast::AsPrimitive<f32>) -> crate::Property { crate::Property::#name_camel(crate::UnitValue::Unit(crate::Unit::#fnames(x))) })*
 			#[inline] pub fn unit(x: crate::Unit) -> crate::Property { crate::Property::#name_camel(crate::UnitValue::Unit(x)) }
 		}

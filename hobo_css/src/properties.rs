@@ -11,7 +11,8 @@ macro_rules! insert_enumlike {
 
 macro_rules! insert_unitlike {
 	($prop:path, $val:path) => {
-		#[inline] pub fn zero() -> crate::Property { $prop($val(crate::Unit::Zero)) }
+		#[allow(non_upper_case_globals)]
+		pub const zero: crate::Property = $prop($val(crate::Unit::Zero));
 		#[inline] pub fn px(  x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::px(x))) }
 		#[inline] pub fn pct( x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::pct(x))) }
 		#[inline] pub fn em(  x: impl num_traits::cast::AsPrimitive<f32>) -> crate::Property { $prop($val(crate::Unit::em(x))) }
@@ -36,18 +37,18 @@ macro_rules! insert_unitlike {
 #[macro_use] mod background;
 #[macro_use] mod svg;
 #[macro_use] mod animation;
-#[macro_use] mod transform;
-#[macro_use] mod filter;
+#[macro_use] mod transform_props;
+#[macro_use] mod filter_props;
 #[macro_use] mod grid;
-#[macro_use] mod clip_path;
+#[macro_use] mod clip_path_props;
 
 use crate::prelude::*;
 pub use animation::*;
 pub use background::*;
 pub use border::*;
-pub use clip_path::*;
+pub use clip_path_props::*;
 pub use dimensions::*;
-pub use filter::*;
+pub use filter_props::*;
 pub use flex::*;
 pub use grid::*;
 pub use margin_props::*;
@@ -55,11 +56,11 @@ pub use padding_props::*;
 pub use position_props::*;
 pub use svg::*;
 pub use text::*;
-pub use transform::*;
+pub use transform_props::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, PartialOrd, Ord)]
 pub enum ColorValue {
-	Rgba(crate::color::Color),
+	Rgba(crate::colors::Color),
 	Initial,
 	Inherit,
 	Unset,
@@ -120,8 +121,8 @@ pub struct LinearGradient {
 impl std::fmt::Display for LinearGradient {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		write!(f, "{}deg", self.angle)?;
-		for (color, stop) in &self.stop_list {
-			write!(f, ",{} {}", color, stop)?;
+		for (stop_color, stop) in &self.stop_list {
+			write!(f, ",{stop_color} {stop}")?;
 		}
 		Ok(())
 	}
@@ -211,14 +212,17 @@ macro_rules! generate_properties {
 	}};
 }
 
+// TODO: Vec<crate::Image> as input to easy_enum?
+// solves borderimagesource, background image, mask image
+//
+// maybe easy_enum option for Vec<T>
+// solves transform, filter, boxshadow
+
+// difficult:
 // transform
 // filter
-// borderimagesource
 // clippath
-// gridautoflow
-// boxshadow
-// transformorigin
-
+//
 // @Awpteamoose: I'm choosing to implement macroless syntax as inherent impl methods on types returning Self
 // rather than a mod with smth like `enum Property` and free fns that return Property
 // because a mod is completely sealed, while types are extensible (e.g. with extensions traits)
@@ -307,19 +311,19 @@ generate_properties! {
 		transition_property, transition_timing_function,
 		transition_duration, transition_delay,
 
-		Transform,
-		Filter,
+		transform,
+		filter,
 
-		BorderImageSource, border_image_slice, border_image_width,
+		border_image_source, border_image_slice, border_image_width,
 		border_image_outset, border_image_repeat,
 
 		scroll_behavior, pointer_events, user_select, touch_action, cursor,
 
-		ClipPath,
-		GridAutoFlow,
+		clip_path,
+		grid_auto_flow,
 		row_gap, column_gap, grid_gap,
-		BoxShadow,
-		TransformOrigin,
+		box_shadow,
+		transform_origin,
 		appearance,
 		mask_image, mask_size,
 		float, clear,
@@ -439,4 +443,4 @@ crate::macros::easy_enum! {scrollbar-gutter auto stable}
 crate::macros::easy_enum! {-*-appearance auto none}
 
 crate::macros::easy_join!(overflow, (overflow_x, overflow_y), (visible, hidden, scroll, auto));
-crate::macros::easy_join!(size, (width, height), (auto, [unit]));
+crate::macros::easy_join!(size, (width, height), (auto, max-content, min-content, [unit]));
