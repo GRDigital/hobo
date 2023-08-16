@@ -2,7 +2,6 @@
 pub mod create;
 pub mod dom_events;
 pub mod element;
-mod enclose;
 pub mod entity;
 /// simple way to fire and respond to arbitrarily-typed events
 pub mod events;
