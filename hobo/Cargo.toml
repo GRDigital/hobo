@@ -81,4 +81,3 @@ features = [
 
 [features]
 experimental = ["hobo_derive/experimental"]
-property_macros = ["hobo_css/property_macros"]

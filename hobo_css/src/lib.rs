@@ -1,7 +1,6 @@
 pub mod prelude;
 #[macro_use] pub mod units;
 #[macro_use] pub mod properties;
-#[doc(hidden)] #[macro_use] mod shortcuts;
 #[macro_use] pub mod selector;
 mod append_property;
 /// Css named colors

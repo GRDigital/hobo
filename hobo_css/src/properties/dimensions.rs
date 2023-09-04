@@ -77,39 +77,6 @@ impl max_height {
 
 crate::macros::easy_join!(size, (width, height), (auto, max-content, min-content, [unit]));
 
-#[rustfmt::skip]
-#[macro_export]
-#[doc(hidden)]
-macro_rules! __dimension {
-	($kind:ident, auto)        => {$crate::Property::$kind($crate::Dimension::Auto)};
-	($kind:ident, initial)     => {$crate::Property::$kind($crate::Dimension::Initial)};
-	($kind:ident, inherit)     => {$crate::Property::$kind($crate::Dimension::Inherit)};
-	($kind:ident, unset)       => {$crate::Property::$kind($crate::Dimension::Unset)};
-	($kind:ident, $($val:tt)+) => {$crate::Property::$kind($crate::Dimension::Some($crate::unit!($($val)+)))};
-}
-
-#[macro_export] macro_rules! width { ($($tt:tt)+) => {$crate::__dimension_extremity!(Width, $($tt)+)} }
-#[macro_export] macro_rules! height { ($($tt:tt)+) => {$crate::__dimension_extremity!(Height, $($tt)+)} }
-
-#[rustfmt::skip]
-#[macro_export]
-#[doc(hidden)]
-macro_rules! __dimension_extremity {
-	($kind:ident, auto)        => {$crate::Property::$kind($crate::Dimension::Auto)};
-	($kind:ident, initial)     => {$crate::Property::$kind($crate::Dimension::Initial)};
-	($kind:ident, inherit)     => {$crate::Property::$kind($crate::Dimension::Inherit)};
-	($kind:ident, unset)       => {$crate::Property::$kind($crate::Dimension::Unset)};
-	($kind:ident, none)        => {$crate::Property::$kind($crate::Dimension::None)};
-	($kind:ident, max-content) => {$crate::Property::$kind($crate::Dimension::MaxContent)};
-	($kind:ident, min-content) => {$crate::Property::$kind($crate::Dimension::MinContent)};
-	($kind:ident, $($val:tt)+) => {$crate::Property::$kind($crate::Dimension::Some($crate::unit!($($val)+)))};
-}
-
-#[macro_export] macro_rules! min_width { ($($tt:tt)+) => { $crate::__dimension_extremity!(MinWidth, $($tt)+)} }
-#[macro_export] macro_rules! max_width { ($($tt:tt)+) => { $crate::__dimension_extremity!(MaxWidth, $($tt)+)} }
-#[macro_export] macro_rules! min_height { ($($tt:tt)+) => { $crate::__dimension_extremity!(MinHeight, $($tt)+)} }
-#[macro_export] macro_rules! max_height { ($($tt:tt)+) => { $crate::__dimension_extremity!(MaxHeight, $($tt)+)} }
-
 /*
 pub mod property_exploration {
 	use super::*;
@@ -217,30 +184,5 @@ pub mod property_exploration {
 		}
 		let hash_res = hasher.finish();
 	}
-}
-*/
-
-/*
-pub mod width {
-	use super::*;
-	use num_traits::cast::AsPrimitive;
-
-	pub fn auto() -> crate::Property { crate::Property::Width(DimensionExtremity::Auto) }
-	pub fn initial() -> crate::Property { crate::Property::Width(DimensionExtremity::Initial) }
-	pub fn inherit() -> crate::Property { crate::Property::Width(DimensionExtremity::Inherit) }
-	pub fn unset() -> crate::Property { crate::Property::Width(DimensionExtremity::Unset) }
-	pub fn none() -> crate::Property { crate::Property::Width(DimensionExtremity::None) }
-	pub fn max_content() -> crate::Property { crate::Property::Width(DimensionExtremity::MaxContent) }
-	pub fn min_content() -> crate::Property { crate::Property::Width(DimensionExtremity::MinContent) }
-
-	pub fn frac(val: impl AsPrimitive<f32>) -> crate::Property { crate::Property::Width(DimensionExtremity::Some(Unit::pct(val.as_() * 100.))) }
-	pub fn px(val: impl AsPrimitive<f32>) -> crate::Property { crate::Property::Width(DimensionExtremity::Some(Unit::px(val))) }
-	pub fn em(val: impl AsPrimitive<f32>) -> crate::Property { crate::Property::Width(DimensionExtremity::Some(Unit::em(val))) }
-	pub fn rem(val: impl AsPrimitive<f32>) -> crate::Property { crate::Property::Width(DimensionExtremity::Some(Unit::rem(val))) }
-	pub fn vw(val: impl AsPrimitive<f32>) -> crate::Property { crate::Property::Width(DimensionExtremity::Some(Unit::vw(val))) }
-	pub fn vh(val: impl AsPrimitive<f32>) -> crate::Property { crate::Property::Width(DimensionExtremity::Some(Unit::vh(val))) }
-	pub fn vmin(val: impl AsPrimitive<f32>) -> crate::Property { crate::Property::Width(DimensionExtremity::Some(Unit::vmin(val))) }
-	pub fn vmax(val: impl AsPrimitive<f32>) -> crate::Property { crate::Property::Width(DimensionExtremity::Some(Unit::vmax(val))) }
-	pub fn fr(val: impl AsPrimitive<f32>) -> crate::Property { crate::Property::Width(DimensionExtremity::Some(Unit::fr(val))) }
 }
 */

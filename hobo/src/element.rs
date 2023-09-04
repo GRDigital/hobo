@@ -211,6 +211,12 @@ impl Element {
 
 		self.remove();
 	}
+
+	#[track_caller]
+	fn allow_no_parent(self) -> Self {
+		#[cfg(debug_assertions)] self.remove_cmp::<Complainer>();
+		self
+	}
 }
 
 /// Marker trait for an entity that has `web_sys::Node`, `web_sys::Element`, `web_sys::EventTarget` and one of `web_sys::HtmlElement` or `web_sys::SvgElement` as attached components
@@ -530,6 +536,8 @@ pub trait AsElement: AsEntity + Sized {
 	#[deprecated = "use .tap() instead"]
 	fn with(self, f: impl FnOnce(&Self)) -> Self { f(&self); self }
 	fn as_element(&self) -> Element { Element(self.as_entity()) }
+
+	fn allow_no_parent(self) -> Self { Element::allow_no_parent(self.as_element()); self }
 }
 
 impl<T: AsElement> AsElement for &T {}

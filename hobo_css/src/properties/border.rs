@@ -173,18 +173,6 @@ macro_rules! decl_border {
 				(outset, BorderStyle::Outset),
 			];
 		}
-
-		/*
-		pub struct [<border_ $sides _color>];
-		impl [<border_ $sides _color>] {
-			insert_enumlike![crate::Property::[<Border $sides:camel Color>],
-				(initial, BorderColor::Initial),
-				(inherit, BorderColor::Inherit),
-				(unset, BorderColor::Unset),
-			];
-			insert_unitlike!(crate::Property::[<Border $sides:camel Color>], BorderColor::Some);
-		}
-		*/
 	)*}};
 }
 decl_border![left, right, top, bottom];
@@ -199,89 +187,15 @@ crate::macros::easy_join!(border_vertical_color, (border_top_color, border_botto
 crate::macros::easy_join!(border_color, (border_horizontal_color, border_vertical_color), ([color]));
 crate::macros::easy_join!(border_radius, (border_top_left_radius, border_top_right_radius, border_bottom_left_radius, border_bottom_right_radius), ([unit]));
 
-#[rustfmt::skip]
-#[macro_export]
-#[doc(hidden)]
-macro_rules! __border_width {
-	($side:ident, medium)      => {$crate::paste::item!{$crate::Property::[<Border $side Width>]($crate::BorderWidth::Medium)}};
-	($side:ident, thin)        => {$crate::paste::item!{$crate::Property::[<Border $side Width>]($crate::BorderWidth::Thin)}};
-	($side:ident, thick)       => {$crate::paste::item!{$crate::Property::[<Border $side Width>]($crate::BorderWidth::Thick)}};
-	($side:ident, initial)     => {$crate::paste::item!{$crate::Property::[<Border $side Width>]($crate::BorderWidth::Initial)}};
-	($side:ident, inherit)     => {$crate::paste::item!{$crate::Property::[<Border $side Width>]($crate::BorderWidth::Inherit)}};
-	($side:ident, unset)       => {$crate::paste::item!{$crate::Property::[<Border $side Width>]($crate::BorderWidth::Unset)}};
-	($side:ident, $($val:tt)+) => {$crate::paste::item!{$crate::Property::[<Border $side Width>]($crate::BorderWidth::Some($crate::unit!($($val)+)))}};
-}
-
-#[macro_export] macro_rules! border_left_width {($($tt:tt)+)   => {$crate::__border_width!(Left, $($tt)+)}}
-#[macro_export] macro_rules! border_right_width {($($tt:tt)+)  => {$crate::__border_width!(Right, $($tt)+)}}
-#[macro_export] macro_rules! border_top_width {($($tt:tt)+)    => {$crate::__border_width!(Top, $($tt)+)}}
-#[macro_export] macro_rules! border_bottom_width {($($tt:tt)+) => {$crate::__border_width!(Bottom, $($tt)+)}}
-#[macro_export] macro_rules! border_width {($($tt:tt)+) => {
-	vec![
-		$crate::border_left_width!($($tt)+),
-		$crate::border_right_width!($($tt)+),
-		$crate::border_top_width!($($tt)+),
-		$crate::border_bottom_width!($($tt)+),
-	]
-}}
-
-#[rustfmt::skip]
-#[macro_export]
-#[doc(hidden)]
-macro_rules! __border_style {
-	($side:ident, none)    => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::None)}};
-	($side:ident, hidden)  => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Hidden)}};
-	($side:ident, dotted)  => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Dotted)}};
-	($side:ident, dashed)  => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Dashed)}};
-	($side:ident, solid)   => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Solid)}};
-	($side:ident, double)  => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Double)}};
-	($side:ident, groove)  => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Groove)}};
-	($side:ident, ridge)   => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Ridge)}};
-	($side:ident, inset)   => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Inset)}};
-	($side:ident, outset)  => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Outset)}};
-	($side:ident, initial) => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Initial)}};
-	($side:ident, inherit) => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Inherit)}};
-	($side:ident, unset)   => {$crate::paste::item!{$crate::Property::[<Border $side Style>]($crate::BorderStyle::Unset)}};
-}
-
-#[macro_export] macro_rules! border_left_style {($($tt:tt)+)   => {$crate::__border_style!(Left, $($tt)+)}}
-#[macro_export] macro_rules! border_right_style {($($tt:tt)+)  => {$crate::__border_style!(Right, $($tt)+)}}
-#[macro_export] macro_rules! border_top_style {($($tt:tt)+)    => {$crate::__border_style!(Top, $($tt)+)}}
-#[macro_export] macro_rules! border_bottom_style {($($tt:tt)+) => {$crate::__border_style!(Bottom, $($tt)+)}}
-#[macro_export] macro_rules! border_style {($($tt:tt)+) => {
-	vec![
-		$crate::border_left_style!($($tt)+),
-		$crate::border_right_style!($($tt)+),
-		$crate::border_top_style!($($tt)+),
-		$crate::border_bottom_style!($($tt)+),
-	]
-}}
-
 crate::macros::easy_color! {border_left_color}
 crate::macros::easy_color! {border_right_color}
 crate::macros::easy_color! {border_top_color}
 crate::macros::easy_color! {border_bottom_color}
-#[macro_export] macro_rules! border_color {($($tt:tt)+) => {
-	vec![
-		$crate::border_left_color!($($tt)+),
-		$crate::border_right_color!($($tt)+),
-		$crate::border_top_color!($($tt)+),
-		$crate::border_bottom_color!($($tt)+),
-	]
-}}
 
 crate::macros::unit_value_macro! {border_top_left_radius}
 crate::macros::unit_value_macro! {border_top_right_radius}
 crate::macros::unit_value_macro! {border_bottom_left_radius}
 crate::macros::unit_value_macro! {border_bottom_right_radius}
-#[macro_export] macro_rules! border_radius {($($tt:tt)+) => {
-	vec![
-		$crate::border_top_left_radius!($($tt)+),
-		$crate::border_top_right_radius!($($tt)+),
-		$crate::border_bottom_left_radius!($($tt)+),
-		$crate::border_bottom_right_radius!($($tt)+),
-	]
-}}
 
 #[test]
 fn border_width_values() {

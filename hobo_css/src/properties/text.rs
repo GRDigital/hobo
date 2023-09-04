@@ -73,14 +73,6 @@ impl std::fmt::Display for font_family {
 	}
 }
 
-#[macro_export]
-macro_rules! font_family {
-	(initial)         => {$crate::Property::FontFamily($crate::font_family::initial)};
-	(inherit)         => {$crate::Property::FontFamily($crate::font_family::inherit)};
-	(unset)           => {$crate::Property::FontFamily($crate::font_family::unset)};
-	($($font:expr),+) => {$crate::Property::FontFamily($crate::font_family::Some(vec![$($font.into()),+]))};
-}
-
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord, SmartDefault)]
 pub struct TextShadowEffect {
 	#[default(crate::colors::BLACK)]

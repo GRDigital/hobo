@@ -73,14 +73,6 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = syn::parse_macro_input!(input as Input);
 
 	let property_snek = proc_macro2::Ident::new(&input.property.0.to_snek_case(), Span::call_site());
-	// let property_camel = proc_macro2::Ident::new(&input.property.0.to_upper_camel_case(), Span::call_site());
-
-	/*
-	let test_fn_name = quote::format_ident!("{}_initial_inherit_unset", property_snek);
-	let result_initial = format!("{}:initial;", input.property.0);
-	let result_inherit = format!("{}:inherit;", input.property.0);
-	let result_unset = format!("{}:unset;", input.property.0);
-	*/
 
 	let enum_members = input.values.iter().map(|value| match value {
 		Value::EnumVariant(value) => {
@@ -130,26 +122,6 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		}
 	});
 
-	let macro_values = input.values.iter().map(|value| match value {
-		Value::EnumVariant(value) => {
-			let value_snek = proc_macro2::Ident::new_raw(match &value.0.to_snek_case() as &str {
-				"super" => "super_",
-				"crate" => "crate_",
-				"self" => "self_",
-				"Self" => "Self_",
-				x => x,
-			}, Span::call_site());
-			let value_tt: TokenStream = syn::parse_str(&value.0).unwrap();
-			quote! {(#value_tt) => { $crate::#property_snek::#value_snek };}
-		},
-		Value::Unit => quote! {($($val:tt)+) => { $crate::#property_snek::Some($crate::unit!($($val)+)) };},
-		Value::String => quote! {($str:expr) => { $crate::#property_snek::String($str.into()) };},
-		Value::Raw => quote! {($str:expr) => { $crate::#property_snek::Raw($str.into()) };},
-		Value::Number => quote! {($num:expr) => { $crate::#property_snek::Number($num) };},
-		Value::Float => quote! {($num:expr) => { $crate::#property_snek::Number(unsafe { $crate::units::F32::new_unchecked($num as _) }) };},
-		Value::Color => quote! { /* unimplemented */ },
-	});
-
 	let fn_values = input.values.iter().map(|value| match value {
 		Value::EnumVariant(_) => quote! {},
 		Value::Unit => {
@@ -191,11 +163,6 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 		impl #property_snek {
 			#(#fn_values)*
-		}
-
-		#[macro_export]
-		macro_rules! #property_snek {
-			#(#macro_values)*
 		}
 
 		/*
@@ -290,11 +257,6 @@ pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let property_snek = proc_macro2::Ident::new(&property.to_snek_case(), Span::call_site());
 	let property_camel = proc_macro2::Ident::new(&property.to_upper_camel_case(), Span::call_site());
 
-	let test_fn_name = quote::format_ident!("{}_initial_inherit_unset", property_snek);
-	let result_initial = format!("{}:initial;", property.to_kebab_case());
-	let result_inherit = format!("{}:inherit;", property.to_kebab_case());
-	let result_unset = format!("{}:unset;", property.to_kebab_case());
-
 	let res = quote!(
 		#[allow(non_camel_case_types)]
 		pub struct #property_snek;
@@ -311,22 +273,14 @@ pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 			#[inline] pub fn rgba(x: impl Into<crate::Color>) -> crate::Property { crate::Property::#property_camel(crate::ColorValue::Rgba(x.into())) }
 		}
 
-		#[macro_export]
-		macro_rules! #property_snek {
-			(initial)       => {$crate::Property::#property_camel($crate::ColorValue::Initial)};
-			(inherit)       => {$crate::Property::#property_camel($crate::ColorValue::Inherit)};
-			(unset)         => {$crate::Property::#property_camel($crate::ColorValue::Unset)};
-			(gray $c:expr)  => {$crate::Property::#property_camel($crate::ColorValue::Rgba($crate::Color { r: $c, g: $c, b: $c, a: 0xFF }))};
-			(rgb $rgb:expr) => {$crate::Property::#property_camel($crate::ColorValue::Rgba(($rgb << 8 | 0xFF).into()))};
-			($rgba:expr)    => {$crate::Property::#property_camel($crate::ColorValue::Rgba($rgba.into()))};
-		}
-
+		/*
 		#[test]
 		fn #test_fn_name() {
 			assert_eq!(#property_snek!(initial).to_string(), #result_initial);
 			assert_eq!(#property_snek!(inherit).to_string(), #result_inherit);
 			assert_eq!(#property_snek!(unset).to_string(), #result_unset);
 		}
+		*/
 	);
 
 	res.into()
