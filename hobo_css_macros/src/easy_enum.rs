@@ -125,12 +125,11 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let fn_values = input.values.iter().map(|value| match value {
 		Value::EnumVariant(_) => quote! {},
 		Value::Unit => {
-			let fnames = ["px", "em", "rem", "vh", "vw", "vmin", "vmax", "fr", "dur"].iter().map(|fname| proc_macro2::Ident::new(fname, Span::call_site()));
+			let fnames = ["px", "em", "rem", "vh", "vw", "vmin", "vmax", "fr", "dur", "pct"].iter().map(|fname| proc_macro2::Ident::new(fname, Span::call_site()));
 			quote! {
 				#[allow(non_upper_case_globals)]
 				pub const zero: Self = Self::Some(crate::Unit::Zero);
 				#(#[inline] pub fn #fnames(x: impl ::num_traits::cast::AsPrimitive<f32>) -> Self { Self::Some(crate::Unit::#fnames(x)) })*
-				#[inline] pub fn pct(x: impl ::num_traits::cast::AsPrimitive<f32>) -> Self { Self::Some(crate::Unit::pct(::num_traits::cast::AsPrimitive::<f32>::as_(x) * 100.)) }
 				#[inline] pub fn unit(x: crate::Unit) -> Self { Self::Some(x) }
 			}
 		},
