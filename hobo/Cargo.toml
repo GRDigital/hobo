@@ -25,8 +25,6 @@ owning_ref = "0.4"
 paste = "1"
 shrinkwraprs = "0.3"
 slotmap = "1"
-smart-default = "0.7"
-strum = { version = "0.25", features = ["derive"] }
 sugars = "3"
 wasm-bindgen = { version = "0.2", features = ["serde-serialize", "strict-macro", "enable-interning"] }
 wasm-bindgen-futures = "0.4"
