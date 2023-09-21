@@ -243,7 +243,10 @@ pub fn easy_join(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		},
 	});
 
-	let res = quote! { pub mod #name { #(#items)* } };
+	let res = quote! {
+		pub struct #name;
+		impl #name { #(#items)* }
+	};
 
 	// dbg!(res.to_string());
 
