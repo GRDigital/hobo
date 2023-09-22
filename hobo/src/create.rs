@@ -20,7 +20,7 @@ pub fn dom_element<T, E>(world: &World, entity: T, element: &E) where
 	world.storage_mut::<web_sys::EventTarget>().add(entity, (element.as_ref() as &web_sys::EventTarget).clone());
 
 	#[cfg(debug_assertions)]
-	world.storage_mut::<crate::element::Complainer>().add(entity, crate::element::Complainer::new(entity));
+	world.storage_mut::<crate::element::OrphanComplainer>().add(entity, crate::element::OrphanComplainer::new(entity));
 }
 
 struct DomTypes(HashSet<TypeId>);

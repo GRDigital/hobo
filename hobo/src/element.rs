@@ -30,46 +30,67 @@ pub(crate) struct Classes {
 pub struct InDom;
 
 #[cfg(feature = "experimental")]
+impl InDom {
+	fn infect(element: Element) {
+		if element.is_dead() { log::warn!("InDom::infect dead {:?}", element.as_entity()); return; }
+		element.add_component(InDom);
+
+		let callbacks = element.try_get_cmp_mut::<OnDomAttachCbs>().map(|mut x| std::mem::take(&mut x.0));
+		if let Some(callbacks) = callbacks {
+			element.remove_cmp::<OnDomAttachCbs>();
+			for cb in callbacks { cb(); }
+		}
+
+		let children = element.try_get_cmp::<Children>().map(|x| x.0.clone());
+		if let Some(children) = children {
+			for child in children { InDom::infect(Element(child)); }
+		}
+	}
+}
+
+#[cfg(feature = "experimental")]
 #[derive(Default)]
 struct OnDomAttachCbs(Vec<Box<dyn FnOnce() + Send + Sync + 'static>>);
+
+#[cfg(feature = "experimental")]
+impl OnDomAttachCbs {
+	fn handle_parenting(parent: Element, child: Element) {
+		if !child.has_cmp::<InDom>() && parent.has_cmp::<InDom>() {
+			InDom::infect(child);
+		}
+	}
+}
 
 #[derive(Default)]
 struct SignalHandlesCollection(Vec<discard::DiscardOnDrop<futures_signals::CancelableFutureHandle>>);
 
 #[cfg(debug_assertions)]
-pub struct Complainer(i32, Closure<dyn Fn()>);
+pub(crate) struct OrphanComplainer(i32, Closure<dyn Fn()>);
 
 #[cfg(debug_assertions)]
-impl Complainer {
+impl OrphanComplainer {
 	pub fn new(entity: Entity) -> Self {
 		let f = Closure::wrap(Box::new(move || {
 			// taken from console_error_panic_hook
 			// unfortunately, we can't build PanicInfo to use their hook soooo just ctrlc ctrlv time
 			#[wasm_bindgen]
 			extern {
-				#[wasm_bindgen(js_namespace = console)]
-				fn error(msg: String);
-
 				type Error;
-
-				#[wasm_bindgen(constructor)]
-				fn new() -> Error;
-
-				#[wasm_bindgen(structural, method, getter)]
-				fn stack(error: &Error) -> String;
+				#[wasm_bindgen(constructor)] fn new() -> Error;
+				#[wasm_bindgen(structural, method, getter)] fn stack(error: &Error) -> String;
 			}
 
 			// we can't get location here because location is set in .add_child
-			log::warn!("[Complainer] Element {} wasn't parented in 1 sec, it's probably a bug\n\nStack:\n\n{}", entity.0, Error::new().stack());
+			log::warn!("[OrphanComplainer] Element {} wasn't parented in 1 sec, it's probably a bug\n\nStack:\n\n{}", entity.0, Error::new().stack());
 		}) as Box<dyn Fn()>);
 		let id = web_sys::window().unwrap().set_interval_with_callback_and_timeout_and_arguments_0(f.as_ref().unchecked_ref(), 1000).unwrap();
 
-		Complainer(id, f)
+		OrphanComplainer(id, f)
 	}
 }
 
 #[cfg(debug_assertions)]
-impl Drop for Complainer {
+impl Drop for OrphanComplainer {
 	fn drop(&mut self) {
 		web_sys::window().unwrap().clear_interval_with_handle(self.0);
 	}
@@ -97,24 +118,11 @@ impl Element {
 			child.set_attr("data-location", &format!("{}:{}", caller.file(), caller.line()));
 		}
 
-		// HACK: this is not very good because,
-		// if after passing callbacks up, the child is detached or the parent is detached,
-		// the callbacks might be called while the child is elsewhere or never called if the parent is discarded
 		#[cfg(feature = "experimental")]
-		if !child.has_cmp::<InDom>() {
-			if self.has_cmp::<InDom>() {
-				child.add_component(InDom);
-				if let Some(mut callbacks) = child.try_get_cmp_mut::<OnDomAttachCbs>() {
-					for cb in std::mem::take(&mut callbacks.0) { cb(); }
-					child.remove_cmp::<OnDomAttachCbs>();
-				}
-			} else if let Some(mut callbacks) = child.try_get_cmp_mut::<OnDomAttachCbs>() {
-				self.get_cmp_mut_or_default::<OnDomAttachCbs>().0.append(&mut callbacks.0);
-			}
-		}
+		OnDomAttachCbs::handle_parenting(self, child);
 
 		#[cfg(debug_assertions)]
-		child.remove_cmp::<Complainer>();
+		child.remove_cmp::<OrphanComplainer>();
 	}
 
 	fn leave_parent(self) {
@@ -181,10 +189,9 @@ impl Element {
 
 	#[track_caller]
 	fn replace_with(self, other: Element) {
-		let other_entity = other.as_entity();
 		if self.is_dead() { log::warn!("replace_with dead {:?}", self.as_entity()); return; }
 
-		if let (Some(this), Some(other)) = (self.try_get_cmp::<web_sys::Element>(), other_entity.try_get_cmp::<web_sys::Node>()) {
+		if let (Some(this), Some(other)) = (self.try_get_cmp::<web_sys::Element>(), other.try_get_cmp::<web_sys::Node>()) {
 			this.replace_with_with_node_1(&other).unwrap();
 		} else {
 			let self_has = if self.has_cmp::<web_sys::Node>() { "has" } else { "doesn't have" };
@@ -200,13 +207,18 @@ impl Element {
 		// Fix up reference in parent
 		if let Some(parent) = self.try_get_cmp::<Parent>().map(|x| x.0) {
 			if parent.is_dead() { log::warn!("replace_with parent dead {:?}", parent); return; }
-			let mut children = parent.get_cmp_mut::<Children>();
-			let position = children.0.iter().position(|&x| x == self.as_entity()).expect("entity claims to be a child while missing in parent");
-			children.0[position] = other.as_entity();
-			other_entity.get_cmp_mut_or_default::<Parent>().0 = parent;
+			{
+				let mut children = parent.get_cmp_mut::<Children>();
+				let position = children.0.iter().position(|&x| x == self.as_entity()).expect("entity claims to be a child while missing in parent");
+				children.0[position] = other.as_entity();
+				other.get_cmp_mut_or_default::<Parent>().0 = parent;
+			}
 
 			#[cfg(debug_assertions)]
-			other.remove_cmp::<Complainer>();
+			other.remove_cmp::<OrphanComplainer>();
+
+			#[cfg(feature = "experimental")]
+			OnDomAttachCbs::handle_parenting(Element(parent), other);
 		}
 
 		self.remove();
@@ -214,7 +226,7 @@ impl Element {
 
 	#[track_caller]
 	fn allow_no_parent(self) -> Self {
-		#[cfg(debug_assertions)] self.remove_cmp::<Complainer>();
+		#[cfg(debug_assertions)] self.remove_cmp::<OrphanComplainer>();
 		self
 	}
 }
