@@ -49,10 +49,13 @@ macro_rules! generate_events {
 			fn $f(self, f: impl FnMut(web_sys::$event_kind) + 'static) -> Self where Self: Sized { self.[<add_ $f>](f); self }
 
 			$(#[cfg($maybe_cfg)])?
-			fn [<with_ $f>](self, mut f: impl FnMut(&Self, web_sys::$event_kind) + 'static) -> Self where Self: Sized + Clone + 'static {
-				let self_clone = self.clone();
-				self.[<add_ $f>](move |event| f(&self_clone, event));
-				self
+			fn [<with_ $f>]<Inner, Outer>(self, f: Outer) -> Self where
+				Inner: FnMut(web_sys::$event_kind) + 'static,
+				Outer: FnOnce(&Self) -> Inner,
+				Self: Sized + Clone + 'static,
+			{
+				let f = f(&self);
+				self.$f(f)
 			}
 		)+}
 
