@@ -273,7 +273,15 @@ pub trait AsElement: AsEntity + Sized {
 		E: AsElement,
 		S: Signal<Item = E> + 'static,
 	{
-		Element::add_child_signal(self.as_element(), signal.map(|x| x.as_element()));
+		Element::add_child_signal(self.as_element(), signal.map(|x| {
+			#[cfg(feature = "experimental")]
+			if let Some(mark) = E::MARK { x.get_cmp_mut_or_default::<Classes>().marks.insert(mark()); }
+
+			#[cfg(all(debug_assertions, feature = "experimental"))]
+			if let Some(type_id) = E::TYPE { x.set_attr("data-type", type_id()); }
+
+			x.as_element()
+		}));
 	}
 	#[track_caller]
 	#[must_use]
