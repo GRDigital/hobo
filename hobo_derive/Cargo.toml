@@ -13,7 +13,7 @@ proc-macro = true
 
 [dependencies]
 derive_utils = "0.13"
-proc-macro-crate = "1"
+proc-macro-crate = "2"
 proc-macro2 = "1"
 proc-quote = "0.4"
 quote = "1"
