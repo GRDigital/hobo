@@ -3,7 +3,7 @@ use crate::Color;
 
 crate::macros::easy_enum! {direction ltr rtl}
 crate::macros::easy_enum! {unicode-bidi normal embed bidi-override isolate isolate-override plaintext}
-crate::macros::easy_enum! {white-space normal nowrap pre pre-line pre-wrap}
+crate::macros::easy_enum! {white-space normal nowrap pre pre-line pre-wrap break-spaces}
 crate::macros::easy_enum! {writing-mode horizontal-tb vertical-rl vertical-lr}
 crate::macros::easy_enum! {hanging-punctuation none first last allow-end force-end}
 crate::macros::easy_enum! {-*-hyphens manual none auto}
