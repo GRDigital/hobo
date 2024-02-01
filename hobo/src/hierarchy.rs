@@ -47,5 +47,7 @@ impl Children {
 				child.remove();
 			}
 		}
+
+		entity.try_get_cmp_mut::<crate::element::ChildSignalHandlesCollection>().map(|mut x| x.0.clear());
 	}
 }

@@ -64,6 +64,12 @@ impl OnDomAttachCbs {
 #[derive(Default)]
 struct SignalHandlesCollection(Vec<discard::DiscardOnDrop<futures_signals::CancelableFutureHandle>>);
 
+// NOTE: This is so we can clear child signals on Children::clear
+// Kind of a hack, ideally we should be able to just steal components instead of replacing the entire entity
+// on replace_with. But handlers would be invalidated. But maybe that's ok? One of life's mysteries.
+#[derive(Default)]
+pub(crate) struct ChildSignalHandlesCollection(pub(crate) Vec<discard::DiscardOnDrop<futures_signals::CancelableFutureHandle>>);
+
 #[cfg(debug_assertions)]
 pub(crate) struct OrphanComplainer(i32, Closure<dyn Fn()>);
 
@@ -184,7 +190,7 @@ impl Element {
 		}), Default::default);
 
 		wasm_bindgen_futures::spawn_local(fut);
-		self.get_cmp_mut_or_default::<SignalHandlesCollection>().0.push(handle);
+		self.get_cmp_mut_or_default::<ChildSignalHandlesCollection>().0.push(handle);
 	}
 
 	#[track_caller]
