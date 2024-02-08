@@ -211,6 +211,7 @@ impl SelectorBuilder {
 	pub fn raw(self, x: String)                       -> Selector              { Selector(vec![SelectorComponent::Raw(x)]) }
 }
 
+#[allow(clippy::return_self_not_must_use)]
 #[rustfmt::skip]
 impl Selector {
 	pub fn class(mut self, x: String)                 -> Self                  { self.0.push(SelectorComponent::Class(x)); self }

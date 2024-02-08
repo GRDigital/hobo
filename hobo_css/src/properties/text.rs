@@ -91,7 +91,7 @@ impl std::fmt::Display for TextShadowEffect {
 
 impl crate::AppendProperty for TextShadowEffect {
 	fn append_property(self, properties: &mut Vec<crate::Property>) {
-		text_shadow::Some(vec![self]).append_property(properties)
+		text_shadow::Some(vec![self]).append_property(properties);
 	}
 }
 

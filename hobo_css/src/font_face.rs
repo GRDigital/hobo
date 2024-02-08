@@ -159,9 +159,9 @@ impl std::fmt::Display for FontFace {
 				";".fmt(f)?;
 			}
 			write!(f, "font-display:{};", self.display)?;
-			write!(f, "font-stretch:{} {};", &self.stretch.0, &if let Some(x) = self.stretch.1 { x } else { self.stretch.0 })?;
+			write!(f, "font-stretch:{} {};", &self.stretch.0, &self.stretch.1.map_or(self.stretch.0, |x| x))?;
 			write!(f, "font-style:{};", &self.style)?;
-			write!(f, "font-weight:{} {};", &self.weight.0, &if let Some(x) = self.weight.1 { x } else { self.weight.0 })?;
+			write!(f, "font-weight:{} {};", &self.weight.0, &self.weight.1.map_or(self.weight.0, |x| x))?;
 			if let Some((UnicodeRange(min, max), rest)) = self.unicode_range.split_first() {
 				write!(f, "unicode-range:U+{:X}", min)?;
 				if let Some(max) = max {

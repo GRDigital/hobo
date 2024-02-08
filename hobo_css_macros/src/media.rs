@@ -9,7 +9,7 @@ struct Nottable {
 impl quote::ToTokens for Nottable {
 	fn to_tokens(&self, tokens: &mut TokenStream) {
 		let Self { not, stream } = self;
-		(quote! { Nottable { not: #not, data: MediaFeature::#stream } }).to_tokens(tokens)
+		(quote! { Nottable { not: #not, data: MediaFeature::#stream } }).to_tokens(tokens);
 	}
 }
 
@@ -42,7 +42,7 @@ impl quote::ToTokens for Query {
 				media: Nottable { not: #media_not, data: MediaType::#media_ident },
 				features: vec![#(#elems),*],
 			}
-		}).to_tokens(tokens)
+		}).to_tokens(tokens);
 	}
 }
 

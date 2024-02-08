@@ -250,7 +250,7 @@ pub fn easy_join(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 	// dbg!(res.to_string());
 
-	return res.into()
+	res.into()
 }
 
 pub fn easy_color(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

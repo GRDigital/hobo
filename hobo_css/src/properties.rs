@@ -391,7 +391,7 @@ generate_properties! {
 
 impl std::cmp::PartialOrd for Property {
 	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-		PropertyDiscriminants::from(self).partial_cmp(&PropertyDiscriminants::from(other))
+		Some(self.cmp(other))
 	}
 }
 

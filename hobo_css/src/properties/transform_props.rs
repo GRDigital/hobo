@@ -114,7 +114,7 @@ impl TransformFunction {
 
 impl crate::AppendProperty for TransformFunction {
 	fn append_property(self, properties: &mut Vec<crate::Property>) {
-		transform::multiple(vec![self]).append_property(properties)
+		transform::multiple(vec![self]).append_property(properties);
 	}
 }
 
