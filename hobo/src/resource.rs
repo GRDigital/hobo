@@ -32,7 +32,7 @@ pub trait Resource: 'static {
 	#[inline]
 	#[track_caller]
 	fn remove_resource() where Self: Sized {
-		World::remove_resource::<Self>(&WORLD)
+		World::remove_resource::<Self>(&WORLD);
 	}
 }
 impl<T: 'static + Sized> Resource for T {}

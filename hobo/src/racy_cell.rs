@@ -1,7 +1,7 @@
 use std::cell::UnsafeCell;
 
 #[repr(transparent)]
-pub(crate) struct RacyCell<T>(UnsafeCell<T>);
+pub struct RacyCell<T>(UnsafeCell<T>);
 
 impl<T> RacyCell<T> {
 	pub(crate) const fn new(value: T) -> Self { RacyCell(UnsafeCell::new(value)) }

@@ -17,6 +17,7 @@ use std::{
 };
 use sugars::hash;
 
+#[allow(clippy::redundant_pub_crate)]
 pub(crate) static WORLD: Lazy<World> = Lazy::new(|| {
 	let world = World { next_entity: AtomicU64::new(1), ..Default::default() };
 	world.component_ownership.borrow_mut().insert(Entity::root(), BTreeSet::default());
@@ -78,13 +79,14 @@ impl World {
 	pub(crate) fn dyn_storage<Component: 'static>(&self) -> std::cell::Ref<'static, Box<dyn DynStorage>> {
 		let caller = std::panic::Location::caller();
 
+		#[allow(clippy::option_if_let_else)]
 		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.try_borrow()) {
 			storage.unwrap_or_else(|e| panic!("'{e}': Trying to immutably borrow `{}` storage at `{caller}` while a mutable borrow to it already exists:\n\n{}\n",
 				std::any::type_name::<Component>(),
 				crate::backtrace::STORAGE_MAP.0.borrow()[&TypeId::of::<Component>()]
 			))
 		} else {
-			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(Storage::<Component>::default()));
+			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::<Storage<Component>>::default());
 			let storage: &'static _ = Box::leak(Box::new(storage));
 			self.storages.insert(TypeId::of::<Component>(), storage);
 			storage.borrow()
@@ -109,13 +111,14 @@ impl World {
 	pub(crate) fn dyn_storage_mut<Component: 'static>(&self) -> std::cell::RefMut<'static, Box<dyn DynStorage>> {
 		let caller = std::panic::Location::caller();
 
+		#[allow(clippy::option_if_let_else)]
 		if let Some(storage) = self.storages.map_get(&TypeId::of::<Component>(), |x| x.try_borrow_mut()) {
 			storage.unwrap_or_else(|e| panic!("'{e}': Trying to mutably borrow `{}` storage at `{caller}` while other borrows to it already exist:\n\n{}\n",
 				std::any::type_name::<Component>(),
 				crate::backtrace::STORAGE_MAP.0.borrow()[&TypeId::of::<Component>()]
 			))
 		} else {
-			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::new(Storage::<Component>::default()));
+			let storage: RefCell<Box<dyn DynStorage>> = RefCell::new(Box::<Storage<Component>>::default());
 			let storage: &'static _ = Box::leak(Box::new(storage));
 			self.storages.insert(TypeId::of::<Component>(), storage);
 			storage.borrow_mut()

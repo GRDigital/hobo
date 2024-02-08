@@ -21,6 +21,7 @@ pub struct StyleStorage {
 	style_elements: HashMap<String, (web_sys::Document, Vec<web_sys::HtmlStyleElement>)>,
 }
 
+#[allow(clippy::redundant_pub_crate)]
 pub(crate) static STYLE_STORAGE: Lazy<RacyCell<StyleStorage>> = Lazy::new(|| RacyCell::new(StyleStorage {
 	inserted_style_hashes: BTreeSet::new(),
 	style_elements: hmap!["default".to_owned() => {
@@ -36,29 +37,29 @@ pub(crate) static STYLE_STORAGE: Lazy<RacyCell<StyleStorage>> = Lazy::new(|| Rac
 impl css::Style {
 	// replace the ClassPlaceholder with actual element class
 	fn fixup_class_placeholders(&mut self, class: &str) {
-		for rule in self.0.iter_mut() {
+		for rule in &mut self.0 {
 			match rule {
 				css::Rule::Style(style_rule) => {
-					for selector_component in (style_rule.0).0.iter_mut() {
+					for selector_component in &mut (style_rule.0).0 {
 						if *selector_component == css::selector::SelectorComponent::ClassPlaceholder {
 							*selector_component = css::selector::SelectorComponent::Class(class.to_owned());
 						}
 					}
 				},
 				css::Rule::Media(_, style) => style.fixup_class_placeholders(class),
-				_ => {},
+				css::Rule::FontFace(..) => {},
 			}
 		}
 	}
 
 	fn sort_properties(&mut self) {
-		for rule in self.0.iter_mut() {
+		for rule in &mut self.0 {
 			match rule {
 				css::Rule::Style(style_rule) => {
 					style_rule.1.sort();
 				},
 				css::Rule::Media(_, style) => style.sort_properties(),
-				_ => {},
+				css::Rule::FontFace(..) => {},
 			}
 		}
 	}
@@ -95,7 +96,7 @@ impl StyleStorage {
 		let style_string = style.to_string();
 
 		// for each window
-		for (_, (dom, ordered_style_elements)) in self.style_elements.iter_mut() {
+		for (dom, ordered_style_elements) in self.style_elements.values_mut() {
 			if ordered_style_elements.get(ordinal).is_none() {
 				let style_element = dom.create_element(web_str::style()).expect("can't create style element");
 				let head = dom.head().expect("dom has no head");
@@ -114,7 +115,7 @@ impl StyleStorage {
 		self.style_elements.remove(window_name);
 	}
 
-	pub fn register_window(&mut self, window: &web_sys::Window, window_name: String) {
+	pub fn register_window(&mut self, window: &web_sys::Window, window_name: &str) {
 		let dom = window.document().expect("window has no dom");
 		let head = dom.head().expect("dom has no head");
 
@@ -127,7 +128,7 @@ impl StyleStorage {
 			// especially necessary for re-registering a previously closed window
 			let style_element = &self.style_elements.get("default").expect("no default window").1[default_window_style_index];
 			new_style_element.set_inner_html(&style_element.inner_html());
-			self.style_elements.entry(window_name.clone()).or_insert((dom.clone(), Vec::new())).1.push(new_style_element.unchecked_into());
+			self.style_elements.entry(window_name.to_owned()).or_insert((dom.clone(), Vec::new())).1.push(new_style_element.unchecked_into());
 		}
 	}
 }

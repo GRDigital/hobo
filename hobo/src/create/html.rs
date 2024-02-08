@@ -68,6 +68,7 @@ impl Input {
 }
 
 pub trait StringValue: AsElement {
+	#[must_use]
 	fn value_attr<'a>(self, value: impl Into<Cow<'a, str>>) -> Self where Self: Sized { self.set_value_attr(value); self }
 	fn set_value_attr<'a>(&self, value: impl Into<Cow<'a, str>>) { self.set_attr(web_str::value(), value) }
 	fn value(&self) -> String;
@@ -102,6 +103,7 @@ impl Select {
 }
 
 impl Img {
+	#[must_use]
 	#[inline] pub fn src<'a>(self, url: impl Into<Cow<'a, str>>) -> Self { self.attr(web_str::src(), url) }
 	#[inline] pub fn set_src<'a>(&self, url: impl Into<Cow<'a, str>>) { self.set_attr(web_str::src(), url) }
 
@@ -117,13 +119,15 @@ impl Img {
 }
 
 impl Script {
+	#[must_use]
 	#[inline] pub fn src<'a>(self, url: impl Into<Cow<'a, str>>) -> Self { self.attr(web_str::src(), url) }
 	#[inline] pub fn set_src<'a>(&self, url: impl Into<Cow<'a, str>>) { self.set_attr(web_str::src(), url) }
 }
 
 impl Label {
-	#[inline] pub fn set_for_ctrl<'a>(&self, x: impl Into<Cow<'a, str>>) { self.set_attr(web_str::r#for(), x); }
+	#[must_use]
 	#[inline] pub fn for_ctrl<'a>(self, x: impl Into<Cow<'a, str>>) -> Self where Self: Sized { self.set_for_ctrl(x); self }
+	#[inline] pub fn set_for_ctrl<'a>(&self, x: impl Into<Cow<'a, str>>) { self.set_attr(web_str::r#for(), x); }
 }
 
 impl Form {

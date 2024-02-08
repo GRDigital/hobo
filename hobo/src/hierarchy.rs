@@ -48,6 +48,6 @@ impl Children {
 			}
 		}
 
-		entity.try_get_cmp_mut::<crate::element::ChildSignalHandlesCollection>().map(|mut x| x.0.clear());
+		if let Some(mut x) = entity.try_get_cmp_mut::<crate::element::ChildSignalHandlesCollection>() { x.0.clear() }
 	}
 }

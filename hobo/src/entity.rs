@@ -110,6 +110,7 @@ pub trait AsEntity {
 	fn add_component<T: 'static>(&self, component: T) { WORLD.storage_mut::<T>().add(self.as_entity(), component) }
 	#[inline]
 	#[track_caller]
+	#[must_use]
 	fn component<T: 'static>(self, component: T) -> Self where Self: Sized { self.add_component(component); self }
 	#[inline] fn has_cmp<C: 'static>(&self) -> bool where Self: Sized { WORLD.storage::<C>().has(self.as_entity()) }
 	#[inline] fn is_dead(&self)  -> bool { WORLD.is_dead(self.as_entity()) }
@@ -120,6 +121,7 @@ pub trait AsEntity {
 		self.get_cmp_mut_or_default::<FutureHandlesCollection>().0.push(handle);
 	}
 
+	#[must_use]
 	fn spawn_in<F: FnOnce(&Self) -> Fut, Fut: std::future::Future<Output = ()> + 'static>(self, f: F) -> Self where Self: Sized { self.spawn(f(&self)); self }
 }
 

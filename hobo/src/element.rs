@@ -122,7 +122,7 @@ impl Element {
 
 		#[cfg(debug_assertions)] {
 			let caller = std::panic::Location::caller();
-			child.set_attr("data-location", &format!("{}:{}", caller.file(), caller.line()));
+			child.set_attr("data-location", format!("{}:{}", caller.file(), caller.line()));
 		}
 
 		#[cfg(feature = "experimental")]
@@ -170,7 +170,7 @@ impl Element {
 
 			#[cfg(debug_assertions)] {
 				let caller = std::panic::Location::caller();
-				child.set_attr("data-location", &format!("{}:{}", caller.file(), caller.line()));
+				child.set_attr("data-location", format!("{}:{}", caller.file(), caller.line()));
 			}
 		}
 	}
@@ -208,7 +208,7 @@ impl Element {
 
 		#[cfg(debug_assertions)] {
 			let caller = std::panic::Location::caller();
-			other.set_attr("data-location", &format!("{}:{}", caller.file(), caller.line()));
+			other.set_attr("data-location", format!("{}:{}", caller.file(), caller.line()));
 		}
 
 		// Fix up reference in parent
@@ -258,7 +258,7 @@ pub trait AsElement: AsEntity + Sized {
 	}
 	#[track_caller] #[must_use] fn child(self, child: impl AsElement) -> Self { self.add_child(child); self }
 	#[track_caller] #[must_use] fn with_child<T: AsElement>(self, f: impl FnOnce(&Self) -> T) -> Self { let c = f(&self); self.child(c) }
-	#[track_caller] fn add_children<Item: AsElement>(&self, children: impl IntoIterator<Item = Item>) { for child in children.into_iter() { self.add_child(child); } }
+	#[track_caller] fn add_children<Item: AsElement>(&self, children: impl IntoIterator<Item = Item>) { for child in children { self.add_child(child); } }
 	#[track_caller] #[must_use] fn children<Item: AsElement>(self, children: impl IntoIterator<Item = Item>) -> Self { self.add_children(children); self }
 	fn leave_parent(self) { Element::leave_parent(self.as_element()) }
 
@@ -317,7 +317,7 @@ pub trait AsElement: AsEntity + Sized {
 	fn set_class_typed<Type: 'static>(&self, style: impl Into<css::Style>) { self.set_class_tagged(TypeId::of::<Type>(), style) }
 	fn set_class(&self, style: impl Into<css::Style>) { self.set_class_tagged(0u64, style); }
 	fn add_class(&self, style: impl Into<css::Style>) {
-		let id = self.try_get_cmp::<Classes>().map(|x| x.styles.len() as u64).unwrap_or(0);
+		let id = self.try_get_cmp::<Classes>().map_or(0, |x| x.styles.len() as u64);
 		self.set_class_tagged(id, style);
 	}
 	#[must_use] fn class(self, style: impl Into<css::Style>) -> Self { self.add_class(style); self }
@@ -505,11 +505,13 @@ pub trait AsElement: AsEntity + Sized {
 		S: Signal<Item = I> + 'static,
 	{ self.set_style_signal(signal); self }
 
+	#[allow(clippy::return_self_not_must_use)]
 	fn mark<T: 'static>(self) -> Self {
 		if self.is_dead() { log::warn!("mark dead {:?}", self.as_entity()); return self; }
 		self.get_cmp_mut_or_default::<Classes>().marks.insert(TypeId::of::<T>());
 		self
 	}
+	#[allow(clippy::return_self_not_must_use)]
 	fn unmark<T: 'static>(self) -> Self {
 		if self.is_dead() { log::warn!("unmark dead {:?}", self.as_entity()); return self; }
 		self.get_cmp_mut_or_default::<Classes>().marks.remove(&TypeId::of::<T>());
@@ -558,12 +560,14 @@ pub trait AsElement: AsEntity + Sized {
 		self.get_cmp_mut_or_default::<OnDomAttachCbs>().0.push(Box::new(cb));
 	}
 	#[cfg(feature = "experimental")]
-	fn on_dom_attach(self, cb: impl FnOnce() + Send + Sync + 'static) -> Self { self.add_on_dom_attach(cb); self }
+	#[must_use] fn on_dom_attach(self, cb: impl FnOnce() + Send + Sync + 'static) -> Self { self.add_on_dom_attach(cb); self }
 
 	#[deprecated = "use .tap() instead"]
+	#[must_use]
 	fn with(self, f: impl FnOnce(&Self)) -> Self { f(&self); self }
 	fn as_element(&self) -> Element { Element(self.as_entity()) }
 
+	#[must_use]
 	fn allow_no_parent(self) -> Self { Element::allow_no_parent(self.as_element()); self }
 }
 

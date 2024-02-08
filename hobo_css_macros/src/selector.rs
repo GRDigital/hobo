@@ -5,6 +5,7 @@ pub struct Selector(Vec<TokenStream>);
 // TODO: I could factor out the literal quoted code if I return a Vec of some enum rather than just TokenStream
 // and then each enum variant can have their own arguments etc
 // in this way, parsing the selector and what code it outputs would be more cleanly seaprated
+#[allow(clippy::str_to_string)]
 impl Parse for Selector {
 	fn parse(input: ParseStream) -> Result<Self> {
 		let crate_name = crate::css_crate_name();
