@@ -79,3 +79,6 @@ features = [
 
 [features]
 experimental = ["hobo_derive/experimental"]
+
+[lints]
+workspace = true

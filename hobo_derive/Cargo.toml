@@ -21,3 +21,6 @@ syn = "2"
 
 [features]
 experimental = []
+
+[lints]
+workspace = true
