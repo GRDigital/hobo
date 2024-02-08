@@ -1,3 +1,37 @@
 [workspace]
 members = ["hobo", "hobo_css", "hobo_css_macros", "hobo_derive"]
 resolver = "2"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+clone_on_ref_ptr = "warn"
+decimal_literal_representation = "warn"
+todo = "warn"
+option_if_let_else = "warn"
+redundant_pub_crate = "warn"
+allow_attributes_without_reason = "warn"
+if_then_some_else_none = "warn"
+mod_module_files = "warn"
+# too many false-positives, unfortunately
+# shadow_unrelated = "warn"
+str_to_string = "warn"
+string_to_string = "warn"
+
+missing_panics_doc = "allow"
+cast_precision_loss = "allow"
+module_name_repetitions = "allow"
+default_trait_access = "allow"
+new_without_default = "allow"
+non_ascii_literal = "allow"
+too_many_lines = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+missing_errors_doc = "allow"
+wildcard_imports = "allow"
+doc_markdown = "allow"
+must_use_candidate = "allow"
+cast_lossless = "allow"
+implicit_hasher = "allow"
+cast_possible_wrap = "allow"
+used_underscore_binding = "allow"
+uninlined-format-args = "allow"
