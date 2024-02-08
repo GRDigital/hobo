@@ -20,11 +20,10 @@ impl Drop for EventHandler {
 }
 
 macro_rules! generate_events {
-	($($([$maybe_cfg:ident],)? $event_kind:ident, $name:ident, $f:ident);+$(;)*) => {paste::item!{
+	($($event_kind:ident, $name:ident, $f:ident);+$(;)*) => {paste::item!{
 
 		#[extend::ext(name = RawDomEvents)]
 		pub impl web_sys::EventTarget {$(
-			$(#[cfg($maybe_cfg)])?
 			fn $f(&self, f: impl FnMut(web_sys::$event_kind) + 'static) -> EventHandler {
 				let handler = Closure::wrap(Box::new(f) as Box<dyn FnMut(web_sys::$event_kind) + 'static>);
 				self.add_event_listener_with_callback(web_str::$name(), handler.as_ref().unchecked_ref()).expect("can't add event listener");
@@ -37,7 +36,6 @@ macro_rules! generate_events {
 		)+}
 
 		pub trait DomEvents: AsElement {$(
-			$(#[cfg($maybe_cfg)])?
 			fn [<add_ $f>](&self, f: impl FnMut(web_sys::$event_kind) + 'static) {
 				let entity = self.as_entity();
 				if entity.is_dead() { log::warn!("callback handler entity dead {:?}", entity); return; }
@@ -45,10 +43,10 @@ macro_rules! generate_events {
 				entity.get_cmp_mut_or_default::<Vec<EventHandler>>().push(target.$f(f));
 			}
 
-			$(#[cfg($maybe_cfg)])?
+			#[must_use]
 			fn $f(self, f: impl FnMut(web_sys::$event_kind) + 'static) -> Self where Self: Sized { self.[<add_ $f>](f); self }
 
-			$(#[cfg($maybe_cfg)])?
+			#[must_use]
 			fn [<with_ $f>]<Inner, Outer>(self, f: Outer) -> Self where
 				Inner: FnMut(web_sys::$event_kind) + 'static,
 				Outer: FnOnce(&Self) -> Inner,
@@ -97,10 +95,9 @@ generate_events! {
 	AnimationEvent,  animationstart,     on_animation_start;
 	PopStateEvent,   popstate,           on_pop_state;
 	HashChangeEvent, hashchange,         on_hash_change;
-
-	[web_sys_unstable_apis], ClipboardEvent, cut,   on_cut;
-	[web_sys_unstable_apis], ClipboardEvent, copy,  on_copy;
-	[web_sys_unstable_apis], ClipboardEvent, paste, on_paste;
+	ClipboardEvent,  cut,                on_cut;
+	ClipboardEvent,  copy,               on_copy;
+	ClipboardEvent,  paste,              on_paste;
 }
 
 // DeviceMotionEvent
