@@ -70,6 +70,7 @@ struct SignalHandlesCollection(Vec<discard::DiscardOnDrop<futures_signals::Cance
 #[derive(Default)]
 pub(crate) struct ChildSignalHandlesCollection(pub(crate) Vec<discard::DiscardOnDrop<futures_signals::CancelableFutureHandle>>);
 
+#[allow(dead_code)]
 #[cfg(debug_assertions)]
 pub(crate) struct OrphanComplainer(i32, Closure<dyn Fn()>);
 
