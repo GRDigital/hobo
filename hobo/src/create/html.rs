@@ -106,6 +106,9 @@ impl Img {
 	#[must_use]
 	#[inline] pub fn src<'a>(self, url: impl Into<Cow<'a, str>>) -> Self { self.attr(web_str::src(), url) }
 	#[inline] pub fn set_src<'a>(&self, url: impl Into<Cow<'a, str>>) { self.set_attr(web_str::src(), url) }
+	#[must_use]
+	#[inline] pub fn alt<'a>(self, text: impl Into<Cow<'a, str>>) -> Self { self.attr(web_str::alt(), text) }
+	#[inline] pub fn set_alt<'a>(&self, text: impl Into<Cow<'a, str>>) { self.set_attr(web_str::alt(), text) }
 
 	#[must_use]
 	pub fn src_signal<'v, S, V>(self, signal: S) -> Self where
