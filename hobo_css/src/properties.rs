@@ -70,10 +70,10 @@ pub enum ColorValue {
 impl std::fmt::Display for ColorValue {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Rgba(x)    => x.fmt(f),
-			Self::Initial    => "initial".fmt(f),
-			Self::Inherit    => "inherit".fmt(f),
-			Self::Unset      => "unset".fmt(f),
+			Self::Rgba(x) => x.fmt(f),
+			Self::Initial => "initial".fmt(f),
+			Self::Inherit => "inherit".fmt(f),
+			Self::Unset   => "unset".fmt(f),
 		}
 	}
 }
