@@ -53,7 +53,7 @@ impl std::fmt::Display for Unit {
 			Self::Vmin(x)               => write!(f, "{}vmin", x),
 			Self::Vmax(x)               => write!(f, "{}vmax", x),
 			Self::Fr(x)                 => write!(f, "{}fr", x),
-			Self::Percent(x)            => write!(f, "{}%", x * 100.),
+			Self::Percent(x)            => write!(f, "{}%", x),
 			Self::Duration(x)           => write!(f, "{}ms", x),
 			Self::Calc(left, op, right) => write!(f, "calc({} {} {})", left, op, right),
 		}
@@ -111,18 +111,18 @@ macro_rules! unit {
 	($e:literal $(px)?)       => { $crate::units::Unit::px($e)                      };
 	($e:literal ms)           => { $crate::units::Unit::dur($e)                     };
 	($e:literal $frag:ident)  => { $crate::units::Unit::$frag($e)                   };
-	($e:literal %)            => { $crate::units::Unit::pct($e as f32 / 100.)       };
+	($e:literal %)            => { $crate::units::Unit::pct($e)       };
 
 	($e:ident $(px)?)         => { $crate::units::Unit::px($e)                      };
 	($e:ident ms)             => { $crate::units::Unit::dur($e)                     };
 	($e:ident $frag:ident)    => { $crate::units::Unit::$frag($e)                   };
-	($e:ident %)              => { $crate::units::Unit::pct($e as f32 / 100.)       };
+	($e:ident %)              => { $crate::units::Unit::pct($e)       };
 
 	// this so you can use a more complex expression by wrapping it in parens
 	(($($e:tt)+) $(px)?)      => { $crate::units::Unit::px($($e)+)                  };
 	(($($e:tt)+) ms)          => { $crate::units::Unit::dur($($e)+)                 };
 	(($($e:tt)+) $frag:ident) => { $crate::units::Unit::$frag($($e)+)               };
-	(($($e:tt)+) %)           => { $crate::units::Unit::pct(($($e)+) as f32 / 100.) };
+	(($($e:tt)+) %)           => { $crate::units::Unit::pct($($e)+) };
 
 	// garbage
 	($e1:literal  $frag1:tt + $e2:literal  $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Plus, $crate::unit!($e2       $frag2)) };
