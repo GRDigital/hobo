@@ -18,7 +18,7 @@ crate::macros::easy_enum! {break-after auto avoid always all avoid-page page lef
 crate::macros::easy_enum! {break-before auto avoid always all avoid-page page left right recto verso avoid-column column avoid-region region}
 crate::macros::easy_enum! {break-inside auto avoid avoid-page avoid-column avoid-region}
 crate::macros::easy_enum! {font-variant normal small-caps}
-crate::macros::easy_enum! {word-break normal break-all break-word keep-all}
+crate::macros::easy_enum! {word-break normal break-all keep-all}
 crate::macros::easy_enum! {word-wrap normal break-word}
 crate::macros::easy_enum! {font-style normal italic oblique}
 crate::macros::easy_enum! {font-size medium xx-small x-small small large x-large xx-large smaller larger [unit]}
