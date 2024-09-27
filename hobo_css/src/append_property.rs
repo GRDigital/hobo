@@ -59,5 +59,9 @@ append_tuples! {
 }
 
 impl<T: AppendProperty> From<T> for crate::Style {
-	fn from(other: T) -> Self { crate::style!(.& { other }) }
+	fn from(other: T) -> Self {
+		let mut decls = Vec::new();
+		other.append_property(&mut decls);
+		crate::Style(vec![crate::Rule::Style(crate::StyleRule(crate::selector::Selector(vec![crate::selector::SelectorComponent::ClassPlaceholder]), decls))])
+	}
 }
