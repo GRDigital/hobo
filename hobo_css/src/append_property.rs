@@ -60,6 +60,8 @@ append_tuples! {
 
 impl<T: AppendProperty> From<T> for crate::Style {
 	fn from(other: T) -> Self {
+		// inshallah the compiler shall reserve enough space for this vec
+		// and avoid the reallocation shaitan
 		let mut decls = Vec::new();
 		other.append_property(&mut decls);
 		crate::Style(vec![crate::Rule::Style(crate::StyleRule(crate::selector::Selector(vec![crate::selector::SelectorComponent::ClassPlaceholder]), decls))])

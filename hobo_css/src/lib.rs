@@ -87,6 +87,8 @@ macro_rules! __replace_expr {
 #[doc(hidden)]
 pub const fn __count_helper<const N: usize>(_: [(); N]) -> usize { N }
 
+// TODO: need to benchmark this vs naive Vec::new
+// the compiler might optimize and reserve space
 #[macro_export]
 macro_rules! properties {
 	() => {Vec::new()};
