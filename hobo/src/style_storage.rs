@@ -18,7 +18,11 @@ pub struct StyleStorage {
 	/// * key:     `String`                         - identifier, usually the name of the window.
 	/// * value.0: `web_sys::Document`              - The main document of the window, to which head's <style> elements will be appended.
 	/// * value.1: `Vec<web_sys::HtmlStyleElement>` - The <style> elements in this window's head.
+	#[cfg(not(feature = "insert-rule"))]
 	style_elements: HashMap<String, (web_sys::Document, Vec<web_sys::HtmlStyleElement>)>,
+
+	#[cfg(feature = "insert-rule")]
+	style_elements: HashMap<String, (web_sys::Document, Vec<web_sys::CssStyleSheet>)>,
 }
 
 #[allow(clippy::redundant_pub_crate)]
@@ -29,7 +33,12 @@ pub(crate) static STYLE_STORAGE: Lazy<RacyCell<StyleStorage>> = Lazy::new(|| Rac
 		let head = dom.head().expect("dom has no head");
 		let element = dom.create_element(web_str::style()).expect("can't create style element");
 		head.append_child(&element).expect("can't append child");
-		(dom, vec![element.unchecked_into()])
+
+		(
+			dom,
+			#[cfg(not(feature = "insert-rule"))] vec![element.unchecked_into::<web_sys::HtmlStyleElement>()],
+			#[cfg(feature = "insert-rule")] vec![element.unchecked_into::<web_sys::HtmlStyleElement>().sheet().unwrap().unchecked_into::<web_sys::CssStyleSheet>()],
+		)
 	}],
 }));
 
@@ -93,6 +102,7 @@ impl StyleStorage {
 
 		style.fixup_class_placeholders(&class);
 
+		#[cfg(not(feature = "insert-rule"))]
 		let style_string = style.to_string();
 
 		// for each window
@@ -101,20 +111,35 @@ impl StyleStorage {
 				let style_element = dom.create_element(web_str::style()).expect("can't create style element");
 				let head = dom.head().expect("dom has no head");
 				head.append_child(&style_element).expect("can't append child");
-				ordered_style_elements.push(style_element.unchecked_into());
+
+				#[cfg(not(feature = "insert-rule"))]
+				ordered_style_elements.push(style_element.unchecked_into::<web_sys::HtmlStyleElement>());
+
+				#[cfg(feature = "insert-rule")]
+				ordered_style_elements.push(style_element.unchecked_into::<web_sys::HtmlStyleElement>().sheet().unwrap().unchecked_into::<web_sys::CssStyleSheet>());
 			}
 
 			// insert the stringified generated css into the style tag
+			#[cfg(not(feature = "insert-rule"))]
 			ordered_style_elements[ordinal].append_with_str_1(&style_string).expect("can't append css string");
+
+			#[cfg(feature = "insert-rule")] {
+				let sheet = &ordered_style_elements[ordinal];
+				for rule in &style.0 {
+					sheet.insert_rule(&rule.to_string()).unwrap();
+				}
+			}
 		}
 
 		class
 	}
 
+	#[cfg(not(feature = "insert-rule"))]
 	pub fn unregister_window(&mut self, window_name: &str) {
 		self.style_elements.remove(window_name);
 	}
 
+	#[cfg(not(feature = "insert-rule"))]
 	pub fn register_window(&mut self, window: &web_sys::Window, window_name: &str) {
 		let dom = window.document().expect("window has no dom");
 		let head = dom.head().expect("dom has no head");
@@ -128,7 +153,7 @@ impl StyleStorage {
 			// especially necessary for re-registering a previously closed window
 			let style_element = &self.style_elements.get("default").expect("no default window").1[default_window_style_index];
 			new_style_element.set_inner_html(&style_element.inner_html());
-			self.style_elements.entry(window_name.to_owned()).or_insert((dom.clone(), Vec::new())).1.push(new_style_element.unchecked_into());
+			self.style_elements.entry(window_name.to_owned()).or_insert((dom.clone(), Vec::new())).1.push(new_style_element.unchecked_into::<web_sys::HtmlStyleElement>());
 		}
 	}
 }

@@ -89,12 +89,14 @@ pub type StorageRef<'a, Component> = OwningRef<Ref<'a, Box<dyn storage::DynStora
 pub type StorageRefMut<'a, Component> = OwningRefMut<RefMut<'a, Box<dyn storage::DynStorage>>, Storage<Component>>;
 
 /// Register a browser window to also receive styles, automatically called for the global `window` object with the name "default"
+#[cfg(not(feature = "insert-rule"))]
 pub fn register_window(window: &web_sys::Window, window_name: &str) {
 	let style_storage = unsafe { &mut *STYLE_STORAGE.get() as &mut StyleStorage };
 	style_storage.register_window(window, window_name);
 }
 
 /// Removes a window from the style storage
+#[cfg(not(feature = "insert-rule"))]
 pub fn unregister_window(window_name: &str) {
 	let style_storage = unsafe { &mut *STYLE_STORAGE.get() as &mut StyleStorage };
 	style_storage.unregister_window(window_name);

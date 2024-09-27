@@ -79,6 +79,7 @@ features = [
 
 [features]
 experimental = ["hobo_derive/experimental"]
+insert-rule = ["web-sys/CssStyleSheet"]
 
 [lints]
 workspace = true
