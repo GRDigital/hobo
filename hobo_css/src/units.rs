@@ -45,17 +45,17 @@ impl std::fmt::Display for Unit {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			Self::Zero                  => "0".fmt(f),
-			Self::Px(x)                 => write!(f, "{}px", x),
-			Self::Em(x)                 => write!(f, "{}em", x),
-			Self::Rem(x)                => write!(f, "{}rem", x),
-			Self::Vw(x)                 => write!(f, "{}vw", x),
-			Self::Vh(x)                 => write!(f, "{}vh", x),
-			Self::Vmin(x)               => write!(f, "{}vmin", x),
-			Self::Vmax(x)               => write!(f, "{}vmax", x),
-			Self::Fr(x)                 => write!(f, "{}fr", x),
-			Self::Percent(x)            => write!(f, "{}%", x),
-			Self::Duration(x)           => write!(f, "{}ms", x),
-			Self::Calc(left, op, right) => write!(f, "calc({} {} {})", left, op, right),
+			Self::Px(x)                 => write!(f, "{x}px"),
+			Self::Em(x)                 => write!(f, "{x}em"),
+			Self::Rem(x)                => write!(f, "{x}rem"),
+			Self::Vw(x)                 => write!(f, "{x}vw"),
+			Self::Vh(x)                 => write!(f, "{x}vh"),
+			Self::Vmin(x)               => write!(f, "{x}vmin"),
+			Self::Vmax(x)               => write!(f, "{x}vmax"),
+			Self::Fr(x)                 => write!(f, "{x}fr"),
+			Self::Percent(x)            => write!(f, "{x}%"),
+			Self::Duration(x)           => write!(f, "{x}ms"),
+			Self::Calc(left, op, right) => write!(f, "calc({left} {op} {right})"),
 		}
 	}
 }

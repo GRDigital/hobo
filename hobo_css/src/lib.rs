@@ -33,7 +33,7 @@ impl std::fmt::Display for Rule {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			Self::Style(x) => x.fmt(f),
-			Self::Media(selector, style) => write!(f, "@media {}{{{}}}", selector, style),
+			Self::Media(selector, style) => write!(f, "@media {selector}{{{style}}}"),
 			Self::FontFace(x) => x.fmt(f),
 		}
 	}

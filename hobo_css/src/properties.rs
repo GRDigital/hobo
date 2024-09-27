@@ -147,9 +147,9 @@ impl Image {
 impl std::fmt::Display for Image {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Url(x) => write!(f, r#"url("{}")"#, x),
-			Self::LinearGradient(x) => write!(f, "linear-gradient({})", x),
-			Self::RepeatingLinearGradient(x) => write!(f, "repeating-linear-gradient({})", x),
+			Self::Url(x) => write!(f, r#"url("{x}")"#),
+			Self::LinearGradient(x) => write!(f, "linear-gradient({x})"),
+			Self::RepeatingLinearGradient(x) => write!(f, "repeating-linear-gradient({x})"),
 		}
 	}
 }
@@ -166,9 +166,9 @@ impl std::fmt::Display for BasicShape {
 			Self::Polygon(points) => {
 				"polygon(".fmt(f)?;
 				if let Some(((x, y), rest)) = points.split_first() {
-					write!(f, "{} {}", x, y)?;
+					write!(f, "{x} {y}")?;
 					for (x, y) in rest {
-						write!(f, ",{} {}", x, y)?;
+						write!(f, ",{x} {y}")?;
 					}
 				}
 				")".fmt(f)
