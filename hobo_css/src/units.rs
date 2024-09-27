@@ -65,7 +65,8 @@ impl std::ops::Add for Unit {
 
 	fn add(self, rhs: Self) -> Self {
 		match (self, rhs) {
-			(Self::Zero, Self::Zero) => Self::Zero,
+			(Self::Zero, rhs) => rhs,
+			(lhs, Self::Zero) => lhs,
 			(Self::Px(a), Self::Px(b)) => Self::Px(a + b),
 			(Self::Em(a), Self::Em(b)) => Self::Em(a + b),
 			(Self::Rem(a), Self::Rem(b)) => Self::Rem(a + b),
@@ -86,7 +87,7 @@ impl std::ops::Sub for Unit {
 
 	fn sub(self, rhs: Self) -> Self {
 		match (self, rhs) {
-			(Self::Zero, Self::Zero) => Self::Zero,
+			(lhs, Self::Zero) => lhs,
 			(Self::Px(a), Self::Px(b)) => Self::Px(a - b),
 			(Self::Em(a), Self::Em(b)) => Self::Em(a - b),
 			(Self::Rem(a), Self::Rem(b)) => Self::Rem(a - b),
