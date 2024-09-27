@@ -124,24 +124,16 @@ macro_rules! unit {
 	(($($e:tt)+) $frag:ident) => { $crate::units::Unit::$frag($($e)+)               };
 	(($($e:tt)+) %)           => { $crate::units::Unit::pct($($e)+) };
 
-	// garbage
-	($e1:literal  $frag1:tt + $e2:literal  $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Plus, $crate::unit!($e2       $frag2)) };
-	($e1:ident    $frag1:tt + $e2:literal  $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Plus, $crate::unit!($e2       $frag2)) };
-	(($($e1:tt)+) $frag1:tt + $e2:literal  $frag2:tt) => { $crate::units::Unit::calc($crate::unit!(($($e1)+) $frag1), $crate::units::Operator::Plus, $crate::unit!($e2       $frag2)) };
-	($e1:literal  $frag1:tt + $e2:ident    $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Plus, $crate::unit!($e2       $frag2)) };
-	($e1:ident    $frag1:tt + $e2:ident    $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Plus, $crate::unit!($e2       $frag2)) };
-	(($($e1:tt)+) $frag1:tt + $e2:ident    $frag2:tt) => { $crate::units::Unit::calc($crate::unit!(($($e1)+) $frag1), $crate::units::Operator::Plus, $crate::unit!($e2       $frag2)) };
-	($e1:literal  $frag1:tt + ($($e2:tt)+) $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Plus, $crate::unit!(($($e2)+) $frag2)) };
-	($e1:ident    $frag1:tt + ($($e2:tt)+) $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Plus, $crate::unit!(($($e2)+) $frag2)) };
+	// base case
 	(($($e1:tt)+) $frag1:tt + ($($e2:tt)+) $frag2:tt) => { $crate::units::Unit::calc($crate::unit!(($($e1)+) $frag1), $crate::units::Operator::Plus, $crate::unit!(($($e2)+) $frag2)) };
-
-	($e1:literal  $frag1:tt - $e2:literal  $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Minus, $crate::unit!($e2       $frag2)) };
-	($e1:ident    $frag1:tt - $e2:literal  $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Minus, $crate::unit!($e2       $frag2)) };
-	(($($e1:tt)+) $frag1:tt - $e2:literal  $frag2:tt) => { $crate::units::Unit::calc($crate::unit!(($($e1)+) $frag1), $crate::units::Operator::Minus, $crate::unit!($e2       $frag2)) };
-	($e1:literal  $frag1:tt - $e2:ident    $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Minus, $crate::unit!($e2       $frag2)) };
-	($e1:ident    $frag1:tt - $e2:ident    $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Minus, $crate::unit!($e2       $frag2)) };
-	(($($e1:tt)+) $frag1:tt - $e2:ident    $frag2:tt) => { $crate::units::Unit::calc($crate::unit!(($($e1)+) $frag1), $crate::units::Operator::Minus, $crate::unit!($e2       $frag2)) };
-	($e1:literal  $frag1:tt - ($($e2:tt)+) $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Minus, $crate::unit!(($($e2)+) $frag2)) };
-	($e1:ident    $frag1:tt - ($($e2:tt)+) $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Minus, $crate::unit!(($($e2)+) $frag2)) };
 	(($($e1:tt)+) $frag1:tt - ($($e2:tt)+) $frag2:tt) => { $crate::units::Unit::calc($crate::unit!(($($e1)+) $frag1), $crate::units::Operator::Minus, $crate::unit!(($($e2)+) $frag2)) };
+
+	// convert from parens-less to base case
+	(($($e1:tt)+) $frag1:tt + $e2:tt $frag2:tt) => { $crate::unit!(($($e1)+) $frag1 + ($e2) $frag2) };
+	($e1:tt $frag1:tt + ($($e2:tt)+) $frag2:tt) => { $crate::unit!(($e1) $frag1 + ($($e2)+) $frag2) };
+	($e1:tt $frag1:tt + $e2:tt $frag2:tt)       => { $crate::unit!(($e1) $frag1 + ($e2) $frag2) };
+
+	(($($e1:tt)+) $frag1:tt - $e2:tt $frag2:tt) => { $crate::unit!(($($e1)+) $frag1 - ($e2) $frag2) };
+	($e1:tt $frag1:tt - ($($e2:tt)+) $frag2:tt) => { $crate::unit!(($e1) $frag1 - ($($e2)+) $frag2) };
+	($e1:tt $frag1:tt - $e2:tt $frag2:tt)       => { $crate::unit!(($e1) $frag1 - ($e2) $frag2) };
 }
