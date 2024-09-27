@@ -50,32 +50,32 @@ pub enum MediaFeature {
 impl std::fmt::Display for MediaFeature {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::AspectRatio(w, h)    => write!(f, "aspect-ratio:{}/{}", w, h),
-			Self::MinAspectRatio(w, h) => write!(f, "min-aspect-ratio:{}/{}", w, h),
-			Self::MaxAspectRatio(w, h) => write!(f, "max-aspect-ratio:{}/{}", w, h),
+			Self::AspectRatio(w, h)    => write!(f, "aspect-ratio:{w}/{h}"),
+			Self::MinAspectRatio(w, h) => write!(f, "min-aspect-ratio:{w}/{h}"),
+			Self::MaxAspectRatio(w, h) => write!(f, "max-aspect-ratio:{w}/{h}"),
 
-			Self::Color(x)             => write!(f, "color:{}", x),
-			Self::MinColor(x)          => write!(f, "min-color:{}", x),
-			Self::MaxColor(x)          => write!(f, "max-color:{}", x),
+			Self::Color(x)             => write!(f, "color:{x}"),
+			Self::MinColor(x)          => write!(f, "min-color:{x}"),
+			Self::MaxColor(x)          => write!(f, "max-color:{x}"),
 
-			Self::Monochrome(x)        => write!(f, "monochrome:{}", x),
-			Self::MinMonochrome(x)     => write!(f, "min-monochrome:{}", x),
-			Self::MaxMonochrome(x)     => write!(f, "max-monochrome:{}", x),
+			Self::Monochrome(x)        => write!(f, "monochrome:{x}"),
+			Self::MinMonochrome(x)     => write!(f, "min-monochrome:{x}"),
+			Self::MaxMonochrome(x)     => write!(f, "max-monochrome:{x}"),
 
-			Self::Width(x)             => write!(f, "width:{}", x),
-			Self::MinWidth(x)          => write!(f, "min-width:{}", x),
-			Self::MaxWidth(x)          => write!(f, "max-width:{}", x),
+			Self::Width(x)             => write!(f, "width:{x}"),
+			Self::MinWidth(x)          => write!(f, "min-width:{x}"),
+			Self::MaxWidth(x)          => write!(f, "max-width:{x}"),
 
-			Self::Height(x)            => write!(f, "height:{}", x),
-			Self::MinHeight(x)         => write!(f, "min-height:{}", x),
-			Self::MaxHeight(x)         => write!(f, "max-height:{}", x),
+			Self::Height(x)            => write!(f, "height:{x}"),
+			Self::MinHeight(x)         => write!(f, "min-height:{x}"),
+			Self::MaxHeight(x)         => write!(f, "max-height:{x}"),
 
-			Self::Resolution(x)        => write!(f, "resolution:{}", x),
-			Self::MinResolution(x)     => write!(f, "min-resolution:{}", x),
-			Self::MaxResolution(x)     => write!(f, "max-resolution:{}", x),
+			Self::Resolution(x)        => write!(f, "resolution:{x}"),
+			Self::MinResolution(x)     => write!(f, "min-resolution:{x}"),
+			Self::MaxResolution(x)     => write!(f, "max-resolution:{x}"),
 
-			Self::Orientation(x)       => write!(f, "orientation:{}", x),
-			Self::Scan(x)              => write!(f, "scan:{}", x),
+			Self::Orientation(x)       => write!(f, "orientation:{x}"),
+			Self::Scan(x)              => write!(f, "scan:{x}"),
 		}
 	}
 }
@@ -91,7 +91,7 @@ impl std::fmt::Display for MediaQuery {
 		if self.media.not { "not ".fmt(f)? }
 		self.media.data.fmt(f)?;
 		for feature in &self.features {
-			write!(f, " and {}", feature)?;
+			write!(f, " and {feature}")?;
 		}
 		Ok(())
 	}
@@ -105,7 +105,7 @@ impl std::fmt::Display for MediaSelector {
 		if let Some((first, rest)) = self.0.split_first() {
 			first.fmt(f)?;
 			for query in rest {
-				write!(f, ",{}", query)?;
+				write!(f, ",{query}")?;
 			}
 		}
 		Ok(())

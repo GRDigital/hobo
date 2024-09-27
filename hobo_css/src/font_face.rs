@@ -40,7 +40,7 @@ impl std::fmt::Display for Stretch {
 			Self::Expanded => write!(f, "expanded"),
 			Self::ExtraExpanded => write!(f, "extra-expanded"),
 			Self::UltraExpanded => write!(f, "ultra-expanded"),
-			Self::Percentage(x) => write!(f, "{}%", x),
+			Self::Percentage(x) => write!(f, "{x}%"),
 		}
 	}
 }
@@ -61,8 +61,8 @@ impl std::fmt::Display for Style {
 			Self::Normal => write!(f, "normal"),
 			Self::Italic => write!(f, "italic"),
 			Self::Oblique => write!(f, "oblique"),
-			Self::ObliqueAngle(x) => write!(f, "oblique {}deg", x),
-			Self::ObliqueAngleRange(min, max) => write!(f, "oblique {}deg {}deg", min, max),
+			Self::ObliqueAngle(x) => write!(f, "oblique {x}deg"),
+			Self::ObliqueAngleRange(min, max) => write!(f, "oblique {min}deg {max}deg"),
 		}
 	}
 }
@@ -80,7 +80,7 @@ impl std::fmt::Display for Weight {
 		match self {
 			Self::Normal => write!(f, "normal"),
 			Self::Bold => write!(f, "bold"),
-			Self::Number(x) => write!(f, "{}", x),
+			Self::Number(x) => write!(f, "{x}"),
 		}
 	}
 }
@@ -104,11 +104,11 @@ pub enum Source {
 impl std::fmt::Display for Source {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Local(name) => write!(f, r#"local("{}")"#, name),
+			Self::Local(name) => write!(f, r#"local("{name}")"#),
 			Self::Url(name, format) => {
-				write!(f, r#"url("{}")"#, name)?;
+				write!(f, r#"url("{name}")"#)?;
 				if let Some(format) = format {
-					write!(f, r#" format("{}")"#, format)?;
+					write!(f, r#" format("{format}")"#)?;
 				}
 				Ok(())
 			},
@@ -152,25 +152,25 @@ impl std::fmt::Display for FontFace {
 		"@font-face{".fmt(f)?;
 			write!(f, r#"font-family:"{}";"#, self.family)?;
 			if let Some((first, rest)) = self.src.split_first() {
-				write!(f, "src:{}", first)?;
+				write!(f, "src:{first}")?;
 				for src in rest {
-					write!(f, r#",{}"#, src)?;
+					write!(f, r#",{src}"#)?;
 				}
 				";".fmt(f)?;
 			}
 			write!(f, "font-display:{};", self.display)?;
-			write!(f, "font-stretch:{} {};", &self.stretch.0, &self.stretch.1.map_or(self.stretch.0, |x| x))?;
+			write!(f, "font-stretch:{} {};", &self.stretch.0, &self.stretch.1.map_or(self.stretch.0, std::convert::identity))?;
 			write!(f, "font-style:{};", &self.style)?;
-			write!(f, "font-weight:{} {};", &self.weight.0, &self.weight.1.map_or(self.weight.0, |x| x))?;
+			write!(f, "font-weight:{} {};", &self.weight.0, &self.weight.1.map_or(self.weight.0, std::convert::identity))?;
 			if let Some((UnicodeRange(min, max), rest)) = self.unicode_range.split_first() {
-				write!(f, "unicode-range:U+{:X}", min)?;
+				write!(f, "unicode-range:U+{min:X}")?;
 				if let Some(max) = max {
-					write!(f, "-{:X}", max)?;
+					write!(f, "-{max:X}")?;
 				}
 				for UnicodeRange(min, max) in rest {
-					write!(f, ",U+{:X}", min)?;
+					write!(f, ",U+{min:X}")?;
 					if let Some(max) = max {
-						write!(f, "-{:X}", max)?;
+						write!(f, "-{max:X}")?;
 					}
 				}
 				";".fmt(f)?;

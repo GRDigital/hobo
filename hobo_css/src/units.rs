@@ -45,17 +45,17 @@ impl std::fmt::Display for Unit {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			Self::Zero                  => "0".fmt(f),
-			Self::Px(x)                 => write!(f, "{}px", x),
-			Self::Em(x)                 => write!(f, "{}em", x),
-			Self::Rem(x)                => write!(f, "{}rem", x),
-			Self::Vw(x)                 => write!(f, "{}vw", x),
-			Self::Vh(x)                 => write!(f, "{}vh", x),
-			Self::Vmin(x)               => write!(f, "{}vmin", x),
-			Self::Vmax(x)               => write!(f, "{}vmax", x),
-			Self::Fr(x)                 => write!(f, "{}fr", x),
-			Self::Percent(x)            => write!(f, "{}%", x * 100.),
-			Self::Duration(x)           => write!(f, "{}ms", x),
-			Self::Calc(left, op, right) => write!(f, "calc({} {} {})", left, op, right),
+			Self::Px(x)                 => write!(f, "{x}px"),
+			Self::Em(x)                 => write!(f, "{x}em"),
+			Self::Rem(x)                => write!(f, "{x}rem"),
+			Self::Vw(x)                 => write!(f, "{x}vw"),
+			Self::Vh(x)                 => write!(f, "{x}vh"),
+			Self::Vmin(x)               => write!(f, "{x}vmin"),
+			Self::Vmax(x)               => write!(f, "{x}vmax"),
+			Self::Fr(x)                 => write!(f, "{x}fr"),
+			Self::Percent(x)            => write!(f, "{x}%"),
+			Self::Duration(x)           => write!(f, "{x}ms"),
+			Self::Calc(left, op, right) => write!(f, "calc({left} {op} {right})"),
 		}
 	}
 }
@@ -65,7 +65,8 @@ impl std::ops::Add for Unit {
 
 	fn add(self, rhs: Self) -> Self {
 		match (self, rhs) {
-			(Self::Zero, Self::Zero) => Self::Zero,
+			(Self::Zero, rhs) => rhs,
+			(lhs, Self::Zero) => lhs,
 			(Self::Px(a), Self::Px(b)) => Self::Px(a + b),
 			(Self::Em(a), Self::Em(b)) => Self::Em(a + b),
 			(Self::Rem(a), Self::Rem(b)) => Self::Rem(a + b),
@@ -86,7 +87,7 @@ impl std::ops::Sub for Unit {
 
 	fn sub(self, rhs: Self) -> Self {
 		match (self, rhs) {
-			(Self::Zero, Self::Zero) => Self::Zero,
+			(lhs, Self::Zero) => lhs,
 			(Self::Px(a), Self::Px(b)) => Self::Px(a - b),
 			(Self::Em(a), Self::Em(b)) => Self::Em(a - b),
 			(Self::Rem(a), Self::Rem(b)) => Self::Rem(a - b),
@@ -111,37 +112,29 @@ macro_rules! unit {
 	($e:literal $(px)?)       => { $crate::units::Unit::px($e)                      };
 	($e:literal ms)           => { $crate::units::Unit::dur($e)                     };
 	($e:literal $frag:ident)  => { $crate::units::Unit::$frag($e)                   };
-	($e:literal %)            => { $crate::units::Unit::pct($e as f32 / 100.)       };
+	($e:literal %)            => { $crate::units::Unit::pct($e)       };
 
 	($e:ident $(px)?)         => { $crate::units::Unit::px($e)                      };
 	($e:ident ms)             => { $crate::units::Unit::dur($e)                     };
 	($e:ident $frag:ident)    => { $crate::units::Unit::$frag($e)                   };
-	($e:ident %)              => { $crate::units::Unit::pct($e as f32 / 100.)       };
+	($e:ident %)              => { $crate::units::Unit::pct($e)       };
 
 	// this so you can use a more complex expression by wrapping it in parens
 	(($($e:tt)+) $(px)?)      => { $crate::units::Unit::px($($e)+)                  };
 	(($($e:tt)+) ms)          => { $crate::units::Unit::dur($($e)+)                 };
 	(($($e:tt)+) $frag:ident) => { $crate::units::Unit::$frag($($e)+)               };
-	(($($e:tt)+) %)           => { $crate::units::Unit::pct(($($e)+) as f32 / 100.) };
+	(($($e:tt)+) %)           => { $crate::units::Unit::pct($($e)+) };
 
-	// garbage
-	($e1:literal  $frag1:tt + $e2:literal  $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Plus, $crate::unit!($e2       $frag2)) };
-	($e1:ident    $frag1:tt + $e2:literal  $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Plus, $crate::unit!($e2       $frag2)) };
-	(($($e1:tt)+) $frag1:tt + $e2:literal  $frag2:tt) => { $crate::units::Unit::calc($crate::unit!(($($e1)+) $frag1), $crate::units::Operator::Plus, $crate::unit!($e2       $frag2)) };
-	($e1:literal  $frag1:tt + $e2:ident    $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Plus, $crate::unit!($e2       $frag2)) };
-	($e1:ident    $frag1:tt + $e2:ident    $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Plus, $crate::unit!($e2       $frag2)) };
-	(($($e1:tt)+) $frag1:tt + $e2:ident    $frag2:tt) => { $crate::units::Unit::calc($crate::unit!(($($e1)+) $frag1), $crate::units::Operator::Plus, $crate::unit!($e2       $frag2)) };
-	($e1:literal  $frag1:tt + ($($e2:tt)+) $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Plus, $crate::unit!(($($e2)+) $frag2)) };
-	($e1:ident    $frag1:tt + ($($e2:tt)+) $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Plus, $crate::unit!(($($e2)+) $frag2)) };
+	// base case
 	(($($e1:tt)+) $frag1:tt + ($($e2:tt)+) $frag2:tt) => { $crate::units::Unit::calc($crate::unit!(($($e1)+) $frag1), $crate::units::Operator::Plus, $crate::unit!(($($e2)+) $frag2)) };
-
-	($e1:literal  $frag1:tt - $e2:literal  $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Minus, $crate::unit!($e2       $frag2)) };
-	($e1:ident    $frag1:tt - $e2:literal  $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Minus, $crate::unit!($e2       $frag2)) };
-	(($($e1:tt)+) $frag1:tt - $e2:literal  $frag2:tt) => { $crate::units::Unit::calc($crate::unit!(($($e1)+) $frag1), $crate::units::Operator::Minus, $crate::unit!($e2       $frag2)) };
-	($e1:literal  $frag1:tt - $e2:ident    $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Minus, $crate::unit!($e2       $frag2)) };
-	($e1:ident    $frag1:tt - $e2:ident    $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Minus, $crate::unit!($e2       $frag2)) };
-	(($($e1:tt)+) $frag1:tt - $e2:ident    $frag2:tt) => { $crate::units::Unit::calc($crate::unit!(($($e1)+) $frag1), $crate::units::Operator::Minus, $crate::unit!($e2       $frag2)) };
-	($e1:literal  $frag1:tt - ($($e2:tt)+) $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Minus, $crate::unit!(($($e2)+) $frag2)) };
-	($e1:ident    $frag1:tt - ($($e2:tt)+) $frag2:tt) => { $crate::units::Unit::calc($crate::unit!($e1       $frag1), $crate::units::Operator::Minus, $crate::unit!(($($e2)+) $frag2)) };
 	(($($e1:tt)+) $frag1:tt - ($($e2:tt)+) $frag2:tt) => { $crate::units::Unit::calc($crate::unit!(($($e1)+) $frag1), $crate::units::Operator::Minus, $crate::unit!(($($e2)+) $frag2)) };
+
+	// convert from parens-less to base case
+	(($($e1:tt)+) $frag1:tt + $e2:tt $frag2:tt) => { $crate::unit!(($($e1)+) $frag1 + ($e2) $frag2) };
+	($e1:tt $frag1:tt + ($($e2:tt)+) $frag2:tt) => { $crate::unit!(($e1) $frag1 + ($($e2)+) $frag2) };
+	($e1:tt $frag1:tt + $e2:tt $frag2:tt)       => { $crate::unit!(($e1) $frag1 + ($e2) $frag2) };
+
+	(($($e1:tt)+) $frag1:tt - $e2:tt $frag2:tt) => { $crate::unit!(($($e1)+) $frag1 - ($e2) $frag2) };
+	($e1:tt $frag1:tt - ($($e2:tt)+) $frag2:tt) => { $crate::unit!(($e1) $frag1 - ($($e2)+) $frag2) };
+	($e1:tt $frag1:tt - $e2:tt $frag2:tt)       => { $crate::unit!(($e1) $frag1 - ($e2) $frag2) };
 }

@@ -59,10 +59,10 @@ impl std::fmt::Display for PseudoClass {
 			Self::enabled                   => ":enabled".fmt(f),
 			Self::in_range                  => ":in-range".fmt(f),
 			Self::invalid                   => ":invalid".fmt(f),
-			Self::nth_child(n, offset)      => write!(f, ":nth-child({}n{:+})", n, offset),
-			Self::nth_last_child(n, offset) => write!(f, ":nth-last-child({}n{:+})", n, offset),
-			Self::nth_of_type(n)            => write!(f, ":nth-of-type({})", n),
-			Self::not(selector)             => write!(f, ":not({})", selector),
+			Self::nth_child(n, offset)      => write!(f, ":nth-child({n}n{offset:+})"),
+			Self::nth_last_child(n, offset) => write!(f, ":nth-last-child({n}n{offset:+})"),
+			Self::nth_of_type(n)            => write!(f, ":nth-of-type({n})"),
+			Self::not(selector)             => write!(f, ":not({selector})"),
 			Self::only_child                => ":only-child".fmt(f),
 			Self::read_only                 => ":read-only".fmt(f),
 			Self::valid                     => ":valid".fmt(f),
@@ -168,8 +168,8 @@ impl std::fmt::Display for SelectorComponent {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			Self::Element(x)       => x.fmt(f),
-			Self::Class(x)         => write!(f, ".{}", x),
-			Self::Id(x)            => write!(f, "#{}", x),
+			Self::Class(x)         => write!(f, ".{x}"),
+			Self::Id(x)            => write!(f, "#{x}"),
 			Self::PseudoClass(x)   => x.fmt(f),
 			Self::PseudoElement(x) => x.fmt(f),
 			Self::Child            => ">".fmt(f),
@@ -178,7 +178,7 @@ impl std::fmt::Display for SelectorComponent {
 			Self::And              => ",".fmt(f),
 			Self::ClassPlaceholder => ".&".fmt(f),
 			Self::Any              => "*".fmt(f),
-			Self::Attribute(x)     => write!(f, "[{}]", x),
+			Self::Attribute(x)     => write!(f, "[{x}]"),
 			Self::Raw(x)           => x.fmt(f),
 		}
 	}

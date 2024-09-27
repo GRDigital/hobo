@@ -13,8 +13,8 @@ proc-macro = true
 
 [dependencies]
 derive_utils = "0.14"
-heck = "0.4"
-itertools = "0.12"
+heck = "0.5"
+itertools = "0.13"
 proc-macro-crate = "3"
 proc-macro-error = "1"
 proc-macro2 = "1"
