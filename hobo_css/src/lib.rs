@@ -222,6 +222,10 @@ macro_rules! style {
 	};
 }
 
+pub fn cond_prop(cond: bool, prop: impl AppendProperty) -> impl FnOnce(&mut Vec<Property>) {
+	move |props| if cond { prop.append_property(props) }
+}
+
 // #[test]
 // fn macros() {
 //     assert_eq!(format!("#{:x}{:x}{:x}{:x}", 0xf1, 0xf2, 0xf3, 0xff), "#f1f2f3ff");
