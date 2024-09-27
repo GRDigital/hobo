@@ -79,9 +79,19 @@ impl std::ops::Add for Style {
 }
 
 #[macro_export]
+#[doc(hidden)]
+macro_rules! __replace_expr {
+	($_t:tt $sub:expr) => { $sub }
+}
+
+#[doc(hidden)]
+pub const fn __count_helper<const N: usize>(_: [(); N]) -> usize { N }
+
+#[macro_export]
 macro_rules! properties {
+	() => {Vec::new()};
 	($($e:expr),*$(,)?) => {{
-		let mut v = Vec::new();
+		let mut v = ::std::vec::Vec::with_capacity($crate::__count_helper([$($crate::__replace_expr!($e ())),*]));
 		$($crate::AppendProperty::append_property($e, &mut v);)*
 		v
 	}};
@@ -160,7 +170,7 @@ macro_rules! __style {
 		new_rule = (),
 		rest = (),
 	) => {{
-		let mut acc = Vec::new();
+		let mut acc = ::std::vec::Vec::new();
 		$crate::__accumulate_style!(acc = acc, rules = ($($rules)*))
 	}};
 
