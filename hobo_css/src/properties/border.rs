@@ -186,6 +186,10 @@ crate::macros::easy_join!(border_horizontal_color, (border_left_color, border_ri
 crate::macros::easy_join!(border_vertical_color, (border_top_color, border_bottom_color), ([color]));
 crate::macros::easy_join!(border_color, (border_horizontal_color, border_vertical_color), ([color]));
 crate::macros::easy_join!(border_radius, (border_top_left_radius, border_top_right_radius, border_bottom_left_radius, border_bottom_right_radius), ([unit]));
+crate::macros::easy_join!(border_top_radius, (border_top_left_radius, border_top_right_radius), ([unit]));
+crate::macros::easy_join!(border_bottom_radius, (border_bottom_left_radius, border_bottom_right_radius), ([unit]));
+crate::macros::easy_join!(border_left_radius, (border_top_left_radius, border_bottom_left_radius), ([unit]));
+crate::macros::easy_join!(border_right_radius, (border_top_right_radius, border_bottom_right_radius), ([unit]));
 
 crate::macros::easy_color! {border_left_color}
 crate::macros::easy_color! {border_right_color}
