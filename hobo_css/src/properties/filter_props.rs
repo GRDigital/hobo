@@ -33,11 +33,7 @@ impl std::fmt::Display for filter {
 			Self::inherit    => "filter:inherit;-webkit-filter:inherit;".fmt(f),
 			Self::multiple(functions)  => {
 				let write = |f: &mut std::fmt::Formatter<'_>| -> std::fmt::Result {
-					if let Some((first, rest)) = functions.split_first() {
-						write!(f, "{first}")?;
-						for func in rest { write!(f, ",{func}")?; }
-					}
-
+					for func in functions { write!(f, "{func}")?; }
 					Ok(())
 				};
 				"filter:".fmt(f)?; write(f)?; ";".fmt(f)?;
