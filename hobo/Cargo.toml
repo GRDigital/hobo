@@ -15,8 +15,8 @@ discard = "1"
 elsa = "1"
 extend = "1"
 futures-signals = "0.3"
-hobo_css = { path = "../hobo_css", version = "=0.4.0" }
-hobo_derive = { path = "../hobo_derive", version = "=0.4.0" }
+hobo_css = { path = "../hobo_css", version = "=0.4.1" }
+hobo_derive = { path = "../hobo_derive", version = "=0.4.1" }
 js-sys = "0.3"
 log = "0.4"
 num-traits = "0.2"
