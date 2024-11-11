@@ -4,8 +4,8 @@
 <a href="https://docs.rs/hobo/"><img alt="API Docs" src="https://img.shields.io/badge/docs.rs-hobo-yellow"/></a>
 
 **hobo** is an opinionated, batteries-included Rust frontend framework. Works on **stable Rust**.    
-**STILL WIP** although used in production by [GR Digital](https://grdigital.co.uk/).    
-[Check out the Book](https://grdigital.github.io/hobo/index.html)!
+**STILL WIP** although used in production by [Zygo Media](https://zygomedia.com).    
+[Check out the Book](https://zygomedia.github.io/hobo/index.html)!
 
 ### Notable features:
 

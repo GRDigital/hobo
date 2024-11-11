@@ -1,11 +1,11 @@
 [package]
 name = "hobo"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/grdigital/hobo"
+repository = "https://github.com/zygomedia/hobo"
 description = "hobo is a Rust frontend framework"
-authors = ["GR Digital <contact@grdigital.co.uk>"]
+authors = ["Zygo Media <contact@zygomedia.com>"]
 readme = "../README.md"
 
 [dependencies]
