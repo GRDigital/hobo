@@ -569,6 +569,8 @@ pub trait AsElement: AsEntity + Sized {
 
 	#[must_use]
 	fn allow_no_parent(self) -> Self { Element::allow_no_parent(self.as_element()); self }
+
+	fn blur(&self) { self.get_cmp::<web_sys::HtmlElement>().blur().ok(); }
 }
 
 impl<T: AsElement> AsElement for &T {}
