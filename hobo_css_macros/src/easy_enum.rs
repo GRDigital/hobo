@@ -110,10 +110,11 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 			},
 			formatted => {
 				let css_format_string = if input.prefixed { format!("-webkit-{prop_name}:{{x}};-moz-{prop_name}:{{x}};{prop_name}:{{x}};") } else { format!("{prop_name}:{{x}};") };
+				let css_format_string_for_str = if input.prefixed { format!("-webkit-{prop_name}:\"{{x}}\";-moz-{prop_name}:\"{{x}}\";{prop_name}:\"{{x}}\";") } else { format!("{prop_name}:\"{{x}}\";") };
 				match formatted {
 					Value::Unit => quote! {Self::Some(x) => write!(f, #css_format_string)},
-					Value::String => quote! {Self::String(x) => write!(f, #css_format_string)},
-					Value::Raw => quote! {Self::Raw(x)    => write!(f, #css_format_string)},
+					Value::String => quote! {Self::String(x) => write!(f, #css_format_string_for_str)},
+					Value::Raw => quote! {Self::Raw(x) => write!(f, #css_format_string)},
 					Value::Number | Value::Float => quote! {Self::Number(x) => write!(f, #css_format_string)},
 					Value::Color => quote! {Self::Color(x) => write!(f, #css_format_string)},
 					Value::EnumVariant(_) => unreachable!(),
@@ -133,7 +134,7 @@ pub fn easy_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 				#[inline] pub fn unit(x: crate::Unit) -> Self { Self::Some(x) }
 			}
 		},
-		Value::String => quote! {#[inline] pub fn str(x: impl ::std::convert::Into<String>) -> Self { Self::String(::std::convert::Into::into(x)) }},
+		Value::String => quote! {#[inline] pub fn str(x: impl ::std::convert::Into<String>) -> Self { Self::String(::std::convert::Into::into(x).replace('"', r#"\""#)) }},
 		Value::Raw => quote! {#[inline] pub fn raw(x: impl ::std::convert::Into<String>) -> Self { Self::Raw(::std::convert::Into::into(x)) }},
 		Value::Number => quote! {#[inline] pub fn val(x: impl ::num_traits::cast::AsPrimitive<i32>) -> Self { Self::Number(::num_traits::cast::AsPrimitive::<i32>::as_(x)) }},
 		Value::Float => quote! {#[inline] pub fn val(x: impl ::num_traits::cast::AsPrimitive<f32>) -> Self { Self::Number(unsafe { crate::units::F32::new_unchecked(::num_traits::cast::AsPrimitive::<f32>::as_(x)) }) }},
